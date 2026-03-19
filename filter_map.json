@@ -1,0 +1,3453 @@
+{
+  "meta": {
+    "title": "FILTER_MAP — eTranoulis Filter Groups by Sub Category",
+    "sources": [
+      "CAT_MAP.md: local file in workspace",
+      "CTA_MAP.md: local file in workspace",
+      "Generated: 2026-02-28 (Europe/Athens)"
+    ],
+    "generated": "2026-02-28 (Europe/Athens)"
+  },
+  "scope": {
+    "FULL_CRAWL": "true",
+    "Sub Categories processed": "150",
+    "Sub Categories with detected filters": "113",
+    "Sub Categories with no detectable filters": "37"
+  },
+  "subcategories": [
+    {
+      "key": "Ραδιόφωνα",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Φορητά",
+      "sub_category": "Ραδιόφωνα",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Φορητά > Ραδιόφωνα",
+      "url": "https://www.etranoulis.gr/eikona-hxos/foritsa/radiofwna",
+      "filter_groups": [
+        "Τροφοδοσία Ρεύματος",
+        "Τύπος Ραδιοφώνου"
+      ]
+    },
+    {
+      "key": "Radio CD",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Φορητά",
+      "sub_category": "Radio CD",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Φορητά > Radio CD",
+      "url": "https://www.etranoulis.gr/eikona-hxos/foritsa/radio-cd",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Ηχεία",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Ηχεία",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Ηχεία",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/hxeia",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Sound Bars",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Sound Bars",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Sound Bars",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/sound-bars",
+      "filter_groups": [
+        "Συνολική Ισχύς Ηχείων (Watt)",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Ενισχυτές",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Ενισχυτές",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Ενισχυτές",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/enisxytes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "DVD",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "DVD",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > DVD",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/dvd",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Hifi",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Hifi",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Hifi",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/hifi",
+      "filter_groups": [
+        "Συνολική Ισχύς Ηχείων (Watt)"
+      ]
+    },
+    {
+      "key": "Πικαπ",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Πικαπ",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Πικαπ",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=59_100_310",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "DVD Blurays",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "DVD Blurays",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > DVD Blurays",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/dvd-blurays",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Βάσεις",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Βάσεις & Έπιπλα TV",
+      "sub_category": "Βάσεις",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Βάσεις & Έπιπλα TV > Βάσεις",
+      "url": "https://www.etranoulis.gr/eikona-hxos/vaseis-epipla-tv/vaseis",
+      "filter_groups": []
+    },
+    {
+      "key": "Έπιπλα",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Βάσεις & Έπιπλα TV",
+      "sub_category": "Έπιπλα",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Βάσεις & Έπιπλα TV > Έπιπλα",
+      "url": "https://www.etranoulis.gr/eikona-hxos/vaseis-epipla-tv/epipla",
+      "filter_groups": []
+    },
+    {
+      "key": "Ψηφιακές κορνίζες",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Κάμερες",
+      "sub_category": "Ψηφιακές κορνίζες",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Κάμερες > Ψηφιακές κορνίζες",
+      "url": "https://www.etranoulis.gr/eikona-hxos/kameres/digital-frames",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Φωτογραφικές",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Κάμερες",
+      "sub_category": "Φωτογραφικές",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Κάμερες > Φωτογραφικές",
+      "url": "https://www.etranoulis.gr/eikona-hxos/kameres/fwtografikes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Ψηφιακοί Αποκωδικοποιητές",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Αξεσουάρ",
+      "sub_category": "Ψηφιακοί Αποκωδικοποιητές",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Αξεσουάρ > Ψηφιακοί Αποκωδικοποιητές",
+      "url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/pshfiakoi-apokwdikopoihtes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Κεραίες",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Αξεσουάρ",
+      "sub_category": "Κεραίες",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Αξεσουάρ > Κεραίες",
+      "url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/keraies",
+      "filter_groups": []
+    },
+    {
+      "key": "TV Control",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Αξεσουάρ",
+      "sub_category": "TV Control",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Αξεσουάρ > TV Control",
+      "url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/tv-control",
+      "filter_groups": []
+    },
+    {
+      "key": "TV Box",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Αξεσουάρ",
+      "sub_category": "TV Box",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Αξεσουάρ > TV Box",
+      "url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/tv-box",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "8K UHD",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "8K UHD",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 8K UHD",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/8k-uhd",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "OLED TV",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "OLED TV",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > OLED TV",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/oled-tv",
+      "filter_groups": [
+        "Μέγεθος οθόνης",
+        "Smart Tv",
+        "Ανάλυση",
+        "Τεχνολογία Οθόνης"
+      ]
+    },
+    {
+      "key": "TCL",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "TCL",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > TCL",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/tileoraseis-tcl",
+      "filter_groups": [
+        "Τεχνολογία Οθόνης",
+        "Ανάλυση",
+        "Μέγεθος οθόνης"
+      ]
+    },
+    {
+      "key": "4K UHD",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "4K UHD",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 4K UHD",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/4k-uhd",
+      "filter_groups": [
+        "Μέγεθος οθόνης",
+        "Τεχνολογία Οθόνης",
+        "Smart Tv",
+        "Ανάλυση"
+      ]
+    },
+    {
+      "key": "Έως 32''",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "Έως 32''",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > Έως 32''",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/ews-32",
+      "filter_groups": [
+        "Τεχνολογία Οθόνης",
+        "Smart Tv",
+        "Μέγεθος οθόνης",
+        "Ανάλυση"
+      ]
+    },
+    {
+      "key": "33''-50''",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "33''-50''",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 33''-50''",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/33-50",
+      "filter_groups": [
+        "Μέγεθος οθόνης",
+        "Τεχνολογία Οθόνης",
+        "Smart Tv",
+        "Ανάλυση"
+      ]
+    },
+    {
+      "key": "50'' & άνω",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "50'' & άνω",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/50-anw",
+      "filter_groups": [
+        "Τεχνολογία Οθόνης",
+        "Smart Tv",
+        "Ανάλυση",
+        "Μέγεθος οθόνης"
+      ]
+    },
+    {
+      "key": "Android [ΤΗΛΕΦΩΝΙΑ > Smartphones]",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Smartphones",
+      "sub_category": "Android",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Smartphones > Android",
+      "url": "https://www.etranoulis.gr/thlefwnia/smartphones/android",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "iOS [ΤΗΛΕΦΩΝΙΑ > Smartphones]",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Smartphones",
+      "sub_category": "iOS",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Smartphones > iOS",
+      "url": "https://www.etranoulis.gr/thlefwnia/smartphones/ios",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Ασύρματα",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Σταθέρα",
+      "sub_category": "Ασύρματα",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Σταθέρα > Ασύρματα",
+      "url": "https://www.etranoulis.gr/thlefwnia/stathera/asyrmata",
+      "filter_groups": [
+        "Ανοικτή συνομιλία",
+        "Αναγνώριση κλήσεων",
+        "Χρώμα"
+      ]
+    },
+    {
+      "key": "Ενσύρματα",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Σταθέρα",
+      "sub_category": "Ενσύρματα",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Σταθέρα > Ενσύρματα",
+      "url": "https://www.etranoulis.gr/thlefwnia/stathera/ensyrmata",
+      "filter_groups": [
+        "Ανοικτή συνομιλία",
+        "Αναγνώριση κλήσεων",
+        "Χρώμα"
+      ]
+    },
+    {
+      "key": "Android [ΤΗΛΕΦΩΝΙΑ > Tablets]",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Tablets",
+      "sub_category": "Android",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Tablets > Android",
+      "url": "https://www.etranoulis.gr/thlefwnia/tablets/tandroid",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "iOS [ΤΗΛΕΦΩΝΙΑ > Tablets]",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Tablets",
+      "sub_category": "iOS",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Tablets > iOS",
+      "url": "https://www.etranoulis.gr/thlefwnia/tablets/tios",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Θήκες",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Tablets",
+      "sub_category": "Θήκες",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Tablets > Θήκες",
+      "url": "https://www.etranoulis.gr/thlefwnia/tablets/thikes",
+      "filter_groups": [
+        "Τύπος",
+        "Ίντσες"
+      ]
+    },
+    {
+      "key": "Φορτιστές",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Αξεσουάρ κινητών",
+      "sub_category": "Φορτιστές",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Αξεσουάρ κινητών > Φορτιστές",
+      "url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/fortistes",
+      "filter_groups": []
+    },
+    {
+      "key": "Hands Free",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Αξεσουάρ κινητών",
+      "sub_category": "Hands Free",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Αξεσουάρ κινητών > Hands Free",
+      "url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/hands-free",
+      "filter_groups": [
+        "Μικρόφωνο",
+        "Τύπος ακουστικού",
+        "Τύπος ακουστικών",
+        "Χρώμα"
+      ]
+    },
+    {
+      "key": "Power Bank",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Αξεσουάρ κινητών",
+      "sub_category": "Power Bank",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Αξεσουάρ κινητών > Power Bank",
+      "url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/power-bank",
+      "filter_groups": []
+    },
+    {
+      "key": "Desktops",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Υπολογιστές",
+      "sub_category": "Desktops",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Υπολογιστές > Desktops",
+      "url": "https://www.etranoulis.gr/plhroforikh/ypologistes/desktops",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Laptops",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Υπολογιστές",
+      "sub_category": "Laptops",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Υπολογιστές > Laptops",
+      "url": "https://www.etranoulis.gr/plhroforikh/ypologistes/laptops",
+      "filter_groups": [
+        "Μοντέλο Κάρτας Γραφικών",
+        "Τύπος επεξεργαστή",
+        "Λειτουργικό",
+        "Σκληρός Δίσκος",
+        "Μνήμη Ram",
+        "Διαγώνιος Οθόνης (Ίντσες)"
+      ]
+    },
+    {
+      "key": "Τσάντες Laptop",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Υπολογιστές",
+      "sub_category": "Τσάντες Laptop",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Υπολογιστές > Τσάντες Laptop",
+      "url": "https://www.etranoulis.gr/plhroforikh/ypologistes/tsantes-laptop",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Πολυμηχανήματα",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Εκτυπωτές & Αναλώσιμα",
+      "sub_category": "Πολυμηχανήματα",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Εκτυπωτές & Αναλώσιμα > Πολυμηχανήματα",
+      "url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/polymhxanhmata",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Εκτυπωτές",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Εκτυπωτές & Αναλώσιμα",
+      "sub_category": "Εκτυπωτές",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Εκτυπωτές & Αναλώσιμα > Εκτυπωτές",
+      "url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/ektypwtws",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Μελάνια",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Εκτυπωτές & Αναλώσιμα",
+      "sub_category": "Μελάνια",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Εκτυπωτές & Αναλώσιμα > Μελάνια",
+      "url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/melania",
+      "filter_groups": []
+    },
+    {
+      "key": "Κάρτες μνήμης",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Αποθηκευτικά Μέσα",
+      "sub_category": "Κάρτες μνήμης",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Αποθηκευτικά Μέσα > Κάρτες μνήμης",
+      "url": "https://www.etranoulis.gr/plhroforikh/apothikeutika-mesa/kartes-mnhmhs",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Σκληροί δίσκοι",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Αποθηκευτικά Μέσα",
+      "sub_category": "Σκληροί δίσκοι",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Αποθηκευτικά Μέσα > Σκληροί δίσκοι",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=139_143_156",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Αξεσουάρ Περιφερειακών",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Αξεσουάρ Περιφερειακών",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Αξεσουάρ Περιφερειακών",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/axesoyar",
+      "filter_groups": []
+    },
+    {
+      "key": "Πληκτρολόγια",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Πληκτρολόγια",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Πληκτρολόγια",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/plhktrologia",
+      "filter_groups": [
+        "Τύπος Λειτουργίας"
+      ]
+    },
+    {
+      "key": "Ακουστικά",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Ακουστικά",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Ακουστικά",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/akoustika",
+      "filter_groups": [
+        "Μικρόφωνο",
+        "Τύπος ακουστικών"
+      ]
+    },
+    {
+      "key": "Οθόνες",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Οθόνες",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Οθόνες",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/othones",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Προστατευτικά Ρεύματος",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Προστατευτικά Ρεύματος",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Προστατευτικά Ρεύματος",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/prostateutika-reumatos",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Ποντίκια",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Ποντίκια",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Ποντίκια",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/pontikia",
+      "filter_groups": [
+        "Τύπος Λειτουργίας"
+      ]
+    },
+    {
+      "key": "Κουζίνες Κεραμικές",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Κουζίνες",
+      "sub_category": "Κουζίνες Κεραμικές",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > Κουζίνες Κεραμικές",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines/kouzines-keramikes",
+      "filter_groups": [
+        "Ηλεκτρονικό Ρολόι",
+        "Τύπος φούρνου",
+        "Υλικό πλάκας",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χωρητικότητα Φούρνου"
+      ]
+    },
+    {
+      "key": "Κουζίνες Εμαγιέ",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Κουζίνες",
+      "sub_category": "Κουζίνες Εμαγιέ",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > Κουζίνες Εμαγιέ",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines/kouzines-emagie",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Κουζίνες Αερίου",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Κουζίνες",
+      "sub_category": "Κουζίνες Αερίου",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > Κουζίνες Αερίου",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines/kouzines-aeriou",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "45cm",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια Πιάτων",
+      "sub_category": "45cm",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια Πιάτων > 45cm",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=162_166_273",
+      "filter_groups": [
+        "Χρώμα",
+        "Χώρος για σερβίτσια",
+        "Πλάτος cm",
+        "Ενεργειακή Κλάση"
+      ]
+    },
+    {
+      "key": "60cm",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια Πιάτων",
+      "sub_category": "60cm",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια Πιάτων > 60cm",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-piatwn/60cm",
+      "filter_groups": [
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χώρος για σερβίτσια",
+        "Πλάτος cm"
+      ]
+    },
+    {
+      "key": "Επιτραπέζια",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια Πιάτων",
+      "sub_category": "Επιτραπέζια",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια Πιάτων > Επιτραπέζια",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-piatwn/epitrapezia",
+      "filter_groups": [
+        "Ενεργειακή Κλάση",
+        "Χώρος για σερβίτσια",
+        "Χρώμα",
+        "Πλάτος cm"
+      ]
+    },
+    {
+      "key": "Ψυγεία [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia",
+      "filter_groups": [
+        "Ψύξη",
+        "Ύψος cm",
+        "Χρώμα",
+        "Πλάτος cm",
+        "Ενεργειακή Κλάση"
+      ]
+    },
+    {
+      "key": "Ψυγειοκαταψύκτες",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγειοκαταψύκτες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγειοκαταψύκτες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeiokatapsyktes",
+      "filter_groups": [
+        "Ύψος cm",
+        "Ψύξη",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Πλάτος cm"
+      ]
+    },
+    {
+      "key": "Ψυγεία Ντουλάπες",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία Ντουλάπες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία Ντουλάπες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+      "filter_groups": [
+        "Ψύξη",
+        "Χρώμα",
+        "Ενεργειακή Κλάση",
+        "Ύψος cm",
+        "Πλάτος cm"
+      ]
+    },
+    {
+      "key": "Καταψύκτες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Καταψύκτες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Καταψύκτες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/katapsyktes",
+      "filter_groups": [
+        "Είδος Καταψύκτη",
+        "Χρώμα",
+        "Ψύξη",
+        "Ύψος cm",
+        "Ενεργειακή Κλάση",
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    {
+      "key": "Συντηρητές Κρασιών",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Συντηρητές Κρασιών",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Συντηρητές Κρασιών",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/synthrhtes-krasiwn",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Πλυντήρια Ρούχων [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Πλυντήρια Ρούχων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Ρούχων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-rouxwn",
+      "filter_groups": [
+        "Κιλά πλύσης",
+        "Τρόπος Φόρτωσης",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Μέγιστες Στροφές Στυψίματος"
+      ]
+    },
+    {
+      "key": "Στεγνωτήρια Ρούχων",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Στεγνωτήρια Ρούχων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Στεγνωτήρια Ρούχων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/stegnwthria-rouxwn",
+      "filter_groups": [
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Κιλά Στεγνώματος"
+      ]
+    },
+    {
+      "key": "Πλυντήρια Στεγνωτήρια 2 in1",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Πλυντήρια Στεγνωτήρια 2 in1",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Στεγνωτήρια 2 in1",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-stegnwthria-2-1",
+      "filter_groups": [
+        "Τρόπος Φόρτωσης",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Κιλά Στεγνώματος",
+        "Μέγιστες Στροφές Στυψίματος",
+        "Κιλά πλύσης"
+      ]
+    },
+    {
+      "key": "Σετ Φούρνοι & Εστίες & Απορροφητήρες",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Σετ Φούρνοι & Εστίες & Απορροφητήρες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Σετ Φούρνοι & Εστίες & Απορροφητήρες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/sets-ovens-hobs-hoods",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Φούρνοι",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Φούρνοι",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Φούρνοι",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/fournoi",
+      "filter_groups": [
+        "Ηλεκτρονικό Ρολόι",
+        "Τύπος φούρνου",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χωρητικότητα Φούρνου",
+        "Πλάτος cm"
+      ]
+    },
+    {
+      "key": "Εστίες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Εστίες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Εστίες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/esties",
+      "filter_groups": [
+        "Τεχνολογία Εστιών",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Αριθμός Ζωνών",
+        "Πλάτος cm"
+      ]
+    },
+    {
+      "key": "Σετ Φούρνοι και Εστίες",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Σετ Φούρνοι και Εστίες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Σετ Φούρνοι και Εστίες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/Set-fournoi-esties",
+      "filter_groups": []
+    },
+    {
+      "key": "Μικροκυμάτων",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Μικροκυμάτων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Μικροκυμάτων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/mikrokymatwn",
+      "filter_groups": [
+        "Με Grill",
+        "Χωρητικότητα Φούρνου",
+        "Χρώμα",
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    {
+      "key": "Πλυντήρια Πιάτων",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Πλυντήρια Πιάτων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Πλυντήρια Πιάτων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-plynthria-piatwn",
+      "filter_groups": [
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χώρος για σερβίτσια",
+        "Πλάτος cm"
+      ]
+    },
+    {
+      "key": "Ψυγεία [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Ψυγεία",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Ψυγεία",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/ent-psygeia",
+      "filter_groups": [
+        "Ψύξη",
+        "Είδος Καταψύκτη",
+        "Χρώμα",
+        "Ενεργειακή Κλάση",
+        "Πλάτος cm",
+        "Ύψος cm"
+      ]
+    },
+    {
+      "key": "Καταψύκτες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Καταψύκτες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Καταψύκτες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-katapsyktes",
+      "filter_groups": [
+        "Βάθος Συσκευής σε Εκατοστά",
+        "Ψύξη",
+        "Ενεργειακή Κλάση",
+        "Πλάτος cm",
+        "Ύψος cm",
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    {
+      "key": "Πλυντήρια Ρούχων [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Πλυντήρια Ρούχων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Πλυντήρια Ρούχων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-plynthria-rouxwn",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Με Grill",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Φούρνοι Μικροκυμάτων",
+      "sub_category": "Με Grill",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Φούρνοι Μικροκυμάτων > Με Grill",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/fournoi-mikrokymatwn/microwave-with-grill",
+      "filter_groups": [
+        "Με Grill",
+        "Χωρητικότητα Φούρνου",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Χωρίς Grill",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Φούρνοι Μικροκυμάτων",
+      "sub_category": "Χωρίς Grill",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Φούρνοι Μικροκυμάτων > Χωρίς Grill",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/fournoi-mikrokymatwn/microwave-without-grill",
+      "filter_groups": [
+        "Χρώμα",
+        "Χωρητικότητα Φούρνου",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Τοίχου [ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά]",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Κλιματιστικά",
+      "sub_category": "Τοίχου",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Τοίχου",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/toixou",
+      "filter_groups": [
+        "Wifi",
+        "Ενεργειακή Κλάση",
+        "Ονομαστική Απόδοση"
+      ]
+    },
+    {
+      "key": "Φορητά",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Κλιματιστικά",
+      "sub_category": "Φορητά",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Φορητά",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/forita",
+      "filter_groups": [
+        "Ονομαστική Απόδοση"
+      ]
+    },
+    {
+      "key": "Ντουλάπες",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Κλιματιστικά",
+      "sub_category": "Ντουλάπες",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Ντουλάπες",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/ntoulapes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Αξεσουάρ Κλιματιστικών",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Κλιματιστικά",
+      "sub_category": "Αξεσουάρ Κλιματιστικών",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Αξεσουάρ Κλιματιστικών",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/aksesouar-klimatistikwn",
+      "filter_groups": []
+    },
+    {
+      "key": "Mini",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Mini",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Mini",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_196_304",
+      "filter_groups": []
+    },
+    {
+      "key": "Υδρονέφωσης",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Υδρονέφωσης",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Υδρονέφωσης",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_196_305",
+      "filter_groups": []
+    },
+    {
+      "key": "Ορθοστάτης",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Ορθοστάτης",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Ορθοστάτης",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/orthostatis",
+      "filter_groups": [
+        "Ισχύς (Watt)",
+        "Διάμετρος σε Εκατοστά"
+      ]
+    },
+    {
+      "key": "Επιτραπέζιοι",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Επιτραπέζιοι",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Επιτραπέζιοι",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/epitrapezioi",
+      "filter_groups": [
+        "Χρώμα",
+        "Διάμετρος σε Εκατοστά",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Τοίχου [ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες]",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Τοίχου",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Τοίχου",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/an-toixou",
+      "filter_groups": [
+        "Διάμετρος σε Εκατοστά",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Οροφής",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Οροφής",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Οροφής",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/orofhs",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Air Coolers & Επιδαπέδιοι",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Air Coolers & Επιδαπέδιοι",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Air Coolers & Επιδαπέδιοι",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/aircoolers-epidapedioi",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Ηλεκτρικά Υποστρώματα",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Ηλεκτρικά Υποστρώματα",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Ηλεκτρικά Υποστρώματα",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_197_311",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Θερμάστρες Carbon",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Θερμάστρες Carbon",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Θερμάστρες Carbon",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_197_312",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Θερμάστρες Πετρελαίου",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Θερμάστρες Πετρελαίου",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Θερμάστρες Πετρελαίου",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermastres-petrelaiou",
+      "filter_groups": [
+        "Θερμική Ισχύς Btu/h"
+      ]
+    },
+    {
+      "key": "Καλοριφέρ",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Καλοριφέρ",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Καλοριφέρ",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/kalorifer",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Θερμοπομποί",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Θερμοπομποί",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Θερμοπομποί",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermopompoi",
+      "filter_groups": [
+        "Συνίσταται για χώρους έως m2",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Αερόθερμα",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Αερόθερμα",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Αερόθερμα",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/aerotherma",
+      "filter_groups": [
+        "Τύπος Θεμμαντικού",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Θερμαντικά Υγραερίου",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Θερμαντικά Υγραερίου",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Θερμαντικά Υγραερίου",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermantika-ygraeriou",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Χαλαζία",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Χαλαζία",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Χαλαζία",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/xalazia",
+      "filter_groups": [
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Ηλεκτρικές Κουβέρτες",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Ηλεκτρικές Κουβέρτες",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Ηλεκτρικές Κουβέρτες",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/hlektrikes-kouvertes",
+      "filter_groups": [
+        "Μέγεθος"
+      ]
+    },
+    {
+      "key": "Αφυγραντήρες",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Αφύγρανση Ιονιστές",
+      "sub_category": "Αφυγραντήρες",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Αφύγρανση Ιονιστές > Αφυγραντήρες",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/afygranthres",
+      "filter_groups": [
+        "Wifi",
+        "Χωρητικότητα σε Λίτρα",
+        "Δυνατότητα Αφύγρανσης σε Λίτρα/24Ώρες"
+      ]
+    },
+    {
+      "key": "Καθαριστές Αέρα Ιονιστές",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Αφύγρανση Ιονιστές",
+      "sub_category": "Καθαριστές Αέρα Ιονιστές",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Αφύγρανση Ιονιστές > Καθαριστές Αέρα Ιονιστές",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/katharistes-aera-ionistes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Αξεσουάρ Αφύγρανσης",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Αφύγρανση Ιονιστές",
+      "sub_category": "Αξεσουάρ Αφύγρανσης",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Αφύγρανση Ιονιστές > Αξεσουάρ Αφύγρανσης",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/axeouar-afigranshs",
+      "filter_groups": []
+    },
+    {
+      "key": "Σκούπες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes",
+      "filter_groups": [
+        "Τύπος Ηλεκτρικής Σκούπας",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Σκουπάκια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκουπάκια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκουπάκια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupakia",
+      "filter_groups": [
+        "Τάση Volt"
+      ]
+    },
+    {
+      "key": "Σκούπες Stick",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Stick",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Stick",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-stick",
+      "filter_groups": [
+        "Τύπος Ηλεκτρικής Σκούπας",
+        "Χρώμα",
+        "Τάση Volt",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Σκούπες Ρομπότ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Ρομπότ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Ρομπότ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
+      "filter_groups": [
+        "Τύπος Ηλεκτρικής Σκούπας"
+      ]
+    },
+    {
+      "key": "Ατμοκαθαριστές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Ατμοκαθαριστές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Ατμοκαθαριστές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/atmokathharistes",
+      "filter_groups": [
+        "Τύπος Συσκευής",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Αξεσουάρ-Αναλώσιμα",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Αξεσουάρ-Αναλώσιμα",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Αξεσουάρ-Αναλώσιμα",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/aksesouar-analwsima",
+      "filter_groups": []
+    },
+    {
+      "key": "Σίδερα",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σιδέρωμα",
+      "sub_category": "Σίδερα",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σιδέρωμα > Σίδερα",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/sidera",
+      "filter_groups": [
+        "Τύπος Συσκευής",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Συστήματα Σιδερώματος",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σιδέρωμα",
+      "sub_category": "Συστήματα Σιδερώματος",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σιδέρωμα > Συστήματα Σιδερώματος",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/systhmata-siderwmatos",
+      "filter_groups": [
+        "Τύπος Συσκευής",
+        "Χρώμα",
+        "Πίεση ατμού (Bar)",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Σιδερώστρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σιδέρωμα",
+      "sub_category": "Σιδερώστρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σιδέρωμα > Σιδερώστρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/siderwstres",
+      "filter_groups": []
+    },
+    {
+      "key": "Αξεσουάρ - Αναλώσιμα",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σιδέρωμα",
+      "sub_category": "Αξεσουάρ - Αναλώσιμα",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σιδέρωμα > Αξεσουάρ - Αναλώσιμα",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/accessories-consumables",
+      "filter_groups": []
+    },
+    {
+      "key": "Καφετιέρες Espresso",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Καφετιέρες Espresso",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Καφετιέρες Espresso",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kafetieres-espresso",
+      "filter_groups": [
+        "Χωρητικότητα σε Λίτρα",
+        "Χρώμα",
+        "Πίεση ατμού (Bar)",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Καφετιέρες Φίλτρου",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Καφετιέρες Φίλτρου",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Καφετιέρες Φίλτρου",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kafetieres-filtrou",
+      "filter_groups": [
+        "Υλικό κανάτας",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Φραπιέρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Φραπιέρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Φραπιέρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/frapieres",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Στυπτήρια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Στυπτήρια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Στυπτήρια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/stypthria",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Αποχυμωτές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Αποχυμωτές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Αποχυμωτές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/apoxymwtes",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Αξεσουάρ-Αναλώσιμα-Θερμός",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Αξεσουάρ-Αναλώσιμα-Θερμός",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Αξεσουάρ-Αναλώσιμα-Θερμός",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kaf-aksesouar-analwsima-thermos",
+      "filter_groups": []
+    },
+    {
+      "key": "Πολυμίξερ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Πολυμίξερ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Πολυμίξερ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/multimixer",
+      "filter_groups": [
+        "Χωρητικότητα Μπολ σε Λίτρα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Διάφορες Συσκευές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Διάφορες Συσκευές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Διάφορες Συσκευές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/diafores-syskeyes",
+      "filter_groups": []
+    },
+    {
+      "key": "Κουζινομηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Κουζινομηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κουζινομηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kouzinomhxanes",
+      "filter_groups": [
+        "Χωρητικότητα Μπολ σε Λίτρα",
+        "Χωρητικότητα σε Λίτρα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Μίξερ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Μίξερ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Μίξερ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/mixer",
+      "filter_groups": [
+        "Τύπος Μίξερ",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Κοπτήρια-Ράβδοι",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Κοπτήρια-Ράβδοι",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κοπτήρια-Ράβδοι",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kopthria-ravdoi",
+      "filter_groups": [
+        "Υλικό κανάτας",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Βραστήρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Βραστήρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Βραστήρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/vrasthres",
+      "filter_groups": [
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Μπλέντερ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Μπλέντερ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Μπλέντερ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/blender",
+      "filter_groups": [
+        "Υλικό κανάτας",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Ζυγαριές Κουζίνας",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Ζυγαριές Κουζίνας",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Ζυγαριές Κουζίνας",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/zygaries-kouzinas",
+      "filter_groups": [
+        "Μέγιστο Ζυγιζόμενο Βάρος σε Κιλά"
+      ]
+    },
+    {
+      "key": "Ηλεκτρικά μπρίκια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Ηλεκτρικά μπρίκια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Ηλεκτρικά μπρίκια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/brikia",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Κρεατομηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Κρεατομηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κρεατομηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kreatomhxanes",
+      "filter_groups": []
+    },
+    {
+      "key": "Σεσουάρ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Σεσουάρ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Σεσουάρ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/sesouar",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Βούρτσες-Ψαλίδια-ισιωτικά",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Βούρτσες-Ψαλίδια-ισιωτικά",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Βούρτσες-Ψαλίδια-ισιωτικά",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/vourtses-psalidia",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Συσκευές Αποτρίχωσης",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Συσκευές Αποτρίχωσης",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Συσκευές Αποτρίχωσης",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/syskeues-apotrixwshs",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Κουρευτικές Μηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Κουρευτικές Μηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Κουρευτικές Μηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/koureutikes-mhxanes",
+      "filter_groups": [
+        "Χρήση Μηχανής",
+        "Τροφοδοσία Ρεύματος",
+        "Τύπος Ξυρίσματος"
+      ]
+    },
+    {
+      "key": "Ξυριστικές Μηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Ξυριστικές Μηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Ξυριστικές Μηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/ksyristikes-mhxanes",
+      "filter_groups": [
+        "Τύπος Ξυρίσματος"
+      ]
+    },
+    {
+      "key": "Ζυγαρίες Σώματος",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Ζυγαρίες Σώματος",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Ζυγαρίες Σώματος",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/zygaries-swmatos",
+      "filter_groups": []
+    },
+    {
+      "key": "Εστίες [ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες]",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Εστίες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Εστίες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/esties_small",
+      "filter_groups": [
+        "Αριθμός εστιών"
+      ]
+    },
+    {
+      "key": "Παρασκευαστής Ποπ Κορν",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Παρασκευαστής Ποπ Κορν",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Παρασκευαστής Ποπ Κορν",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/popcorn-maker",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Φουρνάκια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Φουρνάκια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Φουρνάκια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fournakia",
+      "filter_groups": [
+        "Με εστίες",
+        "Χωρητικότητα σε Λίτρα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Ατμομάγειρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Ατμομάγειρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Ατμομάγειρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/atmomageires",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Τοστιέρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Τοστιέρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Τοστιέρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/tostieres",
+      "filter_groups": [
+        "Υλικό πλάκας",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Ψηστιέρες - Γκριλιέρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Ψηστιέρες - Γκριλιέρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Ψηστιέρες - Γκριλιέρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/pshstieres-gkrilieres",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Φριτέζες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Φριτέζες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Φριτέζες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fritezes",
+      "filter_groups": [
+        "Χωρητικότητα σε Λίτρα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Φρυγανιέρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Φρυγανιέρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Φρυγανιέρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fryganieres",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    {
+      "key": "Αρτοπαρασκευαστές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Αρτοπαρασκευαστές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Αρτοπαρασκευαστές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/artoparaskeuastes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Παγωτομηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Παγωτομηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Παγωτομηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/pagwtomhxanes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Σετ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Σετ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Σετ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/set-utensils",
+      "filter_groups": [
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    {
+      "key": "Χύτρες Ταχύτητας",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Χύτρες Ταχύτητας",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Χύτρες Ταχύτητας",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/xytres-taxythtas",
+      "filter_groups": [
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    {
+      "key": "Χύτρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Χύτρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Χύτρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/xytres",
+      "filter_groups": [
+        "Διάμετρος Σκεύους σε Εκατοστά"
+      ]
+    },
+    {
+      "key": "Τηγάνια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Τηγάνια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Τηγάνια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/thgania",
+      "filter_groups": [
+        "Διάμετρος Σκεύους σε Εκατοστά",
+        "Διάμετρος σε Εκατοστά"
+      ]
+    },
+    {
+      "key": "Ταψιά",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Ταψιά",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Ταψιά",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/tapsia",
+      "filter_groups": [
+        "Πλάτος cm"
+      ]
+    },
+    {
+      "key": "Γάστρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Γάστρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Γάστρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/gastres",
+      "filter_groups": [
+        "Διάμετρος Σκεύους σε Εκατοστά",
+        "Χρώμα"
+      ]
+    },
+    {
+      "key": "Μαχαίρια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Μαχαίρια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Μαχαίρια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/maxairia",
+      "filter_groups": []
+    },
+    {
+      "key": "Διάφορα Σκεύη",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Διάφορα Σκεύη",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Διάφορα Σκεύη",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/diafora-skeyh",
+      "filter_groups": []
+    },
+    {
+      "key": "Αερίου",
+      "parent_category": "HOBBIES",
+      "leaf_category": "Barbeque",
+      "sub_category": "Αερίου",
+      "path": "HOBBIES > Barbeque > Αερίου",
+      "url": "https://www.etranoulis.gr/hobbies/barbeque/aeriou",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    {
+      "key": "Κάρβουνου",
+      "parent_category": "HOBBIES",
+      "leaf_category": "Barbeque",
+      "sub_category": "Κάρβουνου",
+      "path": "HOBBIES > Barbeque > Κάρβουνου",
+      "url": "https://www.etranoulis.gr/hobbies/barbeque/karvounou",
+      "filter_groups": [
+        "Επιφάνεια ψησίματος σε εκατ."
+      ]
+    },
+    {
+      "key": "Αξεσουάρ Ψησταριών",
+      "parent_category": "HOBBIES",
+      "leaf_category": "Barbeque",
+      "sub_category": "Αξεσουάρ Ψησταριών",
+      "path": "HOBBIES > Barbeque > Αξεσουάρ Ψησταριών",
+      "url": "https://www.etranoulis.gr/hobbies/barbeque/aksesouar-pshstariwn",
+      "filter_groups": []
+    },
+    {
+      "key": "Playstation",
+      "parent_category": "HOBBIES",
+      "leaf_category": "Gaming",
+      "sub_category": "Playstation",
+      "path": "HOBBIES > Gaming > Playstation",
+      "url": "https://www.etranoulis.gr/hobbies/gaming/playstation",
+      "filter_groups": []
+    }
+  ],
+  "by_sub_category_key": {
+    "Ραδιόφωνα": {
+      "key": "Ραδιόφωνα",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Φορητά",
+      "sub_category": "Ραδιόφωνα",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Φορητά > Ραδιόφωνα",
+      "url": "https://www.etranoulis.gr/eikona-hxos/foritsa/radiofwna",
+      "filter_groups": [
+        "Τροφοδοσία Ρεύματος",
+        "Τύπος Ραδιοφώνου"
+      ]
+    },
+    "Radio CD": {
+      "key": "Radio CD",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Φορητά",
+      "sub_category": "Radio CD",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Φορητά > Radio CD",
+      "url": "https://www.etranoulis.gr/eikona-hxos/foritsa/radio-cd",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Ηχεία": {
+      "key": "Ηχεία",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Ηχεία",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Ηχεία",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/hxeia",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Sound Bars": {
+      "key": "Sound Bars",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Sound Bars",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Sound Bars",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/sound-bars",
+      "filter_groups": [
+        "Συνολική Ισχύς Ηχείων (Watt)",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Ενισχυτές": {
+      "key": "Ενισχυτές",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Ενισχυτές",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Ενισχυτές",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/enisxytes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "DVD": {
+      "key": "DVD",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "DVD",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > DVD",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/dvd",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Hifi": {
+      "key": "Hifi",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Hifi",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Hifi",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/hifi",
+      "filter_groups": [
+        "Συνολική Ισχύς Ηχείων (Watt)"
+      ]
+    },
+    "Πικαπ": {
+      "key": "Πικαπ",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "Πικαπ",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > Πικαπ",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=59_100_310",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "DVD Blurays": {
+      "key": "DVD Blurays",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Audio Systems",
+      "sub_category": "DVD Blurays",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Audio Systems > DVD Blurays",
+      "url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/dvd-blurays",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Βάσεις": {
+      "key": "Βάσεις",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Βάσεις & Έπιπλα TV",
+      "sub_category": "Βάσεις",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Βάσεις & Έπιπλα TV > Βάσεις",
+      "url": "https://www.etranoulis.gr/eikona-hxos/vaseis-epipla-tv/vaseis",
+      "filter_groups": []
+    },
+    "Έπιπλα": {
+      "key": "Έπιπλα",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Βάσεις & Έπιπλα TV",
+      "sub_category": "Έπιπλα",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Βάσεις & Έπιπλα TV > Έπιπλα",
+      "url": "https://www.etranoulis.gr/eikona-hxos/vaseis-epipla-tv/epipla",
+      "filter_groups": []
+    },
+    "Ψηφιακές κορνίζες": {
+      "key": "Ψηφιακές κορνίζες",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Κάμερες",
+      "sub_category": "Ψηφιακές κορνίζες",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Κάμερες > Ψηφιακές κορνίζες",
+      "url": "https://www.etranoulis.gr/eikona-hxos/kameres/digital-frames",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Φωτογραφικές": {
+      "key": "Φωτογραφικές",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Κάμερες",
+      "sub_category": "Φωτογραφικές",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Κάμερες > Φωτογραφικές",
+      "url": "https://www.etranoulis.gr/eikona-hxos/kameres/fwtografikes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Ψηφιακοί Αποκωδικοποιητές": {
+      "key": "Ψηφιακοί Αποκωδικοποιητές",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Αξεσουάρ",
+      "sub_category": "Ψηφιακοί Αποκωδικοποιητές",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Αξεσουάρ > Ψηφιακοί Αποκωδικοποιητές",
+      "url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/pshfiakoi-apokwdikopoihtes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Κεραίες": {
+      "key": "Κεραίες",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Αξεσουάρ",
+      "sub_category": "Κεραίες",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Αξεσουάρ > Κεραίες",
+      "url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/keraies",
+      "filter_groups": []
+    },
+    "TV Control": {
+      "key": "TV Control",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Αξεσουάρ",
+      "sub_category": "TV Control",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Αξεσουάρ > TV Control",
+      "url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/tv-control",
+      "filter_groups": []
+    },
+    "TV Box": {
+      "key": "TV Box",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Αξεσουάρ",
+      "sub_category": "TV Box",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Αξεσουάρ > TV Box",
+      "url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/tv-box",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "8K UHD": {
+      "key": "8K UHD",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "8K UHD",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 8K UHD",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/8k-uhd",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "OLED TV": {
+      "key": "OLED TV",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "OLED TV",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > OLED TV",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/oled-tv",
+      "filter_groups": [
+        "Μέγεθος οθόνης",
+        "Smart Tv",
+        "Ανάλυση",
+        "Τεχνολογία Οθόνης"
+      ]
+    },
+    "TCL": {
+      "key": "TCL",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "TCL",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > TCL",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/tileoraseis-tcl",
+      "filter_groups": [
+        "Τεχνολογία Οθόνης",
+        "Ανάλυση",
+        "Μέγεθος οθόνης"
+      ]
+    },
+    "4K UHD": {
+      "key": "4K UHD",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "4K UHD",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 4K UHD",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/4k-uhd",
+      "filter_groups": [
+        "Μέγεθος οθόνης",
+        "Τεχνολογία Οθόνης",
+        "Smart Tv",
+        "Ανάλυση"
+      ]
+    },
+    "Έως 32''": {
+      "key": "Έως 32''",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "Έως 32''",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > Έως 32''",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/ews-32",
+      "filter_groups": [
+        "Τεχνολογία Οθόνης",
+        "Smart Tv",
+        "Μέγεθος οθόνης",
+        "Ανάλυση"
+      ]
+    },
+    "33''-50''": {
+      "key": "33''-50''",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "33''-50''",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 33''-50''",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/33-50",
+      "filter_groups": [
+        "Μέγεθος οθόνης",
+        "Τεχνολογία Οθόνης",
+        "Smart Tv",
+        "Ανάλυση"
+      ]
+    },
+    "50'' & άνω": {
+      "key": "50'' & άνω",
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "50'' & άνω",
+      "path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
+      "url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/50-anw",
+      "filter_groups": [
+        "Τεχνολογία Οθόνης",
+        "Smart Tv",
+        "Ανάλυση",
+        "Μέγεθος οθόνης"
+      ]
+    },
+    "Android [ΤΗΛΕΦΩΝΙΑ > Smartphones]": {
+      "key": "Android [ΤΗΛΕΦΩΝΙΑ > Smartphones]",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Smartphones",
+      "sub_category": "Android",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Smartphones > Android",
+      "url": "https://www.etranoulis.gr/thlefwnia/smartphones/android",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "iOS [ΤΗΛΕΦΩΝΙΑ > Smartphones]": {
+      "key": "iOS [ΤΗΛΕΦΩΝΙΑ > Smartphones]",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Smartphones",
+      "sub_category": "iOS",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Smartphones > iOS",
+      "url": "https://www.etranoulis.gr/thlefwnia/smartphones/ios",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Ασύρματα": {
+      "key": "Ασύρματα",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Σταθέρα",
+      "sub_category": "Ασύρματα",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Σταθέρα > Ασύρματα",
+      "url": "https://www.etranoulis.gr/thlefwnia/stathera/asyrmata",
+      "filter_groups": [
+        "Ανοικτή συνομιλία",
+        "Αναγνώριση κλήσεων",
+        "Χρώμα"
+      ]
+    },
+    "Ενσύρματα": {
+      "key": "Ενσύρματα",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Σταθέρα",
+      "sub_category": "Ενσύρματα",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Σταθέρα > Ενσύρματα",
+      "url": "https://www.etranoulis.gr/thlefwnia/stathera/ensyrmata",
+      "filter_groups": [
+        "Ανοικτή συνομιλία",
+        "Αναγνώριση κλήσεων",
+        "Χρώμα"
+      ]
+    },
+    "Android [ΤΗΛΕΦΩΝΙΑ > Tablets]": {
+      "key": "Android [ΤΗΛΕΦΩΝΙΑ > Tablets]",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Tablets",
+      "sub_category": "Android",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Tablets > Android",
+      "url": "https://www.etranoulis.gr/thlefwnia/tablets/tandroid",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "iOS [ΤΗΛΕΦΩΝΙΑ > Tablets]": {
+      "key": "iOS [ΤΗΛΕΦΩΝΙΑ > Tablets]",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Tablets",
+      "sub_category": "iOS",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Tablets > iOS",
+      "url": "https://www.etranoulis.gr/thlefwnia/tablets/tios",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Θήκες": {
+      "key": "Θήκες",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Tablets",
+      "sub_category": "Θήκες",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Tablets > Θήκες",
+      "url": "https://www.etranoulis.gr/thlefwnia/tablets/thikes",
+      "filter_groups": [
+        "Τύπος",
+        "Ίντσες"
+      ]
+    },
+    "Φορτιστές": {
+      "key": "Φορτιστές",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Αξεσουάρ κινητών",
+      "sub_category": "Φορτιστές",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Αξεσουάρ κινητών > Φορτιστές",
+      "url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/fortistes",
+      "filter_groups": []
+    },
+    "Hands Free": {
+      "key": "Hands Free",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Αξεσουάρ κινητών",
+      "sub_category": "Hands Free",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Αξεσουάρ κινητών > Hands Free",
+      "url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/hands-free",
+      "filter_groups": [
+        "Μικρόφωνο",
+        "Τύπος ακουστικού",
+        "Τύπος ακουστικών",
+        "Χρώμα"
+      ]
+    },
+    "Power Bank": {
+      "key": "Power Bank",
+      "parent_category": "ΤΗΛΕΦΩΝΙΑ",
+      "leaf_category": "Αξεσουάρ κινητών",
+      "sub_category": "Power Bank",
+      "path": "ΤΗΛΕΦΩΝΙΑ > Αξεσουάρ κινητών > Power Bank",
+      "url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/power-bank",
+      "filter_groups": []
+    },
+    "Desktops": {
+      "key": "Desktops",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Υπολογιστές",
+      "sub_category": "Desktops",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Υπολογιστές > Desktops",
+      "url": "https://www.etranoulis.gr/plhroforikh/ypologistes/desktops",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Laptops": {
+      "key": "Laptops",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Υπολογιστές",
+      "sub_category": "Laptops",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Υπολογιστές > Laptops",
+      "url": "https://www.etranoulis.gr/plhroforikh/ypologistes/laptops",
+      "filter_groups": [
+        "Μοντέλο Κάρτας Γραφικών",
+        "Τύπος επεξεργαστή",
+        "Λειτουργικό",
+        "Σκληρός Δίσκος",
+        "Μνήμη Ram",
+        "Διαγώνιος Οθόνης (Ίντσες)"
+      ]
+    },
+    "Τσάντες Laptop": {
+      "key": "Τσάντες Laptop",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Υπολογιστές",
+      "sub_category": "Τσάντες Laptop",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Υπολογιστές > Τσάντες Laptop",
+      "url": "https://www.etranoulis.gr/plhroforikh/ypologistes/tsantes-laptop",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Πολυμηχανήματα": {
+      "key": "Πολυμηχανήματα",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Εκτυπωτές & Αναλώσιμα",
+      "sub_category": "Πολυμηχανήματα",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Εκτυπωτές & Αναλώσιμα > Πολυμηχανήματα",
+      "url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/polymhxanhmata",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Εκτυπωτές": {
+      "key": "Εκτυπωτές",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Εκτυπωτές & Αναλώσιμα",
+      "sub_category": "Εκτυπωτές",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Εκτυπωτές & Αναλώσιμα > Εκτυπωτές",
+      "url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/ektypwtws",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Μελάνια": {
+      "key": "Μελάνια",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Εκτυπωτές & Αναλώσιμα",
+      "sub_category": "Μελάνια",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Εκτυπωτές & Αναλώσιμα > Μελάνια",
+      "url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/melania",
+      "filter_groups": []
+    },
+    "Κάρτες μνήμης": {
+      "key": "Κάρτες μνήμης",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Αποθηκευτικά Μέσα",
+      "sub_category": "Κάρτες μνήμης",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Αποθηκευτικά Μέσα > Κάρτες μνήμης",
+      "url": "https://www.etranoulis.gr/plhroforikh/apothikeutika-mesa/kartes-mnhmhs",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Σκληροί δίσκοι": {
+      "key": "Σκληροί δίσκοι",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Αποθηκευτικά Μέσα",
+      "sub_category": "Σκληροί δίσκοι",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Αποθηκευτικά Μέσα > Σκληροί δίσκοι",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=139_143_156",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Αξεσουάρ Περιφερειακών": {
+      "key": "Αξεσουάρ Περιφερειακών",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Αξεσουάρ Περιφερειακών",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Αξεσουάρ Περιφερειακών",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/axesoyar",
+      "filter_groups": []
+    },
+    "Πληκτρολόγια": {
+      "key": "Πληκτρολόγια",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Πληκτρολόγια",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Πληκτρολόγια",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/plhktrologia",
+      "filter_groups": [
+        "Τύπος Λειτουργίας"
+      ]
+    },
+    "Ακουστικά": {
+      "key": "Ακουστικά",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Ακουστικά",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Ακουστικά",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/akoustika",
+      "filter_groups": [
+        "Μικρόφωνο",
+        "Τύπος ακουστικών"
+      ]
+    },
+    "Οθόνες": {
+      "key": "Οθόνες",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Οθόνες",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Οθόνες",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/othones",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Προστατευτικά Ρεύματος": {
+      "key": "Προστατευτικά Ρεύματος",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Προστατευτικά Ρεύματος",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Προστατευτικά Ρεύματος",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/prostateutika-reumatos",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Ποντίκια": {
+      "key": "Ποντίκια",
+      "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
+      "leaf_category": "Περιφερειακά",
+      "sub_category": "Ποντίκια",
+      "path": "ΠΛΗΡΟΦΟΡΙΚΗ > Περιφερειακά > Ποντίκια",
+      "url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/pontikia",
+      "filter_groups": [
+        "Τύπος Λειτουργίας"
+      ]
+    },
+    "Κουζίνες Κεραμικές": {
+      "key": "Κουζίνες Κεραμικές",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Κουζίνες",
+      "sub_category": "Κουζίνες Κεραμικές",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > Κουζίνες Κεραμικές",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines/kouzines-keramikes",
+      "filter_groups": [
+        "Ηλεκτρονικό Ρολόι",
+        "Τύπος φούρνου",
+        "Υλικό πλάκας",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χωρητικότητα Φούρνου"
+      ]
+    },
+    "Κουζίνες Εμαγιέ": {
+      "key": "Κουζίνες Εμαγιέ",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Κουζίνες",
+      "sub_category": "Κουζίνες Εμαγιέ",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > Κουζίνες Εμαγιέ",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines/kouzines-emagie",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Κουζίνες Αερίου": {
+      "key": "Κουζίνες Αερίου",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Κουζίνες",
+      "sub_category": "Κουζίνες Αερίου",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > Κουζίνες Αερίου",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines/kouzines-aeriou",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "45cm": {
+      "key": "45cm",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια Πιάτων",
+      "sub_category": "45cm",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια Πιάτων > 45cm",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=162_166_273",
+      "filter_groups": [
+        "Χρώμα",
+        "Χώρος για σερβίτσια",
+        "Πλάτος cm",
+        "Ενεργειακή Κλάση"
+      ]
+    },
+    "60cm": {
+      "key": "60cm",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια Πιάτων",
+      "sub_category": "60cm",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια Πιάτων > 60cm",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-piatwn/60cm",
+      "filter_groups": [
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χώρος για σερβίτσια",
+        "Πλάτος cm"
+      ]
+    },
+    "Επιτραπέζια": {
+      "key": "Επιτραπέζια",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια Πιάτων",
+      "sub_category": "Επιτραπέζια",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια Πιάτων > Επιτραπέζια",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-piatwn/epitrapezia",
+      "filter_groups": [
+        "Ενεργειακή Κλάση",
+        "Χώρος για σερβίτσια",
+        "Χρώμα",
+        "Πλάτος cm"
+      ]
+    },
+    "Ψυγεία [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες]": {
+      "key": "Ψυγεία [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia",
+      "filter_groups": [
+        "Ψύξη",
+        "Ύψος cm",
+        "Χρώμα",
+        "Πλάτος cm",
+        "Ενεργειακή Κλάση"
+      ]
+    },
+    "Ψυγειοκαταψύκτες": {
+      "key": "Ψυγειοκαταψύκτες",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγειοκαταψύκτες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγειοκαταψύκτες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeiokatapsyktes",
+      "filter_groups": [
+        "Ύψος cm",
+        "Ψύξη",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Πλάτος cm"
+      ]
+    },
+    "Ψυγεία Ντουλάπες": {
+      "key": "Ψυγεία Ντουλάπες",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία Ντουλάπες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία Ντουλάπες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+      "filter_groups": [
+        "Ψύξη",
+        "Χρώμα",
+        "Ενεργειακή Κλάση",
+        "Ύψος cm",
+        "Πλάτος cm"
+      ]
+    },
+    "Καταψύκτες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες]": {
+      "key": "Καταψύκτες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Καταψύκτες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Καταψύκτες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/katapsyktes",
+      "filter_groups": [
+        "Είδος Καταψύκτη",
+        "Χρώμα",
+        "Ψύξη",
+        "Ύψος cm",
+        "Ενεργειακή Κλάση",
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    "Συντηρητές Κρασιών": {
+      "key": "Συντηρητές Κρασιών",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Συντηρητές Κρασιών",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Συντηρητές Κρασιών",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/synthrhtes-krasiwn",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Πλυντήρια Ρούχων [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια]": {
+      "key": "Πλυντήρια Ρούχων [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Πλυντήρια Ρούχων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Ρούχων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-rouxwn",
+      "filter_groups": [
+        "Κιλά πλύσης",
+        "Τρόπος Φόρτωσης",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Μέγιστες Στροφές Στυψίματος"
+      ]
+    },
+    "Στεγνωτήρια Ρούχων": {
+      "key": "Στεγνωτήρια Ρούχων",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Στεγνωτήρια Ρούχων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Στεγνωτήρια Ρούχων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/stegnwthria-rouxwn",
+      "filter_groups": [
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Κιλά Στεγνώματος"
+      ]
+    },
+    "Πλυντήρια Στεγνωτήρια 2 in1": {
+      "key": "Πλυντήρια Στεγνωτήρια 2 in1",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Πλυντήρια Στεγνωτήρια 2 in1",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Στεγνωτήρια 2 in1",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-stegnwthria-2-1",
+      "filter_groups": [
+        "Τρόπος Φόρτωσης",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Κιλά Στεγνώματος",
+        "Μέγιστες Στροφές Στυψίματος",
+        "Κιλά πλύσης"
+      ]
+    },
+    "Σετ Φούρνοι & Εστίες & Απορροφητήρες": {
+      "key": "Σετ Φούρνοι & Εστίες & Απορροφητήρες",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Σετ Φούρνοι & Εστίες & Απορροφητήρες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Σετ Φούρνοι & Εστίες & Απορροφητήρες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/sets-ovens-hobs-hoods",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Φούρνοι": {
+      "key": "Φούρνοι",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Φούρνοι",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Φούρνοι",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/fournoi",
+      "filter_groups": [
+        "Ηλεκτρονικό Ρολόι",
+        "Τύπος φούρνου",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χωρητικότητα Φούρνου",
+        "Πλάτος cm"
+      ]
+    },
+    "Εστίες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]": {
+      "key": "Εστίες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Εστίες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Εστίες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/esties",
+      "filter_groups": [
+        "Τεχνολογία Εστιών",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Αριθμός Ζωνών",
+        "Πλάτος cm"
+      ]
+    },
+    "Σετ Φούρνοι και Εστίες": {
+      "key": "Σετ Φούρνοι και Εστίες",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Σετ Φούρνοι και Εστίες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Σετ Φούρνοι και Εστίες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/Set-fournoi-esties",
+      "filter_groups": []
+    },
+    "Μικροκυμάτων": {
+      "key": "Μικροκυμάτων",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Μικροκυμάτων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Μικροκυμάτων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/mikrokymatwn",
+      "filter_groups": [
+        "Με Grill",
+        "Χωρητικότητα Φούρνου",
+        "Χρώμα",
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    "Πλυντήρια Πιάτων": {
+      "key": "Πλυντήρια Πιάτων",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Πλυντήρια Πιάτων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Πλυντήρια Πιάτων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-plynthria-piatwn",
+      "filter_groups": [
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χώρος για σερβίτσια",
+        "Πλάτος cm"
+      ]
+    },
+    "Ψυγεία [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]": {
+      "key": "Ψυγεία [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Ψυγεία",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Ψυγεία",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/ent-psygeia",
+      "filter_groups": [
+        "Ψύξη",
+        "Είδος Καταψύκτη",
+        "Χρώμα",
+        "Ενεργειακή Κλάση",
+        "Πλάτος cm",
+        "Ύψος cm"
+      ]
+    },
+    "Καταψύκτες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]": {
+      "key": "Καταψύκτες [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Καταψύκτες",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Καταψύκτες",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-katapsyktes",
+      "filter_groups": [
+        "Βάθος Συσκευής σε Εκατοστά",
+        "Ψύξη",
+        "Ενεργειακή Κλάση",
+        "Πλάτος cm",
+        "Ύψος cm",
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    "Πλυντήρια Ρούχων [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]": {
+      "key": "Πλυντήρια Ρούχων [ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές]",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Πλυντήρια Ρούχων",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Πλυντήρια Ρούχων",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-plynthria-rouxwn",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Με Grill": {
+      "key": "Με Grill",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Φούρνοι Μικροκυμάτων",
+      "sub_category": "Με Grill",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Φούρνοι Μικροκυμάτων > Με Grill",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/fournoi-mikrokymatwn/microwave-with-grill",
+      "filter_groups": [
+        "Με Grill",
+        "Χωρητικότητα Φούρνου",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Χωρίς Grill": {
+      "key": "Χωρίς Grill",
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Φούρνοι Μικροκυμάτων",
+      "sub_category": "Χωρίς Grill",
+      "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Φούρνοι Μικροκυμάτων > Χωρίς Grill",
+      "url": "https://www.etranoulis.gr/oikiakes-syskeues/fournoi-mikrokymatwn/microwave-without-grill",
+      "filter_groups": [
+        "Χρώμα",
+        "Χωρητικότητα Φούρνου",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Τοίχου [ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά]": {
+      "key": "Τοίχου [ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά]",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Κλιματιστικά",
+      "sub_category": "Τοίχου",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Τοίχου",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/toixou",
+      "filter_groups": [
+        "Wifi",
+        "Ενεργειακή Κλάση",
+        "Ονομαστική Απόδοση"
+      ]
+    },
+    "Φορητά": {
+      "key": "Φορητά",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Κλιματιστικά",
+      "sub_category": "Φορητά",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Φορητά",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/forita",
+      "filter_groups": [
+        "Ονομαστική Απόδοση"
+      ]
+    },
+    "Ντουλάπες": {
+      "key": "Ντουλάπες",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Κλιματιστικά",
+      "sub_category": "Ντουλάπες",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Ντουλάπες",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/ntoulapes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Αξεσουάρ Κλιματιστικών": {
+      "key": "Αξεσουάρ Κλιματιστικών",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Κλιματιστικά",
+      "sub_category": "Αξεσουάρ Κλιματιστικών",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Αξεσουάρ Κλιματιστικών",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/aksesouar-klimatistikwn",
+      "filter_groups": []
+    },
+    "Mini": {
+      "key": "Mini",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Mini",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Mini",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_196_304",
+      "filter_groups": []
+    },
+    "Υδρονέφωσης": {
+      "key": "Υδρονέφωσης",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Υδρονέφωσης",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Υδρονέφωσης",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_196_305",
+      "filter_groups": []
+    },
+    "Ορθοστάτης": {
+      "key": "Ορθοστάτης",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Ορθοστάτης",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Ορθοστάτης",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/orthostatis",
+      "filter_groups": [
+        "Ισχύς (Watt)",
+        "Διάμετρος σε Εκατοστά"
+      ]
+    },
+    "Επιτραπέζιοι": {
+      "key": "Επιτραπέζιοι",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Επιτραπέζιοι",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Επιτραπέζιοι",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/epitrapezioi",
+      "filter_groups": [
+        "Χρώμα",
+        "Διάμετρος σε Εκατοστά",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Τοίχου [ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες]": {
+      "key": "Τοίχου [ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες]",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Τοίχου",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Τοίχου",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/an-toixou",
+      "filter_groups": [
+        "Διάμετρος σε Εκατοστά",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Οροφής": {
+      "key": "Οροφής",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Οροφής",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Οροφής",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/orofhs",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Air Coolers & Επιδαπέδιοι": {
+      "key": "Air Coolers & Επιδαπέδιοι",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Ανεμιστήρες",
+      "sub_category": "Air Coolers & Επιδαπέδιοι",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > Air Coolers & Επιδαπέδιοι",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/aircoolers-epidapedioi",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Ηλεκτρικά Υποστρώματα": {
+      "key": "Ηλεκτρικά Υποστρώματα",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Ηλεκτρικά Υποστρώματα",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Ηλεκτρικά Υποστρώματα",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_197_311",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Θερμάστρες Carbon": {
+      "key": "Θερμάστρες Carbon",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Θερμάστρες Carbon",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Θερμάστρες Carbon",
+      "url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_197_312",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Θερμάστρες Πετρελαίου": {
+      "key": "Θερμάστρες Πετρελαίου",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Θερμάστρες Πετρελαίου",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Θερμάστρες Πετρελαίου",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermastres-petrelaiou",
+      "filter_groups": [
+        "Θερμική Ισχύς Btu/h"
+      ]
+    },
+    "Καλοριφέρ": {
+      "key": "Καλοριφέρ",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Καλοριφέρ",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Καλοριφέρ",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/kalorifer",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Θερμοπομποί": {
+      "key": "Θερμοπομποί",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Θερμοπομποί",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Θερμοπομποί",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermopompoi",
+      "filter_groups": [
+        "Συνίσταται για χώρους έως m2",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Αερόθερμα": {
+      "key": "Αερόθερμα",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Αερόθερμα",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Αερόθερμα",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/aerotherma",
+      "filter_groups": [
+        "Τύπος Θεμμαντικού",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Θερμαντικά Υγραερίου": {
+      "key": "Θερμαντικά Υγραερίου",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Θερμαντικά Υγραερίου",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Θερμαντικά Υγραερίου",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermantika-ygraeriou",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Χαλαζία": {
+      "key": "Χαλαζία",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Χαλαζία",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Χαλαζία",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/xalazia",
+      "filter_groups": [
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Ηλεκτρικές Κουβέρτες": {
+      "key": "Ηλεκτρικές Κουβέρτες",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Θερμαντικά",
+      "sub_category": "Ηλεκτρικές Κουβέρτες",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Θερμαντικά > Ηλεκτρικές Κουβέρτες",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/hlektrikes-kouvertes",
+      "filter_groups": [
+        "Μέγεθος"
+      ]
+    },
+    "Αφυγραντήρες": {
+      "key": "Αφυγραντήρες",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Αφύγρανση Ιονιστές",
+      "sub_category": "Αφυγραντήρες",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Αφύγρανση Ιονιστές > Αφυγραντήρες",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/afygranthres",
+      "filter_groups": [
+        "Wifi",
+        "Χωρητικότητα σε Λίτρα",
+        "Δυνατότητα Αφύγρανσης σε Λίτρα/24Ώρες"
+      ]
+    },
+    "Καθαριστές Αέρα Ιονιστές": {
+      "key": "Καθαριστές Αέρα Ιονιστές",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Αφύγρανση Ιονιστές",
+      "sub_category": "Καθαριστές Αέρα Ιονιστές",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Αφύγρανση Ιονιστές > Καθαριστές Αέρα Ιονιστές",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/katharistes-aera-ionistes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Αξεσουάρ Αφύγρανσης": {
+      "key": "Αξεσουάρ Αφύγρανσης",
+      "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+      "leaf_category": "Αφύγρανση Ιονιστές",
+      "sub_category": "Αξεσουάρ Αφύγρανσης",
+      "path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Αφύγρανση Ιονιστές > Αξεσουάρ Αφύγρανσης",
+      "url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/axeouar-afigranshs",
+      "filter_groups": []
+    },
+    "Σκούπες": {
+      "key": "Σκούπες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes",
+      "filter_groups": [
+        "Τύπος Ηλεκτρικής Σκούπας",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Σκουπάκια": {
+      "key": "Σκουπάκια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκουπάκια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκουπάκια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupakia",
+      "filter_groups": [
+        "Τάση Volt"
+      ]
+    },
+    "Σκούπες Stick": {
+      "key": "Σκούπες Stick",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Stick",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Stick",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-stick",
+      "filter_groups": [
+        "Τύπος Ηλεκτρικής Σκούπας",
+        "Χρώμα",
+        "Τάση Volt",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Σκούπες Ρομπότ": {
+      "key": "Σκούπες Ρομπότ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Ρομπότ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Ρομπότ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
+      "filter_groups": [
+        "Τύπος Ηλεκτρικής Σκούπας"
+      ]
+    },
+    "Ατμοκαθαριστές": {
+      "key": "Ατμοκαθαριστές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Ατμοκαθαριστές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Ατμοκαθαριστές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/atmokathharistes",
+      "filter_groups": [
+        "Τύπος Συσκευής",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Αξεσουάρ-Αναλώσιμα": {
+      "key": "Αξεσουάρ-Αναλώσιμα",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Αξεσουάρ-Αναλώσιμα",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Αξεσουάρ-Αναλώσιμα",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/aksesouar-analwsima",
+      "filter_groups": []
+    },
+    "Σίδερα": {
+      "key": "Σίδερα",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σιδέρωμα",
+      "sub_category": "Σίδερα",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σιδέρωμα > Σίδερα",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/sidera",
+      "filter_groups": [
+        "Τύπος Συσκευής",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Συστήματα Σιδερώματος": {
+      "key": "Συστήματα Σιδερώματος",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σιδέρωμα",
+      "sub_category": "Συστήματα Σιδερώματος",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σιδέρωμα > Συστήματα Σιδερώματος",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/systhmata-siderwmatos",
+      "filter_groups": [
+        "Τύπος Συσκευής",
+        "Χρώμα",
+        "Πίεση ατμού (Bar)",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Σιδερώστρες": {
+      "key": "Σιδερώστρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σιδέρωμα",
+      "sub_category": "Σιδερώστρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σιδέρωμα > Σιδερώστρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/siderwstres",
+      "filter_groups": []
+    },
+    "Αξεσουάρ - Αναλώσιμα": {
+      "key": "Αξεσουάρ - Αναλώσιμα",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σιδέρωμα",
+      "sub_category": "Αξεσουάρ - Αναλώσιμα",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σιδέρωμα > Αξεσουάρ - Αναλώσιμα",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/accessories-consumables",
+      "filter_groups": []
+    },
+    "Καφετιέρες Espresso": {
+      "key": "Καφετιέρες Espresso",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Καφετιέρες Espresso",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Καφετιέρες Espresso",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kafetieres-espresso",
+      "filter_groups": [
+        "Χωρητικότητα σε Λίτρα",
+        "Χρώμα",
+        "Πίεση ατμού (Bar)",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Καφετιέρες Φίλτρου": {
+      "key": "Καφετιέρες Φίλτρου",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Καφετιέρες Φίλτρου",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Καφετιέρες Φίλτρου",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kafetieres-filtrou",
+      "filter_groups": [
+        "Υλικό κανάτας",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Φραπιέρες": {
+      "key": "Φραπιέρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Φραπιέρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Φραπιέρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/frapieres",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Στυπτήρια": {
+      "key": "Στυπτήρια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Στυπτήρια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Στυπτήρια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/stypthria",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Αποχυμωτές": {
+      "key": "Αποχυμωτές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Αποχυμωτές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Αποχυμωτές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/apoxymwtes",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Αξεσουάρ-Αναλώσιμα-Θερμός": {
+      "key": "Αξεσουάρ-Αναλώσιμα-Θερμός",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+      "sub_category": "Αξεσουάρ-Αναλώσιμα-Θερμός",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Αξεσουάρ-Αναλώσιμα-Θερμός",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kaf-aksesouar-analwsima-thermos",
+      "filter_groups": []
+    },
+    "Πολυμίξερ": {
+      "key": "Πολυμίξερ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Πολυμίξερ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Πολυμίξερ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/multimixer",
+      "filter_groups": [
+        "Χωρητικότητα Μπολ σε Λίτρα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Διάφορες Συσκευές": {
+      "key": "Διάφορες Συσκευές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Διάφορες Συσκευές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Διάφορες Συσκευές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/diafores-syskeyes",
+      "filter_groups": []
+    },
+    "Κουζινομηχανές": {
+      "key": "Κουζινομηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Κουζινομηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κουζινομηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kouzinomhxanes",
+      "filter_groups": [
+        "Χωρητικότητα Μπολ σε Λίτρα",
+        "Χωρητικότητα σε Λίτρα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Μίξερ": {
+      "key": "Μίξερ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Μίξερ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Μίξερ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/mixer",
+      "filter_groups": [
+        "Τύπος Μίξερ",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Κοπτήρια-Ράβδοι": {
+      "key": "Κοπτήρια-Ράβδοι",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Κοπτήρια-Ράβδοι",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κοπτήρια-Ράβδοι",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kopthria-ravdoi",
+      "filter_groups": [
+        "Υλικό κανάτας",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Βραστήρες": {
+      "key": "Βραστήρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Βραστήρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Βραστήρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/vrasthres",
+      "filter_groups": [
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Μπλέντερ": {
+      "key": "Μπλέντερ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Μπλέντερ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Μπλέντερ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/blender",
+      "filter_groups": [
+        "Υλικό κανάτας",
+        "Χρώμα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Ζυγαριές Κουζίνας": {
+      "key": "Ζυγαριές Κουζίνας",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Ζυγαριές Κουζίνας",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Ζυγαριές Κουζίνας",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/zygaries-kouzinas",
+      "filter_groups": [
+        "Μέγιστο Ζυγιζόμενο Βάρος σε Κιλά"
+      ]
+    },
+    "Ηλεκτρικά μπρίκια": {
+      "key": "Ηλεκτρικά μπρίκια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Ηλεκτρικά μπρίκια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Ηλεκτρικά μπρίκια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/brikia",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Κρεατομηχανές": {
+      "key": "Κρεατομηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Κρεατομηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κρεατομηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kreatomhxanes",
+      "filter_groups": []
+    },
+    "Σεσουάρ": {
+      "key": "Σεσουάρ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Σεσουάρ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Σεσουάρ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/sesouar",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Βούρτσες-Ψαλίδια-ισιωτικά": {
+      "key": "Βούρτσες-Ψαλίδια-ισιωτικά",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Βούρτσες-Ψαλίδια-ισιωτικά",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Βούρτσες-Ψαλίδια-ισιωτικά",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/vourtses-psalidia",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Συσκευές Αποτρίχωσης": {
+      "key": "Συσκευές Αποτρίχωσης",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Συσκευές Αποτρίχωσης",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Συσκευές Αποτρίχωσης",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/syskeues-apotrixwshs",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Κουρευτικές Μηχανές": {
+      "key": "Κουρευτικές Μηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Κουρευτικές Μηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Κουρευτικές Μηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/koureutikes-mhxanes",
+      "filter_groups": [
+        "Χρήση Μηχανής",
+        "Τροφοδοσία Ρεύματος",
+        "Τύπος Ξυρίσματος"
+      ]
+    },
+    "Ξυριστικές Μηχανές": {
+      "key": "Ξυριστικές Μηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Ξυριστικές Μηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Ξυριστικές Μηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/ksyristikes-mhxanes",
+      "filter_groups": [
+        "Τύπος Ξυρίσματος"
+      ]
+    },
+    "Ζυγαρίες Σώματος": {
+      "key": "Ζυγαρίες Σώματος",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Προσωπική Φροντίδα",
+      "sub_category": "Ζυγαρίες Σώματος",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Προσωπική Φροντίδα > Ζυγαρίες Σώματος",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/zygaries-swmatos",
+      "filter_groups": []
+    },
+    "Εστίες [ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες]": {
+      "key": "Εστίες [ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες]",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Εστίες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Εστίες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/esties_small",
+      "filter_groups": [
+        "Αριθμός εστιών"
+      ]
+    },
+    "Παρασκευαστής Ποπ Κορν": {
+      "key": "Παρασκευαστής Ποπ Κορν",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Παρασκευαστής Ποπ Κορν",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Παρασκευαστής Ποπ Κορν",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/popcorn-maker",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Φουρνάκια": {
+      "key": "Φουρνάκια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Φουρνάκια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Φουρνάκια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fournakia",
+      "filter_groups": [
+        "Με εστίες",
+        "Χωρητικότητα σε Λίτρα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Ατμομάγειρες": {
+      "key": "Ατμομάγειρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Ατμομάγειρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Ατμομάγειρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/atmomageires",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Τοστιέρες": {
+      "key": "Τοστιέρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Τοστιέρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Τοστιέρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/tostieres",
+      "filter_groups": [
+        "Υλικό πλάκας",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Ψηστιέρες - Γκριλιέρες": {
+      "key": "Ψηστιέρες - Γκριλιέρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Ψηστιέρες - Γκριλιέρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Ψηστιέρες - Γκριλιέρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/pshstieres-gkrilieres",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Φριτέζες": {
+      "key": "Φριτέζες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Φριτέζες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Φριτέζες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fritezes",
+      "filter_groups": [
+        "Χωρητικότητα σε Λίτρα",
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Φρυγανιέρες": {
+      "key": "Φρυγανιέρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Φρυγανιέρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Φρυγανιέρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fryganieres",
+      "filter_groups": [
+        "Ισχύς (Watt)"
+      ]
+    },
+    "Αρτοπαρασκευαστές": {
+      "key": "Αρτοπαρασκευαστές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Αρτοπαρασκευαστές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Αρτοπαρασκευαστές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/artoparaskeuastes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Παγωτομηχανές": {
+      "key": "Παγωτομηχανές",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Παγωτομηχανές",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Παγωτομηχανές",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/pagwtomhxanes",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Σετ": {
+      "key": "Σετ",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Σετ",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Σετ",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/set-utensils",
+      "filter_groups": [
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    "Χύτρες Ταχύτητας": {
+      "key": "Χύτρες Ταχύτητας",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Χύτρες Ταχύτητας",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Χύτρες Ταχύτητας",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/xytres-taxythtas",
+      "filter_groups": [
+        "Χωρητικότητα σε Λίτρα"
+      ]
+    },
+    "Χύτρες": {
+      "key": "Χύτρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Χύτρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Χύτρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/xytres",
+      "filter_groups": [
+        "Διάμετρος Σκεύους σε Εκατοστά"
+      ]
+    },
+    "Τηγάνια": {
+      "key": "Τηγάνια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Τηγάνια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Τηγάνια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/thgania",
+      "filter_groups": [
+        "Διάμετρος Σκεύους σε Εκατοστά",
+        "Διάμετρος σε Εκατοστά"
+      ]
+    },
+    "Ταψιά": {
+      "key": "Ταψιά",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Ταψιά",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Ταψιά",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/tapsia",
+      "filter_groups": [
+        "Πλάτος cm"
+      ]
+    },
+    "Γάστρες": {
+      "key": "Γάστρες",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Γάστρες",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Γάστρες",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/gastres",
+      "filter_groups": [
+        "Διάμετρος Σκεύους σε Εκατοστά",
+        "Χρώμα"
+      ]
+    },
+    "Μαχαίρια": {
+      "key": "Μαχαίρια",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Μαχαίρια",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Μαχαίρια",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/maxairia",
+      "filter_groups": []
+    },
+    "Διάφορα Σκεύη": {
+      "key": "Διάφορα Σκεύη",
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκεύη Μαγειρικής",
+      "sub_category": "Διάφορα Σκεύη",
+      "path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκεύη Μαγειρικής > Διάφορα Σκεύη",
+      "url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/diafora-skeyh",
+      "filter_groups": []
+    },
+    "Αερίου": {
+      "key": "Αερίου",
+      "parent_category": "HOBBIES",
+      "leaf_category": "Barbeque",
+      "sub_category": "Αερίου",
+      "path": "HOBBIES > Barbeque > Αερίου",
+      "url": "https://www.etranoulis.gr/hobbies/barbeque/aeriou",
+      "filter_groups": [],
+      "notes": "Filters not detectable (no filter module in page source)."
+    },
+    "Κάρβουνου": {
+      "key": "Κάρβουνου",
+      "parent_category": "HOBBIES",
+      "leaf_category": "Barbeque",
+      "sub_category": "Κάρβουνου",
+      "path": "HOBBIES > Barbeque > Κάρβουνου",
+      "url": "https://www.etranoulis.gr/hobbies/barbeque/karvounou",
+      "filter_groups": [
+        "Επιφάνεια ψησίματος σε εκατ."
+      ]
+    },
+    "Αξεσουάρ Ψησταριών": {
+      "key": "Αξεσουάρ Ψησταριών",
+      "parent_category": "HOBBIES",
+      "leaf_category": "Barbeque",
+      "sub_category": "Αξεσουάρ Ψησταριών",
+      "path": "HOBBIES > Barbeque > Αξεσουάρ Ψησταριών",
+      "url": "https://www.etranoulis.gr/hobbies/barbeque/aksesouar-pshstariwn",
+      "filter_groups": []
+    },
+    "Playstation": {
+      "key": "Playstation",
+      "parent_category": "HOBBIES",
+      "leaf_category": "Gaming",
+      "sub_category": "Playstation",
+      "path": "HOBBIES > Gaming > Playstation",
+      "url": "https://www.etranoulis.gr/hobbies/gaming/playstation",
+      "filter_groups": []
+    }
+  },
+  "collisions": {
+    "Same Sub Category name mapped to multiple URLs": "-",
+    "Same Filter Group name appears with suspicious variants": "-"
+  }
+}
