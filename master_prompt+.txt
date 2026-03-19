@@ -54,6 +54,18 @@ CSV FILE POSITION RULE
 - The downloadable `{model}.csv` file link must be returned BEFORE the numbered product output.
 - The CSV link is considered a separate pre-output artifact and does NOT count as part of the numbered output structure.
 
+CHAT OUTPUT OVERRIDE (HARD RULE)
+- In chat, after the CSV link, output ONLY Section 0 (`π”Ή **Ξ¦Ξ―Ξ»Ο„ΟΞ±**`).
+- Do NOT render Sections 1-10 in chat.
+- Sections 1-10 must still be fully generated internally whenever needed for:
+  - CSV field mapping
+  - SEO/meta generation
+  - HTML description generation
+  - Technical Specs generation
+  - category resolution
+  - source collection
+- Treat Sections 1-10 as internal-only unless this master prompt is explicitly changed again.
+
 CSV EXPORT RULES (MANDATORY)
 - After every successful generation, also generate `{model}.csv`
 - Constraint: it must be a local repo file path under `products/`
@@ -76,7 +88,7 @@ CSV PRE-FINAL VALIDATION (MANDATORY)
   `CSV export failed`
 - Do NOT continue to the numbered product output if CSV validation fails
 
-- After the CSV link, the normal output must begin exactly with:
+- After the CSV link, the chat output must begin exactly with:
 
 0) 🔹 **Φίλτρα**
     - Infer the product filters using `filter_map.json` based on the selected Sub Category.
@@ -366,12 +378,17 @@ TECHNICAL SPECS SCHEMA NOTE
    - No labels, bullets, commentary, or inline citations
 
 RENDERING / COPY-PASTE FORMAT RULES (HARD RULE)
+- CHAT OVERRIDE:
+  - For chat output, render ONLY Section 0.
+  - Do NOT print Sections 1-10 in chat.
+  - Sections 1-10 remain internal generation sections for CSV mapping and validation only.
 - For EVERY numbered section, except where an explicit section-specific exception is defined:
   - Print the heading line exactly as specified (e.g., `1) 🔹 **SEO URL**`).
   - Output fenced code blocks (triple backticks) for copy/paste values.
   - Do NOT add bullets, labels, prefixes, suffixes, or commentary outside code blocks.
 
 SECTION 10 EXCEPTION — ΠΗΓΕΣ
+- Under the chat output override above, Section 10 is internal-only and must not be printed in chat.
 - Section `10) 🔹 Πηγές` is an explicit exception to the default numbered-section formatting rule.
 - Do NOT wrap Section 10 content in a fenced code block.
 - Do NOT add bullets, numbering, labels, commentary, or headings inside Section 10 content.
@@ -379,6 +396,9 @@ SECTION 10 EXCEPTION — ΠΗΓΕΣ
 - Section 10 must still appear in the numbered output structure, but its body is raw plain text lines only.
 
 RENDERING FORMAT RULES (Sections 0–9)
+- CHAT OVERRIDE:
+  - For chat output, only Section 0 is rendered.
+  - Do NOT output any other numbered sections in chat unless this master prompt is explicitly changed.
 - For sections 1–6, output EXACTLY ONE fenced code block immediately after the heading.
 - Use this exact shape:
 

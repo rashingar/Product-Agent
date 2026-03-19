@@ -368,6 +368,8 @@ For every valid generation:
 1. Generate the `.csv` file named `{model}.csv`
 - Constraint: it must be created locally under `products/{model}.csv`
 2. Then generate the normal product output in the required format
+- If the active master prompt defines a chat-output override, follow that override for what is shown in chat.
+- Current override target: after the CSV artifact, chat may render only `0) Φίλτρα` while the remaining sections are still generated internally as needed for CSV mapping and validation.
 
 For invalid generation due to missing/unconfirmed 6-digit model:
 - output exactly:
