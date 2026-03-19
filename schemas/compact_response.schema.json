@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Product-Agent Compact LLM Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "product",
+    "presentation"
+  ],
+  "properties": {
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "brand",
+        "mpn",
+        "manufacturer",
+        "name",
+        "seo_keyword",
+        "meta_title",
+        "meta_description",
+        "meta_keywords"
+      ],
+      "properties": {
+        "brand": {
+          "type": "string"
+        },
+        "mpn": {
+          "type": "string"
+        },
+        "manufacturer": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "seo_keyword": {
+          "type": "string"
+        },
+        "meta_title": {
+          "type": "string"
+        },
+        "meta_description": {
+          "type": "string"
+        },
+        "meta_keywords": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "presentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intro_html",
+        "cta_text",
+        "sections"
+      ],
+      "properties": {
+        "intro_html": {
+          "type": "string"
+        },
+        "cta_text": {
+          "type": "string"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "title",
+              "body_html"
+            ],
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "body_html": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
