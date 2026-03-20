@@ -1,6 +1,10 @@
 from electronet_single_import.llm_contract import validate_llm_output
 
 
+def build_intro(words: int = 150) -> str:
+    return " ".join(["λέξη"] * words)
+
+
 def test_validate_llm_output_accepts_reduced_contract() -> None:
     payload = {
         "product": {
@@ -8,7 +12,7 @@ def test_validate_llm_output_accepts_reduced_contract() -> None:
             "meta_keywords": ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα", "Total No Frost"],
         },
         "presentation": {
-            "intro_html": 'Το <strong>LG GSGV80PYLL</strong> προσφέρει μεγάλη χωρητικότητα.',
+            "intro_html": build_intro(),
             "cta_text": "Δείτε περισσότερα ψυγεία ντουλάπες εδώ",
             "sections": [
                 {"title": "NatureFRESH για καθημερινή φρεσκάδα", "body_html": "Το <strong>NatureFRESH</strong> βοηθά στη σωστή συντήρηση."},
@@ -42,3 +46,21 @@ def test_validate_llm_output_rejects_old_contract_shape() -> None:
     _, errors = validate_llm_output(payload, sections_required=0)
 
     assert "llm_product_shape_invalid" in errors
+
+
+def test_validate_llm_output_rejects_short_intro() -> None:
+    payload = {
+        "product": {
+            "meta_description": "Το προϊόν είναι πρακτική λύση για καθημερινή χρήση στην κουζίνα.",
+            "meta_keywords": ["κουζίνα"],
+        },
+        "presentation": {
+            "intro_html": "Σύντομο κείμενο.",
+            "cta_text": "Δείτε περισσότερα εδώ",
+            "sections": [],
+        },
+    }
+
+    _, errors = validate_llm_output(payload, sections_required=0)
+
+    assert "llm_intro_word_count_invalid" in errors

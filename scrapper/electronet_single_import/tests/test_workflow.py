@@ -6,6 +6,10 @@ from electronet_single_import.models import CLIInput, GalleryImage, ParsedProduc
 from electronet_single_import.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
 
+def build_intro(words: int = 150) -> str:
+    return " ".join(["λέξη"] * words)
+
+
 def test_build_cli_input_from_template_file(tmp_path: Path, monkeypatch) -> None:
     template = tmp_path / "input.txt"
     template.write_text(
@@ -232,7 +236,7 @@ def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) ->
             "meta_keywords": ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα", "Total No Frost"],
         },
         "presentation": {
-            "intro_html": 'Το <strong>LG GSGV80PYLL</strong> προσφέρει μεγάλη χωρητικότητα.',
+            "intro_html": build_intro(),
             "cta_text": "Δείτε περισσότερα ψυγεία ντουλάπες εδώ",
             "sections": [
                 {

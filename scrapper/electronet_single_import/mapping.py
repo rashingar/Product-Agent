@@ -70,6 +70,7 @@ def build_row(
             product_name=canonical_name,
             model=cli.model,
             cta_url=taxonomy.cta_url,
+            cta_label=cta_label,
             intro_html=str(llm_presentation.get("intro_html", "")),
             cta_text=str(llm_presentation.get("cta_text", "")),
             sections=list(llm_presentation.get("sections", [])),

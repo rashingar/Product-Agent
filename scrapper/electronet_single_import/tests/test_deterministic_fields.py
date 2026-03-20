@@ -30,7 +30,7 @@ def test_deterministic_name_and_meta_title_follow_business_rules() -> None:
     assert fields["seo_keyword"] == "lg-gsgv80pyll-psygeio-ntoulapa-635lt-total-no-frost-wifi"
 
 
-def test_deterministic_fields_preserve_commercial_title_when_family_precedes_model() -> None:
+def test_deterministic_fields_rebuild_name_from_schema_with_title_family_and_color() -> None:
     source = SourceProductData(
         brand="Rowenta",
         mpn="RH2099",
@@ -48,7 +48,31 @@ def test_deterministic_fields_preserve_commercial_title_when_family_precedes_mod
 
     fields = build_deterministic_product_fields(source, taxonomy, "343700", derive_seo_keyword)
 
-    assert fields["preserve_parsed_title"] is True
-    assert fields["name"] == "Σκούπα Stick Rowenta X-Force Flex 9.60 RH2099 Κόκκινο"
-    assert fields["meta_title"] == "Σκούπα Stick Rowenta X-Force Flex 9.60 RH2099 Κόκκινο | eTranoulis"
-    assert fields["seo_keyword"] == "skoupa-stick-rowenta-x-force-flex-960-rh2099-kokkino"
+    assert fields["preserve_parsed_title"] is False
+    assert fields["name"] == "Rowenta RH2099 – Σκούπα Stick X-Force Flex 9.60 Κόκκινο"
+    assert fields["meta_title"] == "Rowenta RH2099 Σκούπα Stick X-Force Flex 9.60 Κόκκινο | eTranoulis"
+    assert fields["seo_keyword"] == "rowenta-rh2099-skoupa-stick-x-force-flex-960-kokkino"
+
+
+def test_deterministic_fields_keep_family_and_color_for_small_appliances() -> None:
+    source = SourceProductData(
+        brand="Tefal",
+        mpn="DN853B",
+        name="Πολυκόπτης Tefal Fresh Express DN853B Γκρι",
+        key_specs=[
+            SpecItem(label="Τύπος Πολυκόπτη", value="Κοπτήριο άμεσου σερβιρίσματος"),
+            SpecItem(label="Ισχύς σε Watts", value="150"),
+            SpecItem(label="Χρώμα", value="Γκρι"),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        leaf_category="Συσκευές Κουζίνας",
+        sub_category="Κοπτήρια-Ράβδοι",
+    )
+
+    fields = build_deterministic_product_fields(source, taxonomy, "344424", derive_seo_keyword)
+
+    assert fields["name"] == "Tefal DN853B – Πολυκόπτης Fresh Express Γκρι"
+    assert fields["meta_title"] == "Tefal DN853B Πολυκόπτης Fresh Express Γκρι | eTranoulis"
+    assert fields["seo_keyword"] == "tefal-dn853b-polykoptis-fresh-express-gkri"

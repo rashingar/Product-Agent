@@ -194,9 +194,23 @@
     "gallery_image_non_jpg_saved:2:.webp",
     "gallery_image_non_jpg_saved:3:.webp",
     "gallery_image_non_jpg_saved:4:.webp",
-    "parent_breadcrumb,leaf_breadcrumb,url_overlap"
+    "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path"
   ],
   "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Κοπτήρια-Ράβδοι",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κοπτήρια-Ράβδοι",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kopthria-ravdoi",
+      "confidence": 16.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_breadcrumb",
+        "full_breadcrumb_path"
+      ]
+    },
     {
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
@@ -242,19 +256,6 @@
       "sub_category": "Μίξερ",
       "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Μίξερ",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/mixer",
-      "confidence": 7.25,
-      "reasons": [
-        "parent_breadcrumb",
-        "leaf_breadcrumb",
-        "filter_map_tiebreak"
-      ]
-    },
-    {
-      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
-      "leaf_category": "Συσκευές Κουζίνας",
-      "sub_category": "Βραστήρες",
-      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Βραστήρες",
-      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/vrasthres",
       "confidence": 7.25,
       "reasons": [
         "parent_breadcrumb",

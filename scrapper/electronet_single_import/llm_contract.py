@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from .html_builders import extract_presentation_blocks
 from .mapping import serialize_meta_keywords
 from .models import CLIInput, ParsedProduct, SchemaMatchResult, TaxonomyResolution
 from .normalize import normalize_whitespace
+
+INTRO_MIN_WORDS = 150
+INTRO_MAX_WORDS = 200
+HTML_TAG_RE = re.compile(r"<[^>]+>")
 
 
 def build_llm_context(
@@ -59,7 +64,9 @@ def build_llm_context(
                 "product.meta_keywords",
             ],
             "meta_description_rule": "Exactly one sentence in Greek.",
-            "cta_rule": "Use Greek CTA text only.",
+            "intro_html_rule": f"{INTRO_MIN_WORDS}-{INTRO_MAX_WORDS} Greek words in one intro paragraph.",
+            "cta_rule": "Use Greek CTA text only and prefer the resolved taxonomy label.",
+            "cta_target_label": taxonomy.sub_category or taxonomy.leaf_category,
         },
     }
 
@@ -68,7 +75,17 @@ def render_prompt(template_text: str, context: dict[str, Any]) -> str:
     return template_text.replace("{{LLM_CONTEXT_JSON}}", json.dumps(context, ensure_ascii=False, indent=2))
 
 
-def validate_llm_output(payload: dict[str, Any], sections_required: int) -> tuple[dict[str, Any], list[str]]:
+def count_html_words(value: str) -> int:
+    text = normalize_whitespace(HTML_TAG_RE.sub(" ", value or ""))
+    return len([token for token in text.split(" ") if token])
+
+
+def validate_llm_output(
+    payload: dict[str, Any],
+    sections_required: int,
+    intro_word_min: int = INTRO_MIN_WORDS,
+    intro_word_max: int = INTRO_MAX_WORDS,
+) -> tuple[dict[str, Any], list[str]]:
     errors: list[str] = []
     if not isinstance(payload, dict):
         return {}, ["llm_output_not_object"]
@@ -102,6 +119,10 @@ def validate_llm_output(payload: dict[str, Any], sections_required: int) -> tupl
     sections = presentation.get("sections", [])
     if not isinstance(intro_html, str):
         errors.append("llm_intro_html_invalid")
+    elif intro_html.strip():
+        intro_word_count = count_html_words(intro_html)
+        if intro_word_count < intro_word_min or intro_word_count > intro_word_max:
+            errors.append("llm_intro_word_count_invalid")
     if not isinstance(cta_text, str):
         errors.append("llm_cta_text_invalid")
     if not isinstance(sections, list):

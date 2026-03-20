@@ -47,8 +47,8 @@ YOU MUST RETURN THIS EXACT TOP-LEVEL SHAPE
 FIELD RULES
 - `meta_description`: Greek, exactly one sentence, natural, no quotes, no emojis.
 - `meta_keywords`: array of verified keywords only. No stuffing.
-- `intro_html`: inner HTML only for the intro paragraph. Allowed inline tag: `<strong>`.
-- `cta_text`: Greek CTA label only.
+- `intro_html`: inner HTML only for the intro paragraph. Allowed inline tag: `<strong>`. Keep it between 150 and 200 Greek words.
+- `cta_text`: Greek CTA label only. Make it category-appropriate and prefer the resolved taxonomy label from `LLM_CONTEXT_JSON.writer_rules.cta_target_label`.
 - `sections`: exactly the number required by `LLM_CONTEXT_JSON.writer_rules.sections_required`.
 - `sections[].title`: Greek section heading.
 - `sections[].body_html`: inner HTML only for the paragraph. Allowed inline tag: `<strong>`.
@@ -72,6 +72,7 @@ PRESENTATION RULES
 - Do not merge or reorder source sections.
 - Slight paraphrase is allowed only if the meaning stays intact.
 - If source sections are weak, stay conservative instead of inventing claims.
+- The intro paragraph must be 150-200 Greek words, natural, SEO-friendly, and based only on verified facts in the context.
 
 IF `sections_required = 0`
 - Return `"sections": []`.
@@ -123,15 +124,15 @@ LLM_CONTEXT_JSON
   "taxonomy": {
     "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
     "leaf_category": "Συσκευές Κουζίνας",
-    "sub_category": "Διάφορες Συσκευές",
-    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Διάφορες Συσκευές",
-    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/diafores-syskeyes",
-    "confidence": 7.5,
-    "reason": "parent_breadcrumb,leaf_breadcrumb,url_overlap"
+    "sub_category": "Κοπτήρια-Ράβδοι",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κοπτήρια-Ράβδοι",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kopthria-ravdoi",
+    "confidence": 16.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path"
   },
   "schema_match": {
     "matched_schema_id": "sha1:cd9ee57d9fa534540b89587b8b4f0384fb81bbf6",
-    "matched_sub_category": "Διάφορες Συσκευές",
+    "matched_sub_category": "Κοπτήρια-Ράβδοι",
     "score": 1.01,
     "warnings": []
   },
@@ -140,11 +141,14 @@ LLM_CONTEXT_JSON
     "mpn": "DN853B",
     "manufacturer": "Tefal",
     "category_phrase": "Πολυκόπτης",
-    "name_differentiators": [],
-    "preserve_parsed_title": true,
-    "name": "Πολυκόπτης Tefal Fresh Express DN853B Γκρι",
-    "meta_title": "Πολυκόπτης Tefal Fresh Express DN853B Γκρι | eTranoulis",
-    "seo_keyword": "polykoptis-tefal-fresh-express-dn853b-gkri"
+    "name_differentiators": [
+      "Fresh Express",
+      "Γκρι"
+    ],
+    "preserve_parsed_title": false,
+    "name": "Tefal DN853B – Πολυκόπτης Fresh Express Γκρι",
+    "meta_title": "Tefal DN853B Πολυκόπτης Fresh Express Γκρι | eTranoulis",
+    "seo_keyword": "tefal-dn853b-polykoptis-fresh-express-gkri"
   },
   "presentation_source_sections": [],
   "writer_rules": {
@@ -159,6 +163,8 @@ LLM_CONTEXT_JSON
       "product.meta_keywords"
     ],
     "meta_description_rule": "Exactly one sentence in Greek.",
-    "cta_rule": "Use Greek CTA text only."
+    "intro_html_rule": "150-200 Greek words in one intro paragraph.",
+    "cta_rule": "Use Greek CTA text only and prefer the resolved taxonomy label.",
+    "cta_target_label": "Κοπτήρια-Ράβδοι"
   }
 }

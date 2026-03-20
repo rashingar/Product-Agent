@@ -1,9 +1,11 @@
 {
-  "ok": true,
+  "ok": false,
   "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\candidate\\233541.csv",
   "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
   "baseline_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\products\\233541.csv",
-  "errors": [],
+  "errors": [
+    "llm_intro_word_count_invalid"
+  ],
   "warnings": [],
   "field_health": {
     "model": {

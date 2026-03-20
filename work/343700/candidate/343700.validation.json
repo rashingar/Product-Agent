@@ -1,9 +1,11 @@
 {
-  "ok": true,
+  "ok": false,
   "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\candidate\\343700.csv",
   "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
   "baseline_path": "",
-  "errors": [],
+  "errors": [
+    "llm_intro_word_count_invalid"
+  ],
   "warnings": [],
   "field_health": {
     "model": {
@@ -24,18 +26,18 @@
     },
     "name": {
       "status": "filled",
-      "candidate_length": 53,
+      "candidate_length": 55,
       "baseline_length": 0,
       "encoding_issues": [],
-      "candidate_preview": "Σκούπα Stick Rowenta X-Force Flex 9.60 RH2099 Κόκκινο",
+      "candidate_preview": "Rowenta RH2099 – Σκούπα Stick X-Force Flex 9.60 Κόκκινο",
       "baseline_preview": ""
     },
     "description": {
       "status": "filled",
-      "candidate_length": 11026,
+      "candidate_length": 11028,
       "baseline_length": 0,
       "encoding_issues": [],
-      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Σκούπα Stick Rowenta X-Force F",
+      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Rowenta RH2099 – Σκούπα Stick ",
       "baseline_preview": ""
     },
     "characteristics": {
@@ -139,7 +141,7 @@
       "candidate_length": 66,
       "baseline_length": 0,
       "encoding_issues": [],
-      "candidate_preview": "Σκούπα Stick Rowenta X-Force Flex 9.60 RH2099 Κόκκινο | eTranoulis",
+      "candidate_preview": "Rowenta RH2099 Σκούπα Stick X-Force Flex 9.60 Κόκκινο | eTranoulis",
       "baseline_preview": ""
     },
     "meta_description": {
@@ -155,7 +157,7 @@
       "candidate_length": 52,
       "baseline_length": 0,
       "encoding_issues": [],
-      "candidate_preview": "skoupa-stick-rowenta-x-force-flex-960-rh2099-kokkino",
+      "candidate_preview": "rowenta-rh2099-skoupa-stick-x-force-flex-960-kokkino",
       "baseline_preview": ""
     },
     "product_url": {
@@ -163,7 +165,7 @@
       "candidate_length": 78,
       "baseline_length": 0,
       "encoding_issues": [],
-      "candidate_preview": "https://www.etranoulis.gr/skoupa-stick-rowenta-x-force-flex-960-rh2099-kokkino",
+      "candidate_preview": "https://www.etranoulis.gr/rowenta-rh2099-skoupa-stick-x-force-flex-960-kokkino",
       "baseline_preview": ""
     },
     "related_product": {

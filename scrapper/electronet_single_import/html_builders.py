@@ -9,6 +9,24 @@ from .models import SpecSection
 from .normalize import make_absolute_url, normalize_for_match, normalize_whitespace, split_visible_lines
 
 
+def default_cta_text(cta_label: str) -> str:
+    label = normalize_whitespace(cta_label)
+    return f"Δείτε περισσότερα {label} εδώ" if label else "Δείτε περισσότερα εδώ"
+
+
+def resolve_cta_text(cta_text: str, cta_label: str) -> str:
+    normalized = normalize_whitespace(cta_text)
+    if not normalized:
+        return default_cta_text(cta_label)
+    generic_values = {
+        normalize_for_match("Δείτε περισσότερα"),
+        normalize_for_match("Δείτε περισσότερα εδώ"),
+    }
+    if normalize_for_match(normalized) in generic_values:
+        return default_cta_text(cta_label)
+    return normalized
+
+
 
 def build_characteristics_html(spec_sections: list[SpecSection]) -> str:
     if not spec_sections:
@@ -88,7 +106,7 @@ def build_description_html(
     use_besco_asset_map = besco_filenames_by_section is not None
     besco_filenames_by_section = besco_filenames_by_section or {}
 
-    cta_text = f"Δείτε περισσότερα {cta_label} εδώ" if cta_label else "Δείτε περισσότερα εδώ"
+    cta_text = default_cta_text(cta_label)
     out = ['<div class="etr-desc">']
     out.append(f'<h2 style="text-align:center"><span style="font-size:36px"><strong>{escape(product_name)}</strong></span></h2>')
     out.append('')
@@ -135,6 +153,7 @@ def build_description_html_from_llm(
     product_name: str,
     model: str,
     cta_url: str,
+    cta_label: str,
     intro_html: str,
     cta_text: str,
     sections: list[dict[str, str]],
@@ -159,7 +178,7 @@ def build_description_html_from_llm(
     out.append("")
     out.append('<div style="margin-bottom:20px; margin-left:auto; margin-right:auto; margin-top:20px; text-align:center">')
     out.append(
-        f'<a href="{escape(cta_url, quote=True)}" style="font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;">{escape(normalize_whitespace(cta_text) or "Δείτε περισσότερα εδώ")}</a>'
+        f'<a href="{escape(cta_url, quote=True)}" style="font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;">{escape(resolve_cta_text(cta_text, cta_label))}</a>'
     )
     out.append("</div>")
     out.append("")

@@ -9,6 +9,8 @@ from .normalize import normalize_for_match, normalize_whitespace
 MODEL_TOKEN_RE = re.compile(r"^(?=.*[A-Z])(?=.*\d)[A-Z0-9][A-Z0-9._/-]{2,}$")
 PURE_NUMERIC_TOKEN_RE = re.compile(r"^\d+(?:[.,]\d+)?$")
 NUMERIC_RE = re.compile(r"\d+(?:[.,]\d+)?")
+ENERGY_CLASS_TOKEN_RE = re.compile(r"^[A-G](?:\+{1,3})?$", re.IGNORECASE)
+MAX_NAME_DIFFERENTIATORS = 3
 
 
 def build_deterministic_product_fields(
@@ -21,10 +23,10 @@ def build_deterministic_product_fields(
     brand = normalize_whitespace(source.brand)
     mpn = normalize_whitespace(source.mpn) or extract_mpn_from_name(raw_title, brand)
     category_phrase = derive_category_phrase(raw_title, brand, taxonomy)
-    differentiators = derive_name_differentiators(source, category_phrase, taxonomy)
+    differentiators = derive_name_differentiators(source, category_phrase, taxonomy, brand, mpn)
     composed_name = compose_name(brand, mpn, category_phrase, differentiators)
-    preserve_title = should_preserve_parsed_title(raw_title, brand, mpn)
-    name = raw_title if preserve_title and raw_title else composed_name
+    preserve_title = should_preserve_parsed_title(raw_title, brand, mpn, composed_name)
+    name = composed_name or raw_title
     meta_title = compose_meta_title(name, brand, mpn, category_phrase, differentiators, preserve_title)
     seo_keyword = seo_keyword_builder(name, model)
     return {
@@ -60,6 +62,8 @@ def derive_name_differentiators(
     source: SourceProductData,
     category_phrase: str,
     taxonomy: TaxonomyResolution,
+    brand: str,
+    mpn: str,
 ) -> list[str]:
     spec_lookup = build_spec_lookup(source.key_specs, source.spec_sections)
     ordered: list[str] = []
@@ -67,10 +71,15 @@ def derive_name_differentiators(
     capacity = format_capacity_differentiator(spec_lookup, category_phrase, taxonomy)
     cooling = normalize_value(spec_lookup, ["Τεχνολογία Ψύξης"])
     connectivity = normalize_connectivity(normalize_value(spec_lookup, ["Συνδεσιμότητα"]))
+    family = extract_commercial_family_from_title(source.name, brand, mpn)
+    color = normalize_color_differentiator(spec_lookup) or extract_title_suffix_differentiator(source.name, brand, mpn)
 
-    for value in [capacity, cooling, connectivity]:
-        if value and value not in ordered:
-            ordered.append(value)
+    for value in [capacity, cooling, connectivity, family, color]:
+        normalized = normalize_whitespace(value)
+        if normalized and normalized not in ordered:
+            ordered.append(normalized)
+        if len(ordered) >= MAX_NAME_DIFFERENTIATORS:
+            break
     return ordered
 
 
@@ -122,7 +131,7 @@ def infer_capacity_unit(category_phrase: str, taxonomy: TaxonomyResolution) -> s
     haystack = normalize_for_match(" ".join([category_phrase, taxonomy.sub_category or "", taxonomy.leaf_category]))
     if any(token in haystack for token in ["ψυγει", "καταψυκ", "συντηρητ", "wine", "κρασι"]):
         return "Lt"
-    if any(token in haystack for token in ["πλυντηρ", "στεγνωτ", "ρούχ"]):
+    if any(token in haystack for token in ["πλυντηρ", "στεγνωτ", "ρουχ"]):
         return "Kg"
     return ""
 
@@ -132,6 +141,60 @@ def normalize_connectivity(value: str) -> str:
     if normalized in {"wifi", "wi fi"}:
         return "WiFi"
     return normalize_whitespace(value)
+
+
+def normalize_color_differentiator(spec_lookup: dict[str, str]) -> str:
+    return normalize_value(
+        spec_lookup,
+        [
+            "Χρώμα",
+            "Χρώμα Συσκευής",
+            "Χρώμα / Φινίρισμα",
+        ],
+    )
+
+
+def extract_commercial_family_from_title(title: str, brand: str, mpn: str) -> str:
+    tokens = title_tokens(title)
+    brand_norm = normalize_for_match(brand)
+    mpn_norm = normalize_for_match(mpn)
+    if not tokens or not brand_norm or not mpn_norm:
+        return ""
+    brand_index = next((idx for idx, token in enumerate(tokens) if normalize_for_match(token) == brand_norm), -1)
+    mpn_index = next((idx for idx, token in enumerate(tokens) if normalize_for_match(token) == mpn_norm), -1)
+    if brand_index == -1 or mpn_index == -1 or mpn_index <= brand_index + 1:
+        return ""
+    family_tokens = [
+        token
+        for token in tokens[brand_index + 1 : mpn_index]
+        if normalize_for_match(token) not in {brand_norm, mpn_norm}
+    ]
+    family = normalize_whitespace(" ".join(family_tokens))
+    if not family or PURE_NUMERIC_TOKEN_RE.fullmatch(family):
+        return ""
+    return family
+
+
+def extract_title_suffix_differentiator(title: str, brand: str, mpn: str) -> str:
+    tokens = title_tokens(title)
+    mpn_norm = normalize_for_match(mpn)
+    brand_norm = normalize_for_match(brand)
+    if not tokens or not mpn_norm:
+        return ""
+    mpn_index = next((idx for idx, token in enumerate(tokens) if normalize_for_match(token) == mpn_norm), -1)
+    if mpn_index == -1 or mpn_index >= len(tokens) - 1:
+        return ""
+    suffix_tokens: list[str] = []
+    for token in tokens[mpn_index + 1 :]:
+        normalized = normalize_for_match(token)
+        if not normalized or normalized in {brand_norm, mpn_norm}:
+            continue
+        if PURE_NUMERIC_TOKEN_RE.fullmatch(token):
+            continue
+        if ENERGY_CLASS_TOKEN_RE.fullmatch(token.upper()):
+            continue
+        suffix_tokens.append(token)
+    return normalize_whitespace(" ".join(suffix_tokens))
 
 
 def compose_name(brand: str, mpn: str, category_phrase: str, differentiators: list[str]) -> str:
@@ -174,25 +237,9 @@ def extract_mpn_from_name(name: str, brand: str) -> str:
     return ""
 
 
-def should_preserve_parsed_title(title: str, brand: str, mpn: str) -> bool:
-    tokens = title_tokens(title)
-    if not tokens or not brand:
-        return False
-    if not mpn:
-        return bool(title)
-    brand_norm = normalize_for_match(brand)
-    mpn_norm = normalize_for_match(mpn)
-    brand_index = next((idx for idx, token in enumerate(tokens) if normalize_for_match(token) == brand_norm), -1)
-    mpn_index = next((idx for idx, token in enumerate(tokens) if normalize_for_match(token) == mpn_norm), -1)
-    if brand_index == -1 or mpn_index == -1 or mpn_index <= brand_index:
-        return False
-    family_tokens = [
-        token
-        for token in tokens[brand_index + 1 : mpn_index]
-        if normalize_for_match(token) not in {brand_norm, mpn_norm}
-    ]
-    non_numeric_family_tokens = [token for token in family_tokens if not PURE_NUMERIC_TOKEN_RE.fullmatch(token)]
-    return bool(non_numeric_family_tokens)
+def should_preserve_parsed_title(title: str, brand: str, mpn: str, composed_name: str = "") -> bool:
+    del brand, mpn
+    return not normalize_whitespace(composed_name) and bool(normalize_whitespace(title))
 
 
 def title_tokens(name: str) -> list[str]:

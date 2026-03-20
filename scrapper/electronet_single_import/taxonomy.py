@@ -162,4 +162,7 @@ class TaxonomyResolver:
         return serialized
 
     def _alias(self, value: str) -> str:
-        return ALIASES.get(normalize_for_match(value), value)
+        normalized = normalize_for_match(value)
+        if "κοπτηρια" in normalized and "ραβδο" in normalized:
+            return "Κοπτήρια-Ράβδοι"
+        return ALIASES.get(normalized, value)
