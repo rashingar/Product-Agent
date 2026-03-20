@@ -9,6 +9,7 @@ from urllib.robotparser import RobotFileParser
 
 import httpx
 
+from .image_pipeline import ImageConversionError, convert_image_bytes_to_jpg
 from .models import FetchResult, GalleryImage
 from .utils import ensure_directory, guess_extension, write_bytes
 
@@ -209,7 +210,16 @@ class ElectronetFetcher:
             payload, content_type = self.fetch_binary(image.url)
             ext = guess_extension(content_type, image.url)
             if ext != ".jpg":
-                warnings.append(f"{non_jpg_warning_prefix}:{asset_position}:{ext}")
+                try:
+                    payload = convert_image_bytes_to_jpg(
+                        payload,
+                        resize_for_besco=output_subdir == "bescos",
+                    )
+                    ext = ".jpg"
+                    content_type = "image/jpeg"
+                except ImageConversionError as exc:
+                    warnings.append(f"{non_jpg_warning_prefix}:{asset_position}:{ext}")
+                    warnings.append(f"image_conversion_failed:{output_subdir}:{asset_position}:{ext}:{exc}")
             filename = filename_builder(asset_position, ext)
             local_path = target_dir / filename
             write_bytes(local_path, payload)

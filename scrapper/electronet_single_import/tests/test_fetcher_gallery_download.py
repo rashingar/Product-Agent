@@ -1,4 +1,7 @@
+import io
 from pathlib import Path
+
+from PIL import Image
 
 from electronet_single_import.fetcher import ElectronetFetcher
 from electronet_single_import.models import GalleryImage
@@ -7,6 +10,14 @@ from electronet_single_import.models import GalleryImage
 class StubFetcher(ElectronetFetcher):
     def fetch_binary(self, url: str) -> tuple[bytes, str]:
         return b"binary-image", "image/jpeg"
+
+
+class ConvertingStubFetcher(ElectronetFetcher):
+    def fetch_binary(self, url: str) -> tuple[bytes, str]:
+        image = Image.new("RGBA", (1200, 800), (0, 128, 255, 180))
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        return buffer.getvalue(), "image/png"
 
 
 
@@ -53,3 +64,42 @@ def test_besco_images_saved_in_bescos_subfolder_with_section_names(tmp_path: Pat
         str(tmp_path / "234385" / "bescos" / "besco1.jpg"),
         str(tmp_path / "234385" / "bescos" / "besco3.jpg"),
     ]
+
+
+def test_gallery_non_jpg_images_are_converted_to_jpg(tmp_path: Path) -> None:
+    fetcher = ConvertingStubFetcher()
+    images = [GalleryImage(url="https://www.electronet.gr/image/one.png", alt="one", position=1)]
+
+    downloaded, warnings, files_written = fetcher.download_gallery_images(
+        images=images,
+        model="234385",
+        output_dir=tmp_path / "234385",
+        requested_photos=1,
+    )
+
+    assert warnings == []
+    assert [item.local_filename for item in downloaded] == ["234385-1.jpg"]
+    assert downloaded[0].content_type == "image/jpeg"
+    assert (tmp_path / "234385" / "gallery" / "234385-1.jpg").exists()
+    assert files_written == [str(tmp_path / "234385" / "gallery" / "234385-1.jpg")]
+
+
+def test_besco_non_jpg_images_are_converted_and_resized_to_jpg(tmp_path: Path) -> None:
+    fetcher = ConvertingStubFetcher()
+    images = [GalleryImage(url="https://www.electronet.gr/image/one.png", alt="one", position=1)]
+
+    downloaded, warnings, _files_written = fetcher.download_besco_images(
+        images=images,
+        output_dir=tmp_path / "234385",
+        requested_sections=1,
+    )
+
+    saved_path = tmp_path / "234385" / "bescos" / "besco1.jpg"
+    with Image.open(saved_path) as saved:
+        assert saved.format == "JPEG"
+        assert saved.width <= 600
+        assert saved.height <= 400
+
+    assert warnings == []
+    assert [item.local_filename for item in downloaded] == ["besco1.jpg"]
+    assert downloaded[0].content_type == "image/jpeg"

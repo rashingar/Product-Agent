@@ -94,7 +94,7 @@ If the page contains sufficient presentation content, the program:
 - preserves the source claims
 - preserves section order
 - maps them into the locked `TEMPLATE_presentation.html` wrapper structure
-- uses the required `bescoN` target image pattern, preserving the downloaded file extension when needed
+- uses the required `bescoN` target image pattern in `.jpg` format
 
 ### Mode 2 – presentation unavailable or insufficient
 If presentation content is too weak to build a truthful block:
@@ -108,8 +108,8 @@ The scraper extracts gallery image URLs from the Electronet page and then downlo
 
 Rules:
 - download order follows extracted gallery order
-- filenames become `{model}-1.jpg`, `{model}-2.jpg`, etc. when the source is JPEG
-- non-JPEG files keep the same basename but may retain a different extension, and the report records a warning
+- filenames are normalized to `{model}-1.jpg`, `{model}-2.jpg`, etc.
+- supported non-JPEG source images are converted to JPEG during the pipeline
 - when `--photos` is greater than the extracted gallery count, the report records a warning and CSV additional images are capped to the downloaded count
 
 ## Besco image download behavior
@@ -117,8 +117,9 @@ Rules:
 When `--sections` is greater than `0`, the scraper also inspects the extracted presentation blocks for source images and downloads those assets into the `bescos` folder inside the model output directory.
 
 Rules:
-- Besco filenames become `besco1.jpg`, `besco2.jpg`, etc. when the source is JPEG
-- non-JPEG files keep the same basename but may retain a different extension, and the report records a warning
+- Besco filenames are normalized to `besco1.jpg`, `besco2.jpg`, etc.
+- supported non-JPEG source images are converted to JPEG during the pipeline
+- converted Besco images are resized to fit within `600x400`
 - Besco numbering follows the selected presentation-section order so the generated description can reference the matching downloaded files
 
 ## Taxonomy resolution
