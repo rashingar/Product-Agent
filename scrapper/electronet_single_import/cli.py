@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 from .csv_writer import write_csv_row
@@ -18,7 +18,6 @@ from .utils import SCHEMA_LIBRARY_PATH, build_model_output_dir, write_json, writ
 FAIL_MESSAGE = "Generation failed, provide 6-digit model"
 
 
-
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m electronet_single_import.cli")
     parser.add_argument("--model", required=True)
@@ -30,7 +29,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--price", default=0)
     parser.add_argument("--out", default="out")
     return parser
-
 
 
 def validate_input(args: argparse.Namespace) -> CLIInput:
@@ -52,17 +50,7 @@ def validate_input(args: argparse.Namespace) -> CLIInput:
     )
 
 
-
-def main(argv: list[str] | None = None) -> int:
-    parser = build_parser()
-    args = parser.parse_args(argv)
-    try:
-        cli = validate_input(args)
-    except ValueError as exc:
-        message = str(exc)
-        print(message)
-        return 1 if message == FAIL_MESSAGE else 2
-
+def run_cli_input(cli: CLIInput) -> dict[str, Any]:
     schema_matcher = SchemaMatcher(str(SCHEMA_LIBRARY_PATH))
     product_parser = ElectronetProductParser(known_section_titles=schema_matcher.known_section_titles)
     fetcher = ElectronetFetcher()
@@ -73,8 +61,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             fetch = fetcher.fetch_playwright(cli.url)
         except FetchError as exc:
-            print(str(exc), file=sys.stderr)
-            return 3
+            raise RuntimeError(str(exc)) from exc
 
     parsed = product_parser.parse(fetch.html, fetch.final_url, fallback_used=fetch.fallback_used)
 
@@ -90,12 +77,9 @@ def main(argv: list[str] | None = None) -> int:
 
     source_code = parsed.source.product_code
     if not source_code or source_code != cli.model:
-        print(FAIL_MESSAGE)
-        return 1
-
+        raise ValueError(FAIL_MESSAGE)
     if not parsed.source.name and not parsed.source.spec_sections:
-        print("Total parse failure", file=sys.stderr)
-        return 4
+        raise RuntimeError("Total parse failure")
 
     model_dir = build_model_output_dir(cli.out, cli.model)
     raw_html_path = model_dir / f"{cli.model}.raw.html"
@@ -188,11 +172,13 @@ def main(argv: list[str] | None = None) -> int:
         "critical_extractors": {
             "product_code": parsed.provenance.get("product_code", "missing"),
             "brand": parsed.provenance.get("brand", "missing"),
+            "mpn": parsed.provenance.get("mpn", "missing"),
             "name": parsed.provenance.get("name", "missing"),
             "price": parsed.provenance.get("price", "missing"),
             "taxonomy": "resolved" if taxonomy.parent_category and taxonomy.leaf_category else "unresolved",
             "schema_match": "matched" if schema_match.score >= 0.35 else ("weak" if schema_match.score > 0 else "none"),
         },
+        "field_diagnostics": {key: value.to_dict() for key, value in parsed.field_diagnostics.items()},
         "missing_fields": parsed.missing_fields,
         "warnings": parsed.warnings
         + gallery_warnings
@@ -225,6 +211,50 @@ def main(argv: list[str] | None = None) -> int:
     }
     write_json(report_json_path, report)
 
+    return {
+        "cli": cli,
+        "fetch": fetch,
+        "parsed": parsed,
+        "taxonomy": taxonomy,
+        "taxonomy_candidates": taxonomy_candidates,
+        "schema_match": schema_match,
+        "schema_candidates": schema_candidates,
+        "row": row,
+        "normalized": normalized,
+        "report": report,
+        "model_dir": model_dir,
+        "raw_html_path": raw_html_path,
+        "source_json_path": source_json_path,
+        "normalized_json_path": normalized_json_path,
+        "report_json_path": report_json_path,
+        "csv_path": csv_path,
+        "selected_presentation_blocks": selected_presentation_blocks,
+        "downloaded_gallery": downloaded_gallery,
+        "downloaded_besco": downloaded_besco,
+        "besco_filenames_by_section": besco_filenames_by_section,
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    try:
+        cli = validate_input(args)
+        result = run_cli_input(cli)
+    except ValueError as exc:
+        message = str(exc)
+        print(message)
+        return 1 if message == FAIL_MESSAGE else 2
+    except RuntimeError as exc:
+        message = str(exc)
+        print(message, file=sys.stderr if message != FAIL_MESSAGE else sys.stdout)
+        return 3 if "failed" in message.lower() else 4
+
+    taxonomy = result["taxonomy"]
+    schema_match = result["schema_match"]
+    report = result["report"]
+    csv_path = result["csv_path"]
+    parsed = result["parsed"]
     resolved_path = taxonomy.taxonomy_path or ""
     print(f"product name: {parsed.source.name}")
     print(f"product code: {parsed.source.product_code}")

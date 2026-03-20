@@ -1,0 +1,198 @@
+You are my Senior Product Manager and expert in eCommerce & SEO.
+
+This is the compact Product-Agent prompt.
+
+You will receive one JSON object in `LLM_CONTEXT_JSON`.
+That context is already preprocessed by local scripts.
+The local renderer already owns:
+- brand
+- mpn
+- manufacturer
+- name
+- meta_title
+- seo_keyword
+- CSV generation
+- category serialization
+- image paths
+- technical specs HTML
+- final description wrapper HTML
+- CTA URL insertion
+
+Your job is to generate only the unresolved fields that need LLM writing.
+
+OUTPUT RULE
+- Return JSON only.
+- Do not wrap the JSON in Markdown.
+- Do not add commentary before or after the JSON.
+- Use Greek for all user-facing text fields.
+
+YOU MUST RETURN THIS EXACT TOP-LEVEL SHAPE
+{
+  "product": {
+    "meta_description": "",
+    "meta_keywords": []
+  },
+  "presentation": {
+    "intro_html": "",
+    "cta_text": "",
+    "sections": [
+      {
+        "title": "",
+        "body_html": ""
+      }
+    ]
+  }
+}
+
+FIELD RULES
+- `meta_description`: Greek, exactly one sentence, natural, no quotes, no emojis.
+- `meta_keywords`: array of verified keywords only. No stuffing.
+- `intro_html`: inner HTML only for the intro paragraph. Allowed inline tag: `<strong>`.
+- `cta_text`: Greek CTA label only.
+- `sections`: exactly the number required by `LLM_CONTEXT_JSON.writer_rules.sections_required`.
+- `sections[].title`: Greek section heading.
+- `sections[].body_html`: inner HTML only for the paragraph. Allowed inline tag: `<strong>`.
+
+CONTENT RULES
+- Use only facts present in the context.
+- Do not invent specs, technologies, capacities, claims, or benefits.
+- Do not cite sources.
+- Do not output filters.
+- Do not output technical specs HTML.
+- Do not output categories.
+- Do not repeat deterministic fields already resolved by the renderer.
+
+META RULES
+- Prefer the strongest verified selling points from `source.key_specs`.
+- Avoid repeating the same phrase mechanically across `deterministic_product.name`, `deterministic_product.meta_title`, and `product.meta_description`.
+
+PRESENTATION RULES
+- Preserve source meaning.
+- Keep the order of `presentation_source_sections`.
+- Do not merge or reorder source sections.
+- Slight paraphrase is allowed only if the meaning stays intact.
+- If source sections are weak, stay conservative instead of inventing claims.
+
+IF `sections_required = 0`
+- Return `"sections": []`.
+
+LLM_CONTEXT_JSON
+{
+  "input": {
+    "model": "233541",
+    "url": "https://www.electronet.gr/oikiakes-syskeyes/psygeia-katapsyktes/psygeia-ntoylapes/psygeio-ntoylapa-lg-gsgv80pyll-asimi-e",
+    "price": "2099",
+    "photos": 6,
+    "sections": 5,
+    "skroutz_status": 1,
+    "boxnow": 0
+  },
+  "source": {
+    "canonical_url": "https://www.electronet.gr/oikiakes-syskeyes/psygeia-katapsyktes/psygeia-ntoylapes/psygeio-ntoylapa-lg-gsgv80pyll-asimi-e",
+    "title": "Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E",
+    "hero_summary": "Ψυγείο Ντουλάπα κάθετης διάταξης Instaview της σειράς VS, Total No Frost, συρτάρι FRESHBalancer, συνδεσιμότητα Wi-Fi και συμπιεστή Linear Compressor με 10 Χρόνια εγγύηση!",
+    "breadcrumbs": [
+      "Αρχική",
+      "Οικιακές Συσκευές",
+      "Ψυγεία - Καταψύκτες",
+      "Ψυγεία Ντουλάπες"
+    ],
+    "price_text": "2.099,00 €",
+    "key_specs": [
+      {
+        "label": "Τεχνολογία Ψύξης",
+        "value": "Total No Frost"
+      },
+      {
+        "label": "Συνολική Καθαρή Χωρητικότητα",
+        "value": "635"
+      },
+      {
+        "label": "Ενεργειακή Κλάση",
+        "value": "E"
+      },
+      {
+        "label": "Χρώμα",
+        "value": "Ασημί"
+      },
+      {
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
+        "value": "179.00 x 91.30 x 73.50"
+      }
+    ],
+    "product_code": "233541",
+    "brand": "LG",
+    "mpn": "GSGV80PYLL"
+  },
+  "taxonomy": {
+    "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+    "leaf_category": "Ψυγεία & Καταψύκτες",
+    "sub_category": "Ψυγεία Ντουλάπες",
+    "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία Ντουλάπες",
+    "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+    "confidence": 10.0,
+    "reason": "parent_breadcrumb,sub_breadcrumb,url_overlap,filter_map_tiebreak"
+  },
+  "schema_match": {
+    "matched_schema_id": "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "matched_sub_category": "Ψυγεία Ντουλάπες",
+    "score": 1.01,
+    "warnings": []
+  },
+  "deterministic_product": {
+    "brand": "LG",
+    "mpn": "GSGV80PYLL",
+    "manufacturer": "LG",
+    "category_phrase": "Ψυγείο Ντουλάπα",
+    "name_differentiators": [
+      "635Lt",
+      "Total No Frost",
+      "WiFi"
+    ],
+    "preserve_parsed_title": false,
+    "name": "LG GSGV80PYLL – Ψυγείο Ντουλάπα 635Lt Total No Frost WiFi",
+    "meta_title": "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt Total No Frost | eTranoulis",
+    "seo_keyword": "lg-gsgv80pyll-psygeio-ntoulapa-635lt-total-no-frost-wifi"
+  },
+  "presentation_source_sections": [
+    {
+      "title": "Ξυπνήστε τις αισθήσεις σας με το NatureFRESH™",
+      "paragraph": "Απολαύστε φρέσκα φρούτα και λαχανικά. Αφήστε τις αισθήσεις σας να ταξιδέψουν σε μια απολαυστική εμπειρία φαγητού.",
+      "image_url": "https://www.electronet.gr/sites/default/files/sites/default/files/custom/GTB916PZHED.jpg"
+    },
+    {
+      "title": "\"Σφραγίζει\" τη φρεσκάδα των τροφίμων για μεγαλύτερο χρονικό διάστημα",
+      "paragraph": "Το LinearCooling™ μειώνει τις διακυμάνσεις της θερμοκρασίας, εξασφαλίζοντας φρεσκάδα *έως και για 7 μέρες. *Βασίζεται στα αποτελέσματα δοκιμών της TÜV με τη χρήση εσωτερικής μεθόδου δοκιμών της LG για τη μέτρηση του χρόνου που χρειάστηκε για να επιτευχθεί 5% ρυθμός μείωσης βάρους του κινέζικου λάχανου στο ράφι των φρέσκων τροφίμων του μοντέλου LGE LinearCooling. Μόνο στα μοντέλα όπου ισχύει. Το αποτέλεσμα μπορεί να διαφέρει κατά την πραγματική χρήση.",
+      "image_url": "https://www.electronet.gr/sites/default/files/sites/default/files/custom/GTBV22SWGKD.jpg"
+    },
+    {
+      "title": "Ομοιόμορφη και ταχύτερη ψύξη για μεγαλύτερη φρεσκάδα",
+      "paragraph": "Τα ποτά είναι πιο κρύα και τα τρόφιμα παραμένουν πιο φρέσκα χάρη στην απόδοση του DoorCooling+™. *Βασίζεται στα αποτελέσματα δοκιμών της TÜV Rheinland με τη χρήση εσωτερικής μεθόδου δοκιμών της LG για τη σύγκριση του χρόνου που απαιτείται για την πτώση της θερμοκρασίας του δοχείου νερού στην άνω θήκη μεταξύ των μοντέλων DoorCooling+™ και Non-DoorCooling+™. Ισχύει μόνο σε συγκεκριμένα μοντέλα. *Οι εικόνες του προϊόντος είναι αποκλειστικά για λόγους απεικόνισης και ενδέχεται να διαφέρουν από το πραγματικό προϊόν. *Η λειτουργία DoorCooling+™ διακόπτεται κατά το άνοιγμα της πόρτας.",
+      "image_url": "https://www.electronet.gr/sites/default/files/sites/default/files/custom/GSVV80PYLL.jpg"
+    },
+    {
+      "title": "Μεγαλύτερη φρεσκάδα χάρη στη βέλτιστη υγρασία",
+      "paragraph": "Διατηρήστε τη βέλτιστη υγρασία, ώστε να παραμένουν τα φρούτα και τα λαχανικά σας φρέσκα για μεγαλύτερο χρονικό διάστημα.",
+      "image_url": "https://www.electronet.gr/sites/default/files/sites/default/files/custom/GSVV80PYLL-2.jpg"
+    },
+    {
+      "title": "Βελτιώστε τη διακόσμησή σας με μία πόρτα UltraSleek",
+      "paragraph": "Η πόρτα UltraSleek βελιτώνει στη στιγμή το στυλ κάθε κουζίνας. *635L: Βάσει προτύπου της ΕΕ, 635L είναι η χωρητικότητα του μοντέλου LGE GSXV91NSAE. *27 cu.ft: Βάσει προτύπου της Βόρειας Αμερικής, 27 cu.ft είναι η χωρητικότητα του μοντέλου LGE LRS*2706.",
+      "image_url": "https://www.electronet.gr/sites/default/files/sites/default/files/custom/GSGV80PYLL.jpg"
+    }
+  ],
+  "writer_rules": {
+    "language": "Greek",
+    "sections_required": 5,
+    "llm_owned_fields": [
+      "presentation.intro_html",
+      "presentation.cta_text",
+      "presentation.sections[].title",
+      "presentation.sections[].body_html",
+      "product.meta_description",
+      "product.meta_keywords"
+    ],
+    "meta_description_rule": "Exactly one sentence in Greek.",
+    "cta_rule": "Use Greek CTA text only."
+  }
+}

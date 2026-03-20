@@ -120,6 +120,8 @@ def slugify_greek_for_seo(text: str | None) -> str:
     if not text:
         return ""
     text = _strip_accents(text).lower()
+    text = text.replace("ου", "ou")
+    text = re.sub(r"(?<=\d)[.,](?=\d)", "", text)
     chars: list[str] = []
     for ch in text:
         if ch in _GREEK_TRANSLIT:

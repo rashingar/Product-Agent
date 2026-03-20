@@ -12,49 +12,18 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "brand",
-        "mpn",
-        "manufacturer",
-        "name",
-        "seo_keyword",
-        "meta_title",
         "meta_description",
         "meta_keywords"
       ],
       "properties": {
-        "brand": {
-          "type": "string"
-        },
-        "mpn": {
-          "type": "string"
-        },
-        "manufacturer": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "seo_keyword": {
-          "type": "string"
-        },
-        "meta_title": {
-          "type": "string"
-        },
         "meta_description": {
           "type": "string"
         },
         "meta_keywords": {
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          ]
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

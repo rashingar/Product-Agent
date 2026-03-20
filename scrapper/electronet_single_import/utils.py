@@ -19,6 +19,8 @@ PRESENTATION_TEMPLATE_PATH = REPO_ROOT / "TEMPLATE_presentation.html"
 CATALOG_TAXONOMY_PATH = REPO_ROOT / "catalog_taxonomy.json"
 SCHEMA_LIBRARY_PATH = REPO_ROOT / "electronet_schema_library.json"
 FILTER_MAP_PATH = REPO_ROOT / "filter_map.json"
+MASTER_PROMPT_PATH = REPO_ROOT / "master_prompt+.txt"
+COMPACT_RESPONSE_SCHEMA_PATH = REPO_ROOT / "schemas" / "compact_response.schema.json"
 
 
 

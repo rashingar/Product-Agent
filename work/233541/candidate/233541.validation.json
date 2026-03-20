@@ -1,0 +1,288 @@
+{
+  "ok": true,
+  "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\candidate\\233541.csv",
+  "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
+  "baseline_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\products\\233541.csv",
+  "errors": [],
+  "warnings": [],
+  "field_health": {
+    "model": {
+      "status": "match",
+      "candidate_length": 6,
+      "baseline_length": 6,
+      "encoding_issues": [],
+      "candidate_preview": "233541",
+      "baseline_preview": "233541"
+    },
+    "mpn": {
+      "status": "match",
+      "candidate_length": 10,
+      "baseline_length": 10,
+      "encoding_issues": [],
+      "candidate_preview": "GSGV80PYLL",
+      "baseline_preview": "GSGV80PYLL"
+    },
+    "name": {
+      "status": "match",
+      "candidate_length": 57,
+      "baseline_length": 57,
+      "encoding_issues": [],
+      "candidate_preview": "LG GSGV80PYLL – Ψυγείο Ντουλάπα 635Lt Total No Frost WiFi",
+      "baseline_preview": "LG GSGV80PYLL – Ψυγείο Ντουλάπα 635Lt Total No Frost WiFi"
+    },
+    "description": {
+      "status": "different_but_valid",
+      "candidate_length": 5034,
+      "baseline_length": 4674,
+      "encoding_issues": [],
+      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>LG GSGV80PYLL – Ψυγείο Ντουλάπ",
+      "baseline_preview": "<div class=\"etr-desc\"><h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>LG GSGV80PYLL – Ψυγείο Ντουλάπα"
+    },
+    "characteristics": {
+      "status": "match",
+      "candidate_length": 5646,
+      "baseline_length": 5646,
+      "encoding_issues": [],
+      "candidate_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><t",
+      "baseline_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><t"
+    },
+    "category": {
+      "status": "match",
+      "candidate_length": 120,
+      "baseline_length": 120,
+      "encoding_issues": [],
+      "candidate_preview": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες///Ψυγεία Ντουλάπες",
+      "baseline_preview": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες///Ψυγεία Ντουλάπες"
+    },
+    "image": {
+      "status": "match",
+      "candidate_length": 35,
+      "baseline_length": 35,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/233541/233541-1.jpg",
+      "baseline_preview": "catalog/01_main/233541/233541-1.jpg"
+    },
+    "additional_image": {
+      "status": "match",
+      "candidate_length": 187,
+      "baseline_length": 187,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/233541/233541-2.jpg:::catalog/01_main/233541/233541-3.jpg:::catalog/01_main/233541/233541-4.jpg:::catalo",
+      "baseline_preview": "catalog/01_main/233541/233541-2.jpg:::catalog/01_main/233541/233541-3.jpg:::catalog/01_main/233541/233541-4.jpg:::catalo"
+    },
+    "manufacturer": {
+      "status": "match",
+      "candidate_length": 2,
+      "baseline_length": 2,
+      "encoding_issues": [],
+      "candidate_preview": "LG",
+      "baseline_preview": "LG"
+    },
+    "price": {
+      "status": "match",
+      "candidate_length": 4,
+      "baseline_length": 4,
+      "encoding_issues": [],
+      "candidate_preview": "2099",
+      "baseline_preview": "2099"
+    },
+    "quantity": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "minimum": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "subtract": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "stock_status": {
+      "status": "match",
+      "candidate_length": 13,
+      "baseline_length": 13,
+      "encoding_issues": [],
+      "candidate_preview": "Έως 30 ημέρες",
+      "baseline_preview": "Έως 30 ημέρες"
+    },
+    "status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "meta_keyword": {
+      "status": "match",
+      "candidate_length": 104,
+      "baseline_length": 104,
+      "encoding_issues": [],
+      "candidate_preview": "LG, GSGV80PYLL, ψυγείο ντουλάπα, Total No Frost, 635 λίτρα, WiFi, InstaView, DoorCooling+, LinearCooling",
+      "baseline_preview": "LG, GSGV80PYLL, ψυγείο ντουλάπα, Total No Frost, 635 λίτρα, WiFi, InstaView, DoorCooling+, LinearCooling"
+    },
+    "meta_title": {
+      "status": "different_but_valid",
+      "candidate_length": 63,
+      "baseline_length": 63,
+      "encoding_issues": [],
+      "candidate_preview": "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt Total No Frost | eTranoulis",
+      "baseline_preview": "LG GSGV80PYLL ψυγείο ντουλάπα 635Lt Total No Frost | eTranoulis"
+    },
+    "meta_description": {
+      "status": "match",
+      "candidate_length": 147,
+      "baseline_length": 147,
+      "encoding_issues": [],
+      "candidate_preview": "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost, WiFi, InstaView, DoorCooling+ και εξωτερικό βρυσάκι",
+      "baseline_preview": "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost, WiFi, InstaView, DoorCooling+ και εξωτερικό βρυσάκι"
+    },
+    "seo_keyword": {
+      "status": "match",
+      "candidate_length": 56,
+      "baseline_length": 56,
+      "encoding_issues": [],
+      "candidate_preview": "lg-gsgv80pyll-psygeio-ntoulapa-635lt-total-no-frost-wifi",
+      "baseline_preview": "lg-gsgv80pyll-psygeio-ntoulapa-635lt-total-no-frost-wifi"
+    },
+    "product_url": {
+      "status": "match",
+      "candidate_length": 82,
+      "baseline_length": 82,
+      "encoding_issues": [],
+      "candidate_preview": "https://www.etranoulis.gr/lg-gsgv80pyll-psygeio-ntoulapa-635lt-total-no-frost-wifi",
+      "baseline_preview": "https://www.etranoulis.gr/lg-gsgv80pyll-psygeio-ntoulapa-635lt-total-no-frost-wifi"
+    },
+    "related_product": {
+      "status": "match",
+      "candidate_length": 0,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "",
+      "baseline_preview": ""
+    },
+    "bestprice_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "skroutz_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "boxnow": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    }
+  },
+  "expected_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "actual_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "baseline_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "summary": {
+    "match": 22,
+    "different_but_valid": 2,
+    "filled": 0,
+    "missing": 0,
+    "encoding_issue": 0,
+    "empty": 0
+  }
+}

@@ -1,0 +1,333 @@
+{
+  "input": {
+    "model": "343700",
+    "url": "https://www.electronet.gr/exoplismos-spitioy/skoypisma/skoypes-stick/skoypa-stick-rowenta-x-force-flex-960-rh2099-kokkino",
+    "photos": 4,
+    "sections": 6,
+    "skroutz_status": 0,
+    "boxnow": 0,
+    "price": "249",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape"
+  },
+  "fetch_mode": "httpx",
+  "critical_extractors": {
+    "product_code": "dom:#cscp-sku",
+    "brand": "dom:#product-brand-logo a",
+    "mpn": "title_after_brand",
+    "name": "dom:h1.product-title",
+    "price": "dom:#product-price .price",
+    "taxonomy": "resolved",
+    "schema_match": "matched"
+  },
+  "field_diagnostics": {
+    "breadcrumbs": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#block-mytheme-breadcrumbs .breadcrumb__link",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#block-mytheme-breadcrumbs .breadcrumb__link",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Αρχική",
+          "note": "4 breadcrumbs"
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#cscp-sku",
+      "value_present": true,
+      "value_preview": "343700",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#cscp-sku",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "343700",
+          "note": ""
+        }
+      ]
+    },
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:h1.product-title",
+      "value_present": true,
+      "value_preview": "Σκούπα Stick Rowenta X-Force Flex 9.60 RH2099 Κόκκινο",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1.product-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Σκούπα Stick Rowenta X-Force Flex 9.60 RH2099 Κόκκινο",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-brand-logo a",
+      "value_present": true,
+      "value_preview": "Rowenta",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-brand-logo a",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Rowenta",
+          "note": ""
+        }
+      ]
+    },
+    "price": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-price .price",
+      "value_present": true,
+      "value_preview": "249,00 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-price .price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "249,00 €",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.product-desc p",
+      "value_present": true,
+      "value_preview": "Απολαύστε ισχυρή απόδοση και άνεση στον καθαρισμό με τη Rowenta RH2099. Πρόκειται για μία επαναφορτιζόμενη stick σκούπα, ελαφριά και εργονομική, ιδανική για καθ",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".product-desc p",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Απολαύστε ισχυρή απόδοση και άνεση στον καθαρισμό με τη Rowenta RH2099. Πρόκειται για μία επαναφορτιζόμενη stick σκούπα, ελαφριά και εργονομική, ιδανική για καθ",
+          "note": ""
+        }
+      ]
+    },
+    "presentation_blocks": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:#product-presentation .ck-text.inline",
+      "value_present": true,
+      "value_preview": "6",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-presentation .ck-text.inline",
+          "match_count": 6,
+          "success": true,
+          "chosen_preview": "ΕΞΑΙΡΕΤΙΚΑ ΑΠΟΤΕΛΕΣΜΑΤΙΚΟ ΚΑΘΑΡΙΣΜΑ Εξαιρετικά αποτελεσματικό καθάρισμα σε όλα τα δάπεδα με το πέλμα νέας γενιάς και επιπλέον ισχύ απορρόφησης έως και 245 Air W",
+          "note": "6 blocks"
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.94,
+      "selected_strategy": "dom:#product-main-attributes .product-main-attribute",
+      "value_present": true,
+      "value_preview": "3 items; first=Τάση Volt:18,5",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-main-attributes .product-main-attribute",
+          "match_count": 3,
+          "success": true,
+          "chosen_preview": "Τάση Volt 18,5",
+          "note": "3 rows"
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.98,
+      "selected_strategy": "dom:#product-details .prop-group-wrapper",
+      "value_present": true,
+      "value_preview": "2 sections; first=Επισκόπηση Προϊόντος",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-details .prop-group-wrapper",
+          "match_count": 2,
+          "success": true,
+          "chosen_preview": "Επισκόπηση Προϊόντος Τύπος Μπαταρίας - Τάση Volt 18,5 Χρόνος Λειτουργίας σε Λεπτά 45 Χωρητικότητα Κάδου σε Λίτρα 0,44 Φίλτρο Εξαγωγής Αέρα Ναί Βάση Φόρτισης με ",
+          "note": "2 sections"
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.8,
+      "selected_strategy": "title_after_brand",
+      "value_present": true,
+      "value_preview": "RH2099",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.96,
+      "selected_strategy": "dom:img.lightbox",
+      "value_present": true,
+      "value_preview": "4 images; first=https://www.electronet.gr/sites/default/files/styles/product_large/public/343700.jpg.webp?itok=fIwel9N4",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "img.lightbox",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Σκούπα Stick Rowenta X-Force Flex 9.60 RH2099 Κόκκινο /sites/default/files/styles/product_large/public/343700.jpg.webp?itok=fIwel9N4",
+          "note": "4 gallery candidates"
+        }
+      ]
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "gallery_image_non_jpg_saved:1:.webp",
+    "gallery_image_non_jpg_saved:2:.webp",
+    "gallery_image_non_jpg_saved:3:.webp",
+    "gallery_image_non_jpg_saved:4:.webp",
+    "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,sub_name_overlap,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Stick",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Stick",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-stick",
+      "confidence": 19.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_breadcrumb",
+        "full_breadcrumb_path",
+        "url_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes",
+      "confidence": 7.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκουπάκια",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκουπάκια",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupakia",
+      "confidence": 7.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Ρομπότ",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Ρομπότ",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
+      "confidence": 7.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Ατμοκαθαριστές",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Ατμοκαθαριστές",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/atmokathharistes",
+      "confidence": 7.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 2,
+      "n_rows_total": 11
+    },
+    {
+      "matched_schema_id": "sha1:41d4e1d08e82978687d40db7acfe37ec3bcc5fab",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 2,
+      "n_rows_total": 11
+    },
+    {
+      "matched_schema_id": "sha1:b6561906abf4eea130e08e0de5f6f76ef398d80b",
+      "matched_sub_category": null,
+      "score": 0.76,
+      "n_sections": 1,
+      "n_rows_total": 9
+    },
+    {
+      "matched_schema_id": "sha1:fd4436f62fc83f6056f2fc641a982e41e383b00b",
+      "matched_sub_category": null,
+      "score": 0.7529,
+      "n_sections": 1,
+      "n_rows_total": 7
+    },
+    {
+      "matched_schema_id": "sha1:c93e9cc3b2eacb8da30d0d2fea5e3fa2e381ab1c",
+      "matched_sub_category": null,
+      "score": 0.74,
+      "n_sections": 1,
+      "n_rows_total": 5
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 4,
+    "downloaded_count": 4,
+    "requested_photos": 4
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 6,
+    "extracted_count": 6,
+    "downloaded_count": 6,
+    "requested_sections": 6
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\343700.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\343700.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\343700.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\343700.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\343700.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\gallery\\343700-1.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\gallery\\343700-2.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\gallery\\343700-3.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\gallery\\343700-4.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\bescos\\besco1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\bescos\\besco2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\bescos\\besco3.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\bescos\\besco4.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\bescos\\besco5.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343700\\scrape\\bescos\\besco6.jpg"
+  ]
+}

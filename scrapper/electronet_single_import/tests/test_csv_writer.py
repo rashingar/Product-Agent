@@ -18,8 +18,26 @@ def test_csv_header_order_preserved_from_template(tmp_path: Path) -> None:
 
 
 def test_characteristics_html_and_safe_blank_description() -> None:
-    html = build_characteristics_html([SpecSection(section="Γενικά Χαρακτηριστικά", items=[SpecItem("Χρώμα", "Κόκκινο")])])
-    assert "<h3>Γενικά Χαρακτηριστικά</h3>" in html
+    html = build_characteristics_html(
+        [
+            SpecSection(
+                section="Γενικά Χαρακτηριστικά",
+                items=[
+                    SpecItem("Χρώμα", "Κόκκινο"),
+                    SpecItem("Διαστάσεις", "179.00 x 91.30 x 73.50"),
+                    SpecItem("Πλάτος Συσκευής σε Εκατοστά", "91,3"),
+                    SpecItem("Επιπλέον Χαρακτηριστικά", "χειρολαβή με εσοχή,σύστημα διάγνωσης βλαβών"),
+                    SpecItem("Επιπλέον", None),
+                ],
+            )
+        ]
+    )
+    assert '<table class="table table-bordered">' in html
+    assert "<td colspan=\"2\"><strong>Γενικά Χαρακτηριστικά</strong></td>" in html
+    assert '<td style="text-align:right;"><strong>Κόκκινο</strong></td>' in html
+    assert '<td style="text-align:right;"><strong>179.00 × 91.30 × 73.50</strong></td>' in html
+    assert '<td style="text-align:right;"><strong>91.30</strong></td>' in html
+    assert html.count('<td style="text-align:right;"><strong>-</strong></td>') >= 2
     description, warnings = build_description_html(
         product_name="Σκούπα",
         hero_summary="",
@@ -66,3 +84,35 @@ def test_presentation_blocks_extract_images_and_description_uses_downloaded_besc
     assert warnings == []
     assert "01_bescos/343700/besco1.webp" in description
     assert "01_bescos/343700/besco2.jpg" not in description
+
+
+def test_presentation_blocks_extract_images_from_left_and_right_banner_layouts() -> None:
+    presentation_html = """
+    <div class="ck-text inline">
+      <div class="middle-align">
+        <h2>Brand Tagline</h2>
+        <h3>Section One</h3>
+        <p>Paragraph one.</p>
+      </div>
+      <div class="image"><img src="/media/right.jpg" /></div>
+    </div>
+    <div class="ck-text inline left-banner">
+      <div class="image"><img src="/media/left.jpg" /></div>
+      <div class="middle-align">
+        <h2>Section Two</h2>
+        <p>Paragraph two.</p>
+      </div>
+    </div>
+    """
+
+    blocks = extract_presentation_blocks(
+        presentation_source_html=presentation_html,
+        presentation_source_text="",
+        base_url="https://www.electronet.gr/product/example",
+    )
+
+    assert len(blocks) == 2
+    assert blocks[0]["title"] == "Section One"
+    assert blocks[0]["image_url"] == "https://www.electronet.gr/media/right.jpg"
+    assert blocks[1]["title"] == "Section Two"
+    assert blocks[1]["image_url"] == "https://www.electronet.gr/media/left.jpg"

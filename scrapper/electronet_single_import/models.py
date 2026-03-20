@@ -66,6 +66,37 @@ class SpecSection:
 
 
 @dataclass(slots=True)
+class SelectorTraceEntry:
+    strategy: str
+    selector: str = ""
+    match_count: int = 0
+    success: bool = False
+    chosen_preview: str = ""
+    note: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(slots=True)
+class FieldDiagnostic:
+    confidence: float = 0.0
+    selected_strategy: str = ""
+    value_present: bool = False
+    value_preview: str = ""
+    selector_trace: list[SelectorTraceEntry] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "confidence": self.confidence,
+            "selected_strategy": self.selected_strategy,
+            "value_present": self.value_present,
+            "value_preview": self.value_preview,
+            "selector_trace": [item.to_dict() for item in self.selector_trace],
+        }
+
+
+@dataclass(slots=True)
 class SourceProductData:
     page_type: str = "product"
     url: str = ""
@@ -127,6 +158,7 @@ class SourceProductData:
 class ParsedProduct:
     source: SourceProductData
     provenance: dict[str, str] = field(default_factory=dict)
+    field_diagnostics: dict[str, FieldDiagnostic] = field(default_factory=dict)
     missing_fields: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     critical_missing: list[str] = field(default_factory=list)
@@ -135,6 +167,7 @@ class ParsedProduct:
         return {
             "source": self.source.to_dict(),
             "provenance": self.provenance,
+            "field_diagnostics": {key: value.to_dict() for key, value in self.field_diagnostics.items()},
             "missing_fields": self.missing_fields,
             "warnings": self.warnings,
             "critical_missing": self.critical_missing,

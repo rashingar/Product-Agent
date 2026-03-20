@@ -1,0 +1,334 @@
+{
+  "input": {
+    "model": "233541",
+    "url": "https://www.electronet.gr/oikiakes-syskeyes/psygeia-katapsyktes/psygeia-ntoylapes/psygeio-ntoylapa-lg-gsgv80pyll-asimi-e",
+    "photos": 6,
+    "sections": 5,
+    "skroutz_status": 1,
+    "boxnow": 0,
+    "price": "2099",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape"
+  },
+  "fetch_mode": "httpx",
+  "critical_extractors": {
+    "product_code": "dom:#cscp-sku",
+    "brand": "dom:#product-brand-logo a",
+    "mpn": "title_after_brand",
+    "name": "dom:h1.product-title",
+    "price": "dom:#product-price .price",
+    "taxonomy": "resolved",
+    "schema_match": "matched"
+  },
+  "field_diagnostics": {
+    "breadcrumbs": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#block-mytheme-breadcrumbs .breadcrumb__link",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#block-mytheme-breadcrumbs .breadcrumb__link",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Αρχική",
+          "note": "4 breadcrumbs"
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#cscp-sku",
+      "value_present": true,
+      "value_preview": "233541",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#cscp-sku",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "233541",
+          "note": ""
+        }
+      ]
+    },
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:h1.product-title",
+      "value_present": true,
+      "value_preview": "Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1.product-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-brand-logo a",
+      "value_present": true,
+      "value_preview": "LG",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-brand-logo a",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "LG",
+          "note": ""
+        }
+      ]
+    },
+    "price": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-price .price",
+      "value_present": true,
+      "value_preview": "2.099,00 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-price .price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "2.099,00 €",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.product-desc p",
+      "value_present": true,
+      "value_preview": "Ψυγείο Ντουλάπα κάθετης διάταξης Instaview της σειράς VS, Total No Frost, συρτάρι FRESHBalancer, συνδεσιμότητα Wi-Fi και συμπιεστή Linear Compressor με 10 Χρόνι",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".product-desc p",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Ψυγείο Ντουλάπα κάθετης διάταξης Instaview της σειράς VS, Total No Frost, συρτάρι FRESHBalancer, συνδεσιμότητα Wi-Fi και συμπιεστή Linear Compressor με 10 Χρόνι",
+          "note": ""
+        }
+      ]
+    },
+    "presentation_blocks": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:#product-presentation .ck-text.inline",
+      "value_present": true,
+      "value_preview": "6",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-presentation .ck-text.inline",
+          "match_count": 6,
+          "success": true,
+          "chosen_preview": "NatureFRESH™ Ξυπνήστε τις αισθήσεις σας με το NatureFRESH™ Απολαύστε φρέσκα φρούτα και λαχανικά. Αφήστε τις αισθήσεις σας να ταξιδέψουν σε μια απολαυστική εμπει",
+          "note": "6 blocks"
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.94,
+      "selected_strategy": "dom:#product-main-attributes .product-main-attribute",
+      "value_present": true,
+      "value_preview": "5 items; first=Τεχνολογία Ψύξης:Total No Frost",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-main-attributes .product-main-attribute",
+          "match_count": 5,
+          "success": true,
+          "chosen_preview": "Τεχνολογία Ψύξης Total No Frost",
+          "note": "5 rows"
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.98,
+      "selected_strategy": "dom:#product-details .prop-group-wrapper",
+      "value_present": true,
+      "value_preview": "5 sections; first=Επισκόπηση Προϊόντος",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-details .prop-group-wrapper",
+          "match_count": 5,
+          "success": true,
+          "chosen_preview": "Επισκόπηση Προϊόντος Τύπος Ψυγείου Ντουλάπα Τρόπος Τοποθέτησης Ελεύθερος Τεχνολογία Ψύξης Total No Frost Συνολική Καθαρή Χωρητικότητα 635 Χρώμα Ασημί Χρώμα Πλαϊ",
+          "note": "5 sections"
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.8,
+      "selected_strategy": "title_after_brand",
+      "value_present": true,
+      "value_preview": "GSGV80PYLL",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.96,
+      "selected_strategy": "dom:img.lightbox",
+      "value_present": true,
+      "value_preview": "6 images; first=https://www.electronet.gr/sites/default/files/styles/product_large/public/233541.jpg.webp?itok=jVsIyPjO",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "img.lightbox",
+          "match_count": 6,
+          "success": true,
+          "chosen_preview": "Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E /sites/default/files/styles/product_large/public/233541.jpg.webp?itok=jVsIyPjO",
+          "note": "6 gallery candidates"
+        }
+      ]
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "gallery_image_non_jpg_saved:1:.webp",
+    "gallery_image_non_jpg_saved:2:.webp",
+    "gallery_image_non_jpg_saved:3:.webp",
+    "gallery_image_non_jpg_saved:4:.webp",
+    "gallery_image_non_jpg_saved:5:.webp",
+    "gallery_image_non_jpg_saved:6:.webp",
+    "parent_breadcrumb,sub_breadcrumb,url_overlap,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία Ντουλάπες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία Ντουλάπες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+      "confidence": 10.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "sub_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia",
+      "confidence": 5.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγειοκαταψύκτες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγειοκαταψύκτες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeiokatapsyktes",
+      "confidence": 5.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Καταψύκτες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Καταψύκτες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/katapsyktes",
+      "confidence": 5.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Συντηρητές Κρασιών",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Συντηρητές Κρασιών",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/synthrhtes-krasiwn",
+      "confidence": 4.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 5,
+      "n_rows_total": 52
+    },
+    {
+      "matched_schema_id": "sha1:27acd23e244876dd0f9eee68083304a7800e9aee",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 5,
+      "n_rows_total": 52
+    },
+    {
+      "matched_schema_id": "sha1:69cddb69ff2da7918e2607a809c6e9e098d0e632",
+      "matched_sub_category": null,
+      "score": 0.92,
+      "n_sections": 4,
+      "n_rows_total": 31
+    },
+    {
+      "matched_schema_id": "sha1:771a63f424bb546fed15d1c9b6beaec997bad407",
+      "matched_sub_category": null,
+      "score": 0.9084,
+      "n_sections": 4,
+      "n_rows_total": 32
+    },
+    {
+      "matched_schema_id": "sha1:b6561906abf4eea130e08e0de5f6f76ef398d80b",
+      "matched_sub_category": null,
+      "score": 0.76,
+      "n_sections": 1,
+      "n_rows_total": 9
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 6,
+    "downloaded_count": 6,
+    "requested_photos": 6
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 5,
+    "extracted_count": 5,
+    "downloaded_count": 5,
+    "requested_sections": 5
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\233541.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\233541.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\233541.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\233541.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\233541.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\gallery\\233541-1.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\gallery\\233541-2.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\gallery\\233541-3.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\gallery\\233541-4.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\gallery\\233541-5.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\gallery\\233541-6.webp",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\bescos\\besco1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\bescos\\besco2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\bescos\\besco3.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\bescos\\besco4.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\233541\\scrape\\bescos\\besco5.jpg"
+  ]
+}
