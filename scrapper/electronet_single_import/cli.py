@@ -10,9 +10,11 @@ from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
 from .mapping import build_row
 from .models import CLIInput, GalleryImage
+from .normalize import normalize_for_match
 from .parser_product_electronet import ElectronetProductParser
 from .parser_product_skroutz import SkroutzProductParser
 from .schema_matcher import SchemaMatcher
+from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .source_detection import detect_source, validate_url_scope
 from .taxonomy import TaxonomyResolver
 from .utils import SCHEMA_LIBRARY_PATH, build_model_output_dir, write_json, write_text
@@ -46,8 +48,6 @@ def validate_input(args: argparse.Namespace) -> CLIInput:
     source, scope_ok, _scope_reason = validate_url_scope(args.url)
     if not scope_ok:
         raise ValueError("Input URL must be a Skroutz product URL")
-    if source == "skroutz" and max(int(args.sections), 0) > 0:
-        raise ValueError("Skroutz v1 supports only sections=0")
     return CLIInput(
         model=model,
         url=args.url.strip(),
@@ -138,17 +138,116 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
 
     selected_presentation_blocks = []
     selected_besco_images: list[GalleryImage] = []
+    section_warnings: list[str] = []
+    section_image_candidates: list[dict[str, Any]] = []
+    section_image_urls_resolved: list[dict[str, Any]] = []
+    section_extraction_window: dict[str, Any] = {
+        "candidate_count": 0,
+        "duplicate_signatures_skipped": 0,
+        "selected_container_index": None,
+        "start_anchor": "",
+        "stop_anchor": "",
+        "title_signature": [],
+    }
+    sections_artifact_path = model_dir / "bescos_raw.json"
+    if sections_artifact_path.exists():
+        sections_artifact_path.unlink()
     if cli.sections > 0:
-        selected_presentation_blocks = extract_presentation_blocks(
-            parsed.source.presentation_source_html,
-            parsed.source.presentation_source_text,
-            base_url=parsed.source.canonical_url or parsed.source.url,
-        )[: cli.sections]
-        selected_besco_images = [
-            GalleryImage(url=block["image_url"], alt=block["title"], position=section_index)
-            for section_index, block in enumerate(selected_presentation_blocks, start=1)
-            if block.get("image_url")
-        ]
+        if source == "skroutz":
+            extracted_window = extract_skroutz_section_window(
+                fetch.html,
+                base_url=parsed.source.canonical_url or parsed.source.url,
+            )
+            section_warnings.extend(extracted_window.get("warnings", []))
+            section_extraction_window = dict(extracted_window.get("window", section_extraction_window))
+            all_sections = list(extracted_window.get("sections", []))
+            if len(all_sections) < cli.sections:
+                raise RuntimeError(
+                    f"Skroutz section extraction failed: expected {cli.sections} sections, found {len(all_sections)}"
+                )
+            selected_presentation_blocks = all_sections[: cli.sections]
+            section_image_candidates = [
+                {
+                    "position": index,
+                    "title": block["title"],
+                    "candidates": list(block.get("image_candidates", [])),
+                }
+                for index, block in enumerate(selected_presentation_blocks, start=1)
+            ]
+            try:
+                rendered_section_data = fetcher.extract_skroutz_section_image_records(fetch.final_url)
+            except FetchError as exc:
+                raise RuntimeError(f"Skroutz rendered section extraction failed: {exc}") from exc
+            rendered_sections = list(rendered_section_data.get("sections", []))
+            rendered_window = rendered_section_data.get("window", {})
+            if rendered_window:
+                section_extraction_window = {
+                    **section_extraction_window,
+                    **rendered_window,
+                    "candidate_count": max(
+                        int(section_extraction_window.get("candidate_count", 0) or 0),
+                        int(rendered_window.get("candidate_count", 0) or 0),
+                    ),
+                    "duplicate_signatures_skipped": max(
+                        int(section_extraction_window.get("duplicate_signatures_skipped", 0) or 0),
+                        int(rendered_window.get("duplicate_signatures_skipped", 0) or 0),
+                    ),
+                }
+            if len(rendered_sections) < cli.sections:
+                raise RuntimeError(
+                    f"Skroutz rendered section extraction failed: expected {cli.sections} image records, found {len(rendered_sections)}"
+                )
+            expected_titles = [normalize_for_match(block["title"]) for block in selected_presentation_blocks]
+            rendered_titles = [normalize_for_match(str(section.get("title", ""))) for section in rendered_sections[: cli.sections]]
+            if expected_titles != rendered_titles:
+                raise RuntimeError("Skroutz section title order mismatch between rendered DOM and parsed description")
+
+            for section_index, block in enumerate(selected_presentation_blocks, start=1):
+                rendered_section = rendered_sections[section_index - 1]
+                resolved_image_url = str(rendered_section.get("resolved_image_url", "")).strip()
+                if not resolved_image_url:
+                    raise RuntimeError(f"Skroutz section image could not be resolved for section {section_index}")
+                block["image_url"] = resolved_image_url
+                section_image_urls_resolved.append(
+                    {
+                        "position": section_index,
+                        "title": block["title"],
+                        "url": resolved_image_url,
+                    }
+                )
+                selected_besco_images.append(GalleryImage(url=resolved_image_url, alt=block["title"], position=section_index))
+
+            parsed.source.presentation_source_html = build_skroutz_presentation_source_html(selected_presentation_blocks)
+            write_json(
+                sections_artifact_path,
+                {
+                    "source": "skroutz",
+                    "requested_sections": cli.sections,
+                    "window": section_extraction_window,
+                    "sections": [
+                        {
+                            "position": index,
+                            "title": block["title"],
+                            "body": block["paragraph"],
+                            "image_candidates": list(block.get("image_candidates", [])),
+                            "resolved_image_url": block.get("image_url", ""),
+                            "target_filename": f"besco{index}.jpg",
+                        }
+                        for index, block in enumerate(selected_presentation_blocks, start=1)
+                    ],
+                },
+            )
+        else:
+            selected_presentation_blocks = extract_presentation_blocks(
+                parsed.source.presentation_source_html,
+                parsed.source.presentation_source_text,
+                base_url=parsed.source.canonical_url or parsed.source.url,
+            )[: cli.sections]
+            selected_besco_images = [
+                GalleryImage(url=block["image_url"], alt=block["title"], position=section_index)
+                for section_index, block in enumerate(selected_presentation_blocks, start=1)
+                if block.get("image_url")
+            ]
     parsed.source.besco_images = selected_besco_images
 
     besco_warnings: list[str] = []
@@ -162,10 +261,16 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
                 output_dir=model_dir,
                 requested_sections=len(selected_presentation_blocks),
             )
+            if source == "skroutz" and cli.sections > 0 and len(downloaded_besco) < cli.sections:
+                raise RuntimeError(
+                    f"Skroutz besco image download incomplete: expected {cli.sections}, downloaded {len(downloaded_besco)}"
+                )
             if downloaded_besco:
                 parsed.source.besco_images = downloaded_besco
                 besco_filenames_by_section = {image.position: image.local_filename for image in downloaded_besco}
         except FetchError as exc:
+            if source == "skroutz" and cli.sections > 0:
+                raise RuntimeError(f"Skroutz besco image download failed: {exc}") from exc
             besco_warnings.append(f"besco_download_failed:{exc}")
 
     parsed.source.raw_html_path = str(raw_html_path)
@@ -236,6 +341,7 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
         "missing_fields": parsed.missing_fields,
         "warnings": parsed.warnings
         + gallery_warnings
+        + section_warnings
         + besco_warnings
         + mapping_warnings
         + schema_match.warnings
@@ -247,6 +353,21 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
             "downloaded_count": len(downloaded_gallery),
             "requested_photos": cli.photos,
         },
+        "sections_requested": cli.sections,
+        "sections_extracted": len(selected_presentation_blocks),
+        "section_titles": [block["title"] for block in selected_presentation_blocks],
+        "section_image_candidates": section_image_candidates,
+        "section_image_urls_resolved": section_image_urls_resolved,
+        "section_downloads": [
+            {
+                "position": image.position,
+                "source_url": image.url,
+                "local_filename": image.local_filename,
+                "local_path": image.local_path,
+            }
+            for image in downloaded_besco
+        ],
+        "section_extraction_window": section_extraction_window,
         "besco_summary": {
             "presentation_blocks_count": len(selected_presentation_blocks),
             "extracted_count": len(selected_besco_images),
@@ -260,6 +381,7 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
             str(report_json_path),
             str(csv_path),
             *gallery_files,
+            *([str(sections_artifact_path)] if sections_artifact_path.exists() else []),
             *besco_files,
         ],
     }

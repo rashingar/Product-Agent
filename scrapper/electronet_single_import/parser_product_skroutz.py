@@ -22,6 +22,11 @@ TITLE_CODE_SUFFIX_RE = re.compile(r"\s+Κωδικός:\s*[A-Z0-9.-]+\s*$", re.IG
 SUMMARY_PAIR_RE = re.compile(r"([^:]{2,80}?):\s*(.+?)(?=(?:\s+[A-Za-zΑ-ΩΆ-Ώα-ωά-ώ][^:]{1,40}:)|$)")
 
 SKROUTZ_FAMILIES: dict[str, dict[str, Any]] = {
+    "soundbar": {
+        "category_labels": {"Soundbar", "Soundbars", "Sound Bars"},
+        "breadcrumbs": ["Αρχική", "ΕΙΚΟΝΑ & ΗΧΟΣ", "Audio Systems", "Sound Bars"],
+        "sections": [],
+    },
     "coffee_filter": {
         "category_labels": {"Καφετιέρες Φίλτρου"},
         "breadcrumbs": ["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Καφές-Ροφήματα-Χυμοί", "Καφετιέρες Φίλτρου"],
@@ -183,6 +188,8 @@ class SkroutzProductParser:
         for family, config in SKROUTZ_FAMILIES.items():
             labels = {normalize_for_match(label) for label in config["category_labels"]}
             if category_norm in labels:
+                return family
+            if family == "soundbar" and "soundbar" in title_norm:
                 return family
             if family == "coffee_filter" and "καφετιερ" in title_norm and "φιλτρ" in title_norm:
                 return family
@@ -433,6 +440,8 @@ class SkroutzProductParser:
             return []
         lookup = self._build_label_lookup(raw_pairs, summary_pairs)
         full_text = normalize_whitespace(" ".join([title, hero_summary, *merchant_titles, *lookup.values()]))
+        if family == "soundbar":
+            return self._soundbar_sections(raw_pairs, merchant_titles)
         if family == "coffee_filter":
             section_values = self._coffee_values(lookup, full_text, merchant_titles)
         elif family == "kettle":
@@ -532,6 +541,7 @@ class SkroutzProductParser:
         lookup = {item.label: item.value or "-" for section in sections for item in section.items}
         supplemental_lookup = self._build_label_lookup(raw_pairs, summary_pairs)
         selected_labels = {
+            "soundbar": ["Κανάλια", "Πρότυπα Ήχου", "Συνδεσιμότητα", "Subwoofer", "Χρώμα", "Ισχύς"],
             "coffee_filter": ["Χωρητικότητα σε Φλυτζάνια", "Χωρητικότητα Δοχείου Νερού σε Λίτρα", "Ισχύς σε Watts", "Υλικό Κανάτας", "Χρώμα"],
             "kettle": ["Χωρητικότητα σε Λίτρα", "Ισχύς σε Watts", "Βάση 360 Μοιρών", "Υλικό Κατασκευής", "Χρώμα"],
             "tabletop_hob": ["Κατασκευαστής", "Μοντέλο", "Εστία", "Πλάτος", "Βάθος"],
@@ -543,6 +553,24 @@ class SkroutzProductParser:
                 if value:
                     items.append(SpecItem(label=label, value=value))
         return items
+
+    def _soundbar_sections(self, raw_pairs: list[tuple[str, str, str]], merchant_titles: list[str]) -> list[SpecSection]:
+        grouped: dict[str, list[SpecItem]] = {}
+        for section_title, label, value in raw_pairs:
+            normalized_title = normalize_whitespace(section_title) or "Τεχνικά Χαρακτηριστικά"
+            grouped.setdefault(normalized_title, []).append(SpecItem(label=label, value=value))
+        derived_power = self._extract_soundbar_power(" ".join(merchant_titles))
+        if derived_power:
+            target_section = next(iter(grouped), "Χαρακτηριστικά")
+            grouped.setdefault(target_section, []).append(SpecItem(label="Ισχύς", value=derived_power))
+        return [SpecSection(section=title, items=items) for title, items in grouped.items()]
+
+    def _extract_soundbar_power(self, text: str) -> str:
+        matches = re.findall(r"(\d+(?:[.,]\d+)?)\s*W\b", text or "", flags=re.IGNORECASE)
+        if not matches:
+            return ""
+        numeric = max(float(value.replace(",", ".")) for value in matches)
+        return f"{int(numeric)} W"
 
     def _extract_cups(self, text: str) -> str:
         match = CUPS_RE.search(text)

@@ -1,0 +1,291 @@
+{
+  "ok": true,
+  "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\143481\\candidate\\143481.csv",
+  "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
+  "baseline_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\products\\143481.csv",
+  "errors": [],
+  "warnings": [
+    "baseline_header_order_differs_from_template"
+  ],
+  "field_health": {
+    "model": {
+      "status": "match",
+      "candidate_length": 6,
+      "baseline_length": 6,
+      "encoding_issues": [],
+      "candidate_preview": "143481",
+      "baseline_preview": "143481"
+    },
+    "mpn": {
+      "status": "match",
+      "candidate_length": 4,
+      "baseline_length": 4,
+      "encoding_issues": [],
+      "candidate_preview": "Q65H",
+      "baseline_preview": "Q65H"
+    },
+    "name": {
+      "status": "match",
+      "candidate_length": 43,
+      "baseline_length": 43,
+      "encoding_issues": [],
+      "candidate_preview": "TCL Q65H Soundbar 5.1 με Ασύρματο Subwoofer",
+      "baseline_preview": "TCL Q65H Soundbar 5.1 με Ασύρματο Subwoofer"
+    },
+    "description": {
+      "status": "different_but_valid",
+      "candidate_length": 7931,
+      "baseline_length": 7532,
+      "encoding_issues": [],
+      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>TCL Q65H Soundbar 5.1 με Ασύρμ",
+      "baseline_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>TCL Q65H Soundbar 5.1 με Ασύρμ"
+    },
+    "characteristics": {
+      "status": "different_but_valid",
+      "candidate_length": 982,
+      "baseline_length": 2227,
+      "encoding_issues": [],
+      "candidate_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Χαρακτηριστικά</strong></td></tr></thead><tbody><",
+      "baseline_preview": "<table class=\"table table-bordered\"> <thead><tr><td colspan=\"2\"><strong>Τεχνικά Χαρακτηριστικά</strong></td></tr></thead"
+    },
+    "category": {
+      "status": "match",
+      "candidate_length": 90,
+      "baseline_length": 90,
+      "encoding_issues": [],
+      "candidate_preview": "ΕΙΚΟΝΑ & ΗΧΟΣ:::ΕΙΚΟΝΑ & ΗΧΟΣ///Audio Systems:::ΕΙΚΟΝΑ & ΗΧΟΣ///Audio Systems///Sound Bars",
+      "baseline_preview": "ΕΙΚΟΝΑ & ΗΧΟΣ:::ΕΙΚΟΝΑ & ΗΧΟΣ///Audio Systems:::ΕΙΚΟΝΑ & ΗΧΟΣ///Audio Systems///Sound Bars"
+    },
+    "image": {
+      "status": "different_but_valid",
+      "candidate_length": 35,
+      "baseline_length": 8,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/143481/143481-1.jpg",
+      "baseline_preview": "143481-1"
+    },
+    "additional_image": {
+      "status": "different_but_valid",
+      "candidate_length": 263,
+      "baseline_length": 74,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/143481/143481-2.jpg:::catalog/01_main/143481/143481-3.jpg:::catalog/01_main/143481/143481-4.jpg:::catalo",
+      "baseline_preview": "143481-2:::143481-3:::143481-4:::143481-5:::143481-6:::143481-7:::143481-8"
+    },
+    "manufacturer": {
+      "status": "match",
+      "candidate_length": 3,
+      "baseline_length": 3,
+      "encoding_issues": [],
+      "candidate_preview": "TCL",
+      "baseline_preview": "TCL"
+    },
+    "price": {
+      "status": "match",
+      "candidate_length": 3,
+      "baseline_length": 3,
+      "encoding_issues": [],
+      "candidate_preview": "269",
+      "baseline_preview": "269"
+    },
+    "quantity": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "minimum": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "subtract": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "stock_status": {
+      "status": "match",
+      "candidate_length": 13,
+      "baseline_length": 13,
+      "encoding_issues": [],
+      "candidate_preview": "Έως 30 ημέρες",
+      "baseline_preview": "Έως 30 ημέρες"
+    },
+    "status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "meta_keyword": {
+      "status": "match",
+      "candidate_length": 112,
+      "baseline_length": 112,
+      "encoding_issues": [],
+      "candidate_preview": "TCL Q65H, soundbar, ηχομπάρα, 5.1, Dolby Atmos, DTS:X, ασύρματο subwoofer, 580W, HDMI eARC, Bluetooth 5.3, Wi-Fi",
+      "baseline_preview": "TCL Q65H, soundbar, ηχομπάρα, 5.1, Dolby Atmos, DTS:X, ασύρματο subwoofer, 580W, HDMI eARC, Bluetooth 5.3, Wi-Fi"
+    },
+    "meta_title": {
+      "status": "match",
+      "candidate_length": 57,
+      "baseline_length": 57,
+      "encoding_issues": [],
+      "candidate_preview": "TCL Q65H Soundbar 5.1 580W Dolby Atmos/DTS:X | eTranoulis",
+      "baseline_preview": "TCL Q65H Soundbar 5.1 580W Dolby Atmos/DTS:X | eTranoulis"
+    },
+    "meta_description": {
+      "status": "match",
+      "candidate_length": 118,
+      "baseline_length": 118,
+      "encoding_issues": [],
+      "candidate_preview": "Η TCL Q65H προσφέρει 5.1 surround με ασύρματο subwoofer, Dolby Atmos/DTS:X και HDMI eARC για καθηλωτικό ήχο στο σπίτι.",
+      "baseline_preview": "Η TCL Q65H προσφέρει 5.1 surround με ασύρματο subwoofer, Dolby Atmos/DTS:X και HDMI eARC για καθηλωτικό ήχο στο σπίτι."
+    },
+    "seo_keyword": {
+      "status": "match",
+      "candidate_length": 44,
+      "baseline_length": 44,
+      "encoding_issues": [],
+      "candidate_preview": "tcl-q65h-soundbar-5-1-dolby-atmos-dts-x-580w",
+      "baseline_preview": "tcl-q65h-soundbar-5-1-dolby-atmos-dts-x-580w"
+    },
+    "product_url": {
+      "status": "match",
+      "candidate_length": 70,
+      "baseline_length": 70,
+      "encoding_issues": [],
+      "candidate_preview": "https://www.etranoulis.gr/tcl-q65h-soundbar-5-1-dolby-atmos-dts-x-580w",
+      "baseline_preview": "https://www.etranoulis.gr/tcl-q65h-soundbar-5-1-dolby-atmos-dts-x-580w"
+    },
+    "related_product": {
+      "status": "match",
+      "candidate_length": 0,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "",
+      "baseline_preview": ""
+    },
+    "bestprice_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "skroutz_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "boxnow": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    }
+  },
+  "expected_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "actual_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "baseline_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "date_added",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow",
+    "characteristics"
+  ],
+  "summary": {
+    "match": 20,
+    "different_but_valid": 4,
+    "filled": 0,
+    "missing": 0,
+    "encoding_issue": 0,
+    "empty": 0
+  }
+}

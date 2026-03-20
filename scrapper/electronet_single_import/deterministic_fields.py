@@ -64,6 +64,34 @@ def build_skroutz_deterministic_fields(
     mpn = normalize_whitespace(source.mpn) or extract_mpn_from_name(raw_title, brand)
     spec_lookup = build_spec_lookup(source.key_specs, source.spec_sections)
 
+    if family == "soundbar":
+        category_phrase = "Soundbar"
+        channels = normalize_value(spec_lookup, ["Κανάλια"])
+        subwoofer = normalize_soundbar_subwoofer(normalize_value(spec_lookup, ["Subwoofer"]))
+        differentiators = [item for item in [channels, subwoofer] if item]
+        name = normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, *differentiators] if part))
+        meta_power = format_power(spec_lookup, ["Ισχύς"]) or extract_soundbar_power(" ".join([source.presentation_source_html, source.hero_summary, raw_title]))
+        meta_standards = normalize_soundbar_standards_for_meta(normalize_value(spec_lookup, ["Πρότυπα Ήχου"]))
+        meta_title_value = normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, channels, meta_power, meta_standards] if part))
+        meta_title = f"{meta_title_value} | eTranoulis" if meta_title_value else ""
+        standards = normalize_soundbar_standards_for_seo(normalize_value(spec_lookup, ["Πρότυπα Ήχου"]))
+        power = meta_power
+        seo_keyword = seo_keyword_builder(
+            normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, normalize_soundbar_channels_for_seo(channels), standards, power] if part)),
+            model,
+        )
+        return {
+            "brand": brand,
+            "mpn": mpn,
+            "manufacturer": brand,
+            "category_phrase": category_phrase,
+            "name_differentiators": differentiators,
+            "preserve_parsed_title": False,
+            "name": name,
+            "meta_title": meta_title,
+            "seo_keyword": seo_keyword,
+        }
+
     if family == "coffee_filter":
         category_phrase = "Καφετιέρα Φίλτρου"
         power = format_power(spec_lookup)
@@ -155,6 +183,8 @@ def build_skroutz_deterministic_fields(
 def resolve_skroutz_family(taxonomy: TaxonomyResolution) -> str | None:
     sub = normalize_for_match(taxonomy.sub_category)
     leaf = normalize_for_match(taxonomy.leaf_category)
+    if sub == normalize_for_match("Sound Bars") and leaf == normalize_for_match("Audio Systems"):
+        return "soundbar"
     if sub == normalize_for_match("Καφετιέρες Φίλτρου"):
         return "coffee_filter"
     if sub == normalize_for_match("Βραστήρες"):
@@ -229,6 +259,38 @@ def normalize_value(spec_lookup: dict[str, str], labels: list[str]) -> str:
         if label in normalized_labels and value:
             return normalize_whitespace(value)
     return ""
+
+
+def normalize_soundbar_subwoofer(value: str) -> str:
+    normalized = normalize_whitespace(value)
+    if not normalized:
+        return ""
+    return normalized if normalized.lower().startswith("με ") else f"με {normalized}"
+
+
+def normalize_soundbar_standards_for_seo(value: str) -> str:
+    normalized = normalize_whitespace(value.replace(",", " ").replace(":", " "))
+    return normalized
+
+
+def normalize_soundbar_standards_for_meta(value: str) -> str:
+    normalized = normalize_whitespace(value.replace(", ", "/").replace(": ", ":"))
+    return normalized
+
+
+def normalize_soundbar_channels_for_seo(value: str) -> str:
+    return normalize_whitespace(value.replace(".", " "))
+
+
+def extract_soundbar_power(text: str) -> str:
+    matches = re.findall(r"(\d+(?:[.,]\d+)?)\s*W\b", text or "", flags=re.IGNORECASE)
+    if not matches:
+        return ""
+    numeric = max(float(value.replace(",", ".")) for value in matches)
+    try:
+        return f"{int(numeric)}W"
+    except ValueError:
+        return ""
 
 
 def format_capacity_differentiator(
