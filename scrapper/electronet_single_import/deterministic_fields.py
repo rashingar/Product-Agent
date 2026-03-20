@@ -19,6 +19,10 @@ def build_deterministic_product_fields(
     model: str,
     seo_keyword_builder,
 ) -> dict[str, object]:
+    skroutz_fields = build_skroutz_deterministic_fields(source, taxonomy, model, seo_keyword_builder)
+    if skroutz_fields is not None:
+        return skroutz_fields
+
     raw_title = normalize_whitespace(source.name)
     brand = normalize_whitespace(source.brand)
     mpn = normalize_whitespace(source.mpn) or extract_mpn_from_name(raw_title, brand)
@@ -40,6 +44,124 @@ def build_deterministic_product_fields(
         "meta_title": meta_title,
         "seo_keyword": seo_keyword,
     }
+
+
+def build_skroutz_deterministic_fields(
+    source: SourceProductData,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+) -> dict[str, object] | None:
+    if normalize_for_match(source.source_name) != "skroutz":
+        return None
+
+    family = resolve_skroutz_family(taxonomy)
+    if not family:
+        return None
+
+    raw_title = normalize_whitespace(source.name)
+    brand = normalize_whitespace(source.brand)
+    mpn = normalize_whitespace(source.mpn) or extract_mpn_from_name(raw_title, brand)
+    spec_lookup = build_spec_lookup(source.key_specs, source.spec_sections)
+
+    if family == "coffee_filter":
+        category_phrase = "Καφετιέρα Φίλτρου"
+        power = format_power(spec_lookup)
+        capacity = format_liters(spec_lookup, ["Χωρητικότητα Δοχείου Νερού σε Λίτρα"])
+        cups = format_cups(spec_lookup)
+        differentiators = [item for item in [power, capacity, cups] if item]
+        name = compose_name(brand, mpn, category_phrase, differentiators)
+        meta_title = compose_meta_title(
+            name=name,
+            brand=brand,
+            mpn=mpn,
+            category_phrase=category_phrase,
+            differentiators=[item for item in [power, capacity] if item],
+            preserve_title=False,
+        )
+        seo_keyword = seo_keyword_builder(
+            normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, power, format_capacity_for_seo(capacity)] if part)),
+            model,
+        )
+        return {
+            "brand": brand,
+            "mpn": mpn,
+            "manufacturer": brand,
+            "category_phrase": category_phrase,
+            "name_differentiators": differentiators,
+            "preserve_parsed_title": False,
+            "name": name,
+            "meta_title": meta_title,
+            "seo_keyword": seo_keyword,
+        }
+
+    if family == "kettle":
+        category_phrase = "Βραστήρας"
+        capacity = format_liters(spec_lookup, ["Χωρητικότητα σε Λίτρα"])
+        power = format_power(spec_lookup)
+        color = derive_kettle_color(raw_title, spec_lookup)
+        differentiators = [item for item in [capacity, power, color] if item]
+        name = compose_name(brand, mpn, category_phrase, differentiators)
+        meta_title_value = normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, *differentiators] if part))
+        meta_title = f"{meta_title_value} | eTranoulis" if meta_title_value else ""
+        seo_tail = extract_skroutz_tail_from_title(raw_title, category_phrase) or normalize_whitespace(
+            " ".join(item for item in [category_phrase, capacity, power, color] if item)
+        )
+        seo_keyword = seo_keyword_builder(
+            normalize_whitespace(" ".join(part for part in [brand, mpn, format_capacity_for_seo(seo_tail)] if part)),
+            model,
+        )
+        return {
+            "brand": brand,
+            "mpn": mpn,
+            "manufacturer": brand,
+            "category_phrase": category_phrase,
+            "name_differentiators": differentiators,
+            "preserve_parsed_title": False,
+            "name": name,
+            "meta_title": meta_title,
+            "seo_keyword": seo_keyword,
+        }
+
+    category_phrase = "Επιτραπέζια Εστία"
+    burner_phrase = derive_hob_burner_phrase(spec_lookup, raw_title)
+    power = format_power(spec_lookup, ["Ισχύς"])
+    surface = normalize_value(spec_lookup, ["Τύπος Εστίας"])
+    differentiators = [item for item in [burner_phrase, power, surface] if item]
+    name = compose_name(brand, mpn, category_phrase, differentiators)
+    meta_title = compose_meta_title(
+        name=name,
+        brand=brand,
+        mpn=mpn,
+        category_phrase=category_phrase,
+        differentiators=[item for item in [burner_phrase, power] if item],
+        preserve_title=False,
+    )
+    seo_name = compose_name(brand, mpn, category_phrase, [normalize_hob_burners_for_seo(burner_phrase), power, surface])
+    seo_keyword = seo_keyword_builder(seo_name, model)
+    return {
+        "brand": brand,
+        "mpn": mpn,
+        "manufacturer": brand,
+        "category_phrase": category_phrase,
+        "name_differentiators": differentiators,
+        "preserve_parsed_title": False,
+        "name": name,
+        "meta_title": meta_title,
+        "seo_keyword": seo_keyword,
+    }
+
+
+def resolve_skroutz_family(taxonomy: TaxonomyResolution) -> str | None:
+    sub = normalize_for_match(taxonomy.sub_category)
+    leaf = normalize_for_match(taxonomy.leaf_category)
+    if sub == normalize_for_match("Καφετιέρες Φίλτρου"):
+        return "coffee_filter"
+    if sub == normalize_for_match("Βραστήρες"):
+        return "kettle"
+    if sub == normalize_for_match("Εστίες") and leaf == normalize_for_match("Μικροί Μάγειρες"):
+        return "tabletop_hob"
+    return None
 
 
 def derive_category_phrase(name: str, brand: str, taxonomy: TaxonomyResolution) -> str:
@@ -144,14 +266,7 @@ def normalize_connectivity(value: str) -> str:
 
 
 def normalize_color_differentiator(spec_lookup: dict[str, str]) -> str:
-    return normalize_value(
-        spec_lookup,
-        [
-            "Χρώμα",
-            "Χρώμα Συσκευής",
-            "Χρώμα / Φινίρισμα",
-        ],
-    )
+    return normalize_value(spec_lookup, ["Χρώμα", "Χρώμα Συσκευής", "Χρώμα / Φινίρισμα"])
 
 
 def extract_commercial_family_from_title(title: str, brand: str, mpn: str) -> str:
@@ -220,6 +335,85 @@ def compose_meta_title(
     parts.extend(item for item in differentiators[:2] if normalize_whitespace(item))
     title = normalize_whitespace(" ".join(parts))
     return f"{title} | eTranoulis" if title else ""
+
+
+def format_power(spec_lookup: dict[str, str], labels: list[str] | None = None) -> str:
+    raw = normalize_value(spec_lookup, labels or ["Ισχύς σε Watts", "Ισχύς"])
+    if not raw:
+        return ""
+    numeric = extract_numeric(raw)
+    return f"{numeric}W" if numeric else ""
+
+
+def format_liters(spec_lookup: dict[str, str], labels: list[str]) -> str:
+    raw = normalize_value(spec_lookup, labels)
+    numeric = extract_numeric(raw)
+    return f"{numeric}Lt" if numeric else ""
+
+
+def format_cups(spec_lookup: dict[str, str]) -> str:
+    raw = normalize_value(spec_lookup, ["Χωρητικότητα σε Φλυτζάνια"])
+    if not raw:
+        return ""
+    normalized = normalize_whitespace(raw).replace(" - ", "-")
+    if normalize_for_match(normalized).endswith(normalize_for_match("φλιτζάνια")):
+        return normalized
+    return f"{normalized} Φλιτζάνια"
+
+
+def format_capacity_for_seo(value: str) -> str:
+    normalized = normalize_whitespace(value)
+    if not normalized:
+        return ""
+    normalized = re.sub(r"(?<=\d)[,.](?=\d)", " ", normalized)
+    return normalized
+
+
+def derive_kettle_color(raw_title: str, spec_lookup: dict[str, str]) -> str:
+    base_color = normalize_value(spec_lookup, ["Χρώμα"])
+    if not base_color:
+        return ""
+    if re.search(r"\bmat\b", raw_title, flags=re.IGNORECASE):
+        return f"{base_color} Ματ"
+    return base_color
+
+
+def extract_skroutz_tail_from_title(raw_title: str, category_phrase: str) -> str:
+    title = normalize_whitespace(raw_title)
+    if not title:
+        return ""
+    match = re.search(rf"\b{re.escape(category_phrase)}\b", title, flags=re.IGNORECASE)
+    if not match:
+        return ""
+    return normalize_whitespace(title[match.start() :])
+
+
+def derive_hob_burner_phrase(spec_lookup: dict[str, str], raw_title: str) -> str:
+    burners = normalize_value(spec_lookup, ["Εστίες"])
+    if burners:
+        numeric = extract_numeric(burners)
+        if numeric:
+            return f"{numeric} Εστιών"
+    title_norm = normalize_for_match(raw_title)
+    if "διπλη" in title_norm:
+        return "2 Εστιών"
+    if "μονη" in title_norm:
+        return "1 Εστιών"
+    return ""
+
+
+def normalize_hob_burners_for_seo(value: str) -> str:
+    normalized = normalize_whitespace(value)
+    if normalized == "2 Εστιών":
+        return "2 Εστίες"
+    if normalized == "1 Εστιών":
+        return "1 Εστία"
+    return normalized
+
+
+def extract_numeric(value: str) -> str:
+    match = NUMERIC_RE.search(normalize_whitespace(value))
+    return match.group(0).replace(".", ",") if match else ""
 
 
 def extract_mpn_from_name(name: str, brand: str) -> str:

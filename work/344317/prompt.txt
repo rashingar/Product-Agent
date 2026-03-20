@@ -1,0 +1,175 @@
+You are my Senior Product Manager and expert in eCommerce & SEO.
+
+This is the compact Product-Agent prompt.
+
+You will receive one JSON object in `LLM_CONTEXT_JSON`.
+That context is already preprocessed by local scripts.
+The local renderer already owns:
+- brand
+- mpn
+- manufacturer
+- name
+- meta_title
+- seo_keyword
+- CSV generation
+- category serialization
+- image paths
+- technical specs HTML
+- final description wrapper HTML
+- CTA URL insertion
+
+Your job is to generate only the unresolved fields that need LLM writing.
+
+OUTPUT RULE
+- Return JSON only.
+- Do not wrap the JSON in Markdown.
+- Do not add commentary before or after the JSON.
+- Use Greek for all user-facing text fields.
+
+YOU MUST RETURN THIS EXACT TOP-LEVEL SHAPE
+{
+  "product": {
+    "meta_description": "",
+    "meta_keywords": []
+  },
+  "presentation": {
+    "intro_html": "",
+    "cta_text": "",
+    "sections": [
+      {
+        "title": "",
+        "body_html": ""
+      }
+    ]
+  }
+}
+
+FIELD RULES
+- `meta_description`: Greek, exactly one sentence, natural, no quotes, no emojis.
+- `meta_keywords`: array of verified keywords only. No stuffing.
+- `intro_html`: inner HTML only for the intro paragraph. Allowed inline tag: `<strong>`. Keep it between 150 and 200 Greek words.
+- `cta_text`: Greek CTA label only. Make it category-appropriate and prefer the resolved taxonomy label from `LLM_CONTEXT_JSON.writer_rules.cta_target_label`.
+- `sections`: exactly the number required by `LLM_CONTEXT_JSON.writer_rules.sections_required`.
+- `sections[].title`: Greek section heading.
+- `sections[].body_html`: inner HTML only for the paragraph. Allowed inline tag: `<strong>`.
+
+CONTENT RULES
+- Use only facts present in the context.
+- Do not invent specs, technologies, capacities, claims, or benefits.
+- Do not cite sources.
+- Do not output filters.
+- Do not output technical specs HTML.
+- Do not output categories.
+- Do not repeat deterministic fields already resolved by the renderer.
+
+META RULES
+- Prefer the strongest verified selling points from `source.key_specs`.
+- Avoid repeating the same phrase mechanically across `deterministic_product.name`, `deterministic_product.meta_title`, and `product.meta_description`.
+
+PRESENTATION RULES
+- Preserve source meaning.
+- Keep the order of `presentation_source_sections`.
+- Do not merge or reorder source sections.
+- Slight paraphrase is allowed only if the meaning stays intact.
+- If source sections are weak, stay conservative instead of inventing claims.
+- The intro paragraph must be 150-200 Greek words, natural, SEO-friendly, and based only on verified facts in the context.
+
+IF `sections_required = 0`
+- Return `"sections": []`.
+
+LLM_CONTEXT_JSON
+{
+  "input": {
+    "model": "344317",
+    "url": "https://www.skroutz.cy/s/65282590/tefal-subito-kafetiera-filtrou-1000w.html",
+    "price": "39",
+    "photos": 2,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 0
+  },
+  "source": {
+    "canonical_url": "https://www.skroutz.cy/s/65282590/tefal-subito-kafetiera-filtrou-1000w.html",
+    "title": "Tefal Subito Καφετιέρα Φίλτρου 1000W",
+    "hero_summary": "Καφετιέρα φίλτρου CM5S1D Subito της Tefal. Ο ιδανικός σύντροφος για ένα διάλειμμα για καφέ, με δυνατότητα παρασκευής 10-15 φλιτζανιών σε σύντομο χρονικό διάστημα. Σύστημα αποτροπής σταξίματος Διατήρηση της θερμοκρασίας του καφέ",
+    "breadcrumbs": [
+      "Αρχική",
+      "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "Καφές-Ροφήματα-Χυμοί",
+      "Καφετιέρες Φίλτρου"
+    ],
+    "price_text": "39,00 €",
+    "key_specs": [
+      {
+        "label": "Χωρητικότητα σε Φλυτζάνια",
+        "value": "10 - 15"
+      },
+      {
+        "label": "Χωρητικότητα Δοχείου Νερού σε Λίτρα",
+        "value": "1,25"
+      },
+      {
+        "label": "Ισχύς σε Watts",
+        "value": "1000"
+      },
+      {
+        "label": "Υλικό Κανάτας",
+        "value": "Γυάλινη"
+      },
+      {
+        "label": "Χρώμα",
+        "value": "Μαύρο"
+      }
+    ],
+    "product_code": "65282590",
+    "brand": "Tefal",
+    "mpn": "CM5S1DE0"
+  },
+  "taxonomy": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Καφές-Ροφήματα-Χυμοί",
+    "sub_category": "Καφετιέρες Φίλτρου",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Καφές-Ροφήματα-Χυμοί > Καφετιέρες Φίλτρου",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kafetieres-filtrou",
+    "confidence": 18.75,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,sub_name_overlap,filter_map_tiebreak"
+  },
+  "schema_match": {
+    "matched_schema_id": "sha1:5c393ed79534c4885582469115ac4c56bc30d095",
+    "matched_sub_category": "Καφετιέρες Φίλτρου",
+    "score": 1.01,
+    "warnings": []
+  },
+  "deterministic_product": {
+    "brand": "Tefal",
+    "mpn": "CM5S1DE0",
+    "manufacturer": "Tefal",
+    "category_phrase": "Καφετιέρα Φίλτρου",
+    "name_differentiators": [
+      "1000W",
+      "1,25Lt",
+      "10-15 Φλιτζάνια"
+    ],
+    "preserve_parsed_title": false,
+    "name": "Tefal CM5S1DE0 – Καφετιέρα Φίλτρου 1000W 1,25Lt 10-15 Φλιτζάνια",
+    "meta_title": "Tefal CM5S1DE0 Καφετιέρα Φίλτρου 1000W 1,25Lt | eTranoulis",
+    "seo_keyword": "tefal-cm5s1de0-kafetiera-filtrou-1000w-1-25lt"
+  },
+  "presentation_source_sections": [],
+  "writer_rules": {
+    "language": "Greek",
+    "sections_required": 0,
+    "llm_owned_fields": [
+      "presentation.intro_html",
+      "presentation.cta_text",
+      "presentation.sections[].title",
+      "presentation.sections[].body_html",
+      "product.meta_description",
+      "product.meta_keywords"
+    ],
+    "meta_description_rule": "Exactly one sentence in Greek.",
+    "intro_html_rule": "150-200 Greek words in one intro paragraph.",
+    "cta_rule": "Use Greek CTA text only and prefer the resolved taxonomy label.",
+    "cta_target_label": "Καφετιέρες Φίλτρου"
+  }
+}

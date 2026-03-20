@@ -1,0 +1,288 @@
+{
+  "ok": true,
+  "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\307497\\candidate\\307497.csv",
+  "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
+  "baseline_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\products\\307497.csv",
+  "errors": [],
+  "warnings": [],
+  "field_health": {
+    "model": {
+      "status": "match",
+      "candidate_length": 6,
+      "baseline_length": 6,
+      "encoding_issues": [],
+      "candidate_preview": "307497",
+      "baseline_preview": "307497"
+    },
+    "mpn": {
+      "status": "match",
+      "candidate_length": 4,
+      "baseline_length": 4,
+      "encoding_issues": [],
+      "candidate_preview": "0013",
+      "baseline_preview": "0013"
+    },
+    "name": {
+      "status": "match",
+      "candidate_length": 52,
+      "baseline_length": 52,
+      "encoding_issues": [],
+      "candidate_preview": "Fancy 0013 – Επιτραπέζια Εστία 2 Εστιών 2450W Εμαγιέ",
+      "baseline_preview": "Fancy 0013 – Επιτραπέζια Εστία 2 Εστιών 2450W Εμαγιέ"
+    },
+    "description": {
+      "status": "different_but_valid",
+      "candidate_length": 1809,
+      "baseline_length": 1845,
+      "encoding_issues": [],
+      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Fancy 0013 – Επιτραπέζια Εστία",
+      "baseline_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Fancy 0013 – Επιτραπέζια Εστία"
+    },
+    "characteristics": {
+      "status": "different_but_valid",
+      "candidate_length": 740,
+      "baseline_length": 817,
+      "encoding_issues": [],
+      "candidate_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Χαρακτηριστικά Μοντέλου</strong></td></tr></thead",
+      "baseline_preview": "<table class=\"table table-bordered\"> <thead> <tr><td colspan=\"2\"><strong>Χαρακτηριστικά Μοντέλου</strong></td></tr> </th"
+    },
+    "category": {
+      "status": "match",
+      "candidate_length": 124,
+      "baseline_length": 124,
+      "encoding_issues": [],
+      "candidate_preview": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες///Εστίες:::Μικροσυσκ",
+      "baseline_preview": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες///Εστίες:::Μικροσυσκ"
+    },
+    "image": {
+      "status": "match",
+      "candidate_length": 35,
+      "baseline_length": 35,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/307497/307497-1.jpg",
+      "baseline_preview": "catalog/01_main/307497/307497-1.jpg"
+    },
+    "additional_image": {
+      "status": "match",
+      "candidate_length": 35,
+      "baseline_length": 35,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/307497/307497-2.jpg",
+      "baseline_preview": "catalog/01_main/307497/307497-2.jpg"
+    },
+    "manufacturer": {
+      "status": "match",
+      "candidate_length": 5,
+      "baseline_length": 5,
+      "encoding_issues": [],
+      "candidate_preview": "Fancy",
+      "baseline_preview": "Fancy"
+    },
+    "price": {
+      "status": "match",
+      "candidate_length": 2,
+      "baseline_length": 2,
+      "encoding_issues": [],
+      "candidate_preview": "65",
+      "baseline_preview": "65"
+    },
+    "quantity": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "minimum": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "subtract": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "stock_status": {
+      "status": "match",
+      "candidate_length": 13,
+      "baseline_length": 13,
+      "encoding_issues": [],
+      "candidate_preview": "Έως 30 ημέρες",
+      "baseline_preview": "Έως 30 ημέρες"
+    },
+    "status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "meta_keyword": {
+      "status": "match",
+      "candidate_length": 90,
+      "baseline_length": 90,
+      "encoding_issues": [],
+      "candidate_preview": "Fancy 0013, επιτραπέζια εστία, ηλεκτρική εστία, εμαγιέ εστία, 2 εστίες, 2450W, λευκή εστία",
+      "baseline_preview": "Fancy 0013, επιτραπέζια εστία, ηλεκτρική εστία, εμαγιέ εστία, 2 εστίες, 2450W, λευκή εστία"
+    },
+    "meta_title": {
+      "status": "match",
+      "candidate_length": 56,
+      "baseline_length": 56,
+      "encoding_issues": [],
+      "candidate_preview": "Fancy 0013 Επιτραπέζια Εστία 2 Εστιών 2450W | eTranoulis",
+      "baseline_preview": "Fancy 0013 Επιτραπέζια Εστία 2 Εστιών 2450W | eTranoulis"
+    },
+    "meta_description": {
+      "status": "match",
+      "candidate_length": 152,
+      "baseline_length": 152,
+      "encoding_issues": [],
+      "candidate_preview": "Η Fancy 0013 είναι επιτραπέζια εστία 2 εστιών με συνολική ισχύ 2450W, εμαγιέ επιφάνεια, περιστροφικούς διακόπτες, διαστά",
+      "baseline_preview": "Η Fancy 0013 είναι επιτραπέζια εστία 2 εστιών με συνολική ισχύ 2450W, εμαγιέ επιφάνεια, περιστροφικούς διακόπτες, διαστά"
+    },
+    "seo_keyword": {
+      "status": "match",
+      "candidate_length": 50,
+      "baseline_length": 50,
+      "encoding_issues": [],
+      "candidate_preview": "fancy-0013-epitrapezia-estia-2-esties-2450w-emagie",
+      "baseline_preview": "fancy-0013-epitrapezia-estia-2-esties-2450w-emagie"
+    },
+    "product_url": {
+      "status": "match",
+      "candidate_length": 76,
+      "baseline_length": 76,
+      "encoding_issues": [],
+      "candidate_preview": "https://www.etranoulis.gr/fancy-0013-epitrapezia-estia-2-esties-2450w-emagie",
+      "baseline_preview": "https://www.etranoulis.gr/fancy-0013-epitrapezia-estia-2-esties-2450w-emagie"
+    },
+    "related_product": {
+      "status": "match",
+      "candidate_length": 0,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "",
+      "baseline_preview": ""
+    },
+    "bestprice_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "skroutz_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "boxnow": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    }
+  },
+  "expected_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "actual_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "baseline_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "summary": {
+    "match": 22,
+    "different_but_valid": 2,
+    "filled": 0,
+    "missing": 0,
+    "encoding_issue": 0,
+    "empty": 0
+  }
+}

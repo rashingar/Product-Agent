@@ -98,6 +98,7 @@ class FieldDiagnostic:
 
 @dataclass(slots=True)
 class SourceProductData:
+    source_name: str = ""
     page_type: str = "product"
     url: str = ""
     canonical_url: str = ""
@@ -126,6 +127,7 @@ class SourceProductData:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "source_name": self.source_name,
             "page_type": self.page_type,
             "url": self.url,
             "canonical_url": self.canonical_url,

@@ -328,6 +328,7 @@ def render_workflow(model: str) -> dict[str, Any]:
 def load_source_product(path: str | Path) -> SourceProductData:
     payload = read_json(path)
     return SourceProductData(
+        source_name=payload.get("source_name", ""),
         page_type=payload.get("page_type", "product"),
         url=payload.get("url", ""),
         canonical_url=payload.get("canonical_url", ""),

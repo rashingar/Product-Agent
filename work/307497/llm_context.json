@@ -1,0 +1,115 @@
+{
+  "input": {
+    "model": "307497",
+    "url": "https://www.skroutz.gr/s/21656760/Fancy-0013-Epitrapezia-Estia-Emagie-Dipli-Leyki-0013.html",
+    "price": "65",
+    "photos": 2,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 1
+  },
+  "source": {
+    "canonical_url": "https://www.skroutz.gr/s/21656760/Fancy-0013-Epitrapezia-Estia-Emagie-Dipli-Leyki-0013.html",
+    "title": "Fancy Επιτραπέζια Εστία Εμαγιέ Διπλή Λευκή",
+    "hero_summary": "Η εστία Fancy είναι εμαγιέ , δηλαδή η κλασική εστία όπου διαθέτει τη θερμική αντίσταση από κάτω και η επιφάνεια γύρω της είναι από επίστρωση σμάλτου , η οποία προκύπτει από την εφαρμογή του σμάλτου (γυαλί) επάνω σε μέταλλο. Είναι κατάλληλη για χρήση με όλα τα είδη σκευών, ενώ η εμαγιέ επιφάνειά της είναι ανθεκτική στις υψηλές θερμοκρασίες και δεν καταστρέφεται από τη σταθερή έκθεση τους. Ο χειρισμός για την επιλογή των επιθυμητών θερμοκρασιών και ρυθμίσεων γίνεται μέσω ενός περιστροφικού διακόπτη . Διαθέτει 2 ζώνες μαγειρέματος με διάμετρο 18 cm και ισχύ 2000 W η αριστερή, και διάμετρο 8 cm και ισχύ 450 W η δεξιά. Με την φωτεινή λυχνία της θα μπορείτε να αντιλαμβάνεστε άμεσα πότε είναι σε λειτουργία. Επιπλέον διαθέτει α ντιολισθητική βάση για μέγιστη σταθερότητα. Ο απλός σχεδιασμός της ταιριάζει σε κάθε κουζίνα και το εύχρηστο μέγεθος καθιστά εύκολη τη μεταφορά είτε για κάμπινγκ, είτε για διακοπές είτε για μετακόμιση . Πριν συνδέσετε τις επιτραπέζιες εστίες στην πρίζα, βεβαιωθείτε ότι το εναλλασσόμενο ρεύμα είναι 220W – 230 W. Τοποθετήστε τη συσκευή σε μια σταθερή, οριζόντια και λεία επιφάνεια. Για να θέσετε σε λειτουργία τις επιτραπέζιες εστίες, συνδέστε το καλώδιο της,στην πρίζα. Περιστρέφοντας το διακόπτη της εκάστοτε εστίας προς τα δεξιά από το 0, ρυθμίζετε την ένταση. της θερμοκρασίας της εστίας στο πιο δυνατό και όσο το περιστρέφετε δεξιόστροφα μειώνεται η ένταση.",
+    "breadcrumbs": [
+      "Αρχική",
+      "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "Μικροί Μάγειρες",
+      "Εστίες"
+    ],
+    "price_text": "56,90 €",
+    "key_specs": [
+      {
+        "label": "Κατασκευαστής",
+        "value": "Fancy"
+      },
+      {
+        "label": "Μοντέλο",
+        "value": "0013"
+      },
+      {
+        "label": "Εστία",
+        "value": "Διπλή*"
+      },
+      {
+        "label": "Πλάτος",
+        "value": "47 cm"
+      },
+      {
+        "label": "Βάθος",
+        "value": "27 cm"
+      },
+      {
+        "label": "Ισχύς",
+        "value": "2450 W"
+      },
+      {
+        "label": "Τύπος Εστίας",
+        "value": "Εμαγιέ"
+      },
+      {
+        "label": "Εστίες",
+        "value": "2"
+      },
+      {
+        "label": "Χρώμα",
+        "value": "Λευκό"
+      },
+      {
+        "label": "Είδος Διακόπτη",
+        "value": "Περιστροφικός"
+      }
+    ],
+    "product_code": "0013",
+    "brand": "Fancy",
+    "mpn": "0013"
+  },
+  "taxonomy": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Μικροί Μάγειρες",
+    "sub_category": "Εστίες",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Εστίες",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/esties_small",
+    "confidence": 16.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path"
+  },
+  "schema_match": {
+    "matched_schema_id": "sha1:5efb1eddbe6bf3a6770f831e84282f1dcaa9cf3b",
+    "matched_sub_category": "Εστίες",
+    "score": 1.01,
+    "warnings": []
+  },
+  "deterministic_product": {
+    "brand": "Fancy",
+    "mpn": "0013",
+    "manufacturer": "Fancy",
+    "category_phrase": "Επιτραπέζια Εστία",
+    "name_differentiators": [
+      "2 Εστιών",
+      "2450W",
+      "Εμαγιέ"
+    ],
+    "preserve_parsed_title": false,
+    "name": "Fancy 0013 – Επιτραπέζια Εστία 2 Εστιών 2450W Εμαγιέ",
+    "meta_title": "Fancy 0013 Επιτραπέζια Εστία 2 Εστιών 2450W | eTranoulis",
+    "seo_keyword": "fancy-0013-epitrapezia-estia-2-esties-2450w-emagie"
+  },
+  "presentation_source_sections": [],
+  "writer_rules": {
+    "language": "Greek",
+    "sections_required": 0,
+    "llm_owned_fields": [
+      "presentation.intro_html",
+      "presentation.cta_text",
+      "presentation.sections[].title",
+      "presentation.sections[].body_html",
+      "product.meta_description",
+      "product.meta_keywords"
+    ],
+    "meta_description_rule": "Exactly one sentence in Greek.",
+    "intro_html_rule": "150-200 Greek words in one intro paragraph.",
+    "cta_rule": "Use Greek CTA text only and prefer the resolved taxonomy label.",
+    "cta_target_label": "Εστίες"
+  }
+}

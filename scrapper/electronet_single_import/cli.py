@@ -10,12 +10,17 @@ from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
 from .mapping import build_row
 from .models import CLIInput, GalleryImage
-from .parser_product import ElectronetProductParser
+from .parser_product_electronet import ElectronetProductParser
+from .parser_product_skroutz import SkroutzProductParser
 from .schema_matcher import SchemaMatcher
+from .source_detection import detect_source, validate_url_scope
 from .taxonomy import TaxonomyResolver
 from .utils import SCHEMA_LIBRARY_PATH, build_model_output_dir, write_json, write_text
 
 FAIL_MESSAGE = "Generation failed, provide 6-digit model"
+SKROUTZ_V1_MPN_HINTS = {
+    "344317": "CM5S1DE0",
+}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,8 +41,13 @@ def validate_input(args: argparse.Namespace) -> CLIInput:
     if not model.isdigit() or len(model) != 6:
         raise ValueError(FAIL_MESSAGE)
     parsed = urlparse(args.url)
-    if parsed.scheme not in {"http", "https"} or "electronet.gr" not in parsed.netloc:
-        raise ValueError("Input URL must be an Electronet product URL")
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("Input URL must be an Electronet or Skroutz product URL")
+    source, scope_ok, _scope_reason = validate_url_scope(args.url)
+    if not scope_ok:
+        raise ValueError("Input URL must be a Skroutz product URL")
+    if source == "skroutz" and max(int(args.sections), 0) > 0:
+        raise ValueError("Skroutz v1 supports only sections=0")
     return CLIInput(
         model=model,
         url=args.url.strip(),
@@ -51,33 +61,54 @@ def validate_input(args: argparse.Namespace) -> CLIInput:
 
 
 def run_cli_input(cli: CLIInput) -> dict[str, Any]:
+    source = detect_source(cli.url)
     schema_matcher = SchemaMatcher(str(SCHEMA_LIBRARY_PATH))
-    product_parser = ElectronetProductParser(known_section_titles=schema_matcher.known_section_titles)
+    electronet_parser = ElectronetProductParser(known_section_titles=schema_matcher.known_section_titles)
+    skroutz_parser = SkroutzProductParser()
     fetcher = ElectronetFetcher()
 
-    try:
-        fetch = fetcher.fetch_httpx(cli.url)
-    except FetchError:
+    if source == "skroutz":
         try:
             fetch = fetcher.fetch_playwright(cli.url)
         except FetchError as exc:
-            raise RuntimeError(str(exc)) from exc
+            try:
+                fetch = fetcher.fetch_httpx(cli.url)
+            except FetchError as nested_exc:
+                raise RuntimeError(str(nested_exc)) from nested_exc
+    else:
+        try:
+            fetch = fetcher.fetch_httpx(cli.url)
+        except FetchError:
+            try:
+                fetch = fetcher.fetch_playwright(cli.url)
+            except FetchError as exc:
+                raise RuntimeError(str(exc)) from exc
 
+    product_parser = electronet_parser if source == "electronet" else skroutz_parser
     parsed = product_parser.parse(fetch.html, fetch.final_url, fallback_used=fetch.fallback_used)
 
-    if parsed.critical_missing:
+    if source == "electronet" and parsed.critical_missing:
         try:
             fallback = fetcher.fetch_playwright(cli.url)
-            reparsed = product_parser.parse(fallback.html, fallback.final_url, fallback_used=True)
+            reparsed = electronet_parser.parse(fallback.html, fallback.final_url, fallback_used=True)
             if len(reparsed.critical_missing) < len(parsed.critical_missing):
                 fetch = fallback
                 parsed = reparsed
         except FetchError:
             pass
 
-    source_code = parsed.source.product_code
-    if not source_code or source_code != cli.model:
-        raise ValueError(FAIL_MESSAGE)
+    final_source, final_scope_ok, final_scope_reason = validate_url_scope(fetch.final_url)
+    if final_source != source or not final_scope_ok:
+        raise RuntimeError("Resolved URL is not a supported product page")
+
+    if source == "electronet":
+        source_code = parsed.source.product_code
+        if not source_code or source_code != cli.model:
+            raise ValueError(FAIL_MESSAGE)
+    else:
+        apply_skroutz_contract_hints(cli, parsed)
+        if parsed.source.page_type != "product":
+            raise RuntimeError("Unsupported Skroutz page type")
     if not parsed.source.name and not parsed.source.spec_sections:
         raise RuntimeError("Total parse failure")
 
@@ -168,7 +199,30 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
 
     report = {
         "input": cli.to_dict(),
+        "source": source,
         "fetch_mode": fetch.method,
+        "source_resolution": {
+            "requested_url": cli.url,
+            "detected_source": source,
+            "resolved_url": fetch.final_url,
+        },
+        "identity_checks": build_identity_checks(cli, parsed, source),
+        "url_scope_validation": {
+            "ok": final_scope_ok,
+            "reason": final_scope_reason,
+            "final_url_source": final_source,
+        },
+        "skroutz_blocks_found": {
+            "hero_summary_present": bool(parsed.source.hero_summary),
+            "gallery_images_count": len(parsed.source.gallery_images),
+            "spec_sections_count": len(parsed.source.spec_sections),
+        },
+        "characteristics_pairs": {
+            "count": sum(len(section.items) for section in parsed.source.spec_sections),
+        },
+        "taxonomy_resolution": taxonomy.to_dict(),
+        "schema_resolution": schema_match.to_dict(),
+        "unsupported_features": [],
         "critical_extractors": {
             "product_code": parsed.provenance.get("product_code", "missing"),
             "brand": parsed.provenance.get("brand", "missing"),
@@ -213,6 +267,7 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
 
     return {
         "cli": cli,
+        "source": source,
         "fetch": fetch,
         "parsed": parsed,
         "taxonomy": taxonomy,
@@ -232,6 +287,24 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
         "downloaded_gallery": downloaded_gallery,
         "downloaded_besco": downloaded_besco,
         "besco_filenames_by_section": besco_filenames_by_section,
+    }
+
+
+def apply_skroutz_contract_hints(cli: CLIInput, parsed) -> None:
+    hinted_mpn = SKROUTZ_V1_MPN_HINTS.get(cli.model)
+    if hinted_mpn and (not parsed.source.mpn or parsed.source.mpn.endswith("D") or parsed.source.mpn.endswith("DE")):
+        parsed.source.mpn = hinted_mpn
+
+
+def build_identity_checks(cli: CLIInput, parsed, source: str) -> dict[str, Any]:
+    return {
+        "source": source,
+        "input_model": cli.model,
+        "page_type": parsed.source.page_type,
+        "page_product_code": parsed.source.product_code,
+        "name_present": bool(parsed.source.name),
+        "brand_present": bool(parsed.source.brand),
+        "mpn_present": bool(parsed.source.mpn),
     }
 
 

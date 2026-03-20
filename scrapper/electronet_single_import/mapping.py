@@ -97,7 +97,7 @@ def build_row(
     except ValueError:
         cli_price_is_zero = str(cli.price).strip() in {"", "0"}
     if cli_price_is_zero:
-        final_price = source.price_value if source.price_value is not None else 0
+        final_price = 0
 
     category_value = ""
     if taxonomy.parent_category and taxonomy.leaf_category:

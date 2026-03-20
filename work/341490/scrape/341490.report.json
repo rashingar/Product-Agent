@@ -1,0 +1,336 @@
+{
+  "input": {
+    "model": "341490",
+    "url": "https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html",
+    "photos": 7,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 1,
+    "price": "19",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape"
+  },
+  "source": "skroutz",
+  "fetch_mode": "playwright",
+  "source_resolution": {
+    "requested_url": "https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html",
+    "detected_source": "skroutz",
+    "resolved_url": "https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html"
+  },
+  "identity_checks": {
+    "source": "skroutz",
+    "input_model": "341490",
+    "page_type": "product",
+    "page_product_code": "06-24567",
+    "name_present": true,
+    "brand_present": true,
+    "mpn_present": true
+  },
+  "url_scope_validation": {
+    "ok": true,
+    "reason": "skroutz_product_path",
+    "final_url_source": "skroutz"
+  },
+  "skroutz_blocks_found": {
+    "hero_summary_present": true,
+    "gallery_images_count": 7,
+    "spec_sections_count": 3
+  },
+  "characteristics_pairs": {
+    "count": 20
+  },
+  "taxonomy_resolution": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Συσκευές Κουζίνας",
+    "sub_category": "Βραστήρες",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Βραστήρες",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/vrasthres",
+    "confidence": 16.25,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,filter_map_tiebreak"
+  },
+  "schema_resolution": {
+    "matched_schema_id": "sha1:2eedb0213b528ef32b7a917fdc436b1a9d19f763",
+    "matched_sub_category": "Βραστήρες",
+    "score": 1.01,
+    "warnings": []
+  },
+  "unsupported_features": [],
+  "critical_extractors": {
+    "product_code": "dom:h1 small.sku-code",
+    "brand": "dom:a.brand-page-link img",
+    "mpn": "jsonld:mpn",
+    "name": "dom:div.sku-title h1.page-title",
+    "price": "dom:.prices .final-price",
+    "taxonomy": "resolved",
+    "schema_match": "matched"
+  },
+  "field_diagnostics": {
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:div.sku-title h1.page-title",
+      "value_present": true,
+      "value_preview": "Estia Intense Βραστήρας 1.7lt 2200W Luminus Mat",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "div.sku-title h1.page-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Estia Intense Βραστήρας 1.7lt 2200W Luminus Mat Κωδικός: 06-24567",
+          "note": ""
+        }
+      ]
+    },
+    "breadcrumbs": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:div.sku-title a.category-tag",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "div.sku-title a.category-tag",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Βραστήρες",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.96,
+      "selected_strategy": "dom:a.brand-page-link img",
+      "value_present": true,
+      "value_preview": "Estia",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "a.brand-page-link img",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "",
+          "note": ""
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:h1 small.sku-code",
+      "value_present": true,
+      "value_preview": "06-24567",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1 small.sku-code",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Κωδικός: 06-24567",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.88,
+      "selected_strategy": "dom:.sku-description",
+      "value_present": true,
+      "value_preview": "Κλείσιμο:Αυτόματη παύση λειτουργίας Χρώμα:Luminus Τύπος:Βραστήρας Αποθήκευση καλωδίου:Ναι Βάση:Περιστρεφόμενη 360° Διαθέτει:Πλήκτρο ενεργοποίησης / απενεργοποίη",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".sku-description",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Ο βραστήρας Intense, με ισχύ 2200W και χωρητικότητα 1.7 λίτρων, είναι σχεδιασμένος για να καλύπτει τις ανάγκες κάθε σύγχ",
+          "note": ""
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.92,
+      "selected_strategy": "jsonld:mpn",
+      "value_present": true,
+      "value_preview": "06-24567",
+      "selector_trace": []
+    },
+    "price": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.prices .final-price",
+      "value_present": true,
+      "value_preview": "15,90 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".prices .final-price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "15 90 €",
+          "note": ""
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.92,
+      "selected_strategy": "dom:#specs .spec-groups",
+      "value_present": true,
+      "value_preview": "3 sections; first=Επισκόπηση Προϊόντος",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#specs .spec-groups",
+          "match_count": 2,
+          "success": true,
+          "chosen_preview": "Κωδικός Προϊόντος 06-24567 Γενικά Ισχύς 2200 W Ισχύς Η ισχύς του βραστήρα δείχνει το πόσο γρήγορα μπορεί να θερμανθεί το",
+          "note": ""
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.9,
+      "selected_strategy": "canonical_from_specs",
+      "value_present": true,
+      "value_preview": "5 items; first=Χωρητικότητα σε Λίτρα",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.95,
+      "selected_strategy": "jsonld:image",
+      "value_present": true,
+      "value_preview": "8 images; first=https://d.scdn.gr/images/sku_main_images/051055/51055155/20240425095340_estia_intense_luminus_06_24567_vrastiras_1_7lt_2200w_leykos.jpeg",
+      "selector_trace": []
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "merchant_summary_and_structured_characteristics_present",
+    "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Βραστήρες",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Βραστήρες",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/vrasthres",
+      "confidence": 16.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_breadcrumb",
+        "full_breadcrumb_path",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Κουζινομηχανές",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Κουζινομηχανές",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kouzinomhxanes",
+      "confidence": 7.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Μίξερ",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Μίξερ",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/mixer",
+      "confidence": 7.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Μπλέντερ",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Μπλέντερ",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/blender",
+      "confidence": 7.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Συσκευές Κουζίνας",
+      "sub_category": "Πολυμίξερ",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Συσκευές Κουζίνας > Πολυμίξερ",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/multimixer",
+      "confidence": 7.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:2eedb0213b528ef32b7a917fdc436b1a9d19f763",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 3,
+      "n_rows_total": 20
+    },
+    {
+      "matched_schema_id": "sha1:c93e9cc3b2eacb8da30d0d2fea5e3fa2e381ab1c",
+      "matched_sub_category": null,
+      "score": 0.83,
+      "n_sections": 1,
+      "n_rows_total": 5
+    },
+    {
+      "matched_schema_id": "sha1:f2704dfe227e48220c6b26f6a6393efb70f2a3ae",
+      "matched_sub_category": null,
+      "score": 0.7677,
+      "n_sections": 2,
+      "n_rows_total": 13
+    },
+    {
+      "matched_schema_id": "sha1:989e32be31833c891ab05912236e5da513439582",
+      "matched_sub_category": null,
+      "score": 0.76,
+      "n_sections": 3,
+      "n_rows_total": 18
+    },
+    {
+      "matched_schema_id": "sha1:b6561906abf4eea130e08e0de5f6f76ef398d80b",
+      "matched_sub_category": null,
+      "score": 0.76,
+      "n_sections": 1,
+      "n_rows_total": 9
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 8,
+    "downloaded_count": 7,
+    "requested_photos": 7
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 0,
+    "extracted_count": 0,
+    "downloaded_count": 0,
+    "requested_sections": 0
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\341490.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\341490.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\341490.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\341490.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\341490.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\gallery\\341490-1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\gallery\\341490-2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\gallery\\341490-3.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\gallery\\341490-4.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\gallery\\341490-5.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\gallery\\341490-6.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341490\\scrape\\gallery\\341490-7.jpg"
+  ]
+}
