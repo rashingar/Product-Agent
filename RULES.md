@@ -1,28 +1,24 @@
 # Product-Agent Runtime Rules
 
-This file documents the default low-token workflow.
+This file documents the current repo-scoped Electronet workflow.
 
-## Default Flow
+## Trigger
 
-1. Run `scripts/build_context.py` with the product input.
-2. Send `work/{model}/prompt.txt` to the model.
-3. Save the JSON reply to `work/{model}/llm_output.json`.
-4. Run `scripts/render_product.py --model {model}`.
+Accepted input template:
 
-## Input Contract
-
-Accepted input fields:
-- `model`
-- `url`
-- `photos`
-- `sections`
-- `skroutz_status`
-- `boxnow`
-- `price`
+```text
+model:
+url:
+photos:
+sections:
+skroutz_status:
+boxnow:
+price:
+```
 
 Rules:
 - `model` must be a confirmed 6-digit code.
-- `url` is required.
+- `url` must be an Electronet product URL.
 - `photos` defaults to `1`.
 - `sections` defaults to `0`.
 - `skroutz_status` and `boxnow` must be `0` or `1`.
@@ -31,59 +27,74 @@ Rules:
 If `model` is missing or not exactly 6 digits, fail with:
 `Generation failed, provide 6-digit model`
 
+## Default Flow
+
+1. Run `python -m electronet_single_import.workflow prepare ...` from `scrapper/`.
+2. Read `work/{model}/llm_context.json` and `work/{model}/prompt.txt`.
+3. Produce `work/{model}/llm_output.json` using the reduced response contract.
+4. Run `python -m electronet_single_import.workflow render --model {model}` from `scrapper/`.
+5. Inspect `work/{model}/candidate/{model}.validation.json`.
+
 ## Source Of Truth
 
 Use these local files as runtime sources:
-- `catalog_taxonomy.json`: category resolution and CTA URLs
-- `filter_map.json`: allowed filter groups per subcategory
-- `product_import_template.csv`: exact CSV headers and order
-- `TEMPLATE_presentation.html`: presentation HTML structure reference
-- `schemas/compact_response.schema.json`: expected compact model response shape
+- `catalog_taxonomy.json`
+- `electronet_schema_library.json`
+- `filter_map.json`
+- `product_import_template.csv`
+- `TEMPLATE_presentation.html`
+- `master_prompt+.txt`
+- `schemas/compact_response.schema.json`
 
 ## Local Responsibilities
 
-The local scripts, not the model, are responsible for:
+Local code owns:
 - category serialization
 - image path generation
 - CTA URL insertion
 - technical specs HTML rendering
+- final description wrapper HTML
 - final CSV writing
-- final chat formatting
-- filter rendering in chat
+- deterministic brand / mpn / manufacturer / name
+- deterministic meta title
+- deterministic SEO URL
+- validation and baseline comparison
 
-## Model Responsibilities
+## LLM Responsibilities
 
-The model should return JSON only for:
-- brand
-- mpn
-- manufacturer
-- product name
-- SEO URL
-- meta title
-- meta description
-- meta keywords
-- intro HTML fragment
-- section titles and body HTML fragments
-
-## Chat Output
-
-Chat output shows only:
-- `0) Φίλτρα`
-
-All other sections are internal-only and are rendered into the CSV artifacts when needed.
+The LLM stage returns JSON only for:
+- `product.meta_description`
+- `product.meta_keywords`
+- `presentation.intro_html`
+- `presentation.cta_text`
+- `presentation.sections[].title`
+- `presentation.sections[].body_html`
 
 ## Outputs
 
-After rendering, the workflow should produce:
-- `products/{model}.csv`
-- `work/{model}/chat_output.txt`
-- `work/{model}/description.html`
-- `work/{model}/characteristics.html`
+Prepare stage writes:
+- `work/{model}/scrape/{model}.raw.html`
+- `work/{model}/scrape/{model}.source.json`
+- `work/{model}/scrape/{model}.normalized.json`
+- `work/{model}/scrape/{model}.report.json`
+- `work/{model}/llm_context.json`
+- `work/{model}/prompt.txt`
+
+Render stage writes:
+- `work/{model}/candidate/{model}.csv`
+- `work/{model}/candidate/{model}.normalized.json`
+- `work/{model}/candidate/{model}.validation.json`
+- `work/{model}/candidate/description.html`
+- `work/{model}/candidate/characteristics.html`
+
+## Validation
+
+- `work/{model}/candidate/{model}.validation.json` is the final machine-readable health report.
+- If `products/{model}.csv` exists, compare candidate output against it field by field.
+- Prefer fixing pipeline behavior instead of patching generated files by hand.
 
 ## Legacy Workflow
 
-The full legacy prompt and rules are preserved here:
+The old script-driven flow is preserved only as historical reference:
 - `master_prompt_legacy.txt`
 - `RULES_legacy.md`
-
-Use the legacy files only when the compact workflow is insufficient for a difficult fallback case.
