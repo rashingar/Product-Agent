@@ -1,102 +1,50 @@
 # Product-Agent
 
-This repo now supports a lower-token workflow by default.
+This repository now contains two distinct workflow layers that share the same support data.
 
-The old workflow asked the model to read a very large prompt, restate HTML and CSV rules in prose, and generate deterministic fields that local code can build faster and cheaper.
+## 1. Product-Agent Repo Workflow
 
-The new workflow moves deterministic work into local scripts and keeps the model focused on the small set of fields that actually benefit from generation.
+The repo root holds the shared support files and outputs used by the broader Product-Agent process:
 
-## New workflow
+- `catalog_taxonomy.json`
+- `electronet_schema_library.json`
+- `filter_map.json`
+- `product_import_template.csv`
+- `TEMPLATE_presentation.html`
+- `RULES.md`
+- `schema_index.csv`
+- `master_prompt+.txt`
+- `products/`
+- `work/`
+- `schemas/`
 
-1. Build compact context from the input and, when possible, scrape the exact Electronet page.
-2. Send the generated prompt to the model.
-3. Save the model JSON response locally.
-4. Render CSV, HTML blocks, and chat output with the local renderer.
+This is the repo-level workflow context: taxonomy, schema, prompt, template, and output assets all stay at the root.
 
-## Commands
+Note: the old local `scripts/` entrypoints were removed, so this root workflow is no longer driven by `scripts/build_context.py` or `scripts/render_product.py`.
 
-### 1. Build context and prompt
+## 2. Electronet Scraper Workflow
 
-```powershell
-python scripts/build_context.py `
-  --model 233541 `
-  --url "https://www.electronet.gr/oikiakes-syskeyes/psygeia-katapsyktes/psygeia-ntoylapes/psygeio-ntoylapa-lg-gsgv80pyll-asimi-e" `
-  --photos 6 `
-  --sections 5 `
-  --skroutz-status 1 `
-  --boxnow 0 `
-  --price 2099
-```
+The runnable single-product Electronet scraper now lives in `scrapper/`.
 
-This writes:
-- `work/{model}/context.json`
-- `work/{model}/llm_context.json`
-- `work/{model}/prompt.txt`
+Use that workflow when you want the scraper/parser/CSV pipeline itself:
 
-### 2. Send the prompt to the model
+- package code: `scrapper/electronet_single_import/`
+- tests: `scrapper/electronet_single_import/tests/`
+- usage and output details: `scrapper/README.md`
 
-Use `work/{model}/prompt.txt` as the prompt.
-
-The model should return JSON only, matching:
-- `schemas/compact_response.schema.json`
-
-Save that JSON to:
-- `work/{model}/llm_output.json`
-
-### 3. Render final artifacts
+Run tests from there:
 
 ```powershell
-python scripts/render_product.py --model 233541
+cd scrapper
+python -m pytest -q
 ```
 
-This writes:
-- `products/{model}.csv`
-- `work/{model}/chat_output.txt`
-- `work/{model}/description.html`
-- `work/{model}/characteristics.html`
+## How They Relate
 
-## What moved out of the prompt
+The scraper is scoped inside this repo and reads shared support files from the repo root.
 
-The renderer now handles:
-- CSV header order
-- CSV defaults
-- category serialization
-- image path generation
-- technical specs HTML rendering
-- final chat formatting
+In practice:
+- repo root = shared Product-Agent assets and outputs
+- `scrapper/` = the Electronet scraping/import implementation
 
-The context builder now handles:
-- exact Electronet title extraction
-- Electronet breadcrumb extraction
-- category resolution against `catalog_taxonomy.json`
-- allowed filter-group lookup from `filter_map.json`
-- technical specs extraction from Electronet
-- presentation-source block extraction from Electronet
-- compact fact selection for the model
-
-## Token savings
-
-The biggest savings come from three changes:
-
-1. The model no longer sees the full CSV and HTML rendering spec on every run.
-2. The model no longer needs to output the technical specs table or the final CSV body.
-3. The chat output is rendered locally and only shows `0) Φίλτρα`.
-
-In practice, the model now only needs to generate:
-- brand and MPN confirmation
-- product name
-- SEO URL
-- meta title
-- meta description
-- meta keywords
-- intro HTML fragment
-- section titles and section body HTML fragments
-
-## Scope
-
-The automated extraction path is strongest for exact Electronet product pages.
-
-If the source is not an exact Electronet product page:
-- the new renderer and context pipeline can still be used
-- but the context may be partial
-- for difficult fallback cases, keep using `master_prompt_legacy.txt` and `RULES_legacy.md`
+If you want the old script-driven Product-Agent workflow back as runnable code, it would need to be restored explicitly from git rather than inferred from the current layout.
