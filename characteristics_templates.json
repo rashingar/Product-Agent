@@ -1,0 +1,224 @@
+{
+  "version": "2026-03-21",
+  "templates": [
+    {
+      "template_id": "skroutz_tv_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_leaf": "Τηλεοράσεις"
+      },
+      "preferred_schema_source_files": [
+        "tileoraseis.json"
+      ],
+      "sections": [
+        {
+          "title": "Εικόνα - Ήχος",
+          "fields": [
+            {
+              "key": "screen_technology",
+              "label": "Τεχνολογία Οθόνης",
+              "resolver": "tv_screen_technology",
+              "aliases": [
+                "Τεχνολογία Οθόνης",
+                "Τύπος Panel"
+              ]
+            },
+            {
+              "key": "screen_size_inches",
+              "label": "Διαγώνιος Οθόνης ( Ίντσες )",
+              "resolver": "tv_screen_size_inches",
+              "aliases": [
+                "Διαγώνιος",
+                "Διαγώνιος Οθόνης ( Ίντσες )"
+              ]
+            },
+            {
+              "key": "screen_size_cm",
+              "label": "Διαγώνιος Οθόνης ( Εκατοστά )",
+              "resolver": "tv_screen_size_cm"
+            },
+            {
+              "key": "resolution",
+              "label": "Ανάλυση Οθόνης",
+              "resolver": "tv_resolution",
+              "aliases": [
+                "Ευκρίνεια",
+                "Ανάλυση Οθόνης"
+              ]
+            },
+            {
+              "key": "pixels",
+              "label": "Αριθμός Pixels",
+              "resolver": "tv_pixels"
+            },
+            {
+              "key": "image_features",
+              "label": "Λειτουργίες Εικόνας",
+              "resolver": "tv_image_features"
+            },
+            {
+              "key": "refresh_rate",
+              "label": "Ρυθμός Ανανέωσης",
+              "resolver": "tv_refresh_rate",
+              "aliases": [
+                "Ρυθμός Ανανέωσης"
+              ]
+            },
+            {
+              "key": "hdr",
+              "label": "HDR",
+              "resolver": "tv_hdr",
+              "aliases": [
+                "Τύποι HDR",
+                "HDR"
+              ]
+            },
+            {
+              "key": "energy_class",
+              "label": "Ενεργειακή Κλάση",
+              "resolver": "tv_energy_class",
+              "aliases": [
+                "Ενεργειακή Κλάση"
+              ]
+            },
+            {
+              "key": "energy_class_hdr",
+              "label": "Ενεργειακή Κλάση HDR",
+              "resolver": "tv_energy_class_hdr"
+            },
+            {
+              "key": "energy_sdr",
+              "label": "Κατανάλωση Ενέργειας σε Λειτουργία SDR (kWh/1000h)",
+              "resolver": "tv_energy_sdr"
+            },
+            {
+              "key": "energy_hdr",
+              "label": "Κατανάλωση Ενέργειας σε Λειτουργία HDR (kWh/1000h)",
+              "resolver": "tv_energy_hdr"
+            },
+            {
+              "key": "tuner",
+              "label": "Δέκτης",
+              "resolver": "tv_tuner",
+              "aliases": [
+                "Δέκτης"
+              ]
+            },
+            {
+              "key": "sound_system",
+              "label": "Σύστημα Ήχου",
+              "resolver": "tv_sound_system"
+            },
+            {
+              "key": "processor",
+              "label": "Επεξεργαστής",
+              "resolver": "tv_processor"
+            }
+          ]
+        },
+        {
+          "title": "Λειτουργίες",
+          "fields": [
+            {
+              "key": "smart_tv",
+              "label": "Smart TV",
+              "resolver": "tv_smart_tv"
+            },
+            {
+              "key": "os",
+              "label": "Λειτουργικό Σύστημα",
+              "resolver": "tv_os"
+            },
+            {
+              "key": "smart_functions",
+              "label": "Λειτουργίες Smart",
+              "resolver": "tv_smart_functions"
+            },
+            {
+              "key": "extra_functions",
+              "label": "Επιπλέον Λειτουργίες",
+              "resolver": "tv_extra_functions"
+            }
+          ]
+        },
+        {
+          "title": "Συνδέσεις",
+          "fields": [
+            {
+              "key": "hdmi",
+              "label": "HDMI",
+              "resolver": "tv_hdmi"
+            },
+            {
+              "key": "bluetooth",
+              "label": "Bluetooth",
+              "resolver": "tv_bluetooth"
+            },
+            {
+              "key": "usb",
+              "label": "USB",
+              "resolver": "tv_usb"
+            },
+            {
+              "key": "io",
+              "label": "Είσοδοι / Έξοδοι",
+              "resolver": "tv_io"
+            }
+          ]
+        },
+        {
+          "title": "Γενικά",
+          "fields": [
+            {
+              "key": "equipment",
+              "label": "Βασικός Εξοπλισμός",
+              "resolver": "tv_equipment"
+            },
+            {
+              "key": "appearance",
+              "label": "Εμφάνιση",
+              "resolver": "tv_appearance"
+            },
+            {
+              "key": "vesa",
+              "label": "Διάκενο Βάσης Τοίχου Vesa (mm)",
+              "resolver": "tv_vesa",
+              "aliases": [
+                "VESA Mount",
+                "Διάκενο Βάσης Τοίχου Vesa (mm)"
+              ]
+            },
+            {
+              "key": "color",
+              "label": "Χρώμα",
+              "resolver": "tv_color"
+            },
+            {
+              "key": "weight_with_stand",
+              "label": "Βάρος Συσκευής σε Κιλά (με Βάση)",
+              "resolver": "tv_weight_with_stand",
+              "aliases": [
+                "Βάρος"
+              ]
+            },
+            {
+              "key": "country",
+              "label": "Χώρα Κατασκευής",
+              "resolver": "tv_country"
+            },
+            {
+              "key": "warranty",
+              "label": "Εγγύηση Κατασκευαστή",
+              "resolver": "tv_warranty"
+            },
+            {
+              "key": "dimensions_with_stand",
+              "label": "Διαστάσεις Συσκευής σε Εκατοστά με Βάση (Υ x Π x Β)",
+              "resolver": "tv_dimensions_with_stand"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

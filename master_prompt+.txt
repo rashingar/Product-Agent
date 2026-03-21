@@ -47,7 +47,7 @@ YOU MUST RETURN THIS EXACT TOP-LEVEL SHAPE
 FIELD RULES
 - `meta_description`: Greek, exactly one sentence, natural, no quotes, no emojis.
 - `meta_keywords`: array of verified keywords only. No stuffing.
-- `intro_html`: inner HTML only for the intro paragraph. Allowed inline tag: `<strong>`. Keep it between 150 and 200 Greek words.
+- `intro_html`: inner HTML only for the intro paragraph. Allowed inline tag: `<strong>`. Keep it between 120 and 180 Greek words.
 - `cta_text`: Greek CTA label only. Make it category-appropriate and prefer the resolved taxonomy label from `LLM_CONTEXT_JSON.writer_rules.cta_target_label`.
 - `sections`: exactly the number required by `LLM_CONTEXT_JSON.writer_rules.sections_required`.
 - `sections[].title`: Greek section heading.
@@ -72,7 +72,7 @@ PRESENTATION RULES
 - Do not merge or reorder source sections.
 - Slight paraphrase is allowed only if the meaning stays intact.
 - If source sections are weak, stay conservative instead of inventing claims.
-- The intro paragraph must be 150-200 Greek words, natural, SEO-friendly, and based only on verified facts in the context.
+- The intro paragraph must be 120-180 Greek words, natural, SEO-friendly, and based only on verified facts in the context.
 
 IF `sections_required = 0`
 - Return `"sections": []`.

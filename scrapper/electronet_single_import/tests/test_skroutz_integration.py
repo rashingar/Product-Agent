@@ -156,7 +156,7 @@ def test_validate_input_rejects_non_product_skroutz_url() -> None:
     try:
         validate_input(args)
     except ValueError as exc:
-        assert str(exc) == "Input URL must be a Skroutz product URL"
+        assert str(exc) == "Input URL must be an Electronet product URL or a Skroutz product URL"
     else:
         raise AssertionError("Expected ValueError")
 
@@ -221,6 +221,7 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(tmp_path: Path, monke
         source_payload = json.loads((prepare_result["scrape_dir"] / f"{model}.source.json").read_text(encoding="utf-8"))
         report = json.loads((prepare_result["scrape_dir"] / f"{model}.report.json").read_text(encoding="utf-8"))
         taxonomy_diagnostics = report["skroutz_taxonomy_diagnostics"]
+        characteristics_diagnostics = report["characteristics_diagnostics"]
         assert source_payload["source_name"] == "skroutz"
         assert len(source_payload["gallery_images"]) == SAMPLES[model]["photos"]
         assert taxonomy_diagnostics["raw_category_tag"] == source_payload["category_tag_text"]
@@ -231,6 +232,8 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(tmp_path: Path, monke
         assert taxonomy_diagnostics["match_type"] == source_payload["taxonomy_match_type"]
         assert taxonomy_diagnostics["ambiguity"] == source_payload["taxonomy_ambiguity"]
         assert taxonomy_diagnostics["escalation_reason"] == source_payload["taxonomy_escalation_reason"]
+        assert characteristics_diagnostics["mode"] in {"raw_spec_sections", "template"}
+        assert "template_id" in characteristics_diagnostics
         if SAMPLES[model]["sections"] > 0:
             assert [item["local_filename"] for item in source_payload["besco_images"]] == [
                 f"besco{index}.jpg" for index in range(1, SAMPLES[model]["sections"] + 1)

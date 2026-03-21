@@ -34,7 +34,12 @@ class SchemaMatcher:
     def known_section_titles(self) -> set[str]:
         return {title for title in self._known_titles if title}
 
-    def match(self, spec_sections: list[SpecSection], taxonomy_sub_category: str | None = None) -> tuple[SchemaMatchResult, list[dict[str, Any]]]:
+    def match(
+        self,
+        spec_sections: list[SpecSection],
+        taxonomy_sub_category: str | None = None,
+        preferred_source_files: list[str] | None = None,
+    ) -> tuple[SchemaMatchResult, list[dict[str, Any]]]:
         if not spec_sections:
             return SchemaMatchResult(None, taxonomy_sub_category, 0.0, ["no_spec_sections_extracted"]), []
 
@@ -46,8 +51,29 @@ class SchemaMatcher:
             if item.label
         }
 
+        candidate_schemas = self.schemas
+        preferred_source_files = preferred_source_files or []
+        normalized_preferred_files = {
+            normalize_for_match(item)
+            for item in preferred_source_files
+            if normalize_for_match(item)
+        }
+        if normalized_preferred_files:
+            filtered_schemas = [
+                schema
+                for schema in self.schemas
+                if normalized_preferred_files
+                & {
+                    normalize_for_match(source_file)
+                    for source_file in schema.get("source_files", [])
+                    if source_file
+                }
+            ]
+            if filtered_schemas:
+                candidate_schemas = filtered_schemas
+
         candidates: list[dict[str, Any]] = []
-        for schema in self.schemas:
+        for schema in candidate_schemas:
             schema_titles = {
                 normalize_for_match(section.get("title", ""))
                 for section in schema.get("sections", [])
@@ -76,6 +102,7 @@ class SchemaMatcher:
                     "score": round(score, 4),
                     "n_sections": schema.get("n_sections"),
                     "n_rows_total": schema.get("n_rows_total"),
+                    "source_files": list(schema.get("source_files", [])),
                 }
             )
 

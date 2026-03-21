@@ -215,7 +215,7 @@ CSV PRE-FINAL VALIDATION (MANDATORY)
         - `<p style="margin-left:auto; margin-right:auto"><span style="font-size:24px">...</span></p>`
         - exactly one `<hr />`
         - one inner `<div class="etr-desc">`
-      - 150–200 Greek words
+      - 120–180 Greek words
       - SEO-optimized, natural, no keyword stuffing
       - Keep body text visually left-aligned
       - Use `<strong>...</strong>` naturally for verified key keywords only:

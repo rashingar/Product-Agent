@@ -6,7 +6,7 @@ from electronet_single_import.models import CLIInput, GalleryImage, ParsedProduc
 from electronet_single_import.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
 
-def build_intro(words: int = 150) -> str:
+def build_intro(words: int = 120) -> str:
     return " ".join(["λέξη"] * words)
 
 
@@ -79,6 +79,11 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
 
     assert result["llm_context_path"].exists()
     assert result["prompt_path"].exists()
+    llm_context = json.loads(result["llm_context_path"].read_text(encoding="utf-8"))
+    prompt_text = result["prompt_path"].read_text(encoding="utf-8")
+    assert llm_context["writer_rules"]["intro_html_rule"] == "120-180 Greek words in one intro paragraph."
+    assert "between 120 and 180 Greek words" in prompt_text
+    assert "120-180 Greek words" in prompt_text
 
 
 def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monkeypatch) -> None:

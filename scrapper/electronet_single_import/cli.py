@@ -5,6 +5,7 @@ import sys
 from typing import Any
 from urllib.parse import urlparse
 
+from .characteristics_pipeline import get_characteristics_registry
 from .csv_writer import write_csv_row
 from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
@@ -48,7 +49,7 @@ def validate_input(args: argparse.Namespace) -> CLIInput:
         raise ValueError("Input URL must be an Electronet or Skroutz product URL")
     source, scope_ok, _scope_reason = validate_url_scope(args.url)
     if not scope_ok:
-        raise ValueError("Input URL must be a Skroutz product URL")
+        raise ValueError("Input URL must be an Electronet product URL or a Skroutz product URL")
     return CLIInput(
         model=model,
         url=args.url.strip(),
@@ -289,7 +290,13 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
         key_specs=parsed.source.key_specs,
         spec_sections=parsed.source.spec_sections,
     )
-    schema_match, schema_candidates = schema_matcher.match(parsed.source.spec_sections, taxonomy.sub_category)
+    characteristics_registry = get_characteristics_registry()
+    preferred_schema_source_files = characteristics_registry.preferred_schema_source_files(parsed.source, taxonomy)
+    schema_match, schema_candidates = schema_matcher.match(
+        parsed.source.spec_sections,
+        taxonomy.sub_category,
+        preferred_source_files=preferred_schema_source_files,
+    )
 
     row, normalized, mapping_warnings = build_row(
         cli,
@@ -329,6 +336,7 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
         },
         "taxonomy_resolution": taxonomy.to_dict(),
         "schema_resolution": schema_match.to_dict(),
+        "characteristics_diagnostics": normalized.get("characteristics_diagnostics", {}),
         "skroutz_taxonomy_diagnostics": {
             "family_key": parsed.source.skroutz_family,
             "raw_category_tag": parsed.source.category_tag_text,
@@ -345,6 +353,9 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
             "tv_inches": parsed.source.taxonomy_tv_inches,
             "ambiguity": parsed.source.taxonomy_ambiguity,
             "escalation_reason": parsed.source.taxonomy_escalation_reason,
+        },
+        "schema_preference": {
+            "preferred_source_files": preferred_schema_source_files,
         },
         "unsupported_features": [],
         "critical_extractors": {

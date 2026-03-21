@@ -1,6 +1,6 @@
 # Product-Agent Instructions
 
-This repository contains a repo-scoped Electronet product pipeline.
+This repository contains a repo-scoped Electronet and Skroutz product pipeline.
 
 ## Trigger
 
@@ -21,7 +21,7 @@ treat it as a request to run the full pipeline.
 ## End-To-End Flow
 
 1. Parse the template fields exactly as provided.
-2. If `url` is an Electronet product URL, run:
+2. If `url` is an Electronet or Skroutz product URL, run:
    `python -m electronet_single_import.workflow prepare --model {model} --url "{url}" --photos {photos} --sections {sections} --skroutz-status {skroutz_status} --boxnow {boxnow} --price {price}`
    Run from `scrapper/`.
 3. Read:
@@ -71,10 +71,10 @@ treat it as a request to run the full pipeline.
   - `encoding_issue`
 - Prefer fixing pipeline issues over hand-editing generated output files.
 
-## Electronet Scope
+## Source Scope
 
-- This workflow is intended for Electronet product URLs.
-- If the URL is not an Electronet product URL, fail clearly instead of improvising a partial run.
+- This workflow is intended for Electronet and Skroutz product URLs.
+- If the URL is neither an Electronet nor a Skroutz product URL, fail clearly instead of improvising a partial run.
 
 ## Working Rules
 

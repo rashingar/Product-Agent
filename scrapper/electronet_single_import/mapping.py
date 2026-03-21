@@ -3,8 +3,9 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from .characteristics_pipeline import build_characteristics_for_product
 from .deterministic_fields import build_deterministic_product_fields
-from .html_builders import build_characteristics_html, build_description_html, build_description_html_from_llm
+from .html_builders import build_description_html, build_description_html_from_llm
 from .models import CLIInput, ParsedProduct, SchemaMatchResult, TaxonomyResolution
 from .normalize import slugify_greek_for_seo
 from .utils import as_decimal_string, build_additional_image_value
@@ -89,7 +90,12 @@ def build_row(
             besco_filenames_by_section=besco_filenames_by_section,
         )
     warnings.extend(desc_warnings)
-    characteristics_html = build_characteristics_html(source.spec_sections)
+    characteristics_html, characteristics_diagnostics, characteristics_warnings = build_characteristics_for_product(
+        source=source,
+        taxonomy=taxonomy,
+        schema_match=schema_match,
+    )
+    warnings.extend(characteristics_warnings)
 
     final_price = cli.price
     try:
@@ -144,6 +150,7 @@ def build_row(
         "taxonomy": taxonomy.to_dict(),
         "schema_match": schema_match.to_dict(),
         "deterministic_product": deterministic,
+        "characteristics_diagnostics": characteristics_diagnostics,
         "downloaded_gallery_count": downloaded_image_count or 0,
         "downloaded_besco_count": len(besco_filenames_by_section or {}),
         "llm_product": llm_product or {},

@@ -1,0 +1,862 @@
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Callable
+
+from bs4 import BeautifulSoup
+
+from .deterministic_fields import build_spec_lookup
+from .html_builders import build_characteristics_html
+from .models import SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from .normalize import normalize_for_match, normalize_whitespace
+from .utils import CHARACTERISTICS_TEMPLATES_PATH, SCHEMA_LIBRARY_PATH, dedupe_strings, read_json
+
+
+TV_INCH_TO_CM = {
+    24: 61,
+    32: 81,
+    40: 101,
+    42: 106,
+    43: 108,
+    48: 121,
+    50: 126,
+    55: 139,
+    58: 146,
+    65: 164,
+    70: 177,
+    75: 189,
+    77: 195,
+    83: 210,
+    85: 215,
+    98: 248,
+}
+RESOLUTION_TO_PIXELS = {
+    "hd ready": "1366 × 768",
+    "full hd": "1920 × 1080",
+    "ultra hd ( 4k )": "3840 × 2160",
+    "ultra hd ( 8k )": "7680 × 4320",
+}
+_REGISTRY: CharacteristicsTemplateRegistry | None = None
+
+
+@dataclass(slots=True)
+class _ResolutionContext:
+    source: SourceProductData
+    taxonomy: TaxonomyResolution
+    spec_lookup: dict[str, str]
+    raw_lookup: dict[str, str]
+    section_lookup: dict[str, dict[str, str]]
+    raw_html: str
+    raw_text: str
+    offer_titles: list[str]
+    combined_text: str
+
+
+class CharacteristicsTemplateRegistry:
+    def __init__(self, path: str = str(CHARACTERISTICS_TEMPLATES_PATH)) -> None:
+        self.path = path
+        payload = read_json(path)
+        self.templates: list[dict[str, Any]] = payload.get("templates", [])
+        schema_payload = read_json(SCHEMA_LIBRARY_PATH)
+        self.schemas_by_id: dict[str, dict[str, Any]] = {
+            str(schema.get("schema_id", "")).strip(): schema
+            for schema in schema_payload.get("schemas", [])
+            if str(schema.get("schema_id", "")).strip()
+        }
+
+    def select_custom_template(self, source: SourceProductData, taxonomy: TaxonomyResolution) -> dict[str, Any] | None:
+        source_name = normalize_for_match(source.source_name)
+        parent = normalize_for_match(taxonomy.parent_category)
+        leaf = normalize_for_match(taxonomy.leaf_category)
+        sub = normalize_for_match(taxonomy.sub_category or "")
+        for template in self.templates:
+            match = template.get("match", {})
+            if normalize_for_match(match.get("source_name", "")) not in {"", source_name}:
+                continue
+            if normalize_for_match(match.get("taxonomy_parent", "")) not in {"", parent}:
+                continue
+            if normalize_for_match(match.get("taxonomy_leaf", "")) not in {"", leaf}:
+                continue
+            if normalize_for_match(match.get("taxonomy_sub", "")) not in {"", sub}:
+                continue
+            return template
+        return None
+
+    def select_template(
+        self,
+        source: SourceProductData,
+        taxonomy: TaxonomyResolution,
+        schema_match: SchemaMatchResult | None = None,
+    ) -> dict[str, Any] | None:
+        custom_template = self.select_custom_template(source, taxonomy)
+        schema_template = self.select_schema_template(schema_match.matched_schema_id if schema_match else None)
+        if schema_template is not None:
+            if custom_template is not None:
+                return self.merge_template_overrides(schema_template, custom_template)
+            return schema_template
+        if custom_template is not None:
+            return {
+                **custom_template,
+                "template_source": "custom",
+                "matched_schema_id": "",
+            }
+        return None
+
+    def select_schema_template(self, schema_id: str | None) -> dict[str, Any] | None:
+        if not schema_id:
+            return None
+        schema = self.schemas_by_id.get(str(schema_id).strip())
+        if schema is None:
+            return None
+        sections: list[dict[str, Any]] = []
+        for section_index, section in enumerate(schema.get("sections", []), start=1):
+            section_title = normalize_whitespace(section.get("title", ""))
+            if not section_title:
+                continue
+            labels = [normalize_whitespace(label) for label in section.get("labels", []) if normalize_whitespace(label)]
+            fields = [
+                {
+                    "key": normalize_for_match(f"{section_title} {label}") or f"schema_{section_index}_{label_index}",
+                    "label": label,
+                    "aliases": [label],
+                    "section_title": section_title,
+                }
+                for label_index, label in enumerate(labels, start=1)
+            ]
+            sections.append({"title": section_title, "fields": fields})
+        return {
+            "template_id": f"schema:{schema_id}",
+            "template_source": "schema_library",
+            "matched_schema_id": schema_id,
+            "preferred_schema_source_files": list(schema.get("source_files", [])),
+            "sections": sections,
+        }
+
+    def merge_template_overrides(self, schema_template: dict[str, Any], custom_template: dict[str, Any]) -> dict[str, Any]:
+        custom_sections = list(custom_template.get("sections", []))
+        merged_sections: list[dict[str, Any]] = []
+        for index, base_section in enumerate(schema_template.get("sections", [])):
+            custom_section = self._match_custom_section(base_section, custom_sections, index)
+            merged_fields: list[dict[str, Any]] = []
+            for field_index, base_field in enumerate(base_section.get("fields", [])):
+                custom_field = self._match_custom_field(base_field, custom_section, field_index)
+                merged_field = dict(base_field)
+                if custom_field:
+                    merged_field.update(
+                        {
+                            "key": custom_field.get("key", merged_field.get("key", "")),
+                            "label": custom_field.get("label", merged_field.get("label", "")),
+                            "resolver": custom_field.get("resolver", merged_field.get("resolver", "")),
+                            "aliases": list(custom_field.get("aliases", merged_field.get("aliases", []))),
+                        }
+                    )
+                merged_fields.append(merged_field)
+            merged_sections.append(
+                {
+                    "title": custom_section.get("title", base_section.get("title", "")) if custom_section else base_section.get("title", ""),
+                    "fields": merged_fields,
+                }
+            )
+        return {
+            **schema_template,
+            "template_source": "schema_library_with_custom_overrides",
+            "custom_template_id": custom_template.get("template_id", ""),
+            "preferred_schema_source_files": dedupe_strings(
+                [
+                    *[str(item) for item in schema_template.get("preferred_schema_source_files", [])],
+                    *[str(item) for item in custom_template.get("preferred_schema_source_files", [])],
+                ]
+            ),
+            "sections": merged_sections,
+        }
+
+    def _match_custom_section(self, base_section: dict[str, Any], custom_sections: list[dict[str, Any]], index: int) -> dict[str, Any] | None:
+        base_title = normalize_for_match(base_section.get("title", ""))
+        for section in custom_sections:
+            if normalize_for_match(section.get("title", "")) == base_title:
+                return section
+        if 0 <= index < len(custom_sections):
+            return custom_sections[index]
+        return None
+
+    def _match_custom_field(
+        self,
+        base_field: dict[str, Any],
+        custom_section: dict[str, Any] | None,
+        index: int,
+    ) -> dict[str, Any] | None:
+        if not custom_section:
+            return None
+        base_label = normalize_for_match(base_field.get("label", ""))
+        for field in custom_section.get("fields", []):
+            if normalize_for_match(field.get("label", "")) == base_label:
+                return field
+        fields = list(custom_section.get("fields", []))
+        if 0 <= index < len(fields):
+            return fields[index]
+        return None
+
+    def preferred_schema_source_files(self, source: SourceProductData, taxonomy: TaxonomyResolution) -> list[str]:
+        template = self.select_custom_template(source, taxonomy)
+        if not template:
+            return []
+        return [str(item).strip() for item in template.get("preferred_schema_source_files", []) if str(item).strip()]
+
+
+def get_characteristics_registry() -> CharacteristicsTemplateRegistry:
+    global _REGISTRY
+    if _REGISTRY is None:
+        _REGISTRY = CharacteristicsTemplateRegistry()
+    return _REGISTRY
+
+
+def build_characteristics_for_product(
+    source: SourceProductData,
+    taxonomy: TaxonomyResolution,
+    schema_match: SchemaMatchResult | None = None,
+) -> tuple[str, dict[str, Any], list[str]]:
+    registry = get_characteristics_registry()
+    template = registry.select_template(source, taxonomy, schema_match=schema_match)
+    if template is None:
+        html = build_characteristics_html(source.spec_sections)
+        diagnostics = {
+            "mode": "raw_spec_sections",
+            "template_id": "",
+            "selection_reason": "no_matching_template",
+            "template_source": "",
+            "matched_schema_id": schema_match.matched_schema_id if schema_match else "",
+            "preferred_schema_source_files": [],
+            "field_count": sum(len(section.items) for section in source.spec_sections),
+            "unresolved_count": 0,
+            "fields": [],
+        }
+        return html, diagnostics, []
+
+    context = _build_resolution_context(source, taxonomy)
+    warnings = [f"characteristics_template_used:{template['template_id']}"]
+    diagnostics_fields: list[dict[str, Any]] = []
+    resolved_sections: list[SpecSection] = []
+    unresolved_count = 0
+    template_source = normalize_whitespace(template.get("template_source")) or "custom"
+    matched_schema_id = normalize_whitespace(template.get("matched_schema_id")) or (schema_match.matched_schema_id if schema_match else "")
+
+    for section in template.get("sections", []):
+        items: list[SpecItem] = []
+        for field in section.get("fields", []):
+            value, resolved_from = _resolve_template_field(context, field)
+            normalized_value = normalize_whitespace(value) or "-"
+            if normalized_value == "-":
+                unresolved_count += 1
+            items.append(SpecItem(label=str(field.get("label", "")).strip(), value=normalized_value))
+            diagnostics_fields.append(
+                {
+                    "section": section.get("title", ""),
+                    "key": field.get("key", ""),
+                    "label": field.get("label", ""),
+                    "value": normalized_value,
+                    "resolved_from": resolved_from,
+                }
+            )
+        resolved_sections.append(SpecSection(section=str(section.get("title", "")).strip(), items=items))
+
+    if unresolved_count:
+        warnings.append(f"characteristics_template_unresolved_fields:{unresolved_count}")
+
+    diagnostics = {
+        "mode": "template",
+        "template_id": template.get("template_id", ""),
+        "selection_reason": (
+            "matched_schema_template_with_custom_overrides"
+            if template_source == "schema_library_with_custom_overrides"
+            else "matched_schema_template"
+            if template_source == "schema_library"
+            else "taxonomy_template_match"
+        ),
+        "template_source": template_source,
+        "matched_schema_id": matched_schema_id,
+        "custom_template_id": template.get("custom_template_id", ""),
+        "preferred_schema_source_files": list(template.get("preferred_schema_source_files", [])),
+        "field_count": len(diagnostics_fields),
+        "unresolved_count": unresolved_count,
+        "fields": diagnostics_fields,
+    }
+    return build_characteristics_html(resolved_sections), diagnostics, warnings
+
+
+def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResolution) -> _ResolutionContext:
+    raw_html = ""
+    raw_path = normalize_whitespace(source.raw_html_path)
+    if raw_path:
+        path = Path(raw_path)
+        if path.exists():
+            raw_html = path.read_text(encoding="utf-8")
+
+    spec_lookup = build_spec_lookup(source.key_specs, source.spec_sections)
+    raw_lookup = _extract_dt_dd_lookup(raw_html)
+    section_lookup = _build_section_lookup(source.spec_sections)
+    offer_titles = _extract_offer_titles(raw_html)
+    raw_text = _extract_raw_text(raw_html)
+    combined_text = normalize_whitespace(
+        " ".join(
+            part
+            for part in [
+                source.name,
+                source.hero_summary,
+                source.presentation_source_text,
+                raw_text,
+                *offer_titles,
+            ]
+            if normalize_whitespace(part)
+        )
+    )
+    return _ResolutionContext(
+        source=source,
+        taxonomy=taxonomy,
+        spec_lookup=spec_lookup,
+        raw_lookup=raw_lookup,
+        section_lookup=section_lookup,
+        raw_html=raw_html,
+        raw_text=raw_text,
+        offer_titles=offer_titles,
+        combined_text=combined_text,
+    )
+
+
+def _extract_dt_dd_lookup(raw_html: str) -> dict[str, str]:
+    if not raw_html:
+        return {}
+    soup = BeautifulSoup(raw_html, "lxml")
+    lookup: dict[str, str] = {}
+    for dt in soup.select("dt"):
+        dd = dt.find_next_sibling("dd")
+        if dd is None:
+            continue
+        key = normalize_for_match(dt.get_text(" ", strip=True))
+        value = normalize_whitespace(dd.get_text(" ", strip=True))
+        if key and value and key not in lookup:
+            lookup[key] = value
+    return lookup
+
+
+def _build_section_lookup(spec_sections: list[SpecSection]) -> dict[str, dict[str, str]]:
+    lookup: dict[str, dict[str, str]] = {}
+    for section in spec_sections:
+        section_key = normalize_for_match(section.section)
+        if not section_key:
+            continue
+        values = lookup.setdefault(section_key, {})
+        for item in section.items:
+            label_key = normalize_for_match(item.label)
+            value = normalize_whitespace(item.value)
+            if label_key and value and label_key not in values:
+                values[label_key] = value
+    return lookup
+
+
+def _extract_offer_titles(raw_html: str) -> list[str]:
+    if not raw_html:
+        return []
+    soup = BeautifulSoup(raw_html, "lxml")
+    return dedupe_strings(node.get("title", "") for node in soup.select(".product-name[title]"))
+
+
+def _extract_raw_text(raw_html: str) -> str:
+    if not raw_html:
+        return ""
+    soup = BeautifulSoup(raw_html, "lxml")
+    return normalize_whitespace(soup.get_text(" ", strip=True))
+
+
+def _resolve_template_field(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    resolver_name = str(field.get("resolver", "")).strip()
+    resolver = _RESOLVERS.get(resolver_name)
+    if resolver is None:
+        aliases = list(field.get("aliases", [])) or [str(field.get("label", "")).strip()]
+        value, source = _first_value_from_aliases(
+            context,
+            aliases,
+            section_name=str(field.get("section_title", "")).strip(),
+        )
+        return value, source or "unresolved"
+    return resolver(context, field)
+
+
+def _first_value_from_aliases(context: _ResolutionContext, aliases: list[str], section_name: str = "") -> tuple[str, str]:
+    if section_name:
+        for alias in aliases:
+            value, source = _section_value(context, section_name, alias)
+            if value:
+                return value, source
+    for alias in aliases:
+        key = normalize_for_match(alias)
+        if key in context.spec_lookup:
+            return context.spec_lookup[key], f"spec_alias:{alias}"
+    for alias in aliases:
+        key = normalize_for_match(alias)
+        if key in context.raw_lookup:
+            return context.raw_lookup[key], f"raw_alias:{alias}"
+    return "", ""
+
+
+def _section_value(context: _ResolutionContext, section_name: str, label: str) -> tuple[str, str]:
+    section_key = normalize_for_match(section_name)
+    label_key = normalize_for_match(label)
+    if section_key in context.section_lookup and label_key in context.section_lookup[section_key]:
+        return context.section_lookup[section_key][label_key], f"section:{section_name}/{label}"
+    for candidate_section in context.source.spec_sections:
+        candidate_key = normalize_for_match(candidate_section.section)
+        if not _section_titles_related(section_key, candidate_key):
+            continue
+        for item in candidate_section.items:
+            item_key = normalize_for_match(item.label)
+            value = normalize_whitespace(item.value)
+            if item_key == label_key and value:
+                return value, f"section_related:{candidate_section.section}/{label}"
+    return "", ""
+
+
+def _value_or_unresolved(value: str, source: str) -> tuple[str, str]:
+    normalized = normalize_whitespace(value)
+    if normalized:
+        return normalized, source or "resolved"
+    return "", "unresolved"
+
+
+def _extract_first_number(value: str) -> float | None:
+    match = re.search(r"\d+(?:[.,]\d+)?", value or "")
+    if not match:
+        return None
+    try:
+        return float(match.group(0).replace(",", "."))
+    except ValueError:
+        return None
+
+
+def _extract_int_from_text(text: str) -> int | None:
+    number = _extract_first_number(text)
+    if number is None:
+        return None
+    return int(round(number))
+
+
+def _tv_inches_int(context: _ResolutionContext) -> tuple[int | None, str]:
+    if context.source.taxonomy_tv_inches:
+        return int(context.source.taxonomy_tv_inches), "taxonomy_tv_inches"
+    value, source = _first_value_from_aliases(context, ["Διαγώνιος", "Διαγώνιος Οθόνης ( Ίντσες )"])
+    parsed = _extract_int_from_text(value)
+    if parsed is not None:
+        return parsed, source
+    title_match = re.search(r"\b(\d{2,3})\s*(?:\"|''|ιντσ|inch|in)\b", context.combined_text, flags=re.IGNORECASE)
+    if title_match:
+        return int(title_match.group(1)), "title_inches"
+    return None, ""
+
+
+def _normalize_panel(value: str) -> str:
+    normalized = normalize_for_match(value)
+    if "oled" in normalized:
+        return "OLED"
+    if "qned" in normalized:
+        return "QNED"
+    if "qled" in normalized:
+        return "QLED"
+    if "mini led" in normalized:
+        return "Mini LED"
+    if "direct led" in normalized or "dled" in normalized or normalized == "led" or normalized.endswith(" led"):
+        return "LED"
+    return normalize_whitespace(value)
+
+
+def _map_resolution(value: str) -> str:
+    normalized = normalize_for_match(value)
+    if "8k" in normalized:
+        return "ULTRA HD ( 8K )"
+    if "4k" in normalized or "ultra hd" in normalized:
+        return "ULTRA HD ( 4K )"
+    if "full hd" in normalized or "1080" in normalized:
+        return "FULL HD"
+    if "hd ready" in normalized:
+        return "HD READY"
+    return normalize_whitespace(value).upper()
+
+
+def _format_pixels(value: str) -> str:
+    match = re.search(r"(\d{3,4})\s*[x×]\s*(\d{3,4})", value or "", flags=re.IGNORECASE)
+    if not match:
+        return ""
+    return f"{match.group(1)} × {match.group(2)}"
+
+
+def _contains_any(text: str, *tokens: str) -> bool:
+    haystack = normalize_for_match(text)
+    return any(normalize_for_match(token) in haystack for token in tokens if token)
+
+
+def _section_titles_related(left: str, right: str) -> bool:
+    if not left or not right:
+        return False
+    if left == right or left in right or right in left:
+        return True
+    left_tokens = {token for token in left.split() if token}
+    right_tokens = {token for token in right.split() if token}
+    if not left_tokens or not right_tokens:
+        return False
+    overlap = len(left_tokens & right_tokens)
+    return overlap >= max(1, min(len(left_tokens), len(right_tokens)) // 2)
+
+
+def _ordered_features(context: _ResolutionContext, candidates: list[tuple[str, tuple[str, ...]]]) -> list[str]:
+    values: list[str] = []
+    for display, tokens in candidates:
+        if any(_contains_any(context.combined_text, token) for token in tokens):
+            values.append(display)
+    return values
+
+
+def _resolve_tv_screen_technology(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    if value:
+        return _normalize_panel(value), source
+    if any(_contains_any(title, "dled", "direct led", "led") for title in context.offer_titles):
+        return "LED", "offer_title:panel"
+    return "", "unresolved"
+
+
+def _resolve_tv_screen_size_inches(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    inches, source = _tv_inches_int(context)
+    return (str(inches), source) if inches is not None else ("", "unresolved")
+
+
+def _resolve_tv_screen_size_cm(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    for title in context.offer_titles:
+        match = re.search(r"(\d+(?:[.,]\d+)?)\s*cm\b", title, flags=re.IGNORECASE)
+        if match:
+            return str(int(float(match.group(1).replace(",", ".")))), "offer_title:cm"
+    inches, source = _tv_inches_int(context)
+    if inches is None:
+        return "", "unresolved"
+    if inches in TV_INCH_TO_CM:
+        return str(TV_INCH_TO_CM[inches]), f"{source}:mapped_cm"
+    return str(int(inches * 2.54)), f"{source}:derived_cm"
+
+
+def _resolve_tv_resolution(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    if value:
+        return _map_resolution(value), source
+    if _contains_any(context.combined_text, "4k", "ultra hd"):
+        return "ULTRA HD ( 4K )", "title_resolution"
+    return "", "unresolved"
+
+
+def _resolve_tv_pixels(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    for candidate in [context.combined_text, *context.offer_titles]:
+        pixels = _format_pixels(candidate)
+        if pixels:
+            return pixels, "text_pixels"
+    resolution, source = _resolve_tv_resolution(context, {})
+    if resolution:
+        return RESOLUTION_TO_PIXELS.get(normalize_for_match(resolution), ""), f"{source}:mapped_pixels"
+    return "", "unresolved"
+
+
+def _resolve_tv_image_features(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    features = _ordered_features(
+        context,
+        [
+            ("FILMMAKER MODE", ("filmmaker",)),
+            ("Direct Full Array", ("direct full array", "dfa")),
+            ("4K AI Upscaling", ("ai 4k upscaler", "4k upscaler", "4k ai upscaling")),
+            ("Dolby Vision", ("dolby vision",)),
+        ],
+    )
+    return (",".join(features), "combined_text:features") if features else ("", "unresolved")
+
+
+def _resolve_tv_refresh_rate(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    if not value:
+        return "", "unresolved"
+    values = [int(part) for part in re.findall(r"\d+", value)]
+    if not values:
+        return "", "unresolved"
+    return str(max(values)), source
+
+
+def _resolve_tv_hdr(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    haystack = normalize_whitespace(" ".join(part for part in [value, context.combined_text] if part))
+    tokens = _ordered_features(
+        _ResolutionContext(
+            source=context.source,
+            taxonomy=context.taxonomy,
+            spec_lookup=context.spec_lookup,
+            raw_lookup=context.raw_lookup,
+            section_lookup=context.section_lookup,
+            raw_html=context.raw_html,
+            raw_text=context.raw_text,
+            offer_titles=context.offer_titles,
+            combined_text=haystack,
+        ),
+        [
+            ("HDR10", ("hdr10",)),
+            ("HDR10+", ("hdr10+",)),
+            ("Dolby Vision ™HDR", ("dolby vision",)),
+            ("HLG", ("hlg",)),
+        ],
+    )
+    return (",".join(tokens), source or "combined_text:hdr") if tokens else ("", "unresolved")
+
+
+def _resolve_tv_energy_class(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    return _value_or_unresolved(value, source)
+
+
+def _resolve_tv_energy_class_hdr(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Ενεργειακή Κλάση HDR"])
+    return _value_or_unresolved(value, source)
+
+
+def _resolve_tv_energy_sdr(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Κατανάλωση Ενέργειας σε Λειτουργία SDR (kWh/1000h)"])
+    return _value_or_unresolved(value, source)
+
+
+def _resolve_tv_energy_hdr(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Κατανάλωση Ενέργειας σε Λειτουργία HDR (kWh/1000h)"])
+    return _value_or_unresolved(value, source)
+
+
+def _resolve_tv_tuner(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    if not value:
+        return "", "unresolved"
+    key = re.sub(r"[\s,/-]+", "", normalize_for_match(value))
+    parts: list[str] = []
+    if "dvbt2" in key:
+        parts.append("DVB-T2")
+    if "dvbc" in key:
+        parts.append("C")
+    if "dvbs2" in key:
+        parts.append("S2")
+    return ("/".join(parts), source) if parts else (normalize_whitespace(value), source)
+
+
+def _resolve_tv_sound_system(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    parts: list[str] = []
+    channels_value, channels_source = _first_value_from_aliases(context, ["Κανάλια"])
+    if channels_value:
+        channels = normalize_whitespace(channels_value).replace(" ", "")
+        if re.fullmatch(r"\d+(?:\.\d+)?", channels):
+            parts.append(f"{channels}ch")
+        else:
+            parts.append(channels)
+    tokens = _ordered_features(
+        context,
+        [
+            ("Dolby Atmos", ("dolby atmos",)),
+            ("Dolby Audio", ("dolby audio",)),
+            ("DTS:X", ("dts:x",)),
+            ("DTS Virtual:X", ("dts virtual:x", "dts virtual x")),
+        ],
+    )
+    parts.extend(token for token in tokens if token not in parts)
+    return (",".join(parts), channels_source or "combined_text:sound") if parts else ("", "unresolved")
+
+
+def _resolve_tv_processor(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    match = re.search(r"hi[\s-]?view ai engine", context.combined_text, flags=re.IGNORECASE)
+    return ("Hi-View AI Engine", "combined_text:processor") if match else ("", "unresolved")
+
+
+def _resolve_tv_smart_tv(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    if _contains_any(context.combined_text, "smart tv", "vidaa", "netflix", "youtube"):
+        return "Υποστηρίζεται", "combined_text:smart_tv"
+    return "", "unresolved"
+
+
+def _resolve_tv_os(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    match = re.search(r"vidaa\s*u?\s*(\d+(?:\.\d+)?)", context.combined_text, flags=re.IGNORECASE)
+    if match:
+        return f"VIDAA U{match.group(1)}", "combined_text:os_version"
+    if _contains_any(context.combined_text, "vidaa smart os", "vidaa"):
+        return "VIDAA", "combined_text:os"
+    return "", "unresolved"
+
+
+def _resolve_tv_smart_functions(_context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return "", "unresolved"
+
+
+def _resolve_tv_extra_functions(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    values = _ordered_features(
+        context,
+        [
+            ("AI Energy Mode", ("ai energy mode",)),
+            ("AI Sports Mode", ("ai sports mode",)),
+            ("AnyView Cast", ("anyview cast",)),
+            ("Voice Remote", ("voice remote",)),
+            ("Gaming Mode", ("gaming mode", "game mode plus")),
+            ("Game Bar", ("game bar",)),
+        ],
+    )
+    return (",".join(values), "combined_text:extra_functions") if values else ("", "unresolved")
+
+
+def _resolve_tv_hdmi(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Σύνολο Θυρών HDMI"])
+    count = _extract_int_from_text(value)
+    if count is None:
+        for title in context.offer_titles:
+            match = re.search(r"(\d+)\s*x\s*hdmi", title, flags=re.IGNORECASE)
+            if match:
+                count = int(match.group(1))
+                source = "offer_title:hdmi_count"
+                break
+    if count is None:
+        return "", "unresolved"
+    parts = [f"Ναι,{count}"]
+    if _contains_any(context.combined_text, "earc", "e arc"):
+        parts.append("eARC")
+    return ",".join(parts), source or "combined_text:hdmi"
+
+
+def _resolve_tv_bluetooth(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Bluetooth"])
+    if _contains_any(value, "ναι", "yes", "bluetooth") or _contains_any(context.combined_text, "bluetooth", " bt "):
+        return "Bluetooth", source or "combined_text:bluetooth"
+    return "", "unresolved"
+
+
+def _resolve_tv_usb(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Πλήθος USB", "USB"])
+    count = _extract_int_from_text(value)
+    if count is None:
+        for title in context.offer_titles:
+            match = re.search(r"(\d+)\s*x\s*usb", title, flags=re.IGNORECASE)
+            if match:
+                count = int(match.group(1))
+                source = "offer_title:usb_count"
+                break
+    return (f"Ναι,{count}", source or "combined_text:usb") if count is not None else ("", "unresolved")
+
+
+def _resolve_tv_io(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    values = _ordered_features(
+        context,
+        [
+            ("ALLM", ("allm",)),
+            ("VRR", ("vrr",)),
+            ("CI+", ("ci+",)),
+        ],
+    )
+    return (",".join(values), "combined_text:io") if values else ("", "unresolved")
+
+
+def _resolve_tv_equipment(_context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return "", "unresolved"
+
+
+def _resolve_tv_appearance(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    values = _ordered_features(
+        context,
+        [
+            ("Bezel-less", ("bezel-less", "bezel less")),
+        ],
+    )
+    return (",".join(values), "combined_text:appearance") if values else ("", "unresolved")
+
+
+def _resolve_tv_vesa(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    match = re.search(r"(\d+)\s*[x×]\s*(\d+)", value or "", flags=re.IGNORECASE)
+    if not match:
+        return "", "unresolved"
+    dims = sorted([int(match.group(1)), int(match.group(2))])
+    return f"{dims[0]} × {dims[1]}", source
+
+
+def _resolve_tv_color(_context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return "", "unresolved"
+
+
+def _resolve_tv_weight_with_stand(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    number = _extract_first_number(value)
+    if number is None:
+        return "", "unresolved"
+    rounded = int(round(number))
+    return str(rounded), source
+
+
+def _resolve_tv_country(_context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return "", "unresolved"
+
+
+def _resolve_tv_warranty(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    match = re.search(r"(\d+)\s+χρόνια\s+εγγύηση", context.raw_html, flags=re.IGNORECASE)
+    if not match:
+        match = re.search(r"εγγύηση[^0-9]{0,25}(\d+)\s+χρόν", context.raw_html, flags=re.IGNORECASE)
+    if match:
+        return f"{match.group(1)} έτη", "raw_html:warranty"
+    return "", "unresolved"
+
+
+def _resolve_tv_dimensions_with_stand(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    width, width_source = _section_value(context, "Διαστάσεις (με Βάση)", "Πλάτος")
+    height, height_source = _section_value(context, "Διαστάσεις (με Βάση)", "Ύψος")
+    depth, depth_source = _section_value(context, "Διαστάσεις (με Βάση)", "Πάχος")
+    if not width or not height or not depth:
+        return "", "unresolved"
+
+    def to_cm(value: str) -> str:
+        number = _extract_first_number(value)
+        if number is None:
+            return ""
+        if "mm" in normalize_for_match(value):
+            number = number / 10
+        return f"{number:.2f}"
+
+    values = [to_cm(height), to_cm(width), to_cm(depth)]
+    if any(not item for item in values):
+        return "", "unresolved"
+    source = ",".join(item for item in [height_source, width_source, depth_source] if item)
+    return " × ".join(values), source
+
+
+_RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, str]]] = {
+    "tv_screen_technology": _resolve_tv_screen_technology,
+    "tv_screen_size_inches": _resolve_tv_screen_size_inches,
+    "tv_screen_size_cm": _resolve_tv_screen_size_cm,
+    "tv_resolution": _resolve_tv_resolution,
+    "tv_pixels": _resolve_tv_pixels,
+    "tv_image_features": _resolve_tv_image_features,
+    "tv_refresh_rate": _resolve_tv_refresh_rate,
+    "tv_hdr": _resolve_tv_hdr,
+    "tv_energy_class": _resolve_tv_energy_class,
+    "tv_energy_class_hdr": _resolve_tv_energy_class_hdr,
+    "tv_energy_sdr": _resolve_tv_energy_sdr,
+    "tv_energy_hdr": _resolve_tv_energy_hdr,
+    "tv_tuner": _resolve_tv_tuner,
+    "tv_sound_system": _resolve_tv_sound_system,
+    "tv_processor": _resolve_tv_processor,
+    "tv_smart_tv": _resolve_tv_smart_tv,
+    "tv_os": _resolve_tv_os,
+    "tv_smart_functions": _resolve_tv_smart_functions,
+    "tv_extra_functions": _resolve_tv_extra_functions,
+    "tv_hdmi": _resolve_tv_hdmi,
+    "tv_bluetooth": _resolve_tv_bluetooth,
+    "tv_usb": _resolve_tv_usb,
+    "tv_io": _resolve_tv_io,
+    "tv_equipment": _resolve_tv_equipment,
+    "tv_appearance": _resolve_tv_appearance,
+    "tv_vesa": _resolve_tv_vesa,
+    "tv_color": _resolve_tv_color,
+    "tv_weight_with_stand": _resolve_tv_weight_with_stand,
+    "tv_country": _resolve_tv_country,
+    "tv_warranty": _resolve_tv_warranty,
+    "tv_dimensions_with_stand": _resolve_tv_dimensions_with_stand,
+}

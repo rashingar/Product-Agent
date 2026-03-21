@@ -8,7 +8,8 @@ from urllib.parse import urljoin
 
 NBSP_PATTERN = re.compile(r"[\u00A0\u202F\u2007]")
 WS_PATTERN = re.compile(r"\s+")
-DASH_NULLS = {"", "-", "–", "—", "−"}
+DASH_NULLS = {"", "-", "—", "–", "β€“", "β€”", "β’"}
+GREEK_MATCH_RANGES = "\u0370-\u03ff\u1f00-\u1fff"
 
 _GREEK_TRANSLIT = {
     "α": "a",
@@ -36,6 +37,31 @@ _GREEK_TRANSLIT = {
     "χ": "ch",
     "ψ": "ps",
     "ω": "o",
+    "Ξ±": "a",
+    "Ξ²": "v",
+    "Ξ³": "g",
+    "Ξ΄": "d",
+    "Ξµ": "e",
+    "Ξ¶": "z",
+    "Ξ·": "i",
+    "ΞΈ": "th",
+    "ΞΉ": "i",
+    "ΞΊ": "k",
+    "Ξ»": "l",
+    "ΞΌ": "m",
+    "Ξ½": "n",
+    "ΞΎ": "x",
+    "ΞΏ": "o",
+    "Ο€": "p",
+    "Ο": "r",
+    "Οƒ": "s",
+    "Ο‚": "s",
+    "Ο„": "t",
+    "Ο…": "y",
+    "Ο†": "f",
+    "Ο‡": "ch",
+    "Ο": "ps",
+    "Ο‰": "o",
 }
 
 
@@ -45,10 +71,8 @@ def strip_nbsp(text: str | None) -> str:
     return NBSP_PATTERN.sub(" ", unescape(str(text)))
 
 
-
 def normalize_whitespace(text: str | None) -> str:
     return WS_PATTERN.sub(" ", strip_nbsp(text)).strip()
-
 
 
 def safe_text(node: object) -> str:
@@ -59,19 +83,17 @@ def safe_text(node: object) -> str:
     return normalize_whitespace(str(node))
 
 
-
 def make_absolute_url(url: str | None, base: str) -> str:
     if not url:
         return ""
     return urljoin(base, url)
 
 
-
 def parse_euro_price(text: str | None) -> float | None:
     if not text:
         return None
     cleaned_text = strip_nbsp(text)
-    candidates = re.findall(r"(?:\d{1,3}(?:[.\s]\d{3})*|\d+)(?:,\d{1,2})?\s*€?", cleaned_text)
+    candidates = re.findall(r"(?:\d{1,3}(?:[.\s]\d{3})*|\d+)(?:,\d{1,2})?\s*(?:€|β‚¬)?", cleaned_text)
     if not candidates:
         return None
     for candidate in reversed(candidates):
@@ -91,17 +113,14 @@ def parse_euro_price(text: str | None) -> float | None:
     return None
 
 
-
 def nullify_dash_values(value: str | None) -> str | None:
     normalized = normalize_whitespace(value)
     return None if normalized in DASH_NULLS else normalized
 
 
-
 def _strip_accents(text: str) -> str:
     decomposed = unicodedata.normalize("NFD", text)
     return "".join(ch for ch in decomposed if unicodedata.category(ch) != "Mn")
-
 
 
 def normalize_for_match(text: str | None) -> str:
@@ -110,9 +129,8 @@ def normalize_for_match(text: str | None) -> str:
         return ""
     text = _strip_accents(text).lower()
     text = text.replace("&", " και ")
-    text = re.sub(r"[^a-z0-9α-ω\s]+", " ", text, flags=re.IGNORECASE)
+    text = re.sub(fr"[^a-z0-9{GREEK_MATCH_RANGES}\s]+", " ", text, flags=re.IGNORECASE)
     return normalize_whitespace(text)
-
 
 
 def slugify_greek_for_seo(text: str | None) -> str:
@@ -120,7 +138,7 @@ def slugify_greek_for_seo(text: str | None) -> str:
     if not text:
         return ""
     text = _strip_accents(text).lower()
-    text = text.replace("ου", "ou")
+    text = text.replace("ου", "ou").replace("ΞΏΟ…", "ou")
     text = re.sub(r"(?<=\d)[.,](?=\d)", "", text)
     chars: list[str] = []
     for ch in text:
@@ -136,7 +154,6 @@ def slugify_greek_for_seo(text: str | None) -> str:
     return slug
 
 
-
 def dedupe_urls_preserve_order(urls: Iterable[str]) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
@@ -147,7 +164,6 @@ def dedupe_urls_preserve_order(urls: Iterable[str]) -> list[str]:
         seen.add(url)
         out.append(url)
     return out
-
 
 
 def clean_breadcrumbs(items: list[str]) -> list[str]:
@@ -162,7 +178,6 @@ def clean_breadcrumbs(items: list[str]) -> list[str]:
         cleaned.append(value)
         previous = value
     return cleaned
-
 
 
 def split_visible_lines(text: str | None) -> list[str]:
