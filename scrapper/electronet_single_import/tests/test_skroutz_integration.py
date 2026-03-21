@@ -219,13 +219,22 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(tmp_path: Path, monke
     for model in SAMPLES:
         prepare_result = prepare_workflow(make_cli(model))
         source_payload = json.loads((prepare_result["scrape_dir"] / f"{model}.source.json").read_text(encoding="utf-8"))
+        report = json.loads((prepare_result["scrape_dir"] / f"{model}.report.json").read_text(encoding="utf-8"))
+        taxonomy_diagnostics = report["skroutz_taxonomy_diagnostics"]
         assert source_payload["source_name"] == "skroutz"
         assert len(source_payload["gallery_images"]) == SAMPLES[model]["photos"]
+        assert taxonomy_diagnostics["raw_category_tag"] == source_payload["category_tag_text"]
+        assert taxonomy_diagnostics["raw_category_href"] == source_payload["category_tag_href"]
+        assert taxonomy_diagnostics["normalized_href_slug"] == source_payload["category_tag_slug"]
+        assert taxonomy_diagnostics["matched_rule"] == source_payload["taxonomy_rule_id"]
+        assert taxonomy_diagnostics["source_category"] == source_payload["taxonomy_source_category"]
+        assert taxonomy_diagnostics["match_type"] == source_payload["taxonomy_match_type"]
+        assert taxonomy_diagnostics["ambiguity"] == source_payload["taxonomy_ambiguity"]
+        assert taxonomy_diagnostics["escalation_reason"] == source_payload["taxonomy_escalation_reason"]
         if SAMPLES[model]["sections"] > 0:
             assert [item["local_filename"] for item in source_payload["besco_images"]] == [
                 f"besco{index}.jpg" for index in range(1, SAMPLES[model]["sections"] + 1)
             ]
-            report = json.loads((prepare_result["scrape_dir"] / f"{model}.report.json").read_text(encoding="utf-8"))
             assert report["sections_extracted"] == SAMPLES[model]["sections"]
             assert report["section_extraction_window"]["start_anchor"] == "Περιγραφή"
             assert report["section_extraction_window"]["stop_anchor"] == "Κατασκευαστής"

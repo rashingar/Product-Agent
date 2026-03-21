@@ -103,6 +103,16 @@ class SourceProductData:
     url: str = ""
     canonical_url: str = ""
     breadcrumbs: list[str] = field(default_factory=list)
+    skroutz_family: str = ""
+    category_tag_text: str = ""
+    category_tag_href: str = ""
+    category_tag_slug: str = ""
+    taxonomy_source_category: str = ""
+    taxonomy_match_type: str = ""
+    taxonomy_rule_id: str = ""
+    taxonomy_ambiguity: bool = False
+    taxonomy_escalation_reason: str = ""
+    taxonomy_tv_inches: Optional[int] = None
     product_code: str = ""
     brand: str = ""
     name: str = ""
@@ -132,6 +142,16 @@ class SourceProductData:
             "url": self.url,
             "canonical_url": self.canonical_url,
             "breadcrumbs": self.breadcrumbs,
+            "skroutz_family": self.skroutz_family,
+            "category_tag_text": self.category_tag_text,
+            "category_tag_href": self.category_tag_href,
+            "category_tag_slug": self.category_tag_slug,
+            "taxonomy_source_category": self.taxonomy_source_category,
+            "taxonomy_match_type": self.taxonomy_match_type,
+            "taxonomy_rule_id": self.taxonomy_rule_id,
+            "taxonomy_ambiguity": self.taxonomy_ambiguity,
+            "taxonomy_escalation_reason": self.taxonomy_escalation_reason,
+            "taxonomy_tv_inches": self.taxonomy_tv_inches,
             "product_code": self.product_code,
             "brand": self.brand,
             "name": self.name,

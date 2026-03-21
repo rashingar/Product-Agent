@@ -1,0 +1,111 @@
+import csv
+import json
+from pathlib import Path
+
+from electronet_single_import.parser_product_skroutz import SkroutzProductParser
+from electronet_single_import.taxonomy import TaxonomyResolver
+
+REPO_ROOT = Path(r"c:\Users\user\Documents\VS_Projects\tranoulis\Product-Agent")
+FIXTURES_ROOT = REPO_ROOT / "scrapper" / "electronet_single_import" / "tests" / "fixtures" / "skroutz"
+REGRESSION_FIXTURE = FIXTURES_ROOT / "skroutz_taxonomy_regression.csv"
+TAXONOMY_CASES_ROOT = FIXTURES_ROOT / "taxonomy_cases"
+
+
+def read_taxonomy_rows() -> list[dict[str, str]]:
+    with REGRESSION_FIXTURE.open("r", encoding="utf-8-sig", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def build_minimal_taxonomy_html(row: dict[str, str]) -> str:
+    title = row["name"]
+    category_text = row["category_tag_text"]
+    category_href = row["category_tag_href"]
+    manufacturer = row["manufacturer"]
+    url = row["skroutz_product_url"]
+    model = row["model"]
+    return (
+        "<!DOCTYPE html>"
+        "<html lang=\"el\">"
+        "<head>"
+        "<meta charset=\"utf-8\" />"
+        f"<title>{title}</title>"
+        f"<link rel=\"canonical\" href=\"{url}\" />"
+        "<script id=\"product-schema\" type=\"application/ld+json\">"
+        f"{json.dumps({'@context': 'https://schema.org', '@type': 'Product', 'name': title, 'brand': {'@type': 'Brand', 'name': manufacturer}, 'mpn': model, 'sku': model, 'category': category_text, 'image': [f'https://static.skroutz.gr/mock/{model}/1.jpg', f'https://static.skroutz.gr/mock/{model}/2.jpg'], 'offers': {'@type': 'Offer', 'price': '199.00', 'priceCurrency': 'EUR'}}, ensure_ascii=False)}"
+        "</script>"
+        "</head>"
+        "<body>"
+        "<div class=\"sku-title\">"
+        f"<a class=\"category-tag\" href=\"{category_href}\">{category_text}</a>"
+        f"<h1 class=\"page-title\">{title}<small class=\"sku-code\">Κωδικός: {model}</small></h1>"
+        "</div>"
+        f"<a class=\"brand-page-link\"><span>{manufacturer}</span></a>"
+        f"<div class=\"summary\"><div class=\"description long\"><div class=\"body-text\">{title}</div></div></div>"
+        f"<div id=\"prices\"><div class=\"product-name\" title=\"{title}\"></div></div>"
+        "<div class=\"prices\"><div class=\"final-price\"><span class=\"integer-part\">199</span><span class=\"decimal-part\">00</span></div></div>"
+        "<div id=\"specs\"><div class=\"spec-groups\">"
+        "<div class=\"spec-details\"><h3>Χαρακτηριστικά</h3>"
+        f"<dl><dt>Κατασκευαστής</dt><dd>{manufacturer or 'Άγνωστο'}</dd></dl>"
+        f"<dl><dt>Μοντέλο</dt><dd>{model}</dd></dl>"
+        "</div>"
+        "</div></div>"
+        "</body>"
+        "</html>"
+    )
+
+
+def test_taxonomy_regression_fixture_resolves_expected_categories() -> None:
+    parser = SkroutzProductParser()
+    resolver = TaxonomyResolver()
+    rows = read_taxonomy_rows()
+    skipped = [(row["model"], row["skip_reason"]) for row in rows if row.get("skip_reason")]
+
+    assert skipped == [("231412", "mapping_conflict_live_page_45cm_freestanding_not_tabletop")]
+    assert len(rows) == 164
+    assert all(row["expected_sub_category"] != "4K UHD" for row in rows if row["expected_leaf_category"] == "Τηλεοράσεις")
+
+    for row in rows:
+        if row.get("skip_reason"):
+            continue
+        parsed = parser.parse(build_minimal_taxonomy_html(row), row["skroutz_product_url"])
+        taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url, parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
+
+        assert parsed.source.page_type == "product"
+        assert parsed.source.skroutz_family == row["family_key"]
+        assert parsed.source.category_tag_text == row["category_tag_text"]
+        assert parsed.source.category_tag_href == row["category_tag_href"]
+        assert taxonomy.parent_category == row["expected_parent_category"]
+        assert taxonomy.leaf_category == row["expected_leaf_category"]
+        assert (taxonomy.sub_category or "") == row["expected_sub_category"]
+        assert parsed.source.taxonomy_source_category == row["expected_source_category"]
+        assert parsed.source.taxonomy_match_type == row["expected_match_type"]
+
+
+def test_representative_taxonomy_html_fixtures_cover_supported_skroutz_combos() -> None:
+    parser = SkroutzProductParser()
+    resolver = TaxonomyResolver()
+    index = json.loads((TAXONOMY_CASES_ROOT / "index.json").read_text(encoding="utf-8"))
+
+    assert len(index) == 29
+    assert any(item["captured_live"] for item in index)
+    assert any(not item["captured_live"] for item in index)
+
+    for entry in index:
+        meta = json.loads((TAXONOMY_CASES_ROOT / entry["meta"]).read_text(encoding="utf-8"))
+        html = (TAXONOMY_CASES_ROOT / entry["html"]).read_text(encoding="utf-8")
+        parsed = parser.parse(html, meta["source_url"])
+        taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url, parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
+
+        assert parsed.source.page_type == "product"
+        assert parsed.source.skroutz_family == meta["family_key"]
+        assert parsed.source.category_tag_text == meta["category_tag_text"]
+        assert parsed.source.category_tag_href == meta["category_tag_href"]
+        assert parsed.source.category_tag_slug == meta["normalized_category_slug"]
+        assert parsed.source.presentation_source_text
+        assert parsed.source.gallery_images
+        assert parsed.source.spec_sections
+        assert taxonomy.parent_category == meta["expected_parent_category"]
+        assert taxonomy.leaf_category == meta["expected_leaf_category"]
+        assert (taxonomy.sub_category or "") == meta["expected_sub_category"]
+        assert parsed.source.taxonomy_source_category == meta["expected_source_category"]
+        assert parsed.source.taxonomy_match_type == meta["expected_match_type"]

@@ -15,6 +15,7 @@ from .parser_product_electronet import ElectronetProductParser
 from .parser_product_skroutz import SkroutzProductParser
 from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
+from .skroutz_taxonomy import serialize_source_category
 from .source_detection import detect_source, validate_url_scope
 from .taxonomy import TaxonomyResolver
 from .utils import SCHEMA_LIBRARY_PATH, build_model_output_dir, write_json, write_text
@@ -108,7 +109,8 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
     else:
         apply_skroutz_contract_hints(cli, parsed)
         if parsed.source.page_type != "product":
-            raise RuntimeError("Unsupported Skroutz page type")
+            detail = parsed.source.taxonomy_escalation_reason or "unsupported_skroutz_page_type"
+            raise RuntimeError(f"Unsupported Skroutz page type: {detail}")
     if not parsed.source.name and not parsed.source.spec_sections:
         raise RuntimeError("Total parse failure")
 
@@ -327,6 +329,23 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
         },
         "taxonomy_resolution": taxonomy.to_dict(),
         "schema_resolution": schema_match.to_dict(),
+        "skroutz_taxonomy_diagnostics": {
+            "family_key": parsed.source.skroutz_family,
+            "raw_category_tag": parsed.source.category_tag_text,
+            "raw_category_href": parsed.source.category_tag_href,
+            "normalized_href_slug": parsed.source.category_tag_slug,
+            "matched_rule": parsed.source.taxonomy_rule_id,
+            "source_category": parsed.source.taxonomy_source_category
+            or serialize_source_category(
+                taxonomy.parent_category,
+                taxonomy.leaf_category,
+                [taxonomy.sub_category] if taxonomy.sub_category else [],
+            ),
+            "match_type": parsed.source.taxonomy_match_type or ("exact_category" if taxonomy.parent_category and taxonomy.leaf_category else ""),
+            "tv_inches": parsed.source.taxonomy_tv_inches,
+            "ambiguity": parsed.source.taxonomy_ambiguity,
+            "escalation_reason": parsed.source.taxonomy_escalation_reason,
+        },
         "unsupported_features": [],
         "critical_extractors": {
             "product_code": parsed.provenance.get("product_code", "missing"),

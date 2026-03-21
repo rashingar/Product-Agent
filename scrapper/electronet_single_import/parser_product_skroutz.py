@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup, Tag
 
 from .models import FieldDiagnostic, GalleryImage, ParsedProduct, SelectorTraceEntry, SourceProductData, SpecItem, SpecSection
 from .normalize import clean_breadcrumbs, dedupe_urls_preserve_order, make_absolute_url, normalize_for_match, normalize_whitespace, parse_euro_price, safe_text
+from .skroutz_taxonomy import classify_skroutz_taxonomy, normalize_category_href_slug, serialize_source_category
 from .utils import utcnow_iso
 
 INTERSTITIAL_MARKERS = {"just a moment", "enable javascript and cookies", "περιμένετε"}
@@ -24,31 +25,146 @@ SUMMARY_PAIR_RE = re.compile(r"([^:]{2,80}?):\s*(.+?)(?=(?:\s+[A-Za-zΑ-ΩΆ-Ώ�
 SKROUTZ_FAMILIES: dict[str, dict[str, Any]] = {
     "soundbar": {
         "category_labels": {"Soundbar", "Soundbars", "Sound Bars"},
+        "category_href_tokens": {"soundbar"},
+        "title_tokens": {"soundbar"},
         "breadcrumbs": ["Αρχική", "ΕΙΚΟΝΑ & ΗΧΟΣ", "Audio Systems", "Sound Bars"],
         "sections": [],
+        "spec_mode": "custom",
+        "taxonomy_mode": "family",
     },
     "coffee_filter": {
         "category_labels": {"Καφετιέρες Φίλτρου"},
+        "category_href_tokens": {"kafetieres filtrou"},
+        "title_tokens": {"kafetiera filtrou", "kafetier", "filtr"},
         "breadcrumbs": ["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Καφές-Ροφήματα-Χυμοί", "Καφετιέρες Φίλτρου"],
         "sections": [
             ("Επισκόπηση Προϊόντος", ["Χωρητικότητα σε Φλυτζάνια", "Υλικό Κανάτας", "Ισχύς σε Watts", "Χωρητικότητα Δοχείου Νερού σε Λίτρα", "Ένδειξη Στάθμης Νερού", "Αποσπώμενο Δοχείο Νερού", "Θερμαινόμενη Βάση", "Ενδεικτική Λυχνία Λειτουργίας", "Ηχητικό Σήμα Ειδοποίησης", "Αποθήκευση Καλωδίου"]),
             ("Ειδικές Λειτουργίες", ["Διακοπή Σταξίματος", "Λειτουργία Aroma", "Αυτόματη Διακοπή Λειτουργίας", "Χρονοδιακόπτης Λειτουργίας"]),
             ("Γενικά Χαρακτηριστικά", ["Χρώμα", "Βάρος Συσκευής σε Κιλά", "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β", "Εγγύηση Κατασκευαστή"]),
         ],
+        "spec_mode": "custom",
+        "taxonomy_mode": "family",
     },
     "kettle": {
         "category_labels": {"Βραστήρες"},
+        "category_href_tokens": {"brasthres", "vrastires"},
+        "title_tokens": {"vrastir", "brasth"},
         "breadcrumbs": ["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Συσκευές Κουζίνας", "Βραστήρες"],
         "sections": [
             ("Επισκόπηση Προϊόντος", ["Χωρητικότητα σε Λίτρα", "Ισχύς σε Watts", "Αποσπώμενη Βάση", "Βάση 360 Μοιρών", "Φίλτρο Νερού", "Άνοιγμα του Καπακιού με το Πάτημα ενός Κουμπιού", "Καλυμμένη Αντίσταση", "Υλικό Κατασκευής", "Αποθήκευση Καλωδίου"]),
             ("Λειτουργίες - Ενδείξεις", ["Ένδειξη Στάθμης Νερού", "Ένδειξη Λειτουργίας", "Ηχητικό Σήμα Ειδοποίησης", "Επιλογές Θερμοκρασίας Βρασμού", "Λειτουργία Διατήρησης Θερμοκρασίας", "Αυτόματος Τερματισμός Λειτουργίας", "Προστασία από Βρασμό Χωρίς Νερό"]),
             ("Γενικά Χαρακτηριστικά", ["Χρώμα", "Βάρος Συσκευής σε Κιλά", "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β", "Εγγύηση Κατασκευαστή"]),
         ],
+        "spec_mode": "custom",
+        "taxonomy_mode": "family",
     },
     "tabletop_hob": {
         "category_labels": {"Επιτραπέζιες Εστίες"},
+        "category_href_tokens": {"epitrapezies esties"},
+        "title_tokens": {"epitrapezia estia", "estia"},
         "breadcrumbs": ["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Μικροί Μάγειρες", "Εστίες"],
         "sections": [("Χαρακτηριστικά Μοντέλου", ["Κατασκευαστής", "Μοντέλο"]), ("Γενικά Χαρακτηριστικά", ["Εστία"]), ("Διαστάσεις", ["Πλάτος", "Βάθος"])],
+        "spec_mode": "custom",
+        "taxonomy_mode": "family",
+    },
+    "television": {
+        "category_labels": {"Τηλεοράσεις"},
+        "category_href_tokens": {"tileoraseis", "television"},
+        "title_tokens": {"tileorasi", "tv"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "speaker": {
+        "category_labels": {"Ηχεία", "Karaoke"},
+        "category_href_tokens": {"hxeia", "ixeia", "audio systems", "speaker", "speakers", "karaoke"},
+        "title_tokens": {"icheio", "ixeio", "speaker", "karaoke"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "dishwasher": {
+        "category_labels": {"Πλυντήρια Πιάτων"},
+        "category_href_tokens": {"plyntiria piaton", "plynthria piatwn", "dishwashers"},
+        "title_tokens": {"plyntirio piaton", "dishwasher"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "cooker": {
+        "category_labels": {"Κουζίνες", "Κουζίνες & Φούρνοι"},
+        "category_href_tokens": {"kouzines", "koyzines"},
+        "title_tokens": {"kouzina"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "refrigeration": {
+        "category_labels": {"Ψυγεία", "Καταψύκτες", "Ψυγεία & Καταψύκτες"},
+        "category_href_tokens": {"psygeia", "psigeia", "katapsyktes", "katapsiktes"},
+        "title_tokens": {"psygei", "katapsykt", "fridge", "freezer"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "laundry": {
+        "category_labels": {"Πλυντήρια Ρούχων", "Στεγνωτήρια Ρούχων", "Πλυντήρια-Στεγνωτήρια"},
+        "category_href_tokens": {"plyntiria stegnotiria", "plynthria stegnwthria", "plyntiria", "plynthria", "stegnotiria"},
+        "title_tokens": {"plyntir", "stegnotir", "washer", "dryer"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "built_in_appliance": {
+        "category_labels": {"Εντοιχιζόμενες Συσκευές"},
+        "category_href_tokens": {"entoixizomenes", "entoixizomenes syskeyes", "entoichizomenes syskeves"},
+        "title_tokens": {"entoichiz", "built in"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "hood": {
+        "category_labels": {"Απορροφητήρες"},
+        "category_href_tokens": {"aporrofitires"},
+        "title_tokens": {"aporrofit"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "home_appliance_accessory": {
+        "category_labels": {"Αξεσουάρ Οικιακών Συσκευών"},
+        "category_href_tokens": {"axesouar oikiakon syskeyon", "aksesouar oikiakon syskevon"},
+        "title_tokens": {"syndetiko", "axesouar", "aksesouar"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "heat_pump": {
+        "category_labels": {"Αντλίες Θερμότητας"},
+        "category_href_tokens": {"antlies thermotitas"},
+        "title_tokens": {"antlia thermotitas", "heat pump"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
+    "lpg_heater": {
+        "category_labels": {"Θερμαντικά"},
+        "category_href_tokens": {"thermantika"},
+        "title_tokens": {"ygraeri", "soba", "thermantik"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
     },
 }
 
@@ -69,14 +185,13 @@ class SkroutzProductParser:
         title, title_source, title_trace = self._extract_title(soup, jsonld)
         provenance["name"] = title_source
         diagnostics["name"] = self._make_diagnostic(title, title_source, 0.99 if title else 0.0, title_trace)
-        category_hint, category_source, category_trace = self._extract_category_hint(soup, jsonld)
-        family = self._resolve_family(category_hint, title)
-        if not family:
-            warnings.append("unsupported_skroutz_category")
 
-        breadcrumbs = clean_breadcrumbs(SKROUTZ_FAMILIES.get(family, {}).get("breadcrumbs", []))
-        provenance["breadcrumbs"] = category_source if breadcrumbs else "missing"
-        diagnostics["breadcrumbs"] = self._make_diagnostic(breadcrumbs, provenance["breadcrumbs"], 0.95 if breadcrumbs else 0.0, category_trace)
+        category_tag_text, category_tag_href, category_source, category_trace = self._extract_category_tag(soup, jsonld, canonical_url)
+        provenance["category_tag"] = category_source
+        diagnostics["category_tag"] = self._make_diagnostic(category_tag_text or category_tag_href, category_source, 0.95 if category_tag_text or category_tag_href else 0.0, category_trace)
+
+        family = self._resolve_family(category_tag_text, category_tag_href, title)
+        family_config = SKROUTZ_FAMILIES.get(family, {})
 
         merchant_titles = self._extract_merchant_titles(soup)
         brand, brand_source, brand_trace = self._extract_brand(soup, jsonld, title, merchant_titles)
@@ -91,7 +206,7 @@ class SkroutzProductParser:
         provenance["hero_summary"] = summary_source
         diagnostics["hero_summary"] = self._make_diagnostic(hero_summary, summary_source, 0.88 if hero_summary else 0.0, summary_trace)
 
-        _raw_sections, raw_pairs, spec_source, spec_trace = self._extract_raw_specs(soup)
+        raw_sections, raw_pairs, spec_source, spec_trace = self._extract_raw_specs(soup)
         if raw_pairs and summary_pairs:
             warnings.append("merchant_summary_and_structured_characteristics_present")
 
@@ -103,19 +218,106 @@ class SkroutzProductParser:
         provenance["price"] = price_source
         diagnostics["price"] = self._make_diagnostic(price_text or price_value, price_source, 0.95 if price_text or price_value else 0.0, price_trace)
 
-        canonical_sections = self._build_canonical_sections(family=family, brand=brand, mpn=mpn, title=title, hero_summary=hero_summary, raw_pairs=raw_pairs, summary_pairs=summary_pairs, merchant_titles=merchant_titles)
+        taxonomy_hint = None
+        if family_config.get("taxonomy_mode") == "helper" or not family:
+            taxonomy_hint = classify_skroutz_taxonomy(
+                category_tag_text=category_tag_text,
+                category_tag_href=category_tag_href,
+                title=title,
+                url=canonical_url,
+                brand=brand,
+                family_key=family,
+            )
+
+        if taxonomy_hint and taxonomy_hint.ambiguous:
+            warnings.append(f"skroutz_taxonomy_ambiguous:{taxonomy_hint.escalation_reason}")
+        elif taxonomy_hint and family_config.get("taxonomy_mode") == "helper":
+            warnings.append(f"skroutz_taxonomy_helper_used:{taxonomy_hint.matched_rule_id}")
+
+        breadcrumbs = clean_breadcrumbs(
+            SKROUTZ_FAMILIES.get(family, {}).get("breadcrumbs", [])
+            or (taxonomy_hint.breadcrumbs if taxonomy_hint and not taxonomy_hint.ambiguous else [])
+        )
+        provenance["breadcrumbs"] = category_source if breadcrumbs else "missing"
+        diagnostics["breadcrumbs"] = self._make_diagnostic(breadcrumbs, provenance["breadcrumbs"], 0.95 if breadcrumbs else 0.0, category_trace)
+
+        family_source_category = ""
+        family_match_type = ""
+        if family and family_config.get("taxonomy_mode") != "helper" and len(breadcrumbs) >= 3:
+            family_source_category = serialize_source_category(
+                breadcrumbs[1],
+                breadcrumbs[2],
+                breadcrumbs[3:],
+            )
+            family_match_type = "exact_category"
+
+        canonical_sections = self._build_canonical_sections(
+            family=family,
+            brand=brand,
+            mpn=mpn,
+            title=title,
+            hero_summary=hero_summary,
+            raw_sections=raw_sections,
+            raw_pairs=raw_pairs,
+            summary_pairs=summary_pairs,
+            merchant_titles=merchant_titles,
+        )
         provenance["spec_sections"] = spec_source
         diagnostics["spec_sections"] = self._make_diagnostic(canonical_sections, spec_source, 0.92 if canonical_sections else 0.0, spec_trace)
-        key_specs = self._build_key_specs(family, canonical_sections, raw_pairs, summary_pairs)
+        key_specs = self._build_key_specs(family, canonical_sections, raw_sections, raw_pairs, summary_pairs)
         provenance["key_specs"] = "canonical_from_specs" if key_specs else "missing"
         diagnostics["key_specs"] = self._make_diagnostic(key_specs, provenance["key_specs"], 0.9 if key_specs else 0.0, [])
+
         gallery_images, gallery_source, gallery_trace = self._extract_gallery_images(soup, jsonld, canonical_url, title)
         provenance["gallery_images"] = gallery_source
         diagnostics["gallery_images"] = self._make_diagnostic(gallery_images, gallery_source, 0.95 if gallery_images else 0.0, gallery_trace)
 
-        source = SourceProductData(source_name="skroutz", page_type="product" if family else "unsupported_family", url=url, canonical_url=canonical_url, breadcrumbs=breadcrumbs, product_code=product_code, brand=brand, name=title, hero_summary=hero_summary, price_text=price_text, price_value=price_value, gallery_images=gallery_images, key_specs=key_specs, spec_sections=canonical_sections, presentation_source_html=summary_html, presentation_source_text=hero_summary, raw_html_path="", scraped_at=utcnow_iso(), fallback_used=fallback_used, mpn=mpn)
+        supported_page = bool(
+            (family and family_config.get("taxonomy_mode") != "helper")
+            or (
+                taxonomy_hint
+                and not taxonomy_hint.ambiguous
+                and taxonomy_hint.parent_category
+                and taxonomy_hint.leaf_category
+            )
+        )
+        if not supported_page:
+            warnings.append("unsupported_skroutz_category")
+
+        source = SourceProductData(
+            source_name="skroutz",
+            page_type="product" if supported_page else "unsupported_family",
+            url=url,
+            canonical_url=canonical_url,
+            breadcrumbs=breadcrumbs,
+            skroutz_family=family or "",
+            category_tag_text=category_tag_text,
+            category_tag_href=category_tag_href,
+            category_tag_slug=normalize_category_href_slug(category_tag_href),
+            taxonomy_source_category=(taxonomy_hint.source_category if taxonomy_hint and not taxonomy_hint.ambiguous else family_source_category),
+            taxonomy_match_type=(taxonomy_hint.match_type if taxonomy_hint and not taxonomy_hint.ambiguous else family_match_type),
+            taxonomy_rule_id=(taxonomy_hint.matched_rule_id if taxonomy_hint else (f"family:{family}" if family else "")),
+            taxonomy_ambiguity=bool(taxonomy_hint.ambiguous if taxonomy_hint else False),
+            taxonomy_escalation_reason=taxonomy_hint.escalation_reason if taxonomy_hint else "",
+            taxonomy_tv_inches=taxonomy_hint.tv_inches if taxonomy_hint else None,
+            product_code=product_code,
+            brand=brand,
+            name=title,
+            hero_summary=hero_summary,
+            price_text=price_text,
+            price_value=price_value,
+            gallery_images=gallery_images,
+            key_specs=key_specs,
+            spec_sections=canonical_sections,
+            presentation_source_html=summary_html,
+            presentation_source_text=hero_summary,
+            raw_html_path="",
+            scraped_at=utcnow_iso(),
+            fallback_used=fallback_used,
+            mpn=mpn,
+        )
         missing_fields = self._collect_missing_fields(source)
-        critical_missing = self._collect_critical_missing(source, family)
+        critical_missing = self._collect_critical_missing(source, supported_page)
         return ParsedProduct(source=source, provenance=provenance, field_diagnostics=diagnostics, missing_fields=missing_fields, warnings=warnings, critical_missing=critical_missing)
 
     def _is_interstitial(self, soup: BeautifulSoup) -> bool:
@@ -172,22 +374,38 @@ class SkroutzProductParser:
             return ""
         return TITLE_CODE_SUFFIX_RE.sub("", cleaned).strip()
 
-    def _extract_category_hint(self, soup: BeautifulSoup, jsonld: dict[str, Any]) -> tuple[str, str, list[SelectorTraceEntry]]:
+    def _extract_category_tag(
+        self,
+        soup: BeautifulSoup,
+        jsonld: dict[str, Any],
+        base_url: str,
+    ) -> tuple[str, str, str, list[SelectorTraceEntry]]:
         trace: list[SelectorTraceEntry] = []
         node = soup.select_one("div.sku-title a.category-tag")
         trace.append(self._trace("dom", "div.sku-title a.category-tag", [node] if node else [], node))
         value = safe_text(node)
-        if value:
-            return value, "dom:div.sku-title a.category-tag", trace
+        href = make_absolute_url(node.get("href"), base_url) if node and node.get("href") else ""
+        if value or href:
+            return value, href, "dom:div.sku-title a.category-tag", trace
         value = normalize_whitespace(jsonld.get("category"))
-        return (value, "jsonld:category", trace) if value else ("", "missing", trace)
+        return (value, "", "jsonld:category", trace) if value else ("", "", "missing", trace)
 
-    def _resolve_family(self, category_hint: str, title: str) -> str | None:
+    def _resolve_family(self, category_hint: str, category_href: str, title: str) -> str | None:
         category_norm = normalize_for_match(category_hint)
+        slug_norm = normalize_for_match(normalize_category_href_slug(category_href))
         title_norm = normalize_for_match(title)
         for family, config in SKROUTZ_FAMILIES.items():
-            labels = {normalize_for_match(label) for label in config["category_labels"]}
-            if category_norm in labels:
+            labels = {normalize_for_match(label) for label in config.get("category_labels", set())}
+            href_tokens = {normalize_for_match(token) for token in config.get("category_href_tokens", set())}
+            if labels and category_norm in labels:
+                return family
+            if href_tokens and any(token and token in slug_norm for token in href_tokens):
+                return family
+        if "entoichiz" in title_norm or "built in" in title_norm:
+            return "built_in_appliance"
+        for family, config in SKROUTZ_FAMILIES.items():
+            title_tokens = {normalize_for_match(token) for token in config.get("title_tokens", set())}
+            if title_tokens and any(token and token in title_norm for token in title_tokens):
                 return family
             if family == "soundbar" and "soundbar" in title_norm:
                 return family
@@ -432,14 +650,18 @@ class SkroutzProductParser:
         mpn: str,
         title: str,
         hero_summary: str,
+        raw_sections: list[SpecSection],
         raw_pairs: list[tuple[str, str, str]],
         summary_pairs: list[tuple[str, str, str]],
         merchant_titles: list[str],
     ) -> list[SpecSection]:
         if family not in SKROUTZ_FAMILIES:
-            return []
+            return self._build_generic_sections(raw_sections, summary_pairs)
         lookup = self._build_label_lookup(raw_pairs, summary_pairs)
         full_text = normalize_whitespace(" ".join([title, hero_summary, *merchant_titles, *lookup.values()]))
+        family_config = SKROUTZ_FAMILIES[family]
+        if family_config.get("spec_mode") == "raw":
+            return self._build_generic_sections(raw_sections, summary_pairs)
         if family == "soundbar":
             return self._soundbar_sections(raw_pairs, merchant_titles)
         if family == "coffee_filter":
@@ -454,6 +676,12 @@ class SkroutzProductParser:
             items = [SpecItem(label=label, value=section_values.get(label, "-")) for label in labels]
             out.append(SpecSection(section=section_title, items=items))
         return out
+
+    def _build_generic_sections(self, raw_sections: list[SpecSection], summary_pairs: list[tuple[str, str, str]]) -> list[SpecSection]:
+        if raw_sections:
+            return raw_sections
+        items = [SpecItem(label=label, value=value) for _, label, value in summary_pairs if label and value]
+        return [SpecSection(section="Χαρακτηριστικά", items=items)] if items else []
 
     def _build_label_lookup(self, raw_pairs: list[tuple[str, str, str]], summary_pairs: list[tuple[str, str, str]]) -> dict[str, str]:
         lookup: dict[str, str] = {}
@@ -535,9 +763,18 @@ class SkroutzProductParser:
             "_Είδος Διακόπτη": self._clean_placeholder(lookup.get(normalize_for_match("Είδος Διακόπτη"))),
         }
 
-    def _build_key_specs(self, family: str | None, sections: list[SpecSection], raw_pairs: list[tuple[str, str, str]], summary_pairs: list[tuple[str, str, str]]) -> list[SpecItem]:
-        if not family or not sections:
+    def _build_key_specs(
+        self,
+        family: str | None,
+        sections: list[SpecSection],
+        raw_sections: list[SpecSection],
+        raw_pairs: list[tuple[str, str, str]],
+        summary_pairs: list[tuple[str, str, str]],
+    ) -> list[SpecItem]:
+        if not sections:
             return []
+        if not family or SKROUTZ_FAMILIES.get(family, {}).get("spec_mode") == "raw":
+            return self._build_generic_key_specs(raw_sections or sections, summary_pairs)
         lookup = {item.label: item.value or "-" for section in sections for item in section.items}
         supplemental_lookup = self._build_label_lookup(raw_pairs, summary_pairs)
         selected_labels = {
@@ -552,6 +789,30 @@ class SkroutzProductParser:
                 value = supplemental_lookup.get(normalize_for_match(label))
                 if value:
                     items.append(SpecItem(label=label, value=value))
+        return items
+
+    def _build_generic_key_specs(self, sections: list[SpecSection], summary_pairs: list[tuple[str, str, str]]) -> list[SpecItem]:
+        items: list[SpecItem] = []
+        seen: set[str] = set()
+        for section in sections:
+            for item in section.items:
+                label_norm = normalize_for_match(item.label)
+                value = normalize_whitespace(item.value)
+                if not label_norm or not value or label_norm in seen:
+                    continue
+                seen.add(label_norm)
+                items.append(SpecItem(label=item.label, value=value))
+                if len(items) >= 8:
+                    return items
+        for _, label, value in summary_pairs:
+            label_norm = normalize_for_match(label)
+            normalized_value = normalize_whitespace(value)
+            if not label_norm or not normalized_value or label_norm in seen:
+                continue
+            seen.add(label_norm)
+            items.append(SpecItem(label=label, value=normalized_value))
+            if len(items) >= 8:
+                break
         return items
 
     def _soundbar_sections(self, raw_pairs: list[tuple[str, str, str]], merchant_titles: list[str]) -> list[SpecSection]:
@@ -680,7 +941,7 @@ class SkroutzProductParser:
             missing.append("spec_sections")
         return missing
 
-    def _collect_critical_missing(self, source: SourceProductData, family: str | None) -> list[str]:
+    def _collect_critical_missing(self, source: SourceProductData, supported_page: bool) -> list[str]:
         critical: list[str] = []
         if not source.name:
             critical.append("name")
@@ -692,7 +953,7 @@ class SkroutzProductParser:
             critical.append("gallery_images")
         if not source.spec_sections:
             critical.append("spec_sections")
-        if family is None:
+        if not supported_page:
             critical.append("supported_family")
         return sorted(set(critical))
 
