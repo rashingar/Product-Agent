@@ -219,6 +219,286 @@
           ]
         }
       ]
+    },
+    {
+      "template_id": "skroutz_built_in_hob_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_leaf": "Εντοιχιζόμενες Συσκευές",
+        "taxonomy_sub": "Εστίες"
+      },
+      "preferred_schema_source_files": [
+        "esties.json"
+      ],
+      "sections": [
+        {
+          "title": "Επισκόπηση Προϊόντος",
+          "fields": [
+            {
+              "key": "installation_type",
+              "label": "Τρόπος Τοποθέτησης",
+              "resolver": "hob_installation_type",
+              "aliases": [
+                "Τύπος εγκατάστασης",
+                "Τρόπος Τοποθέτησης"
+              ]
+            },
+            {
+              "key": "surface_technology",
+              "label": "Τεχνολογία Πλατώ Εστιών",
+              "resolver": "hob_surface_technology",
+              "aliases": [
+                "Βασικό υλικό επιφανειών",
+                "Τεχνολογία Πλατώ Εστιών",
+                "Τύπος"
+              ]
+            },
+            {
+              "key": "zone_count",
+              "label": "Αριθμός Ζωνών",
+              "resolver": "hob_zone_count",
+              "aliases": [
+                "Συνολικός αριθμός ζωνών που μπορούν να χρησιμοποιηθούν ταυτόχρονα",
+                "Αριθμός Εστιών"
+              ]
+            },
+            {
+              "key": "control_type",
+              "label": "Τύπος Χειριστηρίου",
+              "resolver": "hob_control_type",
+              "aliases": [
+                "Είδος ηλεκτρονικού ελέγχου",
+                "Διακόπτες",
+                "Neff"
+              ]
+            },
+            {
+              "key": "digital_indicators",
+              "label": "Ψηφιακές Ενδείξεις",
+              "resolver": "hob_digital_indicators",
+              "aliases": [
+                "Ψηφιακές Ενδείξεις",
+                "Ψηφιακό χρονόμετρο"
+              ]
+            },
+            {
+              "key": "residual_heat",
+              "label": "Ένδειξη Υπολοίπου Θερμότητας",
+              "resolver": "hob_residual_heat",
+              "aliases": [
+                "Ένδειξη Υπολοίπου Θερμότητας",
+                "Ενδεικτική λυχνία εναπομένουσας θερμότητας"
+              ]
+            },
+            {
+              "key": "timer",
+              "label": "Χρονοδιακόπτης",
+              "resolver": "hob_timer",
+              "aliases": [
+                "Χρονοδιακόπτης",
+                "Χρονοδιακόπτης απενεργοποίησης"
+              ]
+            },
+            {
+              "key": "pan_recognition",
+              "label": "Αυτόματη Αναγνώρηση Σκευών",
+              "resolver": "hob_pan_recognition",
+              "aliases": [
+                "Αυτόματη Αναγνώρηση Σκευών"
+              ]
+            },
+            {
+              "key": "coffee_zone",
+              "label": "Ζώνη Καφέ",
+              "resolver": "hob_coffee_zone",
+              "aliases": [
+                "Ζώνη Καφέ"
+              ]
+            },
+            {
+              "key": "natural_gas",
+              "label": "Σύνδεση με Φυσικό Αέριο",
+              "resolver": "hob_natural_gas",
+              "aliases": [
+                "Σύνδεση με Φυσικό Αέριο",
+                "Τύπος λειτουργίας"
+              ]
+            },
+            {
+              "key": "connectivity",
+              "label": "Συνδεσιμότητα",
+              "resolver": "hob_connectivity",
+              "aliases": [
+                "Συνδεσιμότητα",
+                "Smart"
+              ]
+            },
+            {
+              "key": "other_features",
+              "label": "Άλλα Χαρακτηριστικά",
+              "resolver": "hob_other_features"
+            }
+          ]
+        },
+        {
+          "title": "Απόδοση",
+          "fields": [
+            {
+              "key": "front_left_power",
+              "label": "Ισχύς Εστίας Μπροστά Αριστερά (KW",
+              "resolver": "hob_zone_power",
+              "zone_position": "μπροστα_αριστερα"
+            },
+            {
+              "key": "back_left_power",
+              "label": "Ισχύς Εστίας Πίσω Αριστερά (KW",
+              "resolver": "hob_zone_power",
+              "zone_position": "πισω_αριστερα"
+            },
+            {
+              "key": "back_right_power",
+              "label": "Ισχύς Εστίας Πίσω Δεξιά (KW",
+              "resolver": "hob_zone_power",
+              "zone_position": "πισω_δεξια"
+            },
+            {
+              "key": "front_right_power",
+              "label": "Ισχύς Εστίας Μπροστά Δεξιά (KW",
+              "resolver": "hob_zone_power",
+              "zone_position": "μπροστα_δεξια"
+            },
+            {
+              "key": "total_power",
+              "label": "Μέγιστη Ονομαστική Ισχύς (W",
+              "resolver": "hob_total_power",
+              "aliases": [
+                "Συνολική ισχύς",
+                "Μέγιστη Ονομαστική Ισχύς"
+              ]
+            },
+            {
+              "key": "gas_total_power",
+              "label": "Μέγιστη Ονομαστική Ισχύς Αερίου (ΚW",
+              "aliases": [
+                "Μέγιστη Ονομαστική Ισχύς Αερίου"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ασφάλεια",
+          "fields": [
+            {
+              "key": "child_lock",
+              "label": "Κλείδωμα Ασφαλείας για Παιδιά",
+              "resolver": "hob_child_lock",
+              "aliases": [
+                "Κλείδωμα ασφαλείας για τα παιδιά",
+                "Λειτουργία Κλειδώματος"
+              ]
+            },
+            {
+              "key": "auto_safety_off",
+              "label": "Αυτόματη Απενεργοποίηση Ασφαλείας",
+              "resolver": "hob_auto_safety_off",
+              "aliases": [
+                "Αυτόματη απενεργοποίηση ασφαλείας"
+              ]
+            },
+            {
+              "key": "gas_cutoff",
+              "label": "Ασφάλεια Διακοπής Παροχής Αερίου",
+              "aliases": [
+                "Ασφάλεια Διακοπής Παροχής Αερίου"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Γενικά Χαρακτηριστικά",
+          "fields": [
+            {
+              "key": "color",
+              "label": "Χρώμα",
+              "resolver": "hob_color",
+              "aliases": [
+                "Χρώμα",
+                "Χρώμα επιφανειών"
+              ]
+            },
+            {
+              "key": "frame_color",
+              "label": "Χρώμα Πλαισίου",
+              "resolver": "hob_frame_color",
+              "aliases": [
+                "Χρώμα Πλαισίου"
+              ]
+            },
+            {
+              "key": "weight",
+              "label": "Βάρος Συσκευής σε Κιλά",
+              "resolver": "hob_weight",
+              "aliases": [
+                "Καθαρό βάρος",
+                "Βάρος Συσκευής σε Κιλά"
+              ]
+            },
+            {
+              "key": "cutout_height",
+              "label": "Ύψος Διάστασης Εντοιχισμού",
+              "resolver": "hob_cutout_height",
+              "aliases": [
+                "Διαστάσεις εντοιχισμού (υ x π x β)",
+                "Διαστάσεις Εντοιχισμού (ΥxΠxΒ mm)"
+              ]
+            },
+            {
+              "key": "cutout_width",
+              "label": "Πλάτος Διάστασης Εντοιχισμού σε Εκατοστά",
+              "resolver": "hob_cutout_width",
+              "aliases": [
+                "Πλάτος Εντοιχισμού",
+                "Διαστάσεις εντοιχισμού (υ x π x β)"
+              ]
+            },
+            {
+              "key": "cutout_depth",
+              "label": "Βάθος Διάστασης Εντοιχισμού σε Εκατοστά",
+              "resolver": "hob_cutout_depth",
+              "aliases": [
+                "Βάθος Εντοιχισμού",
+                "Διαστάσεις εντοιχισμού (υ x π x β)"
+              ]
+            },
+            {
+              "key": "device_width",
+              "label": "Πλάτος Συσκευής σε Εκατοστά",
+              "resolver": "hob_device_width",
+              "aliases": [
+                "Πλάτος",
+                "Διαστάσεις συσκευής (ΥxΠxΒ mm)"
+              ]
+            },
+            {
+              "key": "device_depth",
+              "label": "Βάθος Συσκευής σε Εκατοστά",
+              "resolver": "hob_device_depth",
+              "aliases": [
+                "Βάθος",
+                "Διαστάσεις συσκευής (ΥxΠxΒ mm)"
+              ]
+            },
+            {
+              "key": "warranty",
+              "label": "Εγγύηση Κατασκευαστή",
+              "resolver": "hob_warranty",
+              "aliases": [
+                "Εγγύηση Κατασκευαστή"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

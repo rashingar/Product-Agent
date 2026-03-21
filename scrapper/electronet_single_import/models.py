@@ -128,6 +128,9 @@ class SourceProductData:
     product_sheet_asset_url: str = ""
     key_specs: list[SpecItem] = field(default_factory=list)
     spec_sections: list[SpecSection] = field(default_factory=list)
+    manufacturer_spec_sections: list[SpecSection] = field(default_factory=list)
+    manufacturer_source_text: str = ""
+    manufacturer_documents: list[dict[str, Any]] = field(default_factory=list)
     presentation_source_html: str = ""
     presentation_source_text: str = ""
     raw_html_path: str = ""
@@ -167,6 +170,9 @@ class SourceProductData:
             "product_sheet_asset_url": self.product_sheet_asset_url,
             "key_specs": [item.to_dict() for item in self.key_specs],
             "spec_sections": [section.to_dict() for section in self.spec_sections],
+            "manufacturer_spec_sections": [section.to_dict() for section in self.manufacturer_spec_sections],
+            "manufacturer_source_text": self.manufacturer_source_text,
+            "manufacturer_documents": self.manufacturer_documents,
             "presentation_source_html": self.presentation_source_html,
             "presentation_source_text": self.presentation_source_text,
             "raw_html_path": self.raw_html_path,

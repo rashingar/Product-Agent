@@ -109,3 +109,45 @@ def test_representative_taxonomy_html_fixtures_cover_supported_skroutz_combos() 
         assert (taxonomy.sub_category or "") == meta["expected_sub_category"]
         assert parsed.source.taxonomy_source_category == meta["expected_source_category"]
         assert parsed.source.taxonomy_match_type == meta["expected_match_type"]
+
+
+def test_kitchen_hobs_category_resolves_to_built_in_hobs() -> None:
+    parser = SkroutzProductParser()
+    resolver = TaxonomyResolver()
+    row = {
+        "name": "Neff T16BT60N0 Κεραμική Εστία 60cm 4 Ζωνών TwistPad",
+        "category_tag_text": "Εστίες Κουζίνας",
+        "category_tag_href": "https://www.skroutz.gr/c/429/esties-kouzinas.html",
+        "manufacturer": "Neff",
+        "skroutz_product_url": "https://www.skroutz.gr/s/7927541/Neff-N-70-Keramiki-Estia-me-Plaisio-Aytonomi-me-Leitourgia-Kleidomatos-58-3x51-3ek-T16BT60N0.html",
+        "model": "T16BT60N0",
+    }
+
+    parsed = parser.parse(build_minimal_taxonomy_html(row), row["skroutz_product_url"])
+    taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url, parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
+
+    assert parsed.source.skroutz_family == "built_in_appliance"
+    assert taxonomy.parent_category == "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ"
+    assert taxonomy.leaf_category == "Εντοιχιζόμενες Συσκευές"
+    assert taxonomy.sub_category == "Εστίες"
+
+
+def test_explicit_tabletop_hob_category_still_resolves_to_small_appliance_hobs() -> None:
+    parser = SkroutzProductParser()
+    resolver = TaxonomyResolver()
+    row = {
+        "name": "Fancy 0013 Επιτραπέζια Εστία Εμαγιέ Διπλή Λευκή",
+        "category_tag_text": "Επιτραπέζιες Εστίες",
+        "category_tag_href": "https://www.skroutz.gr/c/1699/epitrapezies_esties.html",
+        "manufacturer": "Fancy",
+        "skroutz_product_url": "https://www.skroutz.gr/s/21656760/Fancy-0013-Epitrapezia-Estia-Emagie-Dipli-Leyki-0013.html",
+        "model": "0013",
+    }
+
+    parsed = parser.parse(build_minimal_taxonomy_html(row), row["skroutz_product_url"])
+    taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url, parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
+
+    assert parsed.source.skroutz_family == "tabletop_hob"
+    assert taxonomy.parent_category == "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ"
+    assert taxonomy.leaf_category == "Μικροί Μάγειρες"
+    assert taxonomy.sub_category == "Εστίες"

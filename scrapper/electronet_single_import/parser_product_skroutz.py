@@ -61,7 +61,7 @@ SKROUTZ_FAMILIES: dict[str, dict[str, Any]] = {
     "tabletop_hob": {
         "category_labels": {"Επιτραπέζιες Εστίες"},
         "category_href_tokens": {"epitrapezies esties"},
-        "title_tokens": {"epitrapezia estia", "estia"},
+        "title_tokens": {"epitrapezia estia"},
         "breadcrumbs": ["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Μικροί Μάγειρες", "Εστίες"],
         "sections": [("Χαρακτηριστικά Μοντέλου", ["Κατασκευαστής", "Μοντέλο"]), ("Γενικά Χαρακτηριστικά", ["Εστία"]), ("Διαστάσεις", ["Πλάτος", "Βάθος"])],
         "spec_mode": "custom",
@@ -123,7 +123,7 @@ SKROUTZ_FAMILIES: dict[str, dict[str, Any]] = {
     },
     "built_in_appliance": {
         "category_labels": {"Εντοιχιζόμενες Συσκευές"},
-        "category_href_tokens": {"entoixizomenes", "entoixizomenes syskeyes", "entoichizomenes syskeves"},
+        "category_href_tokens": {"entoixizomenes", "entoixizomenes syskeyes", "entoichizomenes syskeves", "esties kouzinas"},
         "title_tokens": {"entoichiz", "built in"},
         "breadcrumbs": [],
         "sections": [],
@@ -412,8 +412,6 @@ class SkroutzProductParser:
             if family == "coffee_filter" and "καφετιερ" in title_norm and "φιλτρ" in title_norm:
                 return family
             if family == "kettle" and "βραστηρ" in title_norm:
-                return family
-            if family == "tabletop_hob" and "εστια" in title_norm:
                 return family
         return None
 

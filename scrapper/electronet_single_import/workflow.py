@@ -364,6 +364,15 @@ def load_source_product(path: str | Path) -> SourceProductData:
             )
             for section in payload.get("spec_sections", [])
         ],
+        manufacturer_spec_sections=[
+            SpecSection(
+                section=section.get("section", ""),
+                items=[SpecItem(**item) for item in section.get("items", [])],
+            )
+            for section in payload.get("manufacturer_spec_sections", [])
+        ],
+        manufacturer_source_text=payload.get("manufacturer_source_text", ""),
+        manufacturer_documents=list(payload.get("manufacturer_documents", [])),
         presentation_source_html=payload.get("presentation_source_html", ""),
         presentation_source_text=payload.get("presentation_source_text", ""),
         raw_html_path=payload.get("raw_html_path", ""),

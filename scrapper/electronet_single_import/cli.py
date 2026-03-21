@@ -10,6 +10,7 @@ from .csv_writer import write_csv_row
 from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
 from .mapping import build_row
+from .manufacturer_enrichment import enrich_source_from_manufacturer_docs
 from .models import CLIInput, GalleryImage
 from .normalize import normalize_for_match
 from .parser_product_electronet import ElectronetProductParser
@@ -280,7 +281,6 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
     parsed.source.fallback_used = fetch.fallback_used
 
     write_text(raw_html_path, fetch.html)
-    write_json(source_json_path, parsed.source.to_dict())
 
     taxonomy_resolver = TaxonomyResolver()
     taxonomy, taxonomy_candidates = taxonomy_resolver.resolve(
@@ -290,10 +290,19 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
         key_specs=parsed.source.key_specs,
         spec_sections=parsed.source.spec_sections,
     )
+    manufacturer_enrichment = enrich_source_from_manufacturer_docs(
+        source=parsed.source,
+        taxonomy=taxonomy,
+        fetcher=fetcher,
+        output_dir=model_dir / "manufacturer",
+    )
+    write_json(source_json_path, parsed.source.to_dict())
+
+    effective_spec_sections = [*parsed.source.spec_sections, *parsed.source.manufacturer_spec_sections]
     characteristics_registry = get_characteristics_registry()
     preferred_schema_source_files = characteristics_registry.preferred_schema_source_files(parsed.source, taxonomy)
     schema_match, schema_candidates = schema_matcher.match(
-        parsed.source.spec_sections,
+        effective_spec_sections,
         taxonomy.sub_category,
         preferred_source_files=preferred_schema_source_files,
     )
@@ -330,11 +339,15 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
             "hero_summary_present": bool(parsed.source.hero_summary),
             "gallery_images_count": len(parsed.source.gallery_images),
             "spec_sections_count": len(parsed.source.spec_sections),
+            "manufacturer_spec_sections_count": len(parsed.source.manufacturer_spec_sections),
         },
         "characteristics_pairs": {
-            "count": sum(len(section.items) for section in parsed.source.spec_sections),
+            "count": sum(len(section.items) for section in effective_spec_sections),
+            "source_count": sum(len(section.items) for section in parsed.source.spec_sections),
+            "manufacturer_count": sum(len(section.items) for section in parsed.source.manufacturer_spec_sections),
         },
         "taxonomy_resolution": taxonomy.to_dict(),
+        "manufacturer_enrichment": manufacturer_enrichment,
         "schema_resolution": schema_match.to_dict(),
         "characteristics_diagnostics": normalized.get("characteristics_diagnostics", {}),
         "skroutz_taxonomy_diagnostics": {
@@ -410,6 +423,12 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
             str(normalized_json_path),
             str(report_json_path),
             str(csv_path),
+            *[
+                path
+                for document in manufacturer_enrichment.get("documents", [])
+                for path in [document.get("local_path", ""), document.get("text_path", "")]
+                if path
+            ],
             *gallery_files,
             *([str(sections_artifact_path)] if sections_artifact_path.exists() else []),
             *besco_files,
@@ -426,6 +445,7 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
         "taxonomy_candidates": taxonomy_candidates,
         "schema_match": schema_match,
         "schema_candidates": schema_candidates,
+        "manufacturer_enrichment": manufacturer_enrichment,
         "row": row,
         "normalized": normalized,
         "report": report,

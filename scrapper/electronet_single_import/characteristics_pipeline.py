@@ -144,14 +144,9 @@ class CharacteristicsTemplateRegistry:
                 custom_field = self._match_custom_field(base_field, custom_section, field_index)
                 merged_field = dict(base_field)
                 if custom_field:
-                    merged_field.update(
-                        {
-                            "key": custom_field.get("key", merged_field.get("key", "")),
-                            "label": custom_field.get("label", merged_field.get("label", "")),
-                            "resolver": custom_field.get("resolver", merged_field.get("resolver", "")),
-                            "aliases": list(custom_field.get("aliases", merged_field.get("aliases", []))),
-                        }
-                    )
+                    merged_field.update(custom_field)
+                    if "aliases" in custom_field:
+                        merged_field["aliases"] = list(custom_field.get("aliases", []))
                 merged_fields.append(merged_field)
             merged_sections.append(
                 {
@@ -220,7 +215,7 @@ def build_characteristics_for_product(
     registry = get_characteristics_registry()
     template = registry.select_template(source, taxonomy, schema_match=schema_match)
     if template is None:
-        html = build_characteristics_html(source.spec_sections)
+        html = build_characteristics_html(_effective_spec_sections(source))
         diagnostics = {
             "mode": "raw_spec_sections",
             "template_id": "",
@@ -293,9 +288,10 @@ def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResol
         if path.exists():
             raw_html = path.read_text(encoding="utf-8")
 
-    spec_lookup = build_spec_lookup(source.key_specs, source.spec_sections)
+    spec_sections = _effective_spec_sections(source)
+    spec_lookup = build_spec_lookup(source.key_specs, spec_sections)
     raw_lookup = _extract_dt_dd_lookup(raw_html)
-    section_lookup = _build_section_lookup(source.spec_sections)
+    section_lookup = _build_section_lookup(spec_sections)
     offer_titles = _extract_offer_titles(raw_html)
     raw_text = _extract_raw_text(raw_html)
     combined_text = normalize_whitespace(
@@ -305,6 +301,7 @@ def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResol
                 source.name,
                 source.hero_summary,
                 source.presentation_source_text,
+                source.manufacturer_source_text,
                 raw_text,
                 *offer_titles,
             ]
@@ -322,6 +319,10 @@ def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResol
         offer_titles=offer_titles,
         combined_text=combined_text,
     )
+
+
+def _effective_spec_sections(source: SourceProductData) -> list[SpecSection]:
+    return [*source.spec_sections, *source.manufacturer_spec_sections]
 
 
 def _extract_dt_dd_lookup(raw_html: str) -> dict[str, str]:
@@ -827,6 +828,325 @@ def _resolve_tv_dimensions_with_stand(context: _ResolutionContext, _field: dict[
     return " × ".join(values), source
 
 
+def _normalize_yes_no(value: str) -> str:
+    normalized = normalize_for_match(value)
+    if not normalized:
+        return ""
+    if any(token in normalized for token in ["ναι", "yes", "supported", "ξεχωριστ", "υποστηριζ"]):
+        return "Ναι"
+    if any(token in normalized for token in ["οχι", "no", "not supported"]):
+        return "Όχι"
+    return ""
+
+
+def _format_decimal(value: float) -> str:
+    if abs(value - round(value)) < 1e-9:
+        return str(int(round(value)))
+    return f"{value:.2f}".rstrip("0").rstrip(".")
+
+
+def _format_power_watts(value: str) -> str:
+    number = _extract_first_number(value)
+    if number is None:
+        return ""
+    unit_text = (value or "").casefold()
+    if re.search(r"(?:[kκ]\s*[wω]|κιλοβατ)", unit_text):
+        number *= 1000
+    return f"{int(round(number))} W"
+
+
+def _format_dimension_token(token: str, assume_millimeters: bool = False) -> str:
+    values: list[str] = []
+    for part in [segment.strip() for segment in re.split(r"\s*-\s*", token) if segment.strip()]:
+        number = _extract_first_number(part)
+        if number is None:
+            continue
+        if assume_millimeters:
+            number /= 10
+        values.append(_format_decimal(number))
+    if not values:
+        return ""
+    return f"{' - '.join(values)} cm"
+
+
+def _extract_dimension_tokens(value: str) -> list[str]:
+    cleaned = normalize_whitespace(value).replace("(", "").replace(")", "")
+    return re.findall(r"\d+(?:[.,]\d+)?(?:\s*-\s*\d+(?:[.,]\d+)?)?", cleaned)
+
+
+def _dimension_from_triplet(value: str, position: int) -> str:
+    tokens = _extract_dimension_tokens(value)
+    if len(tokens) <= position:
+        return ""
+    return _format_dimension_token(tokens[position], assume_millimeters=True)
+
+
+def _resolve_hob_yes_no(context: _ResolutionContext, aliases: list[str], *tokens: str) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, aliases)
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if tokens and any(_contains_any(context.combined_text, token) for token in tokens):
+        return "Ναι", "combined_text:token_match"
+    return "", "unresolved"
+
+
+def _extract_hob_zone_powers(text: str) -> dict[str, str]:
+    powers: dict[str, str] = {}
+    pattern = re.compile(
+        r"(Μπροστά|Πίσω)\s+(αριστερά|δεξιά)\s*:\s*.*?(\d+(?:[.,]\d+)?)\s*[kκΚ]\s*[wωW]",
+        flags=re.IGNORECASE,
+    )
+    for match in pattern.finditer(text or ""):
+        key = f"{normalize_for_match(match.group(1))}_{normalize_for_match(match.group(2))}"
+        powers.setdefault(key, f"{_format_decimal(float(match.group(3).replace(',', '.')))} kW")
+    return powers
+
+
+def _resolve_hob_installation_type(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Τύπος εγκατάστασης", "Τρόπος Τοποθέτησης"])
+    if value:
+        return value, source
+    if normalize_for_match(context.taxonomy.leaf_category) == normalize_for_match("Εντοιχιζόμενες Συσκευές"):
+        return "Εντοιχιζόμενη συσκευή", "taxonomy:leaf_category"
+    return "", "unresolved"
+
+
+def _resolve_hob_surface_technology(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(
+        context,
+        ["Βασικό υλικό επιφανειών", "Τεχνολογία Πλατώ Εστιών", "Τύπος Εστίας", "Τύπος"],
+    )
+    normalized = normalize_for_match(value)
+    if "υαλοκεραμ" in normalized or "κεραμ" in normalized:
+        return "Υαλοκεραμική", source
+    if "επαγωγ" in normalized:
+        return "Επαγωγική", source
+    if "αερι" in normalized or "gas" in normalized:
+        return "Αερίου", source
+    return _value_or_unresolved(value, source)
+
+
+def _resolve_hob_zone_count(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(
+        context,
+        [
+            "Συνολικός αριθμός ζωνών που μπορούν να χρησιμοποιηθούν ταυτόχρονα",
+            "Πλήθος ζωνών και/ή περιοχών μαγειρέματος",
+            "Αριθμός Ζωνών",
+            "Αριθμός Εστιών",
+            "Εστίες",
+        ],
+    )
+    count = _extract_int_from_text(value)
+    return (str(count), source) if count is not None else ("", "unresolved")
+
+
+def _resolve_hob_control_type(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Είδος ηλεκτρονικού ελέγχου", "Τύπος Χειριστηρίου", "Διακόπτες", "Neff"])
+    haystack = normalize_whitespace(" ".join(part for part in [value, context.combined_text] if part))
+    if _contains_any(haystack, "twistpad", "twist pad"):
+        return "TwistPad®", source or "combined_text:twistpad"
+    if _contains_any(haystack, "αφης", "touch"):
+        return "Αφής", source or "combined_text:touch"
+    return _value_or_unresolved(value, source)
+
+
+def _resolve_hob_digital_indicators(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Ψηφιακές Ενδείξεις", "Ψηφιακό χρονόμετρο"])
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if value:
+        return "Ναι", source
+    if _contains_any(context.combined_text, "ψηφιακ", "twistpad", "πλήκτρα αφής"):
+        return "Ναι", "combined_text:digital"
+    return "", "unresolved"
+
+
+def _resolve_hob_residual_heat(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return _resolve_hob_yes_no(
+        context,
+        ["Ένδειξη Υπολοίπου Θερμότητας", "Ενδεικτική λυχνία εναπομένουσας θερμότητας", "Διπλή ένδειξη (H/h) υπολοίπου θερμότητας για κάθε ζώνη"],
+        "υπολοιπου θερμοτητας",
+    )
+
+
+def _resolve_hob_timer(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return _resolve_hob_yes_no(
+        context,
+        ["Χρονοδιακόπτης", "Χρονοδιακόπτης απενεργοποίησης", "Λειτουργία Alarm με ηχητική ειδοποίηση", "Ψηφιακό χρονόμετρο"],
+        "χρονοδιακοπτη",
+        "alarm",
+        "χρονόμετρο",
+    )
+
+
+def _resolve_hob_pan_recognition(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Αυτόματη Αναγνώρηση Σκευών"])
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(context.combined_text, "αναγνωριση σκευων", "ανιχνευση σκευους"):
+        return "Ναι", "combined_text:pan_recognition"
+    return "", "unresolved"
+
+
+def _resolve_hob_coffee_zone(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Ζώνη Καφέ"])
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(context.combined_text, "ζωνη καφε", "coffee zone"):
+        return "Ναι", "combined_text:coffee_zone"
+    return "", "unresolved"
+
+
+def _resolve_hob_natural_gas(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Σύνδεση με Φυσικό Αέριο", "Τύπος λειτουργίας", "Τύπος εστίας", "Τύπος"])
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(value or context.combined_text, "φυσικο αεριο", "αεριου", "gas"):
+        return "Ναι", source or "combined_text:gas"
+    if _contains_any(value or context.combined_text, "ηλεκτρ", "κεραμ", "υαλοκεραμ", "επαγωγ"):
+        return "Όχι", source or "combined_text:electric"
+    return "", "unresolved"
+
+
+def _resolve_hob_connectivity(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Συνδεσιμότητα", "Smart"])
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(context.combined_text, "home connect", "wifi", "wi-fi", "bluetooth"):
+        return "Ναι", "combined_text:connectivity"
+    if _contains_any(value, "smart") and _contains_any(value, "οχι", "no"):
+        return "Όχι", source
+    return "", "unresolved"
+
+
+def _resolve_hob_other_features(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    features: list[str] = []
+    if re.search(r"17\s+βαθμ", context.combined_text, flags=re.IGNORECASE):
+        features.append("17 βαθμίδες ισχύος")
+    if _contains_any(context.combined_text, "restart"):
+        features.append("λειτουργία Restart")
+    if _contains_any(context.combined_text, "alarm"):
+        features.append("λειτουργία Alarm")
+    if _contains_any(context.combined_text, "διατηρησης θερμοτητας", "διατήρησης θερμότητας"):
+        features.append("διατήρηση θερμότητας")
+    return (", ".join(features), "combined_text:other_features") if features else ("", "unresolved")
+
+
+def _resolve_hob_zone_power(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    position = str(field.get("zone_position", "")).strip()
+    powers = _extract_hob_zone_powers(context.combined_text)
+    if position and position in powers:
+        return powers[position], f"combined_text:zone_power:{position}"
+    return "", "unresolved"
+
+
+def _resolve_hob_total_power(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Συνολική ισχύς", "Μέγιστη Ονομαστική Ισχύς"])
+    formatted = _format_power_watts(value)
+    return (formatted, source) if formatted else ("", "unresolved")
+
+
+def _resolve_hob_child_lock(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return _resolve_hob_yes_no(
+        context,
+        ["Κλείδωμα ασφαλείας για τα παιδιά", "Λειτουργία Κλειδώματος"],
+        "κλειδωμα ασφαλειας",
+    )
+
+
+def _resolve_hob_auto_safety_off(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return _resolve_hob_yes_no(
+        context,
+        ["Αυτόματη απενεργοποίηση ασφαλείας"],
+        "αυτοματη απενεργοποιηση ασφαλειας",
+    )
+
+
+def _resolve_hob_color(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Χρώμα", "Χρώμα επιφανειών"])
+    return _value_or_unresolved(value, source)
+
+
+def _resolve_hob_frame_color(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Χρώμα Πλαισίου"])
+    if value:
+        if "ανοξειδ" in normalize_for_match(value):
+            return "Ανοξείδωτο", source
+        return value, source
+    if _contains_any(context.combined_text, "ανοξειδωτο πλαισιο", "περιμετρικο πλαισιο"):
+        return "Ανοξείδωτο", "combined_text:frame_color"
+    return "", "unresolved"
+
+
+def _resolve_hob_weight(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Καθαρό βάρος", "Βάρος Συσκευής σε Κιλά"])
+    number = _extract_first_number(value)
+    if number is None:
+        return "", "unresolved"
+    if re.search(r"[.,]\d", value):
+        return f"{number:.1f}", source
+    return _format_decimal(number), source
+
+
+def _resolve_hob_cutout_height(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Διαστάσεις εντοιχισμού (υ x π x β)", "Διαστάσεις Εντοιχισμού (ΥxΠxΒ mm)"])
+    formatted = _dimension_from_triplet(value, 0)
+    return (formatted, source) if formatted else ("", "unresolved")
+
+
+def _resolve_hob_cutout_width(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Πλάτος Εντοιχισμού"])
+    if value:
+        return _value_or_unresolved(value, source)
+    triple_value, triple_source = _first_value_from_aliases(context, ["Διαστάσεις εντοιχισμού (υ x π x β)", "Διαστάσεις Εντοιχισμού (ΥxΠxΒ mm)"])
+    formatted = _dimension_from_triplet(triple_value, 1)
+    return (formatted, triple_source) if formatted else ("", "unresolved")
+
+
+def _resolve_hob_cutout_depth(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    triple_value, triple_source = _first_value_from_aliases(context, ["Διαστάσεις εντοιχισμού (υ x π x β)", "Διαστάσεις Εντοιχισμού (ΥxΠxΒ mm)"])
+    formatted = _dimension_from_triplet(triple_value, 2)
+    if formatted:
+        return formatted, triple_source
+    value, source = _first_value_from_aliases(context, ["Βάθος Εντοιχισμού"])
+    return _value_or_unresolved(value, source)
+
+
+def _resolve_hob_device_width(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _section_value(context, "Διαστάσεις Συσκευής", "Πλάτος")
+    if value:
+        return value, source
+    triple_value, triple_source = _first_value_from_aliases(context, ["Διαστάσεις συσκευής (ΥxΠxΒ mm)", "Διαστάσεις Εσωτερικής μονάδας: (ΥxΠxΒ)"])
+    formatted = _dimension_from_triplet(triple_value, 1)
+    return (formatted, triple_source) if formatted else ("", "unresolved")
+
+
+def _resolve_hob_device_depth(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _section_value(context, "Διαστάσεις Συσκευής", "Βάθος")
+    if value:
+        return value, source
+    triple_value, triple_source = _first_value_from_aliases(context, ["Διαστάσεις συσκευής (ΥxΠxΒ mm)", "Διαστάσεις Εσωτερικής μονάδας: (ΥxΠxΒ)"])
+    formatted = _dimension_from_triplet(triple_value, 2)
+    return (formatted, triple_source) if formatted else ("", "unresolved")
+
+
+def _resolve_hob_warranty(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Εγγύηση Κατασκευαστή"])
+    if value:
+        return value, source
+    match = re.search(r"(\d+)\s+έτ", context.raw_html, flags=re.IGNORECASE)
+    if match and _contains_any(context.raw_html, "εγγυ"):
+        return f"{match.group(1)} έτη", "raw_html:warranty"
+    return "", "unresolved"
+
+
 _RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, str]]] = {
     "tv_screen_technology": _resolve_tv_screen_technology,
     "tv_screen_size_inches": _resolve_tv_screen_size_inches,
@@ -859,4 +1179,29 @@ _RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, 
     "tv_country": _resolve_tv_country,
     "tv_warranty": _resolve_tv_warranty,
     "tv_dimensions_with_stand": _resolve_tv_dimensions_with_stand,
+    "hob_installation_type": _resolve_hob_installation_type,
+    "hob_surface_technology": _resolve_hob_surface_technology,
+    "hob_zone_count": _resolve_hob_zone_count,
+    "hob_control_type": _resolve_hob_control_type,
+    "hob_digital_indicators": _resolve_hob_digital_indicators,
+    "hob_residual_heat": _resolve_hob_residual_heat,
+    "hob_timer": _resolve_hob_timer,
+    "hob_pan_recognition": _resolve_hob_pan_recognition,
+    "hob_coffee_zone": _resolve_hob_coffee_zone,
+    "hob_natural_gas": _resolve_hob_natural_gas,
+    "hob_connectivity": _resolve_hob_connectivity,
+    "hob_other_features": _resolve_hob_other_features,
+    "hob_zone_power": _resolve_hob_zone_power,
+    "hob_total_power": _resolve_hob_total_power,
+    "hob_child_lock": _resolve_hob_child_lock,
+    "hob_auto_safety_off": _resolve_hob_auto_safety_off,
+    "hob_color": _resolve_hob_color,
+    "hob_frame_color": _resolve_hob_frame_color,
+    "hob_weight": _resolve_hob_weight,
+    "hob_cutout_height": _resolve_hob_cutout_height,
+    "hob_cutout_width": _resolve_hob_cutout_width,
+    "hob_cutout_depth": _resolve_hob_cutout_depth,
+    "hob_device_width": _resolve_hob_device_width,
+    "hob_device_depth": _resolve_hob_device_depth,
+    "hob_warranty": _resolve_hob_warranty,
 }

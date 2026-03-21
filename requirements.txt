@@ -3,3 +3,4 @@ lxml
 requests
 pillow
 pillow-avif-plugin
+pypdf

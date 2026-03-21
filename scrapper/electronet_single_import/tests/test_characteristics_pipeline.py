@@ -2,7 +2,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from electronet_single_import.characteristics_pipeline import build_characteristics_for_product
+from electronet_single_import.characteristics_pipeline import CharacteristicsTemplateRegistry, build_characteristics_for_product
 from electronet_single_import.mapping import build_row
 from electronet_single_import.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from electronet_single_import.normalize import normalize_for_match
@@ -11,6 +11,7 @@ from electronet_single_import.schema_matcher import SchemaMatcher
 
 TV_TEMPLATE_SCHEMA_ID = "sha1:954c8413f2da941e78f3ddce65df522654336c8c"
 HOOD_SCHEMA_ID = "sha1:0afca19ffd5ea62d89eedacca3c889e8d0e67b37"
+BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
 
 
 def write_tv_raw_html(tmp_path: Path) -> Path:
@@ -335,3 +336,137 @@ def test_schema_matcher_prefers_template_source_files_for_tv_sections() -> None:
     assert default_result.matched_schema_id != TV_TEMPLATE_SCHEMA_ID
     assert preferred_result.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
     assert preferred_candidates[0]["source_files"] == ["tileoraseis.json"]
+
+
+def test_characteristics_registry_prefers_built_in_hob_schema_for_skroutz() -> None:
+    registry = CharacteristicsTemplateRegistry()
+    source = SourceProductData(source_name="skroutz", name="Neff Hob")
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        leaf_category="Εντοιχιζόμενες Συσκευές",
+        sub_category="Εστίες",
+    )
+
+    preferred_source_files = registry.preferred_schema_source_files(source, taxonomy)
+    template = registry.select_template(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=BUILT_IN_HOB_SCHEMA_ID, score=0.9),
+    )
+
+    assert preferred_source_files == ["esties.json"]
+    assert template is not None
+    assert template["matched_schema_id"] == BUILT_IN_HOB_SCHEMA_ID
+    assert template["preferred_schema_source_files"] == ["esties.json"]
+    assert template["template_source"] == "schema_library_with_custom_overrides"
+    assert template["custom_template_id"] == "skroutz_built_in_hob_v1"
+
+
+def test_built_in_hob_characteristics_use_source_and_manufacturer_evidence() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="Neff",
+        mpn="T16BT60N0",
+        name="Neff T16BT60N0 Hob",
+        spec_sections=[
+            SpecSection(
+                section="Γενικά",
+                items=[
+                    SpecItem(label="Τύπος", value="Κεραμική"),
+                    SpecItem(label="Αριθμός Εστιών", value="4"),
+                    SpecItem(label="Διακόπτες", value="Αφής"),
+                    SpecItem(label="Χρώμα", value="Μαύρο"),
+                ],
+            ),
+            SpecSection(
+                section="Δυνατότητες & Λειτουργίες",
+                items=[
+                    SpecItem(label="Smart", value="Όχι"),
+                    SpecItem(label="Λειτουργία Κλειδώματος", value="Ναι"),
+                    SpecItem(label="Χρονοδιακόπτης", value="Ναι"),
+                    SpecItem(label="Ένδειξη Υπολοίπου Θερμότητας", value="Ναι"),
+                ],
+            ),
+            SpecSection(
+                section="Διαστάσεις Συσκευής",
+                items=[
+                    SpecItem(label="Ύψος", value="4,8 cm"),
+                    SpecItem(label="Πλάτος", value="58,3 cm"),
+                    SpecItem(label="Βάθος", value="51,3 cm"),
+                ],
+            ),
+            SpecSection(
+                section="Διαστάσεις Εντοιχισμού",
+                items=[
+                    SpecItem(label="Πλάτος Εντοιχισμού", value="56 cm"),
+                    SpecItem(label="Βάθος Εντοιχισμού", value="50 cm"),
+                ],
+            ),
+        ],
+        manufacturer_spec_sections=[
+            SpecSection(
+                section="Τεχνικά στοιχεία",
+                items=[
+                    SpecItem(label="Τύπος εγκατάστασης", value="Εντοιχιζόμενη συσκευή"),
+                    SpecItem(label="Τύπος λειτουργίας", value="Ηλεκτρική"),
+                    SpecItem(label="Βασικό υλικό επιφανειών", value="Υαλοκεραμική"),
+                    SpecItem(label="Συνολικός αριθμός ζωνών που μπορούν να χρησιμοποιηθούν ταυτόχρονα", value="4"),
+                    SpecItem(label="Διαστάσεις εντοιχισμού (υ x π x β)", value="48 x 560 x 490 - 500 mm"),
+                    SpecItem(label="Διαστάσεις συσκευής (ΥxΠxΒ mm)", value="48 x 583 x 513"),
+                    SpecItem(label="Καθαρό βάρος", value="8.0 kg"),
+                    SpecItem(label="Χρώμα πλαισίου", value="Ανοξείδωτο"),
+                ],
+            ),
+            SpecSection(
+                section="Γενικά χαρακτηριστικά",
+                items=[
+                    SpecItem(label="Είδος ηλεκτρονικού ελέγχου", value="TwistPad4: πλήρης έλεγχος της ισχύος"),
+                    SpecItem(label="Ψηφιακό χρονόμετρο", value="ένδειξη του χρόνου που έχει περάσει"),
+                    SpecItem(label="Αυτόματη απενεργοποίηση ασφαλείας", value="η εστία σταματά να θερμαίνεται"),
+                    SpecItem(label="Κλείδωμα ασφαλείας για τα παιδιά", value="αποτροπή ενεργοποίησης"),
+                    SpecItem(label="Συνολική ισχύς", value="6.3 ΚW"),
+                ],
+            ),
+        ],
+        manufacturer_source_text=(
+            "TwistPad 17 βαθμίδες ισχύος Λειτουργία Restart Λειτουργία Alarm "
+            "Λειτουργία διατήρησης θερμότητας Ψηφιακό χρονόμετρο "
+            "Μπροστά αριστερά: 145 mm, 1.2 ΚW Πίσω αριστερά: 210 mm, 120 mm, 0.75 ΚW "
+            "Μπροστά δεξιά: 180 mm, 80 mm, 0.4 ΚW Πίσω δεξιά: 145 mm, 1.2 ΚW"
+        ),
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        leaf_category="Εντοιχιζόμενες Συσκευές",
+        sub_category="Εστίες",
+    )
+
+    html, diagnostics, _warnings = build_characteristics_for_product(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=BUILT_IN_HOB_SCHEMA_ID, score=0.9),
+    )
+
+    soup = BeautifulSoup(html, "lxml")
+    values = {
+        normalize_for_match(cells[0].get_text(" ", strip=True)): cells[1].get_text(" ", strip=True)
+        for cells in (row.find_all("td") for row in soup.select("tbody tr"))
+        if len(cells) == 2
+    }
+
+    assert diagnostics["template_source"] == "schema_library_with_custom_overrides"
+    assert values[normalize_for_match("Τρόπος Τοποθέτησης")] == "Εντοιχιζόμενη συσκευή"
+    assert values[normalize_for_match("Τεχνολογία Πλατώ Εστιών")] == "Υαλοκεραμική"
+    assert values[normalize_for_match("Αριθμός Ζωνών")] == "4"
+    assert values[normalize_for_match("Τύπος Χειριστηρίου")] == "TwistPad®"
+    assert values[normalize_for_match("Ψηφιακές Ενδείξεις")] == "Ναι"
+    assert values[normalize_for_match("Σύνδεση με Φυσικό Αέριο")] == "Όχι"
+    assert values[normalize_for_match("Συνδεσιμότητα")] == "Όχι"
+    assert values[normalize_for_match("Άλλα Χαρακτηριστικά")] == "17 βαθμίδες ισχύος, λειτουργία Restart, λειτουργία Alarm, διατήρηση θερμότητας"
+    assert values[normalize_for_match("Ισχύς Εστίας Μπροστά Αριστερά (KW")] == "1.2 kW"
+    assert values[normalize_for_match("Ισχύς Εστίας Πίσω Αριστερά (KW")] == "0.75 kW"
+    assert values[normalize_for_match("Μέγιστη Ονομαστική Ισχύς (W")] == "6300 W"
+    assert values[normalize_for_match("Χρώμα Πλαισίου")] == "Ανοξείδωτο"
+    assert values[normalize_for_match("Βάρος Συσκευής σε Κιλά")] == "8.0"
+    assert values[normalize_for_match("Ύψος Διάστασης Εντοιχισμού")] == "4.8 cm"
+    assert values[normalize_for_match("Βάθος Διάστασης Εντοιχισμού σε Εκατοστά")] == "49 - 50 cm"
