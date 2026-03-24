@@ -26,6 +26,7 @@ class TaxonomyResolver:
         self.taxonomy = read_json(taxonomy_path)
         self.filter_map = read_json(filter_map_path)
         self.paths: list[dict[str, Any]] = self.taxonomy.get("paths", [])
+        self.gender_map: dict[str, dict[str, str]] = self.taxonomy.get("gender_map", {})
         self.filter_rows: list[dict[str, Any]] = self.filter_map.get("subcategories", [])
         self.filter_by_path = {
             normalize_for_match(item.get("path", "")): item
@@ -135,6 +136,7 @@ class TaxonomyResolver:
         if not resolved:
             return TaxonomyResolution(confidence=best["confidence"], reason="low_confidence"), candidates[:5]
 
+        gender, plural_label = self._lookup_gender(best.get("sub_category"), best.get("leaf_category", ""))
         return (
             TaxonomyResolution(
                 parent_category=best["parent_category"],
@@ -144,6 +146,8 @@ class TaxonomyResolver:
                 cta_url=best.get("cta_url", ""),
                 confidence=best["confidence"],
                 reason=",".join(best["reasons"]),
+                gender=gender,
+                plural_label=plural_label,
             ),
             candidates[:5],
         )
@@ -160,6 +164,13 @@ class TaxonomyResolver:
         if int(boxnow) == 1:
             serialized += ":::Μικροσυσκευές"
         return serialized
+
+    def _lookup_gender(self, sub_category: str | None, leaf_category: str) -> tuple[str, str]:
+        for key in [sub_category or "", leaf_category]:
+            entry = self.gender_map.get(key)
+            if entry:
+                return entry.get("gender", ""), entry.get("plural_label", "")
+        return "", ""
 
     def _alias(self, value: str) -> str:
         normalized = normalize_for_match(value)

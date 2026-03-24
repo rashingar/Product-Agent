@@ -13,7 +13,8 @@
       "additionalProperties": false,
       "required": [
         "meta_description",
-        "meta_keywords"
+        "meta_keywords",
+        "name_tail_polished"
       ],
       "properties": {
         "meta_description": {
@@ -24,6 +25,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "name_tail_polished": {
+          "type": "string"
         }
       }
     },
@@ -32,14 +36,10 @@
       "additionalProperties": false,
       "required": [
         "intro_html",
-        "cta_text",
         "sections"
       ],
       "properties": {
         "intro_html": {
-          "type": "string"
-        },
-        "cta_text": {
           "type": "string"
         },
         "sections": {

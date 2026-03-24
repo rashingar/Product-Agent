@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \":*)",
+      "Bash(python3 gender_map_gen.py)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(python -m pytest scrapper/electronet_single_import/tests/ -x --tb=short)",
+      "Bash(python -m pytest scrapper/electronet_single_import/tests/ --ignore=scrapper/electronet_single_import/tests/test_fetcher_gallery_download.py -x --tb=short)",
+      "Bash(python -m pytest scrapper/electronet_single_import/tests/ --ignore=scrapper/electronet_single_import/tests/test_fetcher_gallery_download.py --ignore=scrapper/electronet_single_import/tests/test_skroutz_integration.py -x --tb=short)",
+      "Bash(python -m pytest scrapper/electronet_single_import/tests/ -k \"not gallery_download and not skroutz_integration and not skroutz_sections and not workflow\" --tb=short)",
+      "Bash(pip install:*)",
+      "Bash(python -m pytest scrapper/electronet_single_import/tests/ --tb=short)",
+      "Bash(python -m pip install Pillow)",
+      "Bash(python -m pytest scrapper/electronet_single_import/tests/test_deterministic_fields.py -x --tb=long)",
+      "Bash(python -m pytest scrapper/electronet_single_import/tests/test_llm_contract.py --tb=short)"
+    ]
+  }
+}

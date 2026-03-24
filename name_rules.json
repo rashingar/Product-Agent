@@ -1,0 +1,303 @@
+{
+  "description": "Per-category rules for building product names deterministically. Pattern: {Brand} {MPN} – {category_phrase} {differentiator1} {differentiator2} ...",
+  "rules": [
+    {
+      "match": { "leaf_category": "Τηλεοράσεις" },
+      "category_phrase": "Τηλεόραση",
+      "differentiator_specs": ["Διαγώνιος Οθόνης", "Ανάλυση", "Τεχνολογία Οθόνης"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Sound Bars" },
+      "category_phrase": "Soundbar",
+      "differentiator_specs": ["Κανάλια", "Subwoofer"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ηχεία" },
+      "category_phrase": "Ηχείο",
+      "differentiator_specs": ["Ισχύς", "Τύπος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ενισχυτές" },
+      "category_phrase": "Ενισχυτής",
+      "differentiator_specs": ["Ισχύς", "Κανάλια"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ραδιόφωνα" },
+      "category_phrase": "Ραδιόφωνο",
+      "differentiator_specs": ["Τύπος", "Συνδεσιμότητα"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Βάσεις TV" },
+      "category_phrase": "Βάση TV",
+      "differentiator_specs": ["Ίντσες", "Τύπος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Πλυντήρια Ρούχων" },
+      "category_phrase": "Πλυντήριο Ρούχων",
+      "differentiator_specs": ["Χωρητικότητα", "Στροφές", "Ενεργειακή Κλάση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Πλυντήρια Πιάτων" },
+      "category_phrase": "Πλυντήριο Πιάτων",
+      "differentiator_specs": ["Σερβίτσια", "Πλάτος", "Ενεργειακή Κλάση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Στεγνωτήρια Ρούχων" },
+      "category_phrase": "Στεγνωτήριο Ρούχων",
+      "differentiator_specs": ["Χωρητικότητα", "Τεχνολογία", "Ενεργειακή Κλάση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Πλυντήρια-Στεγνωτήρια" },
+      "category_phrase": "Πλυντήριο-Στεγνωτήριο",
+      "differentiator_specs": ["Χωρητικότητα Πλύσης", "Χωρητικότητα Στεγνώματος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ψυγεία" },
+      "category_phrase": "Ψυγείο",
+      "differentiator_specs": ["Συνολική Καθαρή Χωρητικότητα", "Τύπος", "Ενεργειακή Κλάση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ψυγειοκαταψύκτες" },
+      "category_phrase": "Ψυγειοκαταψύκτης",
+      "differentiator_specs": ["Συνολική Καθαρή Χωρητικότητα", "Ύψος", "Ενεργειακή Κλάση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Καταψύκτες" },
+      "category_phrase": "Καταψύκτης",
+      "differentiator_specs": ["Χωρητικότητα", "Τύπος", "Ενεργειακή Κλάση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Κουζίνες" },
+      "category_phrase": "Κουζίνα",
+      "differentiator_specs": ["Τύπος", "Πλάτος", "Φούρνος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Φούρνοι" },
+      "category_phrase": "Φούρνος",
+      "differentiator_specs": ["Χωρητικότητα", "Τύπος", "Ενεργειακή Κλάση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Εστίες" },
+      "category_phrase": "Εστία",
+      "differentiator_specs": ["Τύπος Εστίας", "Πλάτος", "Ζώνες Μαγειρέματος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Απορροφητήρες" },
+      "category_phrase": "Απορροφητήρας",
+      "differentiator_specs": ["Τύπος", "Πλάτος", "Ισχύς"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Φούρνοι Μικροκυμάτων" },
+      "category_phrase": "Φούρνος Μικροκυμάτων",
+      "differentiator_specs": ["Χωρητικότητα", "Ισχύς", "Grill"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Σκούπες" },
+      "category_phrase": "Ηλεκτρική Σκούπα",
+      "differentiator_specs": ["Ισχύς", "Τύπος", "Χωρητικότητα Σακούλας"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Σκούπες Stick" },
+      "category_phrase": "Σκούπα Stick",
+      "differentiator_specs": ["Ισχύς", "Αυτονομία", "Χωρητικότητα"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Σκούπες Ρομπότ" },
+      "category_phrase": "Σκούπα Ρομπότ",
+      "differentiator_specs": ["Αυτονομία", "Χαρτογράφηση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Σκουπάκια" },
+      "category_phrase": "Σκουπάκι",
+      "differentiator_specs": ["Ισχύς", "Τύπος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Σίδερα" },
+      "category_phrase": "Σίδερο Ατμού",
+      "differentiator_specs": ["Ισχύς", "Ατμός", "Πλάκα"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Συστήματα Σιδερώματος" },
+      "category_phrase": "Σύστημα Σιδερώματος",
+      "differentiator_specs": ["Ισχύς", "Πίεση Ατμού"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Σεσουάρ" },
+      "category_phrase": "Σεσουάρ Μαλλιών",
+      "differentiator_specs": ["Ισχύς", "Τεχνολογία"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Βούρτσες-Ψαλίδια-ισιωτικά" },
+      "category_phrase": "Ισιωτικό Μαλλιών",
+      "differentiator_specs": ["Τύπος", "Τεχνολογία"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ξυριστικές Μηχανές" },
+      "category_phrase": "Ξυριστική Μηχανή",
+      "differentiator_specs": ["Τύπος", "Αυτονομία"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Κουρευτικές Μηχανές" },
+      "category_phrase": "Κουρευτική Μηχανή",
+      "differentiator_specs": ["Τύπος", "Αυτονομία"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Καφετιέρες Espresso" },
+      "category_phrase": "Καφετιέρα Espresso",
+      "differentiator_specs": ["Τύπος", "Ισχύς", "Πίεση"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Καφετιέρες Φίλτρου" },
+      "category_phrase": "Καφετιέρα Φίλτρου",
+      "differentiator_specs": ["Ισχύς", "Χωρητικότητα Δοχείου Νερού σε Λίτρα", "Χωρητικότητα σε Φλυτζάνια"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Βραστήρες" },
+      "category_phrase": "Βραστήρας",
+      "differentiator_specs": ["Χωρητικότητα σε Λίτρα", "Ισχύς", "Χρώμα"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Φρυγανιέρες" },
+      "category_phrase": "Φρυγανιέρα",
+      "differentiator_specs": ["Θέσεις", "Ισχύς"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Τοστιέρες" },
+      "category_phrase": "Τοστιέρα",
+      "differentiator_specs": ["Ισχύς", "Πλάκες"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Φριτέζες" },
+      "category_phrase": "Φριτέζα",
+      "differentiator_specs": ["Χωρητικότητα", "Ισχύς", "Τύπος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Μπλέντερ" },
+      "category_phrase": "Μπλέντερ",
+      "differentiator_specs": ["Ισχύς", "Χωρητικότητα"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Κουζινομηχανές" },
+      "category_phrase": "Κουζινομηχανή",
+      "differentiator_specs": ["Ισχύς", "Χωρητικότητα"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ψηστιέρες-Γκριλιέρες" },
+      "category_phrase": "Ψηστιέρα",
+      "differentiator_specs": ["Ισχύς", "Τύπος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Χύτρες Ταχύτητας" },
+      "category_phrase": "Χύτρα Ταχύτητας",
+      "differentiator_specs": ["Χωρητικότητα", "Υλικό"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Φουρνάκια" },
+      "category_phrase": "Φουρνάκι",
+      "differentiator_specs": ["Χωρητικότητα", "Ισχύς"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ηλεκτρικά μπρίκια" },
+      "category_phrase": "Ηλεκτρικό Μπρίκι",
+      "differentiator_specs": ["Ισχύς", "Χωρητικότητα"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Κλιματιστικά" },
+      "category_phrase": "Κλιματιστικό Inverter",
+      "differentiator_specs": ["BTU", "Ενεργειακή Κλάση", "WiFi"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Αφυγραντήρες" },
+      "category_phrase": "Αφυγραντήρας",
+      "differentiator_specs": ["Χωρητικότητα", "Ισχύς Αφύγρανσης"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Θερμαντικά Υγραερίου" },
+      "category_phrase": "Θερμαντικό Υγραερίου",
+      "differentiator_specs": ["Ισχύς", "Τύπος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Αερόθερμα" },
+      "category_phrase": "Αερόθερμο",
+      "differentiator_specs": ["Ισχύς", "Τύπος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Θερμοπομποί" },
+      "category_phrase": "Θερμοπομπός",
+      "differentiator_specs": ["Ισχύς", "Τύπος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Καλοριφέρ" },
+      "category_phrase": "Καλοριφέρ",
+      "differentiator_specs": ["Ισχύς", "Φέτες"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ηλεκτρικές Κουβέρτες" },
+      "category_phrase": "Ηλεκτρική Κουβέρτα",
+      "differentiator_specs": ["Διαστάσεις", "Ισχύς"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Ανεμιστήρες" },
+      "category_phrase": "Ανεμιστήρας",
+      "differentiator_specs": ["Τύπος", "Ισχύς", "Διάμετρος"],
+      "format_rules": {}
+    },
+    {
+      "match": { "leaf_category": "Smartphones" },
+      "category_phrase": "Smartphone",
+      "differentiator_specs": ["RAM", "Αποθηκευτικός Χώρος", "Οθόνη"],
+      "format_rules": {}
+    }
+  ],
+  "default": {
+    "differentiator_specs": ["Χωρητικότητα", "Ισχύς", "Χρώμα"],
+    "format_rules": {}
+  }
+}

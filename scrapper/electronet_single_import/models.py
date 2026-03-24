@@ -211,6 +211,8 @@ class TaxonomyResolution:
     cta_url: str = ""
     confidence: float = 0.0
     reason: str = ""
+    gender: str = ""
+    plural_label: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

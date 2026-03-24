@@ -3,14 +3,86 @@ from __future__ import annotations
 import re
 from typing import Iterable
 
+from typing import Any
+
 from .models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match, normalize_whitespace
+from .utils import NAME_RULES_PATH, read_json
 
 MODEL_TOKEN_RE = re.compile(r"^(?=.*[A-Z])(?=.*\d)[A-Z0-9][A-Z0-9._/-]{2,}$")
 PURE_NUMERIC_TOKEN_RE = re.compile(r"^\d+(?:[.,]\d+)?$")
 NUMERIC_RE = re.compile(r"\d+(?:[.,]\d+)?")
 ENERGY_CLASS_TOKEN_RE = re.compile(r"^[A-G](?:\+{1,3})?$", re.IGNORECASE)
 MAX_NAME_DIFFERENTIATORS = 3
+
+ARTICLE_MAP = {"fem": "Η", "neut": "Το", "masc": "Ο"}
+
+_NAME_RULES_CACHE: dict[str, Any] | None = None
+
+
+def _load_name_rules() -> dict[str, Any]:
+    global _NAME_RULES_CACHE
+    if _NAME_RULES_CACHE is None:
+        try:
+            _NAME_RULES_CACHE = read_json(str(NAME_RULES_PATH))
+        except Exception:
+            _NAME_RULES_CACHE = {"rules": [], "default": {"differentiator_specs": [], "format_rules": {}}}
+    return _NAME_RULES_CACHE
+
+
+def match_name_rule(taxonomy: TaxonomyResolution) -> dict[str, Any] | None:
+    rules_data = _load_name_rules()
+    sub = taxonomy.sub_category or ""
+    leaf = taxonomy.leaf_category or ""
+    for rule in rules_data.get("rules", []):
+        match_cond = rule.get("match", {})
+        matched = True
+        for key, value in match_cond.items():
+            if key == "sub_category" and normalize_for_match(sub) != normalize_for_match(value):
+                matched = False
+            elif key == "leaf_category":
+                if normalize_for_match(sub) != normalize_for_match(value) and normalize_for_match(leaf) != normalize_for_match(value):
+                    matched = False
+            if not matched:
+                break
+        if matched:
+            return rule
+    return None
+
+
+def apply_name_rule(
+    rule: dict[str, Any],
+    source: SourceProductData,
+    brand: str,
+    mpn: str,
+    taxonomy: TaxonomyResolution,
+) -> tuple[str, list[str]]:
+    category_phrase = rule.get("category_phrase", "")
+    spec_labels = rule.get("differentiator_specs", [])
+    spec_lookup = build_spec_lookup(source.key_specs, source.spec_sections)
+    differentiators: list[str] = []
+    for label in spec_labels:
+        value = normalize_value(spec_lookup, [label])
+        if value and len(differentiators) < MAX_NAME_DIFFERENTIATORS:
+            differentiators.append(value)
+    if not differentiators:
+        differentiators = derive_name_differentiators(source, category_phrase, taxonomy, brand, mpn)
+    return category_phrase, differentiators
+
+
+def build_meta_description_draft(
+    brand: str,
+    mpn: str,
+    category_phrase: str,
+    gender: str,
+    key_differentiators: list[str],
+) -> str:
+    article = ARTICLE_MAP.get(gender, "Το")
+    specs = ", ".join(d for d in key_differentiators[:4] if d)
+    draft = f"{article} {brand} {mpn} είναι {category_phrase}"
+    if specs:
+        draft += f" με {specs}"
+    return normalize_whitespace(draft) + "."
 
 
 def build_deterministic_product_fields(
@@ -26,13 +98,22 @@ def build_deterministic_product_fields(
     raw_title = normalize_whitespace(source.name)
     brand = normalize_whitespace(source.brand)
     mpn = normalize_whitespace(source.mpn) or extract_mpn_from_name(raw_title, brand)
-    category_phrase = derive_category_phrase(raw_title, brand, taxonomy)
-    differentiators = derive_name_differentiators(source, category_phrase, taxonomy, brand, mpn)
+    name_rule = match_name_rule(taxonomy)
+    if name_rule:
+        category_phrase, differentiators = apply_name_rule(name_rule, source, brand, mpn, taxonomy)
+    else:
+        category_phrase = derive_category_phrase(raw_title, brand, taxonomy)
+        differentiators = derive_name_differentiators(source, category_phrase, taxonomy, brand, mpn)
     composed_name = compose_name(brand, mpn, category_phrase, differentiators)
     preserve_title = should_preserve_parsed_title(raw_title, brand, mpn, composed_name)
     name = composed_name or raw_title
     meta_title = compose_meta_title(name, brand, mpn, category_phrase, differentiators, preserve_title)
     seo_keyword = seo_keyword_builder(name, model)
+    tail_parts = [normalize_whitespace(category_phrase)] + [normalize_whitespace(d) for d in differentiators if d]
+    name_draft_tail = normalize_whitespace(" ".join(p for p in tail_parts if p))
+    meta_description_draft = build_meta_description_draft(
+        brand, mpn, category_phrase, taxonomy.gender, differentiators,
+    )
     return {
         "brand": brand,
         "mpn": mpn,
@@ -41,7 +122,9 @@ def build_deterministic_product_fields(
         "name_differentiators": differentiators,
         "preserve_parsed_title": preserve_title,
         "name": name,
+        "name_draft_tail": name_draft_tail,
         "meta_title": meta_title,
+        "meta_description_draft": meta_description_draft,
         "seo_keyword": seo_keyword,
     }
 
@@ -80,17 +163,7 @@ def build_skroutz_deterministic_fields(
             normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, normalize_soundbar_channels_for_seo(channels), standards, power] if part)),
             model,
         )
-        return {
-            "brand": brand,
-            "mpn": mpn,
-            "manufacturer": brand,
-            "category_phrase": category_phrase,
-            "name_differentiators": differentiators,
-            "preserve_parsed_title": False,
-            "name": name,
-            "meta_title": meta_title,
-            "seo_keyword": seo_keyword,
-        }
+        return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
 
     if family == "coffee_filter":
         category_phrase = "Καφετιέρα Φίλτρου"
@@ -111,17 +184,7 @@ def build_skroutz_deterministic_fields(
             normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, power, format_capacity_for_seo(capacity)] if part)),
             model,
         )
-        return {
-            "brand": brand,
-            "mpn": mpn,
-            "manufacturer": brand,
-            "category_phrase": category_phrase,
-            "name_differentiators": differentiators,
-            "preserve_parsed_title": False,
-            "name": name,
-            "meta_title": meta_title,
-            "seo_keyword": seo_keyword,
-        }
+        return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
 
     if family == "kettle":
         category_phrase = "Βραστήρας"
@@ -139,17 +202,7 @@ def build_skroutz_deterministic_fields(
             normalize_whitespace(" ".join(part for part in [brand, mpn, format_capacity_for_seo(seo_tail)] if part)),
             model,
         )
-        return {
-            "brand": brand,
-            "mpn": mpn,
-            "manufacturer": brand,
-            "category_phrase": category_phrase,
-            "name_differentiators": differentiators,
-            "preserve_parsed_title": False,
-            "name": name,
-            "meta_title": meta_title,
-            "seo_keyword": seo_keyword,
-        }
+        return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
 
     category_phrase = "Επιτραπέζια Εστία"
     burner_phrase = derive_hob_burner_phrase(spec_lookup, raw_title)
@@ -167,6 +220,24 @@ def build_skroutz_deterministic_fields(
     )
     seo_name = compose_name(brand, mpn, category_phrase, [normalize_hob_burners_for_seo(burner_phrase), power, surface])
     seo_keyword = seo_keyword_builder(seo_name, model)
+    return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
+
+def _skroutz_result(
+    brand: str,
+    mpn: str,
+    category_phrase: str,
+    differentiators: list[str],
+    name: str,
+    meta_title: str,
+    seo_keyword: str,
+    taxonomy: TaxonomyResolution,
+) -> dict[str, object]:
+    tail_parts = [normalize_whitespace(category_phrase)] + [normalize_whitespace(d) for d in differentiators if d]
+    name_draft_tail = normalize_whitespace(" ".join(p for p in tail_parts if p))
+    meta_description_draft = build_meta_description_draft(
+        brand, mpn, category_phrase, taxonomy.gender, differentiators,
+    )
     return {
         "brand": brand,
         "mpn": mpn,
@@ -175,7 +246,9 @@ def build_skroutz_deterministic_fields(
         "name_differentiators": differentiators,
         "preserve_parsed_title": False,
         "name": name,
+        "name_draft_tail": name_draft_tail,
         "meta_title": meta_title,
+        "meta_description_draft": meta_description_draft,
         "seo_keyword": seo_keyword,
     }
 
