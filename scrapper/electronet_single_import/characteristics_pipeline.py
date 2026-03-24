@@ -406,6 +406,10 @@ def _section_value(context: _ResolutionContext, section_name: str, label: str) -
     label_key = normalize_for_match(label)
     if section_key in context.section_lookup and label_key in context.section_lookup[section_key]:
         return context.section_lookup[section_key][label_key], f"section:{section_name}/{label}"
+    if section_key in context.section_lookup:
+        for candidate_label, candidate_value in context.section_lookup[section_key].items():
+            if _labels_related(candidate_label, label_key) and candidate_value:
+                return candidate_value, f"section_label_related:{section_name}/{label}"
     for candidate_section in context.source.spec_sections:
         candidate_key = normalize_for_match(candidate_section.section)
         if not _section_titles_related(section_key, candidate_key):
@@ -413,9 +417,19 @@ def _section_value(context: _ResolutionContext, section_name: str, label: str) -
         for item in candidate_section.items:
             item_key = normalize_for_match(item.label)
             value = normalize_whitespace(item.value)
-            if item_key == label_key and value:
+            if (item_key == label_key or _labels_related(item_key, label_key)) and value:
                 return value, f"section_related:{candidate_section.section}/{label}"
     return "", ""
+
+
+def _labels_related(left: str, right: str) -> bool:
+    if not left or not right:
+        return False
+    if left == right:
+        return True
+    compact_left = normalize_whitespace(re.sub(r"\b[χx]\b", " ", left))
+    compact_right = normalize_whitespace(re.sub(r"\b[χx]\b", " ", right))
+    return bool(compact_left and compact_left == compact_right)
 
 
 def _value_or_unresolved(value: str, source: str) -> tuple[str, str]:

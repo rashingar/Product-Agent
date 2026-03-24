@@ -21,6 +21,30 @@ ALIASES = {
 }
 
 
+def _common_prefix_length(left: str, right: str) -> int:
+    limit = min(len(left), len(right))
+    idx = 0
+    while idx < limit and left[idx] == right[idx]:
+        idx += 1
+    return idx
+
+
+def _tokens_soft_overlap(left_tokens: set[str], right_tokens: set[str], min_prefix: int = 6) -> int:
+    if not left_tokens or not right_tokens:
+        return 0
+    matches = 0
+    for left in left_tokens:
+        if any(
+            left == right
+            or left.startswith(right)
+            or right.startswith(left)
+            or _common_prefix_length(left, right) >= min_prefix
+            for right in right_tokens
+        ):
+            matches += 1
+    return matches
+
+
 class TaxonomyResolver:
     def __init__(self, taxonomy_path: str = str(CATALOG_TAXONOMY_PATH), filter_map_path: str = str(FILTER_MAP_PATH)) -> None:
         self.taxonomy = read_json(taxonomy_path)
@@ -89,11 +113,13 @@ class TaxonomyResolver:
 
             leaf_tokens = set(leaf_norm.split())
             sub_tokens = set(sub_norm.split()) if sub_norm else set()
-            if leaf_tokens and leaf_tokens & name_tokens:
-                score += 1.5
+            leaf_overlap = _tokens_soft_overlap(leaf_tokens, name_tokens)
+            sub_overlap = _tokens_soft_overlap(sub_tokens, name_tokens)
+            if leaf_overlap:
+                score += 1.5 * (leaf_overlap / max(len(leaf_tokens), 1))
                 reasons.append("leaf_name_overlap")
-            if sub_tokens and sub_tokens & name_tokens:
-                score += 2.0
+            if sub_overlap:
+                score += 2.0 * (sub_overlap / max(len(sub_tokens), 1))
                 reasons.append("sub_name_overlap")
 
             filter_row = self.filter_by_path.get(candidate_path_norm)

@@ -2,7 +2,11 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from electronet_single_import.characteristics_pipeline import CharacteristicsTemplateRegistry, build_characteristics_for_product
+from electronet_single_import.characteristics_pipeline import (
+    CharacteristicsTemplateRegistry,
+    _labels_related,
+    build_characteristics_for_product,
+)
 from electronet_single_import.mapping import build_row
 from electronet_single_import.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from electronet_single_import.normalize import normalize_for_match
@@ -12,6 +16,13 @@ from electronet_single_import.schema_matcher import SchemaMatcher
 TV_TEMPLATE_SCHEMA_ID = "sha1:954c8413f2da941e78f3ddce65df522654336c8c"
 HOOD_SCHEMA_ID = "sha1:0afca19ffd5ea62d89eedacca3c889e8d0e67b37"
 BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
+
+
+def test_labels_related_treats_dimension_separators_as_equivalent() -> None:
+    assert _labels_related(
+        normalize_for_match("Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"),
+        normalize_for_match("Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β)"),
+    )
 
 
 def write_tv_raw_html(tmp_path: Path) -> Path:
