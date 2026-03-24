@@ -9,7 +9,6 @@ def test_validate_llm_output_accepts_reduced_contract() -> None:
     payload = {
         "product": {
             "meta_description": "Ξ¤ΞΏ LG GSGV80PYLL ΞµΞ―Ξ½Ξ±ΞΉ ΟΟ…Ξ³ΞµΞ―ΞΏ Ξ½Ο„ΞΏΟ…Ξ»Ξ¬Ο€Ξ± 635 Ξ»Ξ―Ο„ΟΟ‰Ξ½ ΞΌΞµ Total No Frost ΞΊΞ±ΞΉ WiFi Ξ³ΞΉΞ± Ξ¬Ξ½ΞµΟƒΞ· ΞΊΞ¬ΞΈΞµ ΞΌΞ­ΟΞ±.",
-            "name_tail_polished": "Ψυγείο Ντουλάπα 635lt",
             "meta_keywords": ["LG", "GSGV80PYLL", "Ξ¨Ο…Ξ³ΞµΞ―ΞΏ ΞΟ„ΞΏΟ…Ξ»Ξ¬Ο€Ξ±", "Total No Frost"],
         },
         "presentation": {

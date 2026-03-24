@@ -61,13 +61,7 @@ def build_row(
         model=cli.model,
         seo_keyword_builder=derive_seo_keyword,
     )
-    polished_tail = str(llm_product.get("name_tail_polished", "")).strip() if llm_product else ""
-    brand = str(deterministic.get("brand", ""))
-    mpn = str(deterministic.get("mpn", ""))
-    if polished_tail and brand and mpn:
-        canonical_name = f"{brand} {mpn} – {polished_tail}"
-    else:
-        canonical_name = str(deterministic["name"])
+    canonical_name = str(deterministic["name"])
     meta_title = str(deterministic["meta_title"])
     canonical_mpn = str(deterministic["mpn"])
     manufacturer = str(deterministic["manufacturer"])

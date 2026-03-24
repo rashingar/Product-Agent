@@ -30,8 +30,7 @@ YOU MUST RETURN THIS EXACT TOP-LEVEL SHAPE
 {
   "product": {
     "meta_description": "",
-    "meta_keywords": [],
-    "name_tail_polished": ""
+    "meta_keywords": []
   },
   "presentation": {
     "intro_html": "",
@@ -47,7 +46,6 @@ YOU MUST RETURN THIS EXACT TOP-LEVEL SHAPE
 FIELD RULES
 - `meta_description`: Smooth the Greek grammar of `deterministic_product.meta_description_draft`. Keep all facts. Fix article agreement and natural phrasing. Exactly one sentence. No quotes, no emojis.
 - `meta_keywords`: array of verified keywords only. No stuffing.
-- `name_tail_polished`: Polish the name tail from `deterministic_product.name_draft_tail`. Keep all technical details. Only improve Greek readability and natural phrasing. Do NOT add or remove facts. Maximum 8 words.
 - `intro_html`: inner HTML only for the intro paragraph. Allowed inline tag: `<strong>`. Keep it between 120 and 180 Greek words.
 - `sections`: exactly the number required by `LLM_CONTEXT_JSON.writer_rules.sections_required`.
 - `sections[].title`: Greek section heading.

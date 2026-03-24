@@ -100,17 +100,15 @@ def validate_llm_output(
         errors.append("llm_presentation_invalid")
         presentation = {}
 
-    if set(product) != {"meta_description", "meta_keywords", "name_tail_polished"}:
+    product_keys = set(product)
+    if product_keys not in ({"meta_description", "meta_keywords"}, {"meta_description", "meta_keywords", "name_tail_polished"}):
         errors.append("llm_product_shape_invalid")
     meta_description = product.get("meta_description", "")
     meta_keywords = product.get("meta_keywords", [])
-    name_tail_polished = product.get("name_tail_polished", "")
     if not isinstance(meta_description, str):
         errors.append("llm_meta_description_invalid")
     if not isinstance(meta_keywords, list) or any(not isinstance(item, str) for item in meta_keywords):
         errors.append("llm_meta_keywords_invalid")
-    if not isinstance(name_tail_polished, str):
-        errors.append("llm_name_tail_polished_invalid")
 
     if set(presentation) != {"intro_html", "sections"}:
         errors.append("llm_presentation_shape_invalid")
@@ -140,7 +138,6 @@ def validate_llm_output(
             "meta_description": normalize_whitespace(meta_description),
             "meta_keywords": [normalize_whitespace(item) for item in meta_keywords if normalize_whitespace(item)],
             "meta_keyword_csv": serialize_meta_keywords(meta_keywords),
-            "name_tail_polished": normalize_whitespace(name_tail_polished),
         },
         "presentation": {
             "intro_html": intro_html.strip() if isinstance(intro_html, str) else "",

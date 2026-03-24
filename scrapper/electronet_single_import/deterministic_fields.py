@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import re
 from typing import Iterable
 
@@ -7,46 +8,82 @@ from typing import Any
 
 from .models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match, normalize_whitespace
-from .utils import NAME_RULES_PATH, read_json
+from .utils import DIFFERENTIATOR_PRIORITY_MAP_PATH
 
 MODEL_TOKEN_RE = re.compile(r"^(?=.*[A-Z])(?=.*\d)[A-Z0-9][A-Z0-9._/-]{2,}$")
 PURE_NUMERIC_TOKEN_RE = re.compile(r"^\d+(?:[.,]\d+)?$")
 NUMERIC_RE = re.compile(r"\d+(?:[.,]\d+)?")
 ENERGY_CLASS_TOKEN_RE = re.compile(r"^[A-G](?:\+{1,3})?$", re.IGNORECASE)
 DEFAULT_MAX_NAME_DIFFERENTIATORS = 3
+DEFAULT_MAX_META_DESCRIPTION_DIFFERENTIATORS = 4
 
 ARTICLE_MAP = {"fem": "Η", "neut": "Το", "masc": "Ο"}
 
-_NAME_RULES_CACHE: dict[str, Any] | None = None
+_DIFFERENTIATOR_RULES_CACHE: dict[str, Any] | None = None
 
 
-def _load_name_rules() -> dict[str, Any]:
-    global _NAME_RULES_CACHE
-    if _NAME_RULES_CACHE is None:
+def _split_aliases(cell: str) -> list[str]:
+    return [normalize_whitespace(part) for part in str(cell or "").split("|") if normalize_whitespace(part)]
+
+
+def _parse_differentiator_cell(cell: str) -> list[list[str]]:
+    segments = [normalize_whitespace(part) for part in str(cell or "").split("+") if normalize_whitespace(part)]
+    return [_split_aliases(segment) for segment in segments if _split_aliases(segment)]
+
+
+def _load_differentiator_rules() -> dict[str, Any]:
+    global _DIFFERENTIATOR_RULES_CACHE
+    if _DIFFERENTIATOR_RULES_CACHE is None:
+        rules: list[dict[str, Any]] = []
+        default_rule: dict[str, Any] = {"differentiator_specs": []}
         try:
-            _NAME_RULES_CACHE = read_json(str(NAME_RULES_PATH))
-        except Exception:
-            _NAME_RULES_CACHE = {"rules": [], "default": {"differentiator_specs": [], "format_rules": {}}}
-    return _NAME_RULES_CACHE
+            with open(DIFFERENTIATOR_PRIORITY_MAP_PATH, "r", encoding="utf-8-sig", newline="") as handle:
+                reader = csv.DictReader(handle)
+                differentiator_columns = [field for field in reader.fieldnames or [] if field.startswith("differentiator_")]
+                for raw_row in reader:
+                    scope = normalize_for_match(raw_row.get("scope", "rule"))
+                    differentiator_specs = [
+                        parsed
+                        for column in differentiator_columns
+                        for parsed in [_parse_differentiator_cell(raw_row.get(column, ""))]
+                        if parsed
+                    ]
+                    row_rule = {
+                        "leaf_category": normalize_whitespace(raw_row.get("leaf_category", "")),
+                        "category_phrase": normalize_whitespace(raw_row.get("category_phrase", "")),
+                        "differentiator_specs": differentiator_specs,
+                        "max_differentiators": len(differentiator_specs) or DEFAULT_MAX_NAME_DIFFERENTIATORS,
+                    }
+                    if scope == "default":
+                        default_rule = row_rule
+                    else:
+                        rules.append(row_rule)
+        except FileNotFoundError:
+            pass
+        _DIFFERENTIATOR_RULES_CACHE = {"rules": rules, "default": default_rule}
+    return _DIFFERENTIATOR_RULES_CACHE
 
 
 def match_name_rule(taxonomy: TaxonomyResolution) -> dict[str, Any] | None:
-    rules_data = _load_name_rules()
+    rules_data = _load_differentiator_rules()
     sub = taxonomy.sub_category or ""
     leaf = taxonomy.leaf_category or ""
+    normalized_sub = normalize_for_match(sub)
+    normalized_leaf = normalize_for_match(leaf)
+
     for rule in rules_data.get("rules", []):
-        match_cond = rule.get("match", {})
-        matched = True
-        for key, value in match_cond.items():
-            if key == "sub_category" and normalize_for_match(sub) != normalize_for_match(value):
-                matched = False
-            elif key == "leaf_category":
-                if normalize_for_match(sub) != normalize_for_match(value) and normalize_for_match(leaf) != normalize_for_match(value):
-                    matched = False
-            if not matched:
-                break
-        if matched:
-            return rule
+        target = normalize_for_match(rule.get("leaf_category", ""))
+        if not target:
+            continue
+        if normalized_sub == target or normalized_leaf == target:
+            return {**rule, "_matched_exact": True}
+
+    for rule in rules_data.get("rules", []):
+        target = normalize_for_match(rule.get("leaf_category", ""))
+        if not target:
+            continue
+        if target in normalized_sub or normalized_sub in target or target in normalized_leaf or normalized_leaf in target:
+            return {**rule, "_matched_exact": False}
     return None
 
 
@@ -61,14 +98,17 @@ def apply_name_rule(
     spec_labels = rule.get("differentiator_specs", [])
     max_differentiators = int(rule.get("max_differentiators", DEFAULT_MAX_NAME_DIFFERENTIATORS) or DEFAULT_MAX_NAME_DIFFERENTIATORS)
     spec_lookup = _build_preferred_spec_lookup(source)
+    exact_match = bool(rule.get("_matched_exact"))
+    if not exact_match:
+        category_phrase = derive_category_phrase(source.name, brand, taxonomy) or category_phrase
     differentiators: list[str] = []
     for label_group in spec_labels:
-        aliases = label_group if isinstance(label_group, list) else [label_group]
-        value = normalize_name_rule_value(
-            normalize_value(spec_lookup, [str(label) for label in aliases]),
-            [str(label) for label in aliases],
-            category_phrase,
-            taxonomy,
+        value = resolve_name_rule_value(
+            source=source,
+            spec_lookup=spec_lookup,
+            alias_groups=label_group,
+            category_phrase=category_phrase,
+            taxonomy=taxonomy,
         )
         if value and len(differentiators) < max_differentiators:
             differentiators.append(value)
@@ -85,7 +125,7 @@ def build_meta_description_draft(
     key_differentiators: list[str],
 ) -> str:
     article = ARTICLE_MAP.get(gender, "Το")
-    specs = ", ".join(d for d in key_differentiators[:4] if d)
+    specs = ", ".join(d for d in key_differentiators[:DEFAULT_MAX_META_DESCRIPTION_DIFFERENTIATORS] if d)
     draft = f"{article} {brand} {mpn} είναι {category_phrase}"
     if specs:
         draft += f" με {specs}"
@@ -386,6 +426,44 @@ def normalize_value(spec_lookup: dict[str, str], labels: list[str]) -> str:
     return ""
 
 
+def resolve_name_rule_value(
+    source: SourceProductData,
+    spec_lookup: dict[str, str],
+    alias_groups: list[list[str]] | list[str],
+    category_phrase: str,
+    taxonomy: TaxonomyResolution,
+) -> str:
+    groups = alias_groups if alias_groups and isinstance(alias_groups[0], list) else [alias_groups]
+    resolved_parts: list[str] = []
+    for aliases in groups:
+        resolved = resolve_name_rule_component(source, spec_lookup, [str(alias) for alias in aliases], category_phrase, taxonomy)
+        if not resolved:
+            return ""
+        resolved_parts.append(resolved)
+    if not resolved_parts:
+        return ""
+    if len(resolved_parts) == 1:
+        return resolved_parts[0]
+    return "/".join(resolved_parts)
+
+
+def resolve_name_rule_component(
+    source: SourceProductData,
+    spec_lookup: dict[str, str],
+    aliases: list[str],
+    category_phrase: str,
+    taxonomy: TaxonomyResolution,
+) -> str:
+    direct_value = normalize_value(spec_lookup, aliases)
+    if direct_value:
+        return normalize_name_rule_value(direct_value, aliases, category_phrase, taxonomy)
+
+    fallback_value = extract_alias_value_from_evidence(source, aliases)
+    if fallback_value:
+        return normalize_name_rule_value(fallback_value, aliases, category_phrase, taxonomy)
+    return ""
+
+
 def normalize_name_rule_value(value: str, aliases: list[str], category_phrase: str, taxonomy: TaxonomyResolution) -> str:
     normalized = normalize_whitespace(value)
     if not normalized:
@@ -398,7 +476,26 @@ def normalize_name_rule_value(value: str, aliases: list[str], category_phrase: s
         unit = infer_capacity_unit(category_phrase, taxonomy)
         if numeric and unit == "Kg":
             return f"{numeric} kg"
+        if numeric and unit == "Lt":
+            return f"{numeric}Lt"
     return normalized
+
+
+def extract_alias_value_from_evidence(source: SourceProductData, aliases: list[str]) -> str:
+    alias_candidates = [normalize_whitespace(alias) for alias in aliases if normalize_whitespace(alias)]
+    if not alias_candidates:
+        return ""
+    texts = [normalize_whitespace(source.name)] + [
+        normalize_whitespace(item.value)
+        for item in iter_specs(source.key_specs, effective_spec_sections(source, manufacturer_first=_prefer_manufacturer_evidence(source)))
+        if normalize_whitespace(item.value)
+    ]
+    for text in texts:
+        for alias in alias_candidates:
+            match = re.search(re.escape(alias), text, flags=re.IGNORECASE)
+            if match:
+                return normalize_whitespace(text[match.start() : match.end()])
+    return ""
 
 
 def normalize_soundbar_subwoofer(value: str) -> str:

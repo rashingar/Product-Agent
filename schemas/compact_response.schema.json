@@ -13,8 +13,7 @@
       "additionalProperties": false,
       "required": [
         "meta_description",
-        "meta_keywords",
-        "name_tail_polished"
+        "meta_keywords"
       ],
       "properties": {
         "meta_description": {
@@ -25,9 +24,6 @@
           "items": {
             "type": "string"
           }
-        },
-        "name_tail_polished": {
-          "type": "string"
         }
       }
     },

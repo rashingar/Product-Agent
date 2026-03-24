@@ -54,9 +54,9 @@ def test_deterministic_name_and_meta_title_follow_business_rules() -> None:
 
     fields = build_deterministic_product_fields(source, taxonomy, "233541", derive_seo_keyword)
 
-    assert fields["name"] == "LG GSGV80PYLL – Ψυγείο Ντουλάπα 635Lt Total No Frost WiFi"
-    assert fields["meta_title"] == "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt Total No Frost | eTranoulis"
-    assert fields["seo_keyword"] == "lg-gsgv80pyll-psygeio-ntoulapa-635lt-total-no-frost-wifi"
+    assert fields["name"] == "LG GSGV80PYLL – Ψυγείο Ντουλάπα Total No Frost 635Lt E"
+    assert fields["meta_title"] == "LG GSGV80PYLL Ψυγείο Ντουλάπα Total No Frost 635Lt | eTranoulis"
+    assert fields["seo_keyword"] == "lg-gsgv80pyll-psygeio-ntoulapa-total-no-frost-635lt-e"
 
 
 def test_deterministic_fields_rebuild_name_from_schema_with_title_family_and_color() -> None:
@@ -129,9 +129,9 @@ def test_deterministic_fields_use_capacity_and_energy_for_dryers() -> None:
 
     fields = build_deterministic_product_fields(source, taxonomy, "235370", derive_seo_keyword)
 
-    assert fields["name"] == "LG RHX5009TWB – Στεγνωτήριο ρούχων 9 kg B Λευκό"
+    assert fields["name"] == "LG RHX5009TWB – Στεγνωτήριο ρούχων 9 kg B"
     assert fields["meta_title"] == "LG RHX5009TWB Στεγνωτήριο ρούχων 9 kg B | eTranoulis"
-    assert fields["seo_keyword"] == "lg-rhx5009twb-stegnotirio-rouchon-9-kg-b-leyko"
+    assert fields["seo_keyword"] == "lg-rhx5009twb-stegnotirio-rouchon-9-kg-b"
 
 
 def test_skroutz_name_prefers_manufacturer_evidence_when_specs_conflict() -> None:
