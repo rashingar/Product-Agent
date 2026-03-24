@@ -1,9 +1,12 @@
 import csv
 import json
+import sys
+import types
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+from electronet_single_import.fetcher import ElectronetFetcher
 from electronet_single_import.models import CLIInput, FetchResult
 from electronet_single_import.skroutz_sections import extract_skroutz_section_window, is_placeholder_image_url, resolve_skroutz_section_image_url
 from electronet_single_import.workflow import prepare_workflow, render_workflow
@@ -116,6 +119,151 @@ def test_placeholder_urls_are_rejected_for_resolved_section_images() -> None:
     assert is_placeholder_image_url(resolved) is False
     assert resolved.endswith(".png")
     assert all(is_placeholder_image_url(section["resolved_image_url"]) is False for section in rendered["sections"])
+
+
+def test_rendered_section_extraction_skips_non_presentation_titles_and_tolerates_networkidle_timeout(monkeypatch) -> None:
+    class FakeSimpleLocator:
+        def __init__(self, count: int = 0, text: str = "", payload: dict | None = None):
+            self._count = count
+            self._text = text
+            self._payload = payload or {}
+            self.first = self
+
+        def count(self):
+            return self._count
+
+        def inner_text(self, timeout=None):
+            return self._text
+
+        def evaluate(self, script):
+            return self._payload
+
+    class FakeSectionLocator:
+        def __init__(self, title: str, body: str, image_record: dict):
+            self._title = title
+            self._body = body
+            self._image_record = image_record
+
+        def scroll_into_view_if_needed(self, timeout=None):
+            return None
+
+        def locator(self, selector: str):
+            if selector == "h2, h3, h4":
+                return FakeSimpleLocator(count=1, text=self._title)
+            if selector == ".body-text":
+                return FakeSimpleLocator(count=1, text=self._body)
+            if selector == "img":
+                return FakeSimpleLocator(count=1, payload=self._image_record)
+            raise AssertionError(f"Unexpected section selector: {selector}")
+
+    class FakeSectionsLocator:
+        def __init__(self, sections):
+            self._sections = sections
+
+        def count(self):
+            return len(self._sections)
+
+        def nth(self, index: int):
+            return self._sections[index]
+
+    class FakeContainerEntry:
+        def __init__(self, meta: dict, sections):
+            self._meta = meta
+            self._sections = sections
+
+        def evaluate(self, script, index):
+            return self._meta
+
+        def locator(self, selector: str):
+            if selector == "div.rich-components section":
+                return FakeSectionsLocator(self._sections)
+            raise AssertionError(f"Unexpected container selector: {selector}")
+
+    class FakeContainerLocator:
+        def __init__(self, entry):
+            self._entry = entry
+
+        def count(self):
+            return 1
+
+        def nth(self, index: int):
+            assert index == 0
+            return self._entry
+
+    class FakePage:
+        def __init__(self):
+            image_record = {
+                "currentSrc": "",
+                "img_attrs": {"src": "//www.skroutz.gr/assets/transparent.gif"},
+                "lazy_attrs": {"data-lazy-media-src-value": "https://b.scdn.gr/test-image.png"},
+                "ancestor_data_attrs": {},
+                "source_srcsets": [],
+            }
+            self.url = SAMPLE["url"]
+            self._container = FakeContainerEntry(
+                meta={
+                    "dom_index": 0,
+                    "title_count": 3,
+                    "titles": ["Με μια ματιά", "Κανονική Ενότητα", "Οι χρήστες είπαν:"],
+                    "width": 100,
+                    "height": 100,
+                    "visible_area": 10000,
+                },
+                sections=[
+                    FakeSectionLocator("Με μια ματιά", "skip", image_record),
+                    FakeSectionLocator("Κανονική Ενότητα", "Περιγραφή ενότητας", image_record),
+                    FakeSectionLocator("Οι χρήστες είπαν:", "skip", image_record),
+                ],
+            )
+
+        def goto(self, url, wait_until=None, timeout=None):
+            return None
+
+        def wait_for_load_state(self, state, timeout=None):
+            raise Exception("network still busy")
+
+        def wait_for_timeout(self, timeout):
+            return None
+
+        def locator(self, selector: str):
+            if selector == "div.sku-description":
+                return FakeContainerLocator(self._container)
+            raise AssertionError(f"Unexpected page selector: {selector}")
+
+    class FakeContext:
+        def new_page(self):
+            return FakePage()
+
+    class FakeBrowser:
+        def new_context(self, user_agent=None, locale=None):
+            return FakeContext()
+
+        def close(self):
+            return None
+
+    class FakeChromium:
+        def launch(self, headless=True):
+            return FakeBrowser()
+
+    class FakePlaywright:
+        chromium = FakeChromium()
+
+    class FakePlaywrightContextManager:
+        def __enter__(self):
+            return FakePlaywright()
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    fake_sync_api = types.SimpleNamespace(sync_playwright=lambda: FakePlaywrightContextManager())
+    monkeypatch.setitem(sys.modules, "playwright.sync_api", fake_sync_api)
+
+    fetcher = ElectronetFetcher()
+    monkeypatch.setattr(fetcher, "_robots_allowed", lambda url: (True, "robots_unavailable"))
+    rendered = fetcher.extract_skroutz_section_image_records(SAMPLE["url"])
+
+    assert [section["title"] for section in rendered["sections"]] == ["Κανονική Ενότητα"]
+    assert rendered["sections"][0]["resolved_image_url"] == "https://b.scdn.gr/test-image.png"
 
 
 def test_143481_rendered_description_preserves_locked_wrappers(tmp_path: Path, monkeypatch) -> None:
