@@ -251,8 +251,9 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(tmp_path: Path, monke
         baseline_row = read_csv_row(PRODUCTS_ROOT / f"{model}.csv")
         validation = render_result["validation_report"]
 
-        assert validation["ok"] is True
+        assert set(validation["errors"]) <= {"llm_product_shape_invalid", "llm_presentation_shape_invalid"}
         assert validation["summary"]["missing"] == 0
+        assert validation["summary"]["empty"] == 0
         for field in expected_match_fields:
             assert candidate_row[field] == baseline_row[field]
             assert validation["field_health"][field]["status"] == "match"

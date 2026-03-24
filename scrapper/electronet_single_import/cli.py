@@ -6,6 +6,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from .characteristics_pipeline import get_characteristics_registry
+from .deterministic_fields import effective_spec_sections as build_effective_spec_sections
 from .csv_writer import write_csv_row
 from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
@@ -106,8 +107,10 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
 
     if source == "electronet":
         source_code = parsed.source.product_code
-        if not source_code or source_code != cli.model:
+        if not source_code:
             raise ValueError(FAIL_MESSAGE)
+        if source_code != cli.model:
+            parsed.warnings.append(f"source_product_code_mismatch:input={cli.model}:page={source_code}")
     else:
         apply_skroutz_contract_hints(cli, parsed)
         if parsed.source.page_type != "product":
@@ -298,7 +301,10 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
     )
     write_json(source_json_path, parsed.source.to_dict())
 
-    effective_spec_sections = [*parsed.source.spec_sections, *parsed.source.manufacturer_spec_sections]
+    effective_spec_sections = build_effective_spec_sections(
+        parsed.source,
+        manufacturer_first=normalize_for_match(parsed.source.source_name) == "skroutz",
+    )
     characteristics_registry = get_characteristics_registry()
     preferred_schema_source_files = characteristics_registry.preferred_schema_source_files(parsed.source, taxonomy)
     schema_match, schema_candidates = schema_matcher.match(

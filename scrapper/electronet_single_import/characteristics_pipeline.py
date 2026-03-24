@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 from bs4 import BeautifulSoup
 
-from .deterministic_fields import build_spec_lookup
+from .deterministic_fields import build_spec_lookup, effective_spec_sections
 from .html_builders import build_characteristics_html
 from .models import SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match, normalize_whitespace
@@ -185,10 +185,12 @@ class CharacteristicsTemplateRegistry:
         if not custom_section:
             return None
         base_label = normalize_for_match(base_field.get("label", ""))
-        for field in custom_section.get("fields", []):
+        fields = list(custom_section.get("fields", []))
+        for field in fields:
             if normalize_for_match(field.get("label", "")) == base_label:
                 return field
-        fields = list(custom_section.get("fields", []))
+        if any(normalize_for_match(field.get("label", "")) for field in fields):
+            return None
         if 0 <= index < len(fields):
             return fields[index]
         return None
@@ -289,7 +291,8 @@ def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResol
             raw_html = path.read_text(encoding="utf-8")
 
     spec_sections = _effective_spec_sections(source)
-    spec_lookup = build_spec_lookup(source.key_specs, spec_sections)
+    prefer_manufacturer = normalize_for_match(source.source_name) == "skroutz" and bool(source.manufacturer_spec_sections)
+    spec_lookup = build_spec_lookup(source.key_specs, spec_sections, key_specs_last=prefer_manufacturer)
     raw_lookup = _extract_dt_dd_lookup(raw_html)
     section_lookup = _build_section_lookup(spec_sections)
     offer_titles = _extract_offer_titles(raw_html)
@@ -322,7 +325,7 @@ def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResol
 
 
 def _effective_spec_sections(source: SourceProductData) -> list[SpecSection]:
-    return [*source.spec_sections, *source.manufacturer_spec_sections]
+    return effective_spec_sections(source, manufacturer_first=normalize_for_match(source.source_name) == "skroutz")
 
 
 def _extract_dt_dd_lookup(raw_html: str) -> dict[str, str]:
@@ -410,7 +413,7 @@ def _section_value(context: _ResolutionContext, section_name: str, label: str) -
         for candidate_label, candidate_value in context.section_lookup[section_key].items():
             if _labels_related(candidate_label, label_key) and candidate_value:
                 return candidate_value, f"section_label_related:{section_name}/{label}"
-    for candidate_section in context.source.spec_sections:
+    for candidate_section in _effective_spec_sections(context.source):
         candidate_key = normalize_for_match(candidate_section.section)
         if not _section_titles_related(section_key, candidate_key):
             continue
@@ -1161,7 +1164,230 @@ def _resolve_hob_warranty(context: _ResolutionContext, _field: dict[str, Any]) -
     return "", "unresolved"
 
 
+def _extract_count_from_text(text: str, pattern: str) -> str:
+    match = re.search(pattern, text or "", flags=re.IGNORECASE)
+    if not match:
+        return ""
+    return match.group(1)
+
+
+def _resolve_fridge_temperature_control(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    if _contains_any(context.combined_text, "panel ελέγχου", "panel ελεγχου", "οθόνη ενδείξεων", "οθονη ενδειξεων"):
+        return "Ηλεκτρονικό panel ελέγχου (LED)", "combined_text:temperature_control"
+    return "", "unresolved"
+
+
+def _resolve_fridge_installation_type(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Τύπος εγκατάστασης", "Εντοιχιζόμενη / Ελεύθερη", "Εντοιχιζόμενο"])
+    normalized = normalize_for_match(value)
+    if "ελευθερ" in normalized:
+        return "Ελεύθερη συσκευή", source
+    if "εντοιχιζ" in normalized and "οχι" not in normalized and "όχι" not in (value or "").lower():
+        return "Εντοιχιζόμενη συσκευή", source
+    if _contains_any(context.combined_text, "perfect fit", "δίπλα σε τοίχους", "διπλα σε τοιχους"):
+        return "Ελεύθερη συσκευή", "combined_text:perfect_fit"
+    if normalized in {"οχι", "oxi", "no", "false"}:
+        return "Ελεύθερη συσκευή", source
+    return "", "unresolved"
+
+
+def _resolve_fridge_dual_cooling_circuits(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Αριθμός ανεξάρτητων συστημάτων ψύξης"])
+    count = _extract_int_from_text(value)
+    if count is None:
+        return "", "unresolved"
+    return ("Ναι" if count >= 2 else "Όχι"), source
+
+
+def _resolve_fridge_multi_airflow(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    if _contains_any(context.combined_text, "multiairflow", "multi airflow", "dynamic multiairflow"):
+        return "Ναι", "combined_text:multi_airflow"
+    return "", "unresolved"
+
+
+def _resolve_fridge_connectivity(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Wi-Fi", "Bluetooth", "Συνδεσιμότητα"])
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(context.combined_text, "wifi", "wi-fi", "home connect", "bluetooth"):
+        return "Ναι", "combined_text:connectivity"
+    return "Όχι", source or "combined_text:no_connectivity"
+
+
+def _resolve_fridge_open_door_alert(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Extra Δυνατότητες"])
+    if _contains_any(" ".join([value, context.combined_text]), "ειδοποίηση πόρτας", "ειδοποιηση πορτας", "ανοικτής πόρτας", "ανοιχτής πόρτας"):
+        return "Ναι", source or "combined_text:door_alert"
+    return "", "unresolved"
+
+
+def _resolve_fridge_overview_features(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    features = _ordered_features(
+        context,
+        [
+            ("Perfect Fit", ("perfect fit",)),
+            ("Ενσωματωμένη οριζόντια χειρολαβή", ("ενσωματωμένη οριζόντια χειρολαβή", "ενσωματωμενη οριζοντια χειρολαβη")),
+        ],
+    )
+    return (", ".join(features), "combined_text:fridge_features") if features else ("", "unresolved")
+
+
+def _resolve_fridge_fridge_shelf_count(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Στην Συντήρηση"])
+    count = _extract_count_from_text(value, r"(\d+)\s+ράφια")
+    if count:
+        return count, source
+    count = _extract_count_from_text(context.combined_text, r"(\d+)\s+ράφια")
+    return (count, "combined_text:fridge_shelves") if count else ("", "unresolved")
+
+
+def _resolve_fridge_adjustable_shelves(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Αριθμός ρυθμιζόμενων ραφιών στη συντήρηση"])
+    count = _extract_int_from_text(value)
+    if count is not None:
+        return str(count), source
+    count_text = _extract_count_from_text(context.combined_text, r"αριθμός ρυθμιζόμενων ραφιών στη συντήρηση[: ]+(\d+)")
+    if count_text:
+        return count_text, "combined_text:adjustable_shelves"
+    count_text = _extract_count_from_text(context.combined_text, r"ρυθμιζόμενα σε ύψος[: ]+(\d+)")
+    if count_text:
+        return count_text, "combined_text:adjustable_shelves"
+    count_text = _extract_count_from_text(context.combined_text, r"ρυθμιζονται σε ύψος[: ]+(\d+)")
+    return (count_text, "combined_text:adjustable_shelves") if count_text else ("", "unresolved")
+
+
+def _resolve_fridge_shelf_material(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    if _contains_any(context.combined_text, "γυαλί ασφαλείας", "γυάλινα ράφια", "γυαλινα ραφια"):
+        return "Γυαλί Ασφαλείας", "combined_text:shelf_material"
+    return "", "unresolved"
+
+
+def _resolve_fridge_fridge_drawer_count(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Στην Συντήρηση"])
+    count = _extract_count_from_text(value, r"(\d+)\s+συρτάρι")
+    if count:
+        return count, source
+    count = _extract_count_from_text(context.combined_text, r"(\d+)\s+συρτάρι")
+    return (count, "combined_text:fridge_drawers") if count else ("", "unresolved")
+
+
+def _resolve_fridge_humidity_drawer(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    if _contains_any(context.combined_text, "ρύθμιση υγρασίας", "ρυθμιση υγρασιας"):
+        return "Ναι", "combined_text:humidity_drawer"
+    return "", "unresolved"
+
+
+def _resolve_fridge_door_shelves(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Στην Συντήρηση"])
+    count = _extract_count_from_text(value, r"(\d+)\s+ράφια\s+στην\s+πόρτα")
+    if count:
+        return count, source
+    count = _extract_count_from_text(context.combined_text, r"(\d+)\s+ράφια\s+θύρας")
+    if count:
+        return count, "combined_text:door_shelves"
+    count = _extract_count_from_text(context.combined_text, r"(\d+)\s+ράφια\s+στην\s+πόρτα")
+    return (count, "combined_text:door_shelves") if count else ("", "unresolved")
+
+
+def _resolve_fridge_internal_light(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    if _contains_any(context.combined_text, "φωτισμός led", "φωτισμος led"):
+        return "LED", "combined_text:internal_light"
+    return "", "unresolved"
+
+
+def _resolve_fridge_fast_cool(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Extra Δυνατότητες"])
+    if _contains_any(" ".join([value, context.combined_text]), "γρήγορη ψύξη", "γρηγορη ψυξη"):
+        return "Ναι", source or "combined_text:fast_cool"
+    return "", "unresolved"
+
+
+def _resolve_fridge_storage_features(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    features = _ordered_features(context, [("MultiBox", ("multibox",))])
+    return (", ".join(features), "combined_text:storage_features") if features else ("", "unresolved")
+
+
+def _resolve_fridge_freezer_drawer_count(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Στην Κατάψυξη"])
+    count = _extract_count_from_text(value, r"(\d+)\s+συρτάρια")
+    if count:
+        return count, source
+    count = _extract_count_from_text(context.combined_text, r"(\d+)\s+συρτάρια")
+    return (count, "combined_text:freezer_drawers") if count else ("", "unresolved")
+
+
+def _resolve_fridge_freezer_shelf_count(_context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    return "", "unresolved"
+
+
+def _resolve_fridge_fast_freeze(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    if _contains_any(context.combined_text, "superfreezing", "γρήγορη κατάψυξη", "γρηγορη καταψυξη"):
+        return "Ναι", "combined_text:fast_freeze"
+    return "", "unresolved"
+
+
+def _resolve_fridge_freezer_features(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    features = _ordered_features(context, [("SuperFreezing", ("superfreezing",))])
+    return (", ".join(features), "combined_text:freezer_features") if features else ("", "unresolved")
+
+
+def _resolve_fridge_climate_class(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Κλιματική Κλάση"])
+    if value:
+        return value, source
+    match = re.search(r"Κλιματική\s+Κλάση[: ]+([A-Z]{1,3}(?:-[A-Z]{1,3})?)", context.combined_text, flags=re.IGNORECASE)
+    if match:
+        return match.group(1).upper(), "combined_text:climate_class"
+    return "", "unresolved"
+
+
+def _resolve_fridge_dimensions_triplet(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Διαστάσεις συσκευής ΥxΠxΒ", "Διαστάσεις συσκευής Υ x Π x Β"])
+    if value:
+        tokens = re.findall(r"\d+(?:[.,]\d+)?", value)
+        if len(tokens) >= 3:
+            return f"{tokens[0]} x {tokens[1]} x {tokens[2]} cm", source
+    height, height_source = _first_value_from_aliases(context, ["Ύψος"])
+    width, width_source = _first_value_from_aliases(context, ["Πλάτος"])
+    depth, depth_source = _first_value_from_aliases(context, ["Βάθος"])
+    if height and width and depth:
+        compact = [re.sub(r"\s*cm\b", "", part, flags=re.IGNORECASE) for part in [height, width, depth]]
+        return f"{compact[0]} x {compact[1]} x {compact[2]} cm", ",".join([height_source, width_source, depth_source])
+    return "", "unresolved"
+
+
+def _resolve_fridge_warranty(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, ["Επιμέρους Εγγύηση Κατασκευαστή", "Εγγύηση Κατασκευαστή"])
+    if value:
+        return value, source
+    return "", "unresolved"
+
+
 _RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, str]]] = {
+    "fridge_temperature_control": _resolve_fridge_temperature_control,
+    "fridge_installation_type": _resolve_fridge_installation_type,
+    "fridge_dual_cooling_circuits": _resolve_fridge_dual_cooling_circuits,
+    "fridge_multi_airflow": _resolve_fridge_multi_airflow,
+    "fridge_connectivity": _resolve_fridge_connectivity,
+    "fridge_open_door_alert": _resolve_fridge_open_door_alert,
+    "fridge_overview_features": _resolve_fridge_overview_features,
+    "fridge_fridge_shelf_count": _resolve_fridge_fridge_shelf_count,
+    "fridge_adjustable_shelves": _resolve_fridge_adjustable_shelves,
+    "fridge_shelf_material": _resolve_fridge_shelf_material,
+    "fridge_fridge_drawer_count": _resolve_fridge_fridge_drawer_count,
+    "fridge_humidity_drawer": _resolve_fridge_humidity_drawer,
+    "fridge_door_shelves": _resolve_fridge_door_shelves,
+    "fridge_internal_light": _resolve_fridge_internal_light,
+    "fridge_fast_cool": _resolve_fridge_fast_cool,
+    "fridge_storage_features": _resolve_fridge_storage_features,
+    "fridge_freezer_drawer_count": _resolve_fridge_freezer_drawer_count,
+    "fridge_freezer_shelf_count": _resolve_fridge_freezer_shelf_count,
+    "fridge_fast_freeze": _resolve_fridge_fast_freeze,
+    "fridge_freezer_features": _resolve_fridge_freezer_features,
+    "fridge_climate_class": _resolve_fridge_climate_class,
+    "fridge_dimensions_triplet": _resolve_fridge_dimensions_triplet,
+    "fridge_warranty": _resolve_fridge_warranty,
     "tv_screen_technology": _resolve_tv_screen_technology,
     "tv_screen_size_inches": _resolve_tv_screen_size_inches,
     "tv_screen_size_cm": _resolve_tv_screen_size_cm,
