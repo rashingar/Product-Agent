@@ -320,5 +320,8 @@ def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) ->
     result = render_workflow(model)
 
     assert result["candidate_csv_path"].exists()
+    assert result["published_csv_path"].exists()
+    assert result["published_csv_path"] == products_dir / f"{model}.csv"
+    assert result["published_csv_path"].read_text(encoding="utf-8-sig") == result["candidate_csv_path"].read_text(encoding="utf-8-sig")
     assert result["validation_report_path"].exists()
     assert "field_health" in result["validation_report"]

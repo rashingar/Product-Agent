@@ -277,6 +277,7 @@ def render_workflow(model: str) -> dict[str, Any]:
 
     candidate_dir = ensure_directory(model_root / "candidate")
     candidate_csv_path = candidate_dir / f"{model}.csv"
+    published_csv_path = PRODUCTS_ROOT / f"{model}.csv"
     description_path = candidate_dir / "description.html"
     characteristics_path = candidate_dir / "characteristics.html"
     normalized_candidate_path = candidate_dir / f"{model}.normalized.json"
@@ -315,9 +316,13 @@ def render_workflow(model: str) -> dict[str, Any]:
         validation_report["warnings"].extend(mapping_warnings)
     write_validation_report(validation_report, validation_report_path)
 
+    ensure_directory(PRODUCTS_ROOT)
+    shutil.copyfile(candidate_csv_path, published_csv_path)
+
     return {
         "candidate_dir": candidate_dir,
         "candidate_csv_path": candidate_csv_path,
+        "published_csv_path": published_csv_path,
         "description_path": description_path,
         "characteristics_path": characteristics_path,
         "validation_report_path": validation_report_path,

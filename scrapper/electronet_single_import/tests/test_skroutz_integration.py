@@ -245,12 +245,14 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(tmp_path: Path, monke
 
         llm_output_path = prepare_result["model_root"] / "llm_output.json"
         llm_output_path.write_text(json.dumps(build_llm_payload_from_baseline(PRODUCTS_ROOT / f"{model}.csv"), ensure_ascii=False, indent=2), encoding="utf-8")
+        baseline_row = read_csv_row(PRODUCTS_ROOT / f"{model}.csv")
 
         render_result = render_workflow(model)
         candidate_row = read_csv_row(render_result["candidate_csv_path"])
-        baseline_row = read_csv_row(PRODUCTS_ROOT / f"{model}.csv")
         validation = render_result["validation_report"]
 
+        assert render_result["published_csv_path"].exists()
+        assert read_csv_row(render_result["published_csv_path"]) == candidate_row
         assert set(validation["errors"]) <= {"llm_product_shape_invalid", "llm_presentation_shape_invalid"}
         assert validation["summary"]["missing"] == 0
         assert validation["summary"]["empty"] == 0

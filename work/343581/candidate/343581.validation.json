@@ -1,0 +1,265 @@
+{
+  "ok": true,
+  "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\candidate\\343581.csv",
+  "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
+  "baseline_path": "",
+  "errors": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+    "characteristics_template_unresolved_fields:3"
+  ],
+  "field_health": {
+    "model": {
+      "status": "filled",
+      "candidate_length": 6,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "343581",
+      "baseline_preview": ""
+    },
+    "mpn": {
+      "status": "filled",
+      "candidate_length": 3,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "M30",
+      "baseline_preview": ""
+    },
+    "name": {
+      "status": "filled",
+      "candidate_length": 38,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "Rohnson M30 – Σκούπα Stick Mamba Μαύρο",
+      "baseline_preview": ""
+    },
+    "description": {
+      "status": "filled",
+      "candidate_length": 1544,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Rohnson M30 – Σκούπα Stick Mam",
+      "baseline_preview": ""
+    },
+    "characteristics": {
+      "status": "filled",
+      "candidate_length": 1288,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><t",
+      "baseline_preview": ""
+    },
+    "category": {
+      "status": "filled",
+      "candidate_length": 103,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα///Σκούπες Stick",
+      "baseline_preview": ""
+    },
+    "image": {
+      "status": "filled",
+      "candidate_length": 35,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/343581/343581-1.jpg",
+      "baseline_preview": ""
+    },
+    "additional_image": {
+      "status": "filled",
+      "candidate_length": 73,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/343581/343581-2.jpg:::catalog/01_main/343581/343581-3.jpg",
+      "baseline_preview": ""
+    },
+    "manufacturer": {
+      "status": "filled",
+      "candidate_length": 7,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "Rohnson",
+      "baseline_preview": ""
+    },
+    "price": {
+      "status": "filled",
+      "candidate_length": 3,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "329",
+      "baseline_preview": ""
+    },
+    "quantity": {
+      "status": "filled",
+      "candidate_length": 1,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": ""
+    },
+    "minimum": {
+      "status": "filled",
+      "candidate_length": 1,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": ""
+    },
+    "subtract": {
+      "status": "filled",
+      "candidate_length": 1,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": ""
+    },
+    "stock_status": {
+      "status": "filled",
+      "candidate_length": 13,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "Έως 30 ημέρες",
+      "baseline_preview": ""
+    },
+    "status": {
+      "status": "filled",
+      "candidate_length": 1,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": ""
+    },
+    "meta_keyword": {
+      "status": "filled",
+      "candidate_length": 86,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "Rohnson M30, σκούπα stick Rohnson, σκούπα wet dry, ασύρματη σκούπα stick, σκούπα 28.8V",
+      "baseline_preview": ""
+    },
+    "meta_title": {
+      "status": "filled",
+      "candidate_length": 49,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "Rohnson M30 Σκούπα Stick Mamba Μαύρο | eTranoulis",
+      "baseline_preview": ""
+    },
+    "meta_description": {
+      "status": "filled",
+      "candidate_length": 54,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "Η Rohnson M30 είναι σκούπα Stick Mamba σε μαύρο χρώμα.",
+      "baseline_preview": ""
+    },
+    "seo_keyword": {
+      "status": "filled",
+      "candidate_length": 36,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "rohnson-m30-skoupa-stick-mamba-mayro",
+      "baseline_preview": ""
+    },
+    "product_url": {
+      "status": "filled",
+      "candidate_length": 62,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "https://www.etranoulis.gr/rohnson-m30-skoupa-stick-mamba-mayro",
+      "baseline_preview": ""
+    },
+    "related_product": {
+      "status": "empty",
+      "candidate_length": 0,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "",
+      "baseline_preview": ""
+    },
+    "bestprice_status": {
+      "status": "filled",
+      "candidate_length": 1,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": ""
+    },
+    "skroutz_status": {
+      "status": "filled",
+      "candidate_length": 1,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": ""
+    },
+    "boxnow": {
+      "status": "filled",
+      "candidate_length": 1,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": ""
+    }
+  },
+  "expected_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "actual_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "summary": {
+    "match": 0,
+    "different_but_valid": 0,
+    "filled": 23,
+    "missing": 0,
+    "encoding_issue": 0,
+    "empty": 1
+  }
+}

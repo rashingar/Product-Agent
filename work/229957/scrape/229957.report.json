@@ -1,0 +1,930 @@
+{
+  "input": {
+    "model": "229957",
+    "url": "https://www.skroutz.gr/s/25589399/Bosch-PSygeiokatapsyktis-305lt-Total-NoFrost-Y186xP60xV66ek-Metal-Look-KGN36NLEA.html",
+    "photos": 12,
+    "sections": 6,
+    "skroutz_status": 1,
+    "boxnow": 0,
+    "price": "599",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape"
+  },
+  "source": "skroutz",
+  "fetch_mode": "playwright",
+  "source_resolution": {
+    "requested_url": "https://www.skroutz.gr/s/25589399/Bosch-PSygeiokatapsyktis-305lt-Total-NoFrost-Y186xP60xV66ek-Metal-Look-KGN36NLEA.html",
+    "detected_source": "skroutz",
+    "resolved_url": "https://www.skroutz.gr/s/25589399/Bosch-PSygeiokatapsyktis-305lt-Total-NoFrost-Y186xP60xV66ek-Metal-Look-KGN36NLEA.html"
+  },
+  "identity_checks": {
+    "source": "skroutz",
+    "input_model": "229957",
+    "page_type": "product",
+    "page_product_code": "25589399",
+    "name_present": true,
+    "brand_present": true,
+    "mpn_present": true
+  },
+  "url_scope_validation": {
+    "ok": true,
+    "reason": "skroutz_product_path",
+    "final_url_source": "skroutz"
+  },
+  "skroutz_blocks_found": {
+    "hero_summary_present": true,
+    "gallery_images_count": 12,
+    "spec_sections_count": 7,
+    "manufacturer_spec_sections_count": 7
+  },
+  "characteristics_pairs": {
+    "count": 76,
+    "source_count": 27,
+    "manufacturer_count": 49
+  },
+  "taxonomy_resolution": {
+    "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+    "leaf_category": "Ψυγεία & Καταψύκτες",
+    "sub_category": "Ψυγειοκαταψύκτες",
+    "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγειοκαταψύκτες",
+    "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeiokatapsyktes",
+    "confidence": 18.5,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,sub_name_overlap,filter_map_tiebreak",
+    "gender": "masc",
+    "plural_label": "Ψυγειοκαταψύκτες"
+  },
+  "manufacturer_enrichment": {
+    "applied": true,
+    "provider": "bosch",
+    "documents": [
+      {
+        "name": "specsheet",
+        "url": "https://media3.bosch-home.com/Documents/specsheet/el-GR/KGN36NLEA.pdf",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\manufacturer\\specsheet.pdf",
+        "text_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\manufacturer\\specsheet.txt",
+        "content_type": "application/pdf",
+        "available": true,
+        "field_count": 49,
+        "section_count": 7,
+        "warnings": []
+      }
+    ],
+    "warnings": [],
+    "section_count": 7,
+    "field_count": 49
+  },
+  "schema_resolution": {
+    "matched_schema_id": "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "matched_sub_category": "Ψυγειοκαταψύκτες",
+    "score": 0.1405,
+    "warnings": [
+      "weak_schema_match",
+      "missing_expected_sections:4",
+      "schema_sentinel_label_missing"
+    ]
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "selection_reason": "matched_schema_template_with_custom_overrides",
+    "template_source": "schema_library_with_custom_overrides",
+    "matched_schema_id": "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "custom_template_id": "skroutz_fridge_freezer_v1",
+    "preferred_schema_source_files": [
+      "entoixizomena_psygeia.json",
+      "psygeiokatapsyktes.json"
+    ],
+    "field_count": 52,
+    "unresolved_count": 12,
+    "fields": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος ψυγειου",
+        "label": "Τύπος Ψυγείου",
+        "value": "Ψυγειοκαταψύκτης",
+        "resolved_from": "spec_alias:Τύπος"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τροπος τοποθετησης",
+        "label": "Τρόπος Τοποθέτησης",
+        "value": "Όχι",
+        "resolved_from": "spec_alias:Εντοιχιζόμενο"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τεχνολογια ψυξης",
+        "label": "Τεχνολογία Ψύξης",
+        "value": "Total NoFrost",
+        "resolved_from": "spec_alias:Σύστημα Ψύξης"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος συνολικη καθαρη χωρητικοτητα",
+        "label": "Συνολική Καθαρή Χωρητικότητα",
+        "value": "305 lt",
+        "resolved_from": "spec_alias:Συνολική Χωρητικότητα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χρωμα",
+        "label": "Χρώμα",
+        "value": "Inox",
+        "resolved_from": "spec_alias:Χρώμα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χρωμα πλαινων",
+        "label": "Χρώμα Πλαϊνών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος ελενχος και ενδειξεις θερμοκρασιας",
+        "label": "Έλενχος και Ενδείξεις Θερμοκρασίας",
+        "value": "Ηλεκτρονικό panel ελέγχου (LED)",
+        "resolved_from": "combined_text:temperature_control"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αριθμος συμπιεστων μοτερ",
+        "label": "Αριθμός Συμπιεστών (μοτέρ",
+        "value": "1",
+        "resolved_from": "spec_alias:Αριθμός συμπιεστών"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος δυο κυκλωματα ψυξης",
+        "label": "Δύο Κυκλώματα Ψύξης",
+        "value": "Όχι",
+        "resolved_from": "spec_alias:Αριθμός ανεξάρτητων συστημάτων ψύξης"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αισθητηρες ψυξης",
+        "label": "Αισθητήρες Ψύξης",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος πολλαπλη ροη αερα",
+        "label": "Πολλαπλή Ροή Αέρα",
+        "value": "Ναι",
+        "resolved_from": "combined_text:multi_airflow"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος συστημα εξουδετερωσης οσμων",
+        "label": "Σύστημα Εξουδετέρωσης Οσμών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αντιβακτηριδιακη τεχνολογια",
+        "label": "Αντιβακτηριδιακή Τεχνολογία",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος συνδεσιμοτητα",
+        "label": "Συνδεσιμότητα",
+        "value": "Όχι",
+        "resolved_from": "spec_alias:Wi-Fi"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος σημα ειδοποιησης ανοικτης πορτας",
+        "label": "Σήμα Ειδοποίησης Ανοικτής Πόρτας",
+        "value": "Ναι",
+        "resolved_from": "spec_alias:Extra Δυνατότητες"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος δυνατοτητα αλλαγης φορας πορτας",
+        "label": "Δυνατότητα Αλλαγής Φοράς Πόρτας",
+        "value": "Ναι",
+        "resolved_from": "spec_alias:Αναστρέψιμη Πόρτα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος επιπλεον χαρακτηριστικα",
+        "label": "Επιπλέον Χαρακτηριστικά",
+        "value": "Perfect Fit, Ενσωματωμένη οριζόντια χειρολαβή",
+        "resolved_from": "combined_text:fridge_features"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος πλατος συσκευης σε εκατοστα",
+        "label": "Πλάτος Συσκευής σε Εκατοστά",
+        "value": "60 cm",
+        "resolved_from": "spec_alias:Πλάτος"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος υψος συσκευης σε εκατοστα",
+        "label": "Υψος Συσκευής σε Εκατοστά",
+        "value": "186 cm",
+        "resolved_from": "spec_alias:Ύψος"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση καθαρη χωρητικοτητα συντηρησης σε λιτρα",
+        "label": "Καθαρή Χωρητικότητα Συντήρησης σε Λίτρα",
+        "value": "216 lt",
+        "resolved_from": "spec_alias:Χωρητικότητα Συντήρησης"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση αριθμος ραφιων",
+        "label": "Αριθμός Ραφιών",
+        "value": "4",
+        "resolved_from": "spec_alias:Στην Συντήρηση"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση ρυθμιζομενα ραφια σε υψος",
+        "label": "Ρυθμιζόμενα Ράφια σε Ύψος",
+        "value": "3",
+        "resolved_from": "spec_alias:Αριθμός ρυθμιζόμενων ραφιών στη συντήρηση"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση υλικο ραφιων",
+        "label": "Υλικό Ραφιών",
+        "value": "Γυαλί Ασφαλείας",
+        "resolved_from": "combined_text:shelf_material"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση αριθμος συρταριων",
+        "label": "Αριθμός Συρταριών",
+        "value": "1",
+        "resolved_from": "spec_alias:Στην Συντήρηση"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση αριθμος συρταριων μισου μεγεθους",
+        "label": "Αριθμός Συρταριών Μισού Μεγέθους",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση συρταρι με ρυθμιση υγρασιας",
+        "label": "Συρτάρι με Ρύθμιση Υγρασίας",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση συρταρι μηδενικης ζωνης 0 c",
+        "label": "Συρτάρι Μηδενικής Ζώνης 0˚C",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση θηκες στην πορτα",
+        "label": "Θήκες στην Πόρτα",
+        "value": "4",
+        "resolved_from": "spec_alias:Στην Συντήρηση"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση θηκη για μπουκαλια",
+        "label": "Θήκη για Μπουκάλια",
+        "value": "Όχι",
+        "resolved_from": "spec_alias:Μπουκαλοθήκη"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση εσωτερικος φωτισμος",
+        "label": "Εσωτερικός Φωτισμός",
+        "value": "LED",
+        "resolved_from": "combined_text:internal_light"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση εξωτερικο βρυσακι νερου",
+        "label": "Εξωτερικό Βρυσάκι Νερού",
+        "value": "Όχι",
+        "resolved_from": "spec_alias:Έξοδος Κρύου Νερού"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση λειτουργια ταχειας ψυξης",
+        "label": "Λειτουργία Ταχείας Ψύξης",
+        "value": "Ναι",
+        "resolved_from": "spec_alias:Extra Δυνατότητες"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση επιπλεον χαρακτηριστικα",
+        "label": "Επιπλέον Χαρακτηριστικά",
+        "value": "MultiBox",
+        "resolved_from": "combined_text:storage_features"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη καταψυξη με αστερια",
+        "label": "Κατάψυξη με Αστέρια",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη καθαρη χωρητικοτητα καταψυξης σε λιτρα",
+        "label": "Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα",
+        "value": "89 lt",
+        "resolved_from": "spec_alias:Χωρητικότητα Κατάψυξης"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη ικανοτητα καταψυξης σε 24 ωρες κιλα",
+        "label": "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά",
+        "value": "10 κιλό",
+        "resolved_from": "spec_alias:Ικανότητα Κατάψυξης σε 24 ώρες"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη αυτονομια καταψυξης σε περιπτωση διακοπης ρευματος ωρες",
+        "label": "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες",
+        "value": "12 h ώρες",
+        "resolved_from": "spec_alias:Αυτονομία σε περίπτωση διακοπής ρεύματος"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη αριθμος συρταριων",
+        "label": "Αριθμός Συρταριών",
+        "value": "3",
+        "resolved_from": "spec_alias:Στην Κατάψυξη"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη αριθμος ραφιων",
+        "label": "Αριθμός Ραφιών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη θηκες στην πορτα",
+        "label": "Θήκες στην Πόρτα",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη λειτουργια ταχειας καταψυξης",
+        "label": "Λειτουργία Ταχείας Κατάψυξης",
+        "value": "Ναι",
+        "resolved_from": "combined_text:fast_freeze"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη συστημα παροχης παγου",
+        "label": "Σύστημα Παροχής Πάγου",
+        "value": "Όχι",
+        "resolved_from": "spec_alias:Έξοδος για Παγάκια"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη επιπλεον χαρακτηριστικα",
+        "label": "Επιπλέον Χαρακτηριστικά",
+        "value": "SuperFreezing",
+        "resolved_from": "combined_text:freezer_features"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα ενεργειακη κλαση",
+        "label": "Ενεργειακή Κλάση",
+        "value": "E",
+        "resolved_from": "spec_alias:Ενεργειακή Κλάση"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα καθαρη χωρητικοτητα συντηρησης σε λιτρα",
+        "label": "Καθαρή Χωρητικότητα Συντήρησης σε Λίτρα",
+        "value": "216 lt",
+        "resolved_from": "section_related:Βασικά Χαρακτηριστικά/Χωρητικότητα Συντήρησης"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα καθαρη χωρητικοτητα καταψυξης σε λιτρα",
+        "label": "Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα",
+        "value": "89 lt",
+        "resolved_from": "section_related:Βασικά Χαρακτηριστικά/Χωρητικότητα Κατάψυξης"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα καταψυξη με αστερια",
+        "label": "Κατάψυξη με Αστέρια",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα επιπεδο θορυβου σε db",
+        "label": "Επίπεδο Θορύβου σε dB",
+        "value": "42 dB",
+        "resolved_from": "spec_alias:Επίπεδο Θορύβου"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα κλιματικη κλαση",
+        "label": "Κλιματική Κλάση",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαρος συσκευης σε κιλα",
+        "label": "Βάρος Συσκευής σε Κιλά",
+        "value": "61.5 kg",
+        "resolved_from": "spec_alias:Καθαρό βάρος"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα διαστασεις συσκευης σε εκατοστα υ χ π χ β",
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+        "value": "186 x 60 x 66 cm",
+        "resolved_from": "spec_alias:Διαστάσεις συσκευής ΥxΠxΒ"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα εγγυηση κατασκευαστη",
+        "label": "Εγγύηση Κατασκευαστή",
+        "value": "10 χρόνια στον Συμπιεστή",
+        "resolved_from": "spec_alias:Επιμέρους Εγγύηση Κατασκευαστή"
+      }
+    ]
+  },
+  "skroutz_taxonomy_diagnostics": {
+    "family_key": "refrigeration",
+    "raw_category_tag": "Ψυγεία",
+    "raw_category_href": "https://www.skroutz.gr/c/404/psigeia.html",
+    "normalized_href_slug": "psigeia",
+    "matched_rule": "refrigeration:fridge_freezer",
+    "source_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες///Ψυγειοκαταψύκτες",
+    "match_type": "exact_category",
+    "tv_inches": null,
+    "ambiguity": false,
+    "escalation_reason": ""
+  },
+  "schema_preference": {
+    "preferred_source_files": [
+      "psygeiokatapsyktes.json"
+    ]
+  },
+  "unsupported_features": [],
+  "critical_extractors": {
+    "product_code": "jsonld:sku",
+    "brand": "jsonld:brand",
+    "mpn": "jsonld:mpn",
+    "name": "dom:div.sku-title h1.page-title",
+    "price": "dom:.prices .final-price",
+    "taxonomy": "resolved",
+    "schema_match": "weak"
+  },
+  "field_diagnostics": {
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:div.sku-title h1.page-title",
+      "value_present": true,
+      "value_preview": "Bosch Ψυγειοκαταψύκτης 305lt Total NoFrost Υ186xΠ60xΒ66εκ. Metal Look KGN36NLEA",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "div.sku-title h1.page-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Bosch Ψυγειοκαταψύκτης 305lt Total NoFrost Υ186xΠ60xΒ66εκ. Metal Look KGN36NLEA",
+          "note": ""
+        }
+      ]
+    },
+    "category_tag": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:div.sku-title a.category-tag",
+      "value_present": true,
+      "value_preview": "Ψυγεία",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "div.sku-title a.category-tag",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Ψυγεία",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.96,
+      "selected_strategy": "jsonld:brand",
+      "value_present": true,
+      "value_preview": "Bosch",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "a.brand-page-link img",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": ""
+        },
+        {
+          "strategy": "dom",
+          "selector": "a.brand-page-link span",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": ""
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.95,
+      "selected_strategy": "jsonld:sku",
+      "value_present": true,
+      "value_preview": "25589399",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1 small.sku-code",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.88,
+      "selected_strategy": "dom:.sku-description",
+      "value_present": true,
+      "value_preview": "✔ Ενεργειακή κλάση: E – Χαμηλή κατανάλωση, χωρίς άγχη στο τέλος του μήνα! ✔ Σύστημα Ψύξης: Total No Frost – Ξέχνα την απόψυξη και απόλαυσε καθαρή, ξηρή ψύξη! ✔ ",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".sku-description",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Με μια ματιά ✔ Ενεργειακή κλάση: E – Χαμηλή κατανάλωση, χωρίς άγχη στο τέλος του μήνα! ✔ Σύστημα Ψύξης: Total No Frost –",
+          "note": ""
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.92,
+      "selected_strategy": "jsonld:mpn",
+      "value_present": true,
+      "value_preview": "KGN36NLEA",
+      "selector_trace": []
+    },
+    "price": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.prices .final-price",
+      "value_present": true,
+      "value_preview": "473,00 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".prices .final-price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "473 00 €",
+          "note": ""
+        }
+      ]
+    },
+    "breadcrumbs": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:div.sku-title a.category-tag",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "div.sku-title a.category-tag",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Ψυγεία",
+          "note": ""
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.92,
+      "selected_strategy": "dom:#specs .spec-groups",
+      "value_present": true,
+      "value_preview": "7 sections; first=Βασικά Χαρακτηριστικά",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#specs .spec-groups",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Οδηγοί Προϊόντος Εγχειρίδιο Χρήσης Εγχειρίδιο Εγκατάστασης",
+          "note": ""
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.9,
+      "selected_strategy": "canonical_from_specs",
+      "value_present": true,
+      "value_preview": "8 items; first=Τύπος",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.95,
+      "selected_strategy": "jsonld:image",
+      "value_present": true,
+      "value_preview": "12 images; first=https://d.scdn.gr/images/sku_main_images/025589/25589399/20251211153308_bosch_psygeiokatapsyktis_305lt_total_nofrost_y186xp60xv66ek_metal_look_kgn36nlea.jpeg",
+      "selector_trace": []
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "merchant_summary_and_structured_characteristics_present",
+    "skroutz_taxonomy_helper_used:refrigeration:fridge_freezer",
+    "skroutz_duplicate_section_windows_deduped",
+    "characteristics_template_used:schema:sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "characteristics_template_unresolved_fields:12",
+    "weak_schema_match",
+    "missing_expected_sections:4",
+    "schema_sentinel_label_missing",
+    "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,sub_name_overlap,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγειοκαταψύκτες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγειοκαταψύκτες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeiokatapsyktes",
+      "confidence": 18.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_breadcrumb",
+        "full_breadcrumb_path",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia",
+      "confidence": 7.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία Ντουλάπες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία Ντουλάπες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+      "confidence": 7.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Καταψύκτες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Καταψύκτες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/katapsyktes",
+      "confidence": 7.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Συντηρητές Κρασιών",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Συντηρητές Κρασιών",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/synthrhtes-krasiwn",
+      "confidence": 7.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+      "matched_sub_category": null,
+      "score": 0.1405,
+      "n_sections": 5,
+      "n_rows_total": 52,
+      "source_files": [
+        "entoixizomena_psygeia.json",
+        "psygeiokatapsyktes.json"
+      ]
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 12,
+    "downloaded_count": 12,
+    "requested_photos": 12
+  },
+  "sections_requested": 6,
+  "sections_extracted": 6,
+  "section_titles": [
+    "Ξέχνα την Απόψυξη και την Υγρασία!",
+    "Ελευθερία Τοποθέτησης με Perfect Fit",
+    "Φωτίζεται και Αναδεικνύει τα Τρόφιμά Σου",
+    "Η Τέλεια Ψύξη, Χωρίς Άγχη",
+    "Απόλυτη Προστασία για τα Κατεψυγμένα",
+    "Σήμα Ειδοποίησης για Ανοιχτή Πόρτα"
+  ],
+  "section_image_candidates": [
+    {
+      "position": 1,
+      "title": "Ξέχνα την Απόψυξη και την Υγρασία!",
+      "candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://d.scdn.gr/ds/rich_description_components_images/3151209/20250430115951_screenshot_from_2025_04_28_10_14_41.png"
+      ]
+    },
+    {
+      "position": 2,
+      "title": "Ελευθερία Τοποθέτησης με Perfect Fit",
+      "candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://c.scdn.gr/ds/rich_description_components_images/3151213/20250430115952_screenshot_from_2025_04_28_10_14_56.png"
+      ]
+    },
+    {
+      "position": 3,
+      "title": "Φωτίζεται και Αναδεικνύει τα Τρόφιμά Σου",
+      "candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://c.scdn.gr/ds/rich_description_components_images/3151217/20250430115952_screenshot_from_2025_04_28_10_15_12.png"
+      ]
+    },
+    {
+      "position": 4,
+      "title": "Η Τέλεια Ψύξη, Χωρίς Άγχη",
+      "candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://d.scdn.gr/ds/rich_description_components_images/3151222/20250430115953_screenshot_from_2025_04_28_10_15_46.png"
+      ]
+    },
+    {
+      "position": 5,
+      "title": "Απόλυτη Προστασία για τα Κατεψυγμένα",
+      "candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://b.scdn.gr/ds/rich_description_components_images/3151227/20250430115953_screenshot_from_2025_04_28_10_16_04.png"
+      ]
+    },
+    {
+      "position": 6,
+      "title": "Σήμα Ειδοποίησης για Ανοιχτή Πόρτα",
+      "candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://c.scdn.gr/ds/rich_description_components_images/3151231/20250430115954_screenshot_from_2025_04_28_10_16_17.png"
+      ]
+    }
+  ],
+  "section_image_urls_resolved": [
+    {
+      "position": 1,
+      "title": "Ξέχνα την Απόψυξη και την Υγρασία!",
+      "url": "https://d.scdn.gr/ds/rich_description_components_images/3151209/20250430115951_screenshot_from_2025_04_28_10_14_41.png"
+    },
+    {
+      "position": 2,
+      "title": "Ελευθερία Τοποθέτησης με Perfect Fit",
+      "url": "https://c.scdn.gr/ds/rich_description_components_images/3151213/20250430115952_screenshot_from_2025_04_28_10_14_56.png"
+    },
+    {
+      "position": 3,
+      "title": "Φωτίζεται και Αναδεικνύει τα Τρόφιμά Σου",
+      "url": "https://c.scdn.gr/ds/rich_description_components_images/3151217/20250430115952_screenshot_from_2025_04_28_10_15_12.png"
+    },
+    {
+      "position": 4,
+      "title": "Η Τέλεια Ψύξη, Χωρίς Άγχη",
+      "url": "https://d.scdn.gr/ds/rich_description_components_images/3151222/20250430115953_screenshot_from_2025_04_28_10_15_46.png"
+    },
+    {
+      "position": 5,
+      "title": "Απόλυτη Προστασία για τα Κατεψυγμένα",
+      "url": "https://b.scdn.gr/ds/rich_description_components_images/3151227/20250430115953_screenshot_from_2025_04_28_10_16_04.png"
+    },
+    {
+      "position": 6,
+      "title": "Σήμα Ειδοποίησης για Ανοιχτή Πόρτα",
+      "url": "https://c.scdn.gr/ds/rich_description_components_images/3151231/20250430115954_screenshot_from_2025_04_28_10_16_17.png"
+    }
+  ],
+  "section_downloads": [
+    {
+      "position": 1,
+      "source_url": "https://d.scdn.gr/ds/rich_description_components_images/3151209/20250430115951_screenshot_from_2025_04_28_10_14_41.png",
+      "local_filename": "besco1.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco1.jpg"
+    },
+    {
+      "position": 2,
+      "source_url": "https://c.scdn.gr/ds/rich_description_components_images/3151213/20250430115952_screenshot_from_2025_04_28_10_14_56.png",
+      "local_filename": "besco2.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco2.jpg"
+    },
+    {
+      "position": 3,
+      "source_url": "https://c.scdn.gr/ds/rich_description_components_images/3151217/20250430115952_screenshot_from_2025_04_28_10_15_12.png",
+      "local_filename": "besco3.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco3.jpg"
+    },
+    {
+      "position": 4,
+      "source_url": "https://d.scdn.gr/ds/rich_description_components_images/3151222/20250430115953_screenshot_from_2025_04_28_10_15_46.png",
+      "local_filename": "besco4.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco4.jpg"
+    },
+    {
+      "position": 5,
+      "source_url": "https://b.scdn.gr/ds/rich_description_components_images/3151227/20250430115953_screenshot_from_2025_04_28_10_16_04.png",
+      "local_filename": "besco5.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco5.jpg"
+    },
+    {
+      "position": 6,
+      "source_url": "https://c.scdn.gr/ds/rich_description_components_images/3151231/20250430115954_screenshot_from_2025_04_28_10_16_17.png",
+      "local_filename": "besco6.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco6.jpg"
+    }
+  ],
+  "section_extraction_window": {
+    "candidate_count": 2,
+    "duplicate_signatures_skipped": 1,
+    "selected_container_index": 0,
+    "start_anchor": "Περιγραφή",
+    "stop_anchor": "Κατασκευαστής",
+    "title_signature": [
+      "Ξέχνα την Απόψυξη και την Υγρασία!",
+      "Ελευθερία Τοποθέτησης με Perfect Fit",
+      "Φωτίζεται και Αναδεικνύει τα Τρόφιμά Σου",
+      "Η Τέλεια Ψύξη, Χωρίς Άγχη",
+      "Απόλυτη Προστασία για τα Κατεψυγμένα",
+      "Σήμα Ειδοποίησης για Ανοιχτή Πόρτα",
+      "Γιατί να το επιλέξεις;"
+    ]
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 6,
+    "extracted_count": 6,
+    "downloaded_count": 6,
+    "requested_sections": 6
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\229957.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\229957.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\229957.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\229957.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\229957.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\manufacturer\\specsheet.pdf",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\manufacturer\\specsheet.txt",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-3.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-4.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-5.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-6.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-7.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-8.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-9.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-10.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-11.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\gallery\\229957-12.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos_raw.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco3.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco4.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco5.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\scrape\\bescos\\besco6.jpg"
+  ]
+}
