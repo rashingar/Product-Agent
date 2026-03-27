@@ -50,6 +50,24 @@
         "philips.com.gr",
         "philips.com"
       ]
+    },
+    {
+      "key": "rowenta",
+      "name": "Rowenta",
+      "preferred_url": "https://shop.tefal.gr/",
+      "preferred_domains": [
+        "shop.tefal.gr"
+      ]
+    }
+  ],
+  "product_pages": [
+    {
+      "provider_id": "tefal_shop",
+      "brand": "Rowenta",
+      "mpn": "RR8797WH",
+      "url": "https://shop.tefal.gr/products/rowenta-x-plorer-serie-90-skoupa-robot-rr8797-animal",
+      "content_type_hint": "text/html",
+      "name": "product_page"
     }
   ]
 }

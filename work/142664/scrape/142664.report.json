@@ -1,0 +1,667 @@
+{
+  "input": {
+    "model": "142664",
+    "url": "https://www.electronet.gr/eikona-ihos/tileoraseis/oles-oi-tileoraseis/tv-tcl-98p8k-98-smart-4k",
+    "photos": 5,
+    "sections": 0,
+    "skroutz_status": 1,
+    "boxnow": 0,
+    "price": "1499",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape"
+  },
+  "source": "electronet",
+  "fetch_mode": "httpx",
+  "source_resolution": {
+    "requested_url": "https://www.electronet.gr/eikona-ihos/tileoraseis/oles-oi-tileoraseis/tv-tcl-98p8k-98-smart-4k",
+    "detected_source": "electronet",
+    "resolved_url": "https://www.electronet.gr/eikona-ihos/tileoraseis/oles-oi-tileoraseis/tv-tcl-98p8k-98-smart-4k"
+  },
+  "identity_checks": {
+    "source": "electronet",
+    "input_model": "142664",
+    "page_type": "product",
+    "page_product_code": "142664",
+    "name_present": true,
+    "brand_present": true,
+    "mpn_present": true
+  },
+  "url_scope_validation": {
+    "ok": true,
+    "reason": "electronet_domain",
+    "final_url_source": "electronet"
+  },
+  "skroutz_blocks_found": {
+    "hero_summary_present": true,
+    "gallery_images_count": 5,
+    "spec_sections_count": 4,
+    "manufacturer_spec_sections_count": 0
+  },
+  "characteristics_pairs": {
+    "count": 31,
+    "source_count": 31,
+    "manufacturer_count": 0
+  },
+  "taxonomy_resolution": {
+    "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+    "leaf_category": "Τηλεοράσεις",
+    "sub_category": "TCL",
+    "taxonomy_path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > TCL",
+    "cta_url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/tileoraseis-tcl",
+    "confidence": 7.75,
+    "reason": "leaf_breadcrumb,url_overlap,sub_name_overlap,filter_map_tiebreak",
+    "gender": "fem",
+    "plural_label": "Τηλεοράσεις TCL"
+  },
+  "manufacturer_enrichment": {
+    "applied": false,
+    "provider": "",
+    "providers_considered": [],
+    "matched_providers": [],
+    "documents": [],
+    "documents_discovered": 0,
+    "documents_parsed": 0,
+    "warnings": [],
+    "section_count": 0,
+    "field_count": 0,
+    "fallback_reason": "not_applicable_non_skroutz"
+  },
+  "schema_resolution": {
+    "matched_schema_id": "sha1:954c8413f2da941e78f3ddce65df522654336c8c",
+    "matched_sub_category": "TCL",
+    "score": 0.9955,
+    "warnings": [
+      "schema_sentinel_label_missing"
+    ]
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:954c8413f2da941e78f3ddce65df522654336c8c",
+    "selection_reason": "matched_schema_template",
+    "template_source": "schema_library",
+    "matched_schema_id": "sha1:954c8413f2da941e78f3ddce65df522654336c8c",
+    "custom_template_id": "",
+    "preferred_schema_source_files": [
+      "tileoraseis.json"
+    ],
+    "field_count": 31,
+    "unresolved_count": 0,
+    "fields": [
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος τεχνολογια οθονης",
+        "label": "Τεχνολογία Οθόνης",
+        "value": "QLED",
+        "resolved_from": "section:Εικόνα - Ήχος/Τεχνολογία Οθόνης"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος διαγωνιος οθονης ιντσες",
+        "label": "Διαγώνιος Οθόνης ( Ίντσες",
+        "value": "98",
+        "resolved_from": "section:Εικόνα - Ήχος/Διαγώνιος Οθόνης ( Ίντσες"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος διαγωνιος οθονης εκατοστα",
+        "label": "Διαγώνιος Οθόνης ( Εκατοστά",
+        "value": "248",
+        "resolved_from": "section:Εικόνα - Ήχος/Διαγώνιος Οθόνης ( Εκατοστά"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος αναλυση οθονης",
+        "label": "Ανάλυση Οθόνης",
+        "value": "ULTRA HD ( 4K )",
+        "resolved_from": "section:Εικόνα - Ήχος/Ανάλυση Οθόνης"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος αριθμος pixels",
+        "label": "Αριθμός Pixels",
+        "value": "3840 X 2160",
+        "resolved_from": "section:Εικόνα - Ήχος/Αριθμός Pixels"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος λειτουργιες εικονας",
+        "label": "Λειτουργίες Εικόνας",
+        "value": "HVA Panel,Dolby Vision,Quantum Dot,FILMMAKER MODE,Motion Clarity - MEMC",
+        "resolved_from": "section:Εικόνα - Ήχος/Λειτουργίες Εικόνας"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος ρυθμος ανανεωσης",
+        "label": "Ρυθμός Ανανέωσης",
+        "value": "144",
+        "resolved_from": "section:Εικόνα - Ήχος/Ρυθμός Ανανέωσης"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος hdr",
+        "label": "HDR",
+        "value": "HDR Pro",
+        "resolved_from": "section:Εικόνα - Ήχος/HDR"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος ενεργειακη κλαση",
+        "label": "Ενεργειακή Κλάση",
+        "value": "E",
+        "resolved_from": "section:Εικόνα - Ήχος/Ενεργειακή Κλάση"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος ενεργειακη κλαση hdr",
+        "label": "Ενεργειακή Κλάση HDR",
+        "value": "G",
+        "resolved_from": "section:Εικόνα - Ήχος/Ενεργειακή Κλάση HDR"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος καταναλωση ενεργειας σε λειτουργια sdr kwh 1000h",
+        "label": "Κατανάλωση Ενέργειας σε Λειτουργία SDR (kWh/1000h",
+        "value": "150",
+        "resolved_from": "section:Εικόνα - Ήχος/Κατανάλωση Ενέργειας σε Λειτουργία SDR (kWh/1000h"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος καταναλωση ενεργειας σε λειτουργια hdr kwh 1000h",
+        "label": "Κατανάλωση Ενέργειας σε Λειτουργία HDR (kWh/1000h",
+        "value": "255",
+        "resolved_from": "section:Εικόνα - Ήχος/Κατανάλωση Ενέργειας σε Λειτουργία HDR (kWh/1000h"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος δεκτης",
+        "label": "Δέκτης",
+        "value": "DVB-T2/C/S2",
+        "resolved_from": "section:Εικόνα - Ήχος/Δέκτης"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος συστημα ηχου",
+        "label": "Σύστημα Ήχου",
+        "value": "Dolby Atmos,ONKYO Sound System",
+        "resolved_from": "section:Εικόνα - Ήχος/Σύστημα Ήχου"
+      },
+      {
+        "section": "Εικόνα - Ήχος",
+        "key": "εικονα ηχος επεξεργαστης",
+        "label": "Επεξεργαστής",
+        "value": "AiPQ Pro",
+        "resolved_from": "section:Εικόνα - Ήχος/Επεξεργαστής"
+      },
+      {
+        "section": "Λειτουργίες",
+        "key": "λειτουργιες smart tv",
+        "label": "Smart TV",
+        "value": "Υποστηρίζεται",
+        "resolved_from": "section:Λειτουργίες/Smart TV"
+      },
+      {
+        "section": "Λειτουργίες",
+        "key": "λειτουργιες λειτουργικο συστημα",
+        "label": "Λειτουργικό Σύστημα",
+        "value": "Android TV",
+        "resolved_from": "section:Λειτουργίες/Λειτουργικό Σύστημα"
+      },
+      {
+        "section": "Λειτουργίες",
+        "key": "λειτουργιες λειτουργιες smart",
+        "label": "Λειτουργίες Smart",
+        "value": "Google Assistant,Google TV",
+        "resolved_from": "section:Λειτουργίες/Λειτουργίες Smart"
+      },
+      {
+        "section": "Λειτουργίες",
+        "key": "λειτουργιες επιπλεον λειτουργιες",
+        "label": "Επιπλέον Λειτουργίες",
+        "value": "Game Mode",
+        "resolved_from": "section:Λειτουργίες/Επιπλέον Λειτουργίες"
+      },
+      {
+        "section": "Συνδέσεις",
+        "key": "συνδεσεις hdmi",
+        "label": "HDMI",
+        "value": "Ναι,4",
+        "resolved_from": "section:Συνδέσεις/HDMI"
+      },
+      {
+        "section": "Συνδέσεις",
+        "key": "συνδεσεις bluetooth",
+        "label": "Bluetooth",
+        "value": "Ναι",
+        "resolved_from": "section:Συνδέσεις/Bluetooth"
+      },
+      {
+        "section": "Συνδέσεις",
+        "key": "συνδεσεις usb",
+        "label": "USB",
+        "value": "Ναι,1",
+        "resolved_from": "section:Συνδέσεις/USB"
+      },
+      {
+        "section": "Συνδέσεις",
+        "key": "συνδεσεις εισοδοι εξοδοι",
+        "label": "Είσοδοι / 'Εξοδοι",
+        "value": "RF,SAT,CI SLOT",
+        "resolved_from": "section:Συνδέσεις/Είσοδοι / 'Εξοδοι"
+      },
+      {
+        "section": "Γενικά",
+        "key": "γενικα βασικος εξοπλισμος",
+        "label": "Βασικός Εξοπλισμός",
+        "value": "Εγχειρίδιο χρήσης,Τηλεχειριστήριο,Μπαταρίες,Καλώδιο τροφοδοσίας,Επιτραπέζια βάση",
+        "resolved_from": "section:Γενικά/Βασικός Εξοπλισμός"
+      },
+      {
+        "section": "Γενικά",
+        "key": "γενικα εμφανιση",
+        "label": "Εμφάνιση",
+        "value": "Ultra Slim,Unibody design",
+        "resolved_from": "section:Γενικά/Εμφάνιση"
+      },
+      {
+        "section": "Γενικά",
+        "key": "γενικα διακενο βασης τοιχου vesa mm",
+        "label": "Διάκενο Βάσης Τοίχου Vesa (mm",
+        "value": "600X400",
+        "resolved_from": "section:Γενικά/Διάκενο Βάσης Τοίχου Vesa (mm"
+      },
+      {
+        "section": "Γενικά",
+        "key": "γενικα χρωμα",
+        "label": "Χρώμα",
+        "value": "Brushed metal font",
+        "resolved_from": "section:Γενικά/Χρώμα"
+      },
+      {
+        "section": "Γενικά",
+        "key": "γενικα βαρος συσκευης σε κιλα με βαση",
+        "label": "Βάρος Συσκευής σε Κιλά (με Βάση",
+        "value": "51,8",
+        "resolved_from": "section:Γενικά/Βάρος Συσκευής σε Κιλά (με Βάση"
+      },
+      {
+        "section": "Γενικά",
+        "key": "γενικα χωρα κατασκευης",
+        "label": "Χώρα Κατασκευής",
+        "value": "Κίνα",
+        "resolved_from": "section:Γενικά/Χώρα Κατασκευής"
+      },
+      {
+        "section": "Γενικά",
+        "key": "γενικα εγγυηση κατασκευαστη",
+        "label": "Εγγύηση Κατασκευαστή",
+        "value": "2 έτη",
+        "resolved_from": "section:Γενικά/Εγγύηση Κατασκευαστή"
+      },
+      {
+        "section": "Γενικά",
+        "key": "γενικα διαστασεις συσκευης σε εκατοστα με βαση υ π β",
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά με Βάση (Υ × Π × Β",
+        "value": "128.50 x 217.80 x 42.00",
+        "resolved_from": "section_label_related:Γενικά/Διαστάσεις Συσκευής σε Εκατοστά με Βάση (Υ × Π × Β"
+      }
+    ]
+  },
+  "skroutz_taxonomy_diagnostics": {
+    "family_key": "",
+    "raw_category_tag": "",
+    "raw_category_href": "",
+    "normalized_href_slug": "",
+    "matched_rule": "",
+    "source_category": "ΕΙΚΟΝΑ & ΗΧΟΣ:::ΕΙΚΟΝΑ & ΗΧΟΣ///Τηλεοράσεις:::ΕΙΚΟΝΑ & ΗΧΟΣ///Τηλεοράσεις///TCL",
+    "match_type": "exact_category",
+    "tv_inches": null,
+    "ambiguity": false,
+    "escalation_reason": ""
+  },
+  "schema_preference": {
+    "preferred_source_files": []
+  },
+  "unsupported_features": [],
+  "critical_extractors": {
+    "product_code": "dom:#cscp-sku",
+    "brand": "dom:#product-brand-logo a",
+    "mpn": "title_after_brand",
+    "name": "dom:h1.product-title",
+    "price": "dom:#product-price .price",
+    "taxonomy": "resolved",
+    "schema_match": "matched"
+  },
+  "field_diagnostics": {
+    "breadcrumbs": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#block-mytheme-breadcrumbs .breadcrumb__link",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#block-mytheme-breadcrumbs .breadcrumb__link",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Αρχική",
+          "note": "4 breadcrumbs"
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#cscp-sku",
+      "value_present": true,
+      "value_preview": "142664",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#cscp-sku",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "142664",
+          "note": ""
+        }
+      ]
+    },
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:h1.product-title",
+      "value_present": true,
+      "value_preview": "TV TCL 98P8K 98'' Smart 4K",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1.product-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "TV TCL 98P8K 98'' Smart 4K",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-brand-logo a",
+      "value_present": true,
+      "value_preview": "TCL",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-brand-logo a",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "TCL",
+          "note": ""
+        }
+      ]
+    },
+    "price": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-price .price",
+      "value_present": true,
+      "value_preview": "1.499,00 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-price .price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "1.499,00 €",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.product-desc p",
+      "value_present": true,
+      "value_preview": "Η τηεόραση 98'' P8K συνδυάζει τεχνολογία QLED 4K HDR Pro, επεξεργαστή AiPQ Pro και ρυθμό ανανέωσης 144Hz για εξαιρετικά ομαλή και πλούσια εικόνα. Με Game Master",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".product-desc p",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Η τηεόραση 98'' P8K συνδυάζει τεχνολογία QLED 4K HDR Pro, επεξεργαστή AiPQ Pro και ρυθμό ανανέωσης 144Hz για εξαιρετικά ομαλή και πλούσια εικόνα. Με Game Master",
+          "note": ""
+        }
+      ]
+    },
+    "presentation_blocks": {
+      "confidence": 0.0,
+      "selected_strategy": "missing",
+      "value_present": true,
+      "value_preview": "0",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-presentation .ck-text.inline",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": "0 blocks"
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.94,
+      "selected_strategy": "dom:#product-main-attributes .product-main-attribute",
+      "value_present": true,
+      "value_preview": "4 items; first=Τεχνολογία Οθόνης:QLED",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-main-attributes .product-main-attribute",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Τεχνολογία Οθόνης QLED",
+          "note": "4 rows"
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.98,
+      "selected_strategy": "dom:#product-details .prop-group-wrapper",
+      "value_present": true,
+      "value_preview": "4 sections; first=Εικόνα - Ήχος",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-details .prop-group-wrapper",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Εικόνα - Ήχος Τεχνολογία Οθόνης QLED Διαγώνιος Οθόνης ( Ίντσες ) 98 Διαγώνιος Οθόνης ( Εκατοστά ) 248 Ανάλυση Οθόνης ULTRA HD ( 4K ) Αριθμός Pixels 3840 X 2160 ",
+          "note": "4 sections"
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.8,
+      "selected_strategy": "title_after_brand",
+      "value_present": true,
+      "value_preview": "98P8K",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.96,
+      "selected_strategy": "dom:img.lightbox",
+      "value_present": true,
+      "value_preview": "5 images; first=https://www.electronet.gr/sites/default/files/styles/product_large/public/142664.jpg.webp?itok=_QhNvRly",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "img.lightbox",
+          "match_count": 5,
+          "success": true,
+          "chosen_preview": "TV TCL 98P8K 98'' Smart 4K /sites/default/files/styles/product_large/public/142664.jpg.webp?itok=_QhNvRly",
+          "note": "5 gallery candidates"
+        }
+      ]
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:954c8413f2da941e78f3ddce65df522654336c8c",
+    "schema_sentinel_label_missing",
+    "leaf_breadcrumb,url_overlap,sub_name_overlap,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "TCL",
+      "taxonomy_path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > TCL",
+      "cta_url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/tileoraseis-tcl",
+      "confidence": 7.75,
+      "reasons": [
+        "leaf_breadcrumb",
+        "url_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "OLED TV",
+      "taxonomy_path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > OLED TV",
+      "cta_url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/oled-tv",
+      "confidence": 6.5,
+      "reasons": [
+        "leaf_breadcrumb",
+        "url_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "4K UHD",
+      "taxonomy_path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 4K UHD",
+      "cta_url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/4k-uhd",
+      "confidence": 6.5,
+      "reasons": [
+        "leaf_breadcrumb",
+        "url_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "Έως 32''",
+      "taxonomy_path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > Έως 32''",
+      "cta_url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/ews-32",
+      "confidence": 5.0,
+      "reasons": [
+        "leaf_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
+      "leaf_category": "Τηλεοράσεις",
+      "sub_category": "33''-50''",
+      "taxonomy_path": "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 33''-50''",
+      "cta_url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis/33-50",
+      "confidence": 5.0,
+      "reasons": [
+        "leaf_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:954c8413f2da941e78f3ddce65df522654336c8c",
+      "matched_sub_category": null,
+      "score": 0.9955,
+      "n_sections": 4,
+      "n_rows_total": 31,
+      "source_files": [
+        "tileoraseis.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:bdef05933faf19818da956dd3c57ecdb57245055",
+      "matched_sub_category": null,
+      "score": 0.6924,
+      "n_sections": 2,
+      "n_rows_total": 17,
+      "source_files": [
+        "radio_cd.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:a47b963096089ae4cb6b45eeca223a9050aa32db",
+      "matched_sub_category": null,
+      "score": 0.6009,
+      "n_sections": 1,
+      "n_rows_total": 11,
+      "source_files": [
+        "thermantika_ygraerioy.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:55864a4525eda9379147cac182db2fedd9e9500a",
+      "matched_sub_category": null,
+      "score": 0.5844,
+      "n_sections": 3,
+      "n_rows_total": 13,
+      "source_files": [
+        "psifiakoi_apokodikopoiites.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:bdc8c08eec39d21a028f7ee939931aefa032517b",
+      "matched_sub_category": null,
+      "score": 0.56,
+      "n_sections": 1,
+      "n_rows_total": 5,
+      "source_files": [
+        "atmokatharistes.json"
+      ]
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 5,
+    "downloaded_count": 5,
+    "requested_photos": 5
+  },
+  "sections_requested": 0,
+  "sections_extracted": 0,
+  "section_titles": [],
+  "section_image_candidates": [],
+  "section_image_urls_resolved": [],
+  "section_downloads": [],
+  "section_extraction_window": {
+    "candidate_count": 0,
+    "duplicate_signatures_skipped": 0,
+    "selected_container_index": null,
+    "start_anchor": "",
+    "stop_anchor": "",
+    "title_signature": []
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 0,
+    "extracted_count": 0,
+    "downloaded_count": 0,
+    "requested_sections": 0
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\142664.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\142664.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\142664.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\142664.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\142664.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\gallery\\142664-1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\gallery\\142664-2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\gallery\\142664-3.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\gallery\\142664-4.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\142664\\scrape\\gallery\\142664-5.jpg"
+  ]
+}

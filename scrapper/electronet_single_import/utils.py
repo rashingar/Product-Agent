@@ -24,6 +24,7 @@ NAME_RULES_PATH = REPO_ROOT / "name_rules.json"
 DIFFERENTIATOR_PRIORITY_MAP_PATH = REPO_ROOT / "differentiator_priority_map.csv"
 MASTER_PROMPT_PATH = REPO_ROOT / "master_prompt+.txt"
 COMPACT_RESPONSE_SCHEMA_PATH = REPO_ROOT / "schemas" / "compact_response.schema.json"
+MANUFACTURER_SOURCE_MAP_PATH = REPO_ROOT / "MANUFACTURER_SOURCE_MAP.json"
 
 
 

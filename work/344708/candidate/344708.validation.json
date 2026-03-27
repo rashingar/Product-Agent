@@ -1,0 +1,291 @@
+{
+  "ok": true,
+  "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\candidate\\344708.csv",
+  "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
+  "baseline_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\products\\344708.csv",
+  "errors": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "characteristics_template_unresolved_fields:1"
+  ],
+  "field_health": {
+    "model": {
+      "status": "match",
+      "candidate_length": 6,
+      "baseline_length": 6,
+      "encoding_issues": [],
+      "candidate_preview": "344708",
+      "baseline_preview": "344708"
+    },
+    "mpn": {
+      "status": "match",
+      "candidate_length": 8,
+      "baseline_length": 8,
+      "encoding_issues": [],
+      "candidate_preview": "RR8797WH",
+      "baseline_preview": "RR8797WH"
+    },
+    "name": {
+      "status": "different_but_valid",
+      "candidate_length": 75,
+      "baseline_length": 45,
+      "encoding_issues": [],
+      "candidate_preview": "Rowenta RR8797WH – Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση",
+      "baseline_preview": "Rowenta RR8797WH – Σκούπα Ρομπότ Χαρτογράφηση"
+    },
+    "description": {
+      "status": "different_but_valid",
+      "candidate_length": 1513,
+      "baseline_length": 1483,
+      "encoding_issues": [],
+      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Rowenta RR8797WH – Σκούπα Ρομπ",
+      "baseline_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Rowenta RR8797WH – Σκούπα Ρομπ"
+    },
+    "characteristics": {
+      "status": "different_but_valid",
+      "candidate_length": 703,
+      "baseline_length": 1022,
+      "encoding_issues": [],
+      "candidate_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση προϊόντος</strong></td></tr></thead><t",
+      "baseline_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Γενικά</strong></td></tr></thead><tbody><tr><td>Ι"
+    },
+    "category": {
+      "status": "match",
+      "candidate_length": 120,
+      "baseline_length": 120,
+      "encoding_issues": [],
+      "candidate_preview": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα///Σκούπες Ρομπότ:::Μικροσυσκευές",
+      "baseline_preview": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα///Σκούπες Ρομπότ:::Μικροσυσκευές"
+    },
+    "image": {
+      "status": "match",
+      "candidate_length": 35,
+      "baseline_length": 35,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/344708/344708-1.jpg",
+      "baseline_preview": "catalog/01_main/344708/344708-1.jpg"
+    },
+    "additional_image": {
+      "status": "match",
+      "candidate_length": 111,
+      "baseline_length": 111,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/344708/344708-2.jpg:::catalog/01_main/344708/344708-3.jpg:::catalog/01_main/344708/344708-4.jpg",
+      "baseline_preview": "catalog/01_main/344708/344708-2.jpg:::catalog/01_main/344708/344708-3.jpg:::catalog/01_main/344708/344708-4.jpg"
+    },
+    "manufacturer": {
+      "status": "match",
+      "candidate_length": 7,
+      "baseline_length": 7,
+      "encoding_issues": [],
+      "candidate_preview": "Rowenta",
+      "baseline_preview": "Rowenta"
+    },
+    "price": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "quantity": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "minimum": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "subtract": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "stock_status": {
+      "status": "match",
+      "candidate_length": 13,
+      "baseline_length": 13,
+      "encoding_issues": [],
+      "candidate_preview": "Έως 30 ημέρες",
+      "baseline_preview": "Έως 30 ημέρες"
+    },
+    "status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "meta_keyword": {
+      "status": "match",
+      "candidate_length": 114,
+      "baseline_length": 114,
+      "encoding_issues": [],
+      "candidate_preview": "Rowenta RR8797WH, σκούπα ρομπότ, σκούπα ρομπότ με χαρτογράφηση, σκούπα ρομπότ με σφουγγάρισμα, σκούπα ρομπότ Wi-Fi",
+      "baseline_preview": "Rowenta RR8797WH, σκούπα ρομπότ, σκούπα ρομπότ με χαρτογράφηση, σκούπα ρομπότ με σφουγγάρισμα, σκούπα ρομπότ Wi-Fi"
+    },
+    "meta_title": {
+      "status": "different_but_valid",
+      "candidate_length": 86,
+      "baseline_length": 56,
+      "encoding_issues": [],
+      "candidate_preview": "Rowenta RR8797WH Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση | eTranoulis",
+      "baseline_preview": "Rowenta RR8797WH Σκούπα Ρομπότ Χαρτογράφηση | eTranoulis"
+    },
+    "meta_description": {
+      "status": "match",
+      "candidate_length": 133,
+      "baseline_length": 133,
+      "encoding_issues": [],
+      "candidate_preview": "Η Rowenta RR8797WH είναι σκούπα ρομπότ με χαρτογράφηση, σκούπισμα και σφουγγάρισμα, ισχύ αναρρόφησης 6000 Pa και συνδεσι",
+      "baseline_preview": "Η Rowenta RR8797WH είναι σκούπα ρομπότ με χαρτογράφηση, σκούπισμα και σφουγγάρισμα, ισχύ αναρρόφησης 6000 Pa και συνδεσι"
+    },
+    "seo_keyword": {
+      "status": "different_but_valid",
+      "candidate_length": 71,
+      "baseline_length": 44,
+      "encoding_issues": [],
+      "candidate_preview": "rowenta-rr8797wh-skoupa-rompot-270-min-sti-leitourgia-eco-chartografisi",
+      "baseline_preview": "rowenta-rr8797wh-skoupa-rompot-chartografisi"
+    },
+    "product_url": {
+      "status": "different_but_valid",
+      "candidate_length": 97,
+      "baseline_length": 70,
+      "encoding_issues": [],
+      "candidate_preview": "https://www.etranoulis.gr/rowenta-rr8797wh-skoupa-rompot-270-min-sti-leitourgia-eco-chartografisi",
+      "baseline_preview": "https://www.etranoulis.gr/rowenta-rr8797wh-skoupa-rompot-chartografisi"
+    },
+    "related_product": {
+      "status": "match",
+      "candidate_length": 0,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "",
+      "baseline_preview": ""
+    },
+    "bestprice_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "skroutz_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "boxnow": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    }
+  },
+  "expected_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "actual_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "baseline_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "summary": {
+    "match": 18,
+    "different_but_valid": 6,
+    "filled": 0,
+    "missing": 0,
+    "encoding_issue": 0,
+    "empty": 0
+  }
+}

@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 
 from .models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match, normalize_whitespace
-from .utils import dedupe_strings, ensure_directory, write_bytes, write_text
+from .utils import MANUFACTURER_SOURCE_MAP_PATH, dedupe_strings, ensure_directory, read_json, write_bytes, write_text
 
 try:  # pragma: no cover - dependency availability is environment-dependent
     from pypdf import PdfReader
@@ -124,8 +124,55 @@ class NeffSpecsheetAdapter(_StaticPdfAdapter):
         return normalize_for_match(source.brand) == normalize_for_match("Neff") and super().matches(source)
 
 
+class ManufacturerMappedHtmlAdapter(OfficialDocAdapter):
+    provider_id = "mapped_html"
+
+    def matches(self, source: SourceProductData) -> bool:
+        return bool(self._matching_entries(source))
+
+    def discover(self, source: SourceProductData, taxonomy: TaxonomyResolution) -> list[OfficialDocumentCandidate]:
+        candidates: list[OfficialDocumentCandidate] = []
+        for entry in self._matching_entries(source):
+            candidates.append(
+                OfficialDocumentCandidate(
+                    provider_id=str(entry.get("provider_id", self.provider_id)).strip() or self.provider_id,
+                    document_type="html",
+                    url=str(entry.get("url", "")).strip(),
+                    name=str(entry.get("name", "product_page")).strip() or "product_page",
+                    content_type_hint=str(entry.get("content_type_hint", "text/html")).strip() or "text/html",
+                    priority=int(entry.get("priority", 20) or 20),
+                )
+            )
+        return candidates
+
+    def parse(self, candidate: OfficialDocumentCandidate, payload: bytes | str, source: SourceProductData, taxonomy: TaxonomyResolution) -> EnrichmentResult:
+        if not isinstance(payload, str):
+            raise RuntimeError("manufacturer_html_payload_invalid")
+        sections = _parse_tefal_shop_product_html(payload)
+        return EnrichmentResult(
+            manufacturer_spec_sections=sections,
+            manufacturer_source_text=_extract_html_text(payload),
+        )
+
+    def _matching_entries(self, source: SourceProductData) -> list[dict[str, Any]]:
+        brand = normalize_for_match(source.brand)
+        mpn = normalize_for_match(source.mpn)
+        matches: list[dict[str, Any]] = []
+        for entry in _load_mapped_product_pages():
+            entry_brand = normalize_for_match(entry.get("brand", ""))
+            entry_mpn = normalize_for_match(entry.get("mpn", ""))
+            if entry_brand and entry_brand != brand:
+                continue
+            if entry_mpn and entry_mpn != mpn:
+                continue
+            if not normalize_whitespace(entry.get("url", "")):
+                continue
+            matches.append(entry)
+        return matches
+
+
 def get_official_doc_adapters() -> list[OfficialDocAdapter]:
-    return [BoschSpecsheetAdapter(), NeffSpecsheetAdapter()]
+    return [BoschSpecsheetAdapter(), NeffSpecsheetAdapter(), ManufacturerMappedHtmlAdapter()]
 
 
 def enrich_source_from_manufacturer_docs(
@@ -294,6 +341,15 @@ def _fallback_document_text(candidate: OfficialDocumentCandidate, payload: bytes
     return ""
 
 
+def _load_mapped_product_pages() -> list[dict[str, Any]]:
+    try:
+        payload = read_json(MANUFACTURER_SOURCE_MAP_PATH)
+    except FileNotFoundError:
+        return []
+    entries = payload.get("product_pages", [])
+    return [entry for entry in entries if isinstance(entry, dict)]
+
+
 def _merge_sections(existing: list[SpecSection], incoming: list[SpecSection]) -> list[SpecSection]:
     grouped: dict[str, list[SpecItem]] = {}
     ordered_titles: list[str] = []
@@ -320,6 +376,27 @@ def _extract_pdf_text(payload: bytes) -> str:
 
 def _extract_html_text(html: str) -> str:
     return normalize_whitespace(BeautifulSoup(html, "lxml").get_text(" ", strip=True))
+
+
+def _parse_tefal_shop_product_html(html: str) -> list[SpecSection]:
+    soup = BeautifulSoup(html, "lxml")
+    container = soup.select_one("[data-tab-content='about-the-product']")
+    if container is None:
+        return []
+
+    items: list[SpecItem] = []
+    for row in container.select("div.u-flex.u-justify-between.u-items-center.u-py-16.u-border-b"):
+        label_node = row.select_one("span")
+        value_node = row.select_one("div.t-text")
+        label = normalize_whitespace(label_node.get_text(" ", strip=True) if label_node else "")
+        value = normalize_whitespace(value_node.get_text(" ", strip=True) if value_node else "")
+        if not label or not value:
+            continue
+        items.append(SpecItem(label=label, value=value))
+
+    if not items:
+        return []
+    return [SpecSection(section="Χαρακτηριστικά Κατασκευαστή", items=_dedupe_items(items))]
 
 
 def _parse_neff_specsheet(text: str) -> list[SpecSection]:

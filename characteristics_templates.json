@@ -322,6 +322,63 @@
       "sections": []
     },
     {
+      "template_id": "skroutz_robot_vacuum_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_sub": "Σκούπες Ρομπότ"
+      },
+      "preferred_schema_source_files": [
+        "skoypes_rompot.json"
+      ],
+      "sections": [
+        {
+          "title": "Επισκόπηση προϊόντος",
+          "fields": [
+            {
+              "label": "Ισχύς (Pa",
+              "aliases": [
+                "Απορρόφηση",
+                "Πίεση απορρόφησης"
+              ]
+            },
+            {
+              "label": "Χρόνος φόρτισης μπαταρίας σε min",
+              "aliases": [
+                "Διάρκεια Φόρτισης",
+                "Χρόνος επαναφόρτισης"
+              ]
+            },
+            {
+              "label": "Χώρος Κάλυψης (m²",
+              "aliases": [
+                "Κάλυψη Χώρου"
+              ]
+            },
+            {
+              "label": "Χωρητικότητα σε λίτρα",
+              "aliases": [
+                "Χωρητικότητα Κάδου Στερεών",
+                "Χωρητικότητα δοχείου σκόνης"
+              ]
+            },
+            {
+              "label": "Τύπος δαπέδου",
+              "aliases": [
+                "Τύπος δαπέδου"
+              ]
+            },
+            {
+              "label": "Σφουγγάρισμα",
+              "aliases": [
+                "Σφουγγάρισμα",
+                "Λειτουργία απορρόφησης και σφουγγαρίσματος"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "template_id": "skroutz_built_in_hob_v1",
       "match": {
         "source_name": "skroutz",

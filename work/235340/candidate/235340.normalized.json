@@ -1,0 +1,660 @@
+{
+  "input": {
+    "model": "235340",
+    "url": "https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/plyntiria-royhon-emprosthias-fortosis/plyntirio-royhon-hisense-wf7s1247bb-12-kg?v=39658",
+    "photos": 3,
+    "sections": 0,
+    "skroutz_status": 1,
+    "boxnow": 0,
+    "price": "699",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\candidate"
+  },
+  "source": {
+    "source_name": "",
+    "page_type": "product",
+    "url": "https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/plyntiria-royhon-emprosthias-fortosis/plyntirio-royhon-hisense-wf7s1247bb-12-kg?v=39658",
+    "canonical_url": "https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/plyntiria-royhon-emprosthias-fortosis/plyntirio-royhon-hisense-wf7s1247bb-12-kg",
+    "breadcrumbs": [
+      "Αρχική",
+      "Οικιακές Συσκευές",
+      "Πλυντήρια - Στεγνωτήρια",
+      "Πλυντήρια Ρούχων Εμπρόσθιας Φόρτωσης"
+    ],
+    "skroutz_family": "",
+    "category_tag_text": "",
+    "category_tag_href": "",
+    "category_tag_slug": "",
+    "taxonomy_source_category": "",
+    "taxonomy_match_type": "",
+    "taxonomy_rule_id": "",
+    "taxonomy_ambiguity": false,
+    "taxonomy_escalation_reason": "",
+    "taxonomy_tv_inches": null,
+    "product_code": "235340",
+    "brand": "Hisense",
+    "name": "Πλυντήριο Ρούχων Hisense WF7S1247BB 12 kg A",
+    "hero_summary": "Πλυντήριο ρούχων με ΑΙ Super Wash για αυτόματη επιλογή του τέλειου κύκλου πλύσης για τα ρούχα σας, με ζύγιση και ανίχνευση φορτίου, λειτουργία Smart Dosing που αξιοποιεί πλήρως το απορρυπαντικό, εξοικονομώντας κάθε σταγόνα και μειώνοντας τη σπατάλη νερού, προστατεύοντας το περιβάλλον και απομακρυσμένη πρόσβαση και έλεγχο της συσκευής χάρη στο ConnectLife μέσω Wi-Fi!",
+    "price_text": "699,00 €",
+    "price_value": 699.0,
+    "installments_text": "24 άτοκες δόσεις",
+    "delivery_text": "Κατόπιν παραγγελίας για παράδοση",
+    "pickup_text": "Επιλέξτε κατάστημα για να δείτε τη διαθεσιμότητα",
+    "gallery_images": [
+      {
+        "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/235340.jpg.webp?itok=PTU3nQf0",
+        "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BB 12 kg A",
+        "position": 1,
+        "local_filename": "235340-1.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\gallery\\235340-1.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      },
+      {
+        "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/235340_1.jpg.webp?itok=RnsL3ew0",
+        "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BB 12 kg A",
+        "position": 2,
+        "local_filename": "235340-2.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\gallery\\235340-2.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      },
+      {
+        "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/235340_2.jpg.webp?itok=S-OxdTCv",
+        "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BB 12 kg A",
+        "position": 3,
+        "local_filename": "235340-3.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\gallery\\235340-3.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      }
+    ],
+    "besco_images": [],
+    "energy_label_asset_url": "https://www.electronet.gr/modules/custom/custom_eprel/energy_arrows/A-Left-DarkGreen-WithAGScale.svg",
+    "product_sheet_asset_url": "",
+    "key_specs": [
+      {
+        "label": "Χωρητικότητα Πλύσης",
+        "value": "12 κιλά"
+      },
+      {
+        "label": "Μέγιστες Στροφές Στυψίματος",
+        "value": "1400 rpm"
+      },
+      {
+        "label": "Ενεργειακή Κλάση",
+        "value": "A"
+      },
+      {
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
+        "value": "84.50 x 59.50 x 64.00"
+      }
+    ],
+    "spec_sections": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "items": [
+          {
+            "label": "Τρόπος Φόρτωσης Πλυντηρίου",
+            "value": "Εμπρόσθιας φόρτωσης"
+          },
+          {
+            "label": "Τρόπος Τοποθέτησης",
+            "value": "Ελεύθερος"
+          },
+          {
+            "label": "Χωρητικότητα Πλύσης",
+            "value": "12 κιλά"
+          },
+          {
+            "label": "Μέγιστες Στροφές Στυψίματος",
+            "value": "1400 rpm"
+          },
+          {
+            "label": "Μετόπη με Κείμενο στα Ελληνικά",
+            "value": null
+          },
+          {
+            "label": "Ενδείξεις Λειτουργίας",
+            "value": "Ψηφιακή οθόνη"
+          },
+          {
+            "label": "Αριθμός Προγραμμάτων",
+            "value": "20"
+          },
+          {
+            "label": "Προγράμματα",
+            "value": "Βαμβακερά,Συνθετικά,Ανάμεικτα,Ευαίσθητα,Βαμβακερά ECO,Γρήγορο 15',Ξέβγαλμα+Στύψιμο,Στύψιμο,Σκουρόχρωμα/Jeans,Αθλητικά/Μικροίνες,Ματαξωτά,Βρεφικά,Κλινοσκεπάσματα,Πουκάμισα,Αντιαλλεργικό,Καθημερινό φορτίο,Ατμός,Καθαρισμός κάδου,Αυτόματο απαλό,Μάλλινα"
+          },
+          {
+            "label": "Αναγνώριση Βάρους Ρούχων",
+            "value": "Ναι"
+          },
+          {
+            "label": "Αναγνώριση Αφρού",
+            "value": null
+          },
+          {
+            "label": "Μείωση Κραδασμών",
+            "value": null
+          },
+          {
+            "label": "Διπλή Παροχή Νερού",
+            "value": null
+          },
+          {
+            "label": "Τύπος Κινητήτηρα(μοτέρ)",
+            "value": "Inverter"
+          },
+          {
+            "label": "Συνδεσιμότητα",
+            "value": "WiFi"
+          },
+          {
+            "label": "Άλλα Χαρακτηριστικά",
+            "value": null
+          },
+          {
+            "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
+            "value": "84.50 x 59.50 x 64.00"
+          }
+        ]
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "items": [
+          {
+            "label": "Θερμοκρασιών",
+            "value": "Ναι"
+          },
+          {
+            "label": "Στροφών",
+            "value": null
+          },
+          {
+            "label": "Πρόπλυσης",
+            "value": "Ναι"
+          },
+          {
+            "label": "Επιπλέον Ξεβγάλματος",
+            "value": "Ναι"
+          },
+          {
+            "label": "Εύκολου Σιδερώματος",
+            "value": null
+          },
+          {
+            "label": "Προγραμματισμός Έναρξης",
+            "value": "Ναι"
+          },
+          {
+            "label": "Άλλες Επιλογές",
+            "value": null
+          }
+        ]
+      },
+      {
+        "section": "Ασφάλεια",
+        "items": [
+          {
+            "label": "Κλείδωμα Ασφαλείας για Παιδιά",
+            "value": "Ναι"
+          },
+          {
+            "label": "Σύστημα Προστασίας από Διαρροές",
+            "value": "Ναι"
+          },
+          {
+            "label": "Σύστημα Αυτοδιάγνωσης Βλαβών",
+            "value": null
+          }
+        ]
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "items": [
+          {
+            "label": "Ενεργειακή Κλάση",
+            "value": "A"
+          },
+          {
+            "label": "Κλάση Απόδοσης Στυψίματος",
+            "value": "A"
+          },
+          {
+            "label": "Χωρητικότητα Πλύσης",
+            "value": "12 κιλά"
+          },
+          {
+            "label": "Επίπεδο Θορύβου Πλυσίματος σε dB",
+            "value": null
+          }
+        ]
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "items": [
+          {
+            "label": "Χρώμα",
+            "value": "Μαύρο"
+          },
+          {
+            "label": "Εγγύηση Κατασκευαστή",
+            "value": "2 έτη"
+          },
+          {
+            "label": "Βάρος Συσκευής σε Κιλά",
+            "value": "77"
+          },
+          {
+            "label": "Πλάτος Συσκευής σε Εκατοστά",
+            "value": "59,5"
+          },
+          {
+            "label": "Βάθος Συσκευής σε Εκατοστά",
+            "value": "64"
+          }
+        ]
+      }
+    ],
+    "manufacturer_spec_sections": [],
+    "manufacturer_source_text": "",
+    "manufacturer_documents": [],
+    "presentation_source_html": "",
+    "presentation_source_text": "",
+    "raw_html_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\235340.raw.html",
+    "scraped_at": "2026-03-27T08:50:20+00:00",
+    "fallback_used": false,
+    "mpn": "WF7S1247BB"
+  },
+  "taxonomy": {
+    "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+    "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+    "sub_category": "Πλυντήρια Ρούχων",
+    "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Ρούχων",
+    "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-rouxwn",
+    "confidence": 20.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,leaf_name_overlap,sub_name_overlap,filter_map_tiebreak",
+    "gender": "neut",
+    "plural_label": "Πλυντήρια Ρούχων"
+  },
+  "schema_match": {
+    "matched_schema_id": "sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "matched_sub_category": "Πλυντήρια Ρούχων",
+    "score": 1.01,
+    "warnings": []
+  },
+  "deterministic_product": {
+    "brand": "Hisense",
+    "mpn": "WF7S1247BB",
+    "manufacturer": "Hisense",
+    "category_phrase": "Πλυντήριο ρούχων",
+    "name_differentiators": [
+      "12 kg",
+      "A"
+    ],
+    "preserve_parsed_title": false,
+    "name": "Hisense WF7S1247BB – Πλυντήριο ρούχων 12 kg A",
+    "name_draft_tail": "Πλυντήριο ρούχων 12 kg A",
+    "meta_title": "Hisense WF7S1247BB Πλυντήριο ρούχων 12 kg A | eTranoulis",
+    "meta_description_draft": "Το Hisense WF7S1247BB είναι Πλυντήριο ρούχων με 12 kg, A.",
+    "seo_keyword": "hisense-wf7s1247bb-plyntirio-rouchon-12-kg-a"
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "selection_reason": "matched_schema_template",
+    "template_source": "schema_library",
+    "matched_schema_id": "sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "custom_template_id": "",
+    "preferred_schema_source_files": [
+      "entoixizomena_plyntiria_royxon.json"
+    ],
+    "field_count": 35,
+    "unresolved_count": 10,
+    "fields": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τροπος φορτωσης πλυντηριου",
+        "label": "Τρόπος Φόρτωσης Πλυντηρίου",
+        "value": "Εμπρόσθιας φόρτωσης",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τρόπος Φόρτωσης Πλυντηρίου"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τροπος τοποθετησης",
+        "label": "Τρόπος Τοποθέτησης",
+        "value": "Ελεύθερος",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τρόπος Τοποθέτησης"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χωρητικοτητα πλυσης",
+        "label": "Χωρητικότητα Πλύσης",
+        "value": "12 κιλά",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Χωρητικότητα Πλύσης"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος μεγιστες στροφες στυψιματος",
+        "label": "Μέγιστες Στροφές Στυψίματος",
+        "value": "1400 rpm",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Μέγιστες Στροφές Στυψίματος"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος μετοπη με κειμενο στα ελληνικα",
+        "label": "Μετόπη με Κείμενο στα Ελληνικά",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος ενδειξεις λειτουργιας",
+        "label": "Ενδείξεις Λειτουργίας",
+        "value": "Ψηφιακή οθόνη",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Ενδείξεις Λειτουργίας"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αριθμος προγραμματων",
+        "label": "Αριθμός Προγραμμάτων",
+        "value": "20",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Αριθμός Προγραμμάτων"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος προγραμματα",
+        "label": "Προγράμματα",
+        "value": "Βαμβακερά,Συνθετικά,Ανάμεικτα,Ευαίσθητα,Βαμβακερά ECO,Γρήγορο 15',Ξέβγαλμα+Στύψιμο,Στύψιμο,Σκουρόχρωμα/Jeans,Αθλητικά/Μικροίνες,Ματαξωτά,Βρεφικά,Κλινοσκεπάσματα,Πουκάμισα,Αντιαλλεργικό,Καθημερινό φορτίο,Ατμός,Καθαρισμός κάδου,Αυτόματο απαλό,Μάλλινα",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Προγράμματα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αναγνωριση βαρους ρουχων",
+        "label": "Αναγνώριση Βάρους Ρούχων",
+        "value": "Ναι",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Αναγνώριση Βάρους Ρούχων"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αναγνωριση αφρου",
+        "label": "Αναγνώριση Αφρού",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος μειωση κραδασμων",
+        "label": "Μείωση Κραδασμών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος διπλη παροχη νερου",
+        "label": "Διπλή Παροχή Νερού",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος κινητητηρα μοτερ",
+        "label": "Τύπος Κινητήτηρα(μοτέρ",
+        "value": "Inverter",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τύπος Κινητήτηρα(μοτέρ"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος συνδεσιμοτητα",
+        "label": "Συνδεσιμότητα",
+        "value": "WiFi",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Συνδεσιμότητα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αλλα χαρακτηριστικα",
+        "label": "Άλλα Χαρακτηριστικά",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος διαστασεις συσκευης σε εκατοστα υ χ π χ β",
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+        "value": "84.50 x 59.50 x 64.00",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης θερμοκρασιων",
+        "label": "Θερμοκρασιών",
+        "value": "Ναι",
+        "resolved_from": "section:Επιλογές Πλύσης/Θερμοκρασιών"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης στροφων",
+        "label": "Στροφών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης προπλυσης",
+        "label": "Πρόπλυσης",
+        "value": "Ναι",
+        "resolved_from": "section:Επιλογές Πλύσης/Πρόπλυσης"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης επιπλεον ξεβγαλματος",
+        "label": "Επιπλέον Ξεβγάλματος",
+        "value": "Ναι",
+        "resolved_from": "section:Επιλογές Πλύσης/Επιπλέον Ξεβγάλματος"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης ευκολου σιδερωματος",
+        "label": "Εύκολου Σιδερώματος",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης προγραμματισμος εναρξης",
+        "label": "Προγραμματισμός Έναρξης",
+        "value": "Ναι",
+        "resolved_from": "section:Επιλογές Πλύσης/Προγραμματισμός Έναρξης"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης αλλες επιλογες",
+        "label": "Άλλες Επιλογές",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Ασφάλεια",
+        "key": "ασφαλεια κλειδωμα ασφαλειας για παιδια",
+        "label": "Κλείδωμα Ασφαλείας για Παιδιά",
+        "value": "Ναι",
+        "resolved_from": "section:Ασφάλεια/Κλείδωμα Ασφαλείας για Παιδιά"
+      },
+      {
+        "section": "Ασφάλεια",
+        "key": "ασφαλεια συστημα προστασιας απο διαρροες",
+        "label": "Σύστημα Προστασίας από Διαρροές",
+        "value": "Ναι",
+        "resolved_from": "section:Ασφάλεια/Σύστημα Προστασίας από Διαρροές"
+      },
+      {
+        "section": "Ασφάλεια",
+        "key": "ασφαλεια συστημα αυτοδιαγνωσης βλαβων",
+        "label": "Σύστημα Αυτοδιάγνωσης Βλαβών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα ενεργειακη κλαση",
+        "label": "Ενεργειακή Κλάση",
+        "value": "A",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Ενεργειακή Κλάση"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα κλαση αποδοσης στυψιματος",
+        "label": "Κλάση Απόδοσης Στυψίματος",
+        "value": "A",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Κλάση Απόδοσης Στυψίματος"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα χωρητικοτητα πλυσης",
+        "label": "Χωρητικότητα Πλύσης",
+        "value": "12 κιλά",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Χωρητικότητα Πλύσης"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα επιπεδο θορυβου πλυσιματος σε db",
+        "label": "Επίπεδο Θορύβου Πλυσίματος σε dB",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα χρωμα",
+        "label": "Χρώμα",
+        "value": "Μαύρο",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Χρώμα"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα εγγυηση κατασκευαστη",
+        "label": "Εγγύηση Κατασκευαστή",
+        "value": "2 έτη",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Εγγύηση Κατασκευαστή"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαρος συσκευης σε κιλα",
+        "label": "Βάρος Συσκευής σε Κιλά",
+        "value": "77",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Βάρος Συσκευής σε Κιλά"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα πλατος συσκευης σε εκατοστα",
+        "label": "Πλάτος Συσκευής σε Εκατοστά",
+        "value": "59,5",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Πλάτος Συσκευής σε Εκατοστά"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαθος συσκευης σε εκατοστα",
+        "label": "Βάθος Συσκευής σε Εκατοστά",
+        "value": "64",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Βάθος Συσκευής σε Εκατοστά"
+      }
+    ]
+  },
+  "downloaded_gallery_count": 3,
+  "downloaded_besco_count": 0,
+  "llm_product": {
+    "meta_description": "Το Hisense WF7S1247BB είναι πλυντήριο ρούχων 12 kg με ενεργειακή κλάση A και μέγιστες στροφές στυψίματος 1400 rpm.",
+    "meta_keywords": [
+      "Hisense WF7S1247BB",
+      "πλυντήριο ρούχων Hisense",
+      "πλυντήριο 12 κιλά",
+      "πλυντήριο 1400 rpm"
+    ],
+    "meta_keyword_csv": "Hisense WF7S1247BB, πλυντήριο ρούχων Hisense, πλυντήριο 12 κιλά, πλυντήριο 1400 rpm"
+  },
+  "llm_presentation": {
+    "intro_html": "Το <strong>Hisense WF7S1247BB</strong> είναι ένα ελεύθερο πλυντήριο ρούχων εμπρόσθιας φόρτωσης με χωρητικότητα πλύσης 12 κιλών, ενεργειακή κλάση <strong>A</strong> και μέγιστες στροφές στυψίματος 1400 rpm. Διαθέτει ψηφιακή οθόνη, inverter μοτέρ και συνδεσιμότητα WiFi μέσω ConnectLife για απομακρυσμένη πρόσβαση και έλεγχο της συσκευής. Στα βασικά του χαρακτηριστικά περιλαμβάνονται AI Super Wash για αυτόματη επιλογή κύκλου πλύσης, ζύγιση και ανίχνευση φορτίου, καθώς και Smart Dosing για αυτόματη αξιοποίηση του απορρυπαντικού. Προσφέρει 20 προγράμματα, όπως Βαμβακερά, Συνθετικά, Γρήγορο 15', Ατμός, Αντιαλλεργικό, Βρεφικά, Καθαρισμό κάδου και Μάλλινα, ενώ υποστηρίζει πρόπλυση, επιπλέον ξέβγαλμα, προγραμματισμό έναρξης και επιλογή θερμοκρασίας. Το πλυντήριο έχει μαύρο χρώμα, κλάση απόδοσης στυψίματος A, διαστάσεις 84,5 x 59,5 x 64 cm και διαθέτει κλείδωμα ασφαλείας για παιδιά, σύστημα προστασίας από διαρροές και αναγνώριση βάρους ρούχων.",
+    "sections": []
+  },
+  "csv_row": {
+    "model": "235340",
+    "mpn": "WF7S1247BB",
+    "name": "Hisense WF7S1247BB – Πλυντήριο ρούχων 12 kg A",
+    "description": "<div class=\"etr-desc\">\n<h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Hisense WF7S1247BB – Πλυντήριο ρούχων 12 kg A</strong></span></h2>\n\n<p style=\"margin-left:auto; margin-right:auto; text-align:left\"><span style=\"font-size:24px\">\nΤο <strong>Hisense WF7S1247BB</strong> είναι ένα ελεύθερο πλυντήριο ρούχων εμπρόσθιας φόρτωσης με χωρητικότητα πλύσης 12 κιλών, ενεργειακή κλάση <strong>A</strong> και μέγιστες στροφές στυψίματος 1400 rpm. Διαθέτει ψηφιακή οθόνη, inverter μοτέρ και συνδεσιμότητα WiFi μέσω ConnectLife για απομακρυσμένη πρόσβαση και έλεγχο της συσκευής. Στα βασικά του χαρακτηριστικά περιλαμβάνονται AI Super Wash για αυτόματη επιλογή κύκλου πλύσης, ζύγιση και ανίχνευση φορτίου, καθώς και Smart Dosing για αυτόματη αξιοποίηση του απορρυπαντικού. Προσφέρει 20 προγράμματα, όπως Βαμβακερά, Συνθετικά, Γρήγορο 15', Ατμός, Αντιαλλεργικό, Βρεφικά, Καθαρισμό κάδου και Μάλλινα, ενώ υποστηρίζει πρόπλυση, επιπλέον ξέβγαλμα, προγραμματισμό έναρξης και επιλογή θερμοκρασίας. Το πλυντήριο έχει μαύρο χρώμα, κλάση απόδοσης στυψίματος A, διαστάσεις 84,5 x 59,5 x 64 cm και διαθέτει κλείδωμα ασφαλείας για παιδιά, σύστημα προστασίας από διαρροές και αναγνώριση βάρους ρούχων.\n</span></p>\n\n<div style=\"margin-bottom:20px; margin-left:auto; margin-right:auto; margin-top:20px; text-align:center\">\n<a href=\"https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-rouxwn\" style=\"font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;\">Δείτε περισσότερα Πλυντήρια Ρούχων εδώ</a>\n</div>\n\n<hr />\n<div class=\"etr-desc\">\n\n</div>\n</div>",
+    "characteristics": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><tbody><tr><td>Τρόπος Φόρτωσης Πλυντηρίου</td><td style=\"text-align:right;\"><strong>Εμπρόσθιας φόρτωσης</strong></td></tr><tr><td>Τρόπος Τοποθέτησης</td><td style=\"text-align:right;\"><strong>Ελεύθερος</strong></td></tr><tr><td>Χωρητικότητα Πλύσης</td><td style=\"text-align:right;\"><strong>12 κιλά</strong></td></tr><tr><td>Μέγιστες Στροφές Στυψίματος</td><td style=\"text-align:right;\"><strong>1400 rpm</strong></td></tr><tr><td>Μετόπη με Κείμενο στα Ελληνικά</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Ενδείξεις Λειτουργίας</td><td style=\"text-align:right;\"><strong>Ψηφιακή οθόνη</strong></td></tr><tr><td>Αριθμός Προγραμμάτων</td><td style=\"text-align:right;\"><strong>20</strong></td></tr><tr><td>Προγράμματα</td><td style=\"text-align:right;\"><strong>Βαμβακερά,Συνθετικά,Ανάμεικτα,Ευαίσθητα,Βαμβακερά ECO,Γρήγορο 15&#x27;,Ξέβγαλμα+Στύψιμο,Στύψιμο,Σκουρόχρωμα/Jeans,Αθλητικά/Μικροίνες,Ματαξωτά,Βρεφικά,Κλινοσκεπάσματα,Πουκάμισα,Αντιαλλεργικό,Καθημερινό φορτίο,Ατμός,Καθαρισμός κάδου,Αυτόματο απαλό,Μάλλινα</strong></td></tr><tr><td>Αναγνώριση Βάρους Ρούχων</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Αναγνώριση Αφρού</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Μείωση Κραδασμών</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Διπλή Παροχή Νερού</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Τύπος Κινητήτηρα(μοτέρ</td><td style=\"text-align:right;\"><strong>Inverter</strong></td></tr><tr><td>Συνδεσιμότητα</td><td style=\"text-align:right;\"><strong>WiFi</strong></td></tr><tr><td>Άλλα Χαρακτηριστικά</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β</td><td style=\"text-align:right;\"><strong>84.50 × 59.50 × 64.00</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Επιλογές Πλύσης</strong></td></tr></thead><tbody><tr><td>Θερμοκρασιών</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Στροφών</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Πρόπλυσης</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Επιπλέον Ξεβγάλματος</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Εύκολου Σιδερώματος</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Προγραμματισμός Έναρξης</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Άλλες Επιλογές</td><td style=\"text-align:right;\"><strong>-</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Ασφάλεια</strong></td></tr></thead><tbody><tr><td>Κλείδωμα Ασφαλείας για Παιδιά</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Σύστημα Προστασίας από Διαρροές</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Σύστημα Αυτοδιάγνωσης Βλαβών</td><td style=\"text-align:right;\"><strong>-</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Ενεργειακά χαρακτηριστικά</strong></td></tr></thead><tbody><tr><td>Ενεργειακή Κλάση</td><td style=\"text-align:right;\"><strong>A</strong></td></tr><tr><td>Κλάση Απόδοσης Στυψίματος</td><td style=\"text-align:right;\"><strong>A</strong></td></tr><tr><td>Χωρητικότητα Πλύσης</td><td style=\"text-align:right;\"><strong>12 κιλά</strong></td></tr><tr><td>Επίπεδο Θορύβου Πλυσίματος σε dB</td><td style=\"text-align:right;\"><strong>-</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Γενικά χαρακτηριστικά</strong></td></tr></thead><tbody><tr><td>Χρώμα</td><td style=\"text-align:right;\"><strong>Μαύρο</strong></td></tr><tr><td>Εγγύηση Κατασκευαστή</td><td style=\"text-align:right;\"><strong>2 έτη</strong></td></tr><tr><td>Βάρος Συσκευής σε Κιλά</td><td style=\"text-align:right;\"><strong>77</strong></td></tr><tr><td>Πλάτος Συσκευής σε Εκατοστά</td><td style=\"text-align:right;\"><strong>59.50</strong></td></tr><tr><td>Βάθος Συσκευής σε Εκατοστά</td><td style=\"text-align:right;\"><strong>64.00</strong></td></tr></tbody></table>",
+    "category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια///Πλυντήρια Ρούχων",
+    "image": "catalog/01_main/235340/235340-1.jpg",
+    "additional_image": "catalog/01_main/235340/235340-2.jpg:::catalog/01_main/235340/235340-3.jpg",
+    "manufacturer": "Hisense",
+    "price": "699",
+    "quantity": "0",
+    "minimum": "1",
+    "subtract": "1",
+    "stock_status": "Έως 30 ημέρες",
+    "status": "0",
+    "meta_keyword": "Hisense WF7S1247BB, πλυντήριο ρούχων Hisense, πλυντήριο 12 κιλά, πλυντήριο 1400 rpm",
+    "meta_title": "Hisense WF7S1247BB Πλυντήριο ρούχων 12 kg A | eTranoulis",
+    "meta_description": "Το Hisense WF7S1247BB είναι πλυντήριο ρούχων 12 kg με ενεργειακή κλάση A και μέγιστες στροφές στυψίματος 1400 rpm.",
+    "seo_keyword": "hisense-wf7s1247bb-plyntirio-rouchon-12-kg-a",
+    "product_url": "https://www.etranoulis.gr/hisense-wf7s1247bb-plyntirio-rouchon-12-kg-a",
+    "related_product": "",
+    "bestprice_status": "1",
+    "skroutz_status": "1",
+    "boxnow": "0"
+  },
+  "csv_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "csv_ordered_row": {
+    "model": "235340",
+    "mpn": "WF7S1247BB",
+    "name": "Hisense WF7S1247BB – Πλυντήριο ρούχων 12 kg A",
+    "description": "<div class=\"etr-desc\">\n<h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Hisense WF7S1247BB – Πλυντήριο ρούχων 12 kg A</strong></span></h2>\n\n<p style=\"margin-left:auto; margin-right:auto; text-align:left\"><span style=\"font-size:24px\">\nΤο <strong>Hisense WF7S1247BB</strong> είναι ένα ελεύθερο πλυντήριο ρούχων εμπρόσθιας φόρτωσης με χωρητικότητα πλύσης 12 κιλών, ενεργειακή κλάση <strong>A</strong> και μέγιστες στροφές στυψίματος 1400 rpm. Διαθέτει ψηφιακή οθόνη, inverter μοτέρ και συνδεσιμότητα WiFi μέσω ConnectLife για απομακρυσμένη πρόσβαση και έλεγχο της συσκευής. Στα βασικά του χαρακτηριστικά περιλαμβάνονται AI Super Wash για αυτόματη επιλογή κύκλου πλύσης, ζύγιση και ανίχνευση φορτίου, καθώς και Smart Dosing για αυτόματη αξιοποίηση του απορρυπαντικού. Προσφέρει 20 προγράμματα, όπως Βαμβακερά, Συνθετικά, Γρήγορο 15', Ατμός, Αντιαλλεργικό, Βρεφικά, Καθαρισμό κάδου και Μάλλινα, ενώ υποστηρίζει πρόπλυση, επιπλέον ξέβγαλμα, προγραμματισμό έναρξης και επιλογή θερμοκρασίας. Το πλυντήριο έχει μαύρο χρώμα, κλάση απόδοσης στυψίματος A, διαστάσεις 84,5 x 59,5 x 64 cm και διαθέτει κλείδωμα ασφαλείας για παιδιά, σύστημα προστασίας από διαρροές και αναγνώριση βάρους ρούχων.\n</span></p>\n\n<div style=\"margin-bottom:20px; margin-left:auto; margin-right:auto; margin-top:20px; text-align:center\">\n<a href=\"https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-rouxwn\" style=\"font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;\">Δείτε περισσότερα Πλυντήρια Ρούχων εδώ</a>\n</div>\n\n<hr />\n<div class=\"etr-desc\">\n\n</div>\n</div>",
+    "characteristics": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><tbody><tr><td>Τρόπος Φόρτωσης Πλυντηρίου</td><td style=\"text-align:right;\"><strong>Εμπρόσθιας φόρτωσης</strong></td></tr><tr><td>Τρόπος Τοποθέτησης</td><td style=\"text-align:right;\"><strong>Ελεύθερος</strong></td></tr><tr><td>Χωρητικότητα Πλύσης</td><td style=\"text-align:right;\"><strong>12 κιλά</strong></td></tr><tr><td>Μέγιστες Στροφές Στυψίματος</td><td style=\"text-align:right;\"><strong>1400 rpm</strong></td></tr><tr><td>Μετόπη με Κείμενο στα Ελληνικά</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Ενδείξεις Λειτουργίας</td><td style=\"text-align:right;\"><strong>Ψηφιακή οθόνη</strong></td></tr><tr><td>Αριθμός Προγραμμάτων</td><td style=\"text-align:right;\"><strong>20</strong></td></tr><tr><td>Προγράμματα</td><td style=\"text-align:right;\"><strong>Βαμβακερά,Συνθετικά,Ανάμεικτα,Ευαίσθητα,Βαμβακερά ECO,Γρήγορο 15&#x27;,Ξέβγαλμα+Στύψιμο,Στύψιμο,Σκουρόχρωμα/Jeans,Αθλητικά/Μικροίνες,Ματαξωτά,Βρεφικά,Κλινοσκεπάσματα,Πουκάμισα,Αντιαλλεργικό,Καθημερινό φορτίο,Ατμός,Καθαρισμός κάδου,Αυτόματο απαλό,Μάλλινα</strong></td></tr><tr><td>Αναγνώριση Βάρους Ρούχων</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Αναγνώριση Αφρού</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Μείωση Κραδασμών</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Διπλή Παροχή Νερού</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Τύπος Κινητήτηρα(μοτέρ</td><td style=\"text-align:right;\"><strong>Inverter</strong></td></tr><tr><td>Συνδεσιμότητα</td><td style=\"text-align:right;\"><strong>WiFi</strong></td></tr><tr><td>Άλλα Χαρακτηριστικά</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β</td><td style=\"text-align:right;\"><strong>84.50 × 59.50 × 64.00</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Επιλογές Πλύσης</strong></td></tr></thead><tbody><tr><td>Θερμοκρασιών</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Στροφών</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Πρόπλυσης</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Επιπλέον Ξεβγάλματος</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Εύκολου Σιδερώματος</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Προγραμματισμός Έναρξης</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Άλλες Επιλογές</td><td style=\"text-align:right;\"><strong>-</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Ασφάλεια</strong></td></tr></thead><tbody><tr><td>Κλείδωμα Ασφαλείας για Παιδιά</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Σύστημα Προστασίας από Διαρροές</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Σύστημα Αυτοδιάγνωσης Βλαβών</td><td style=\"text-align:right;\"><strong>-</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Ενεργειακά χαρακτηριστικά</strong></td></tr></thead><tbody><tr><td>Ενεργειακή Κλάση</td><td style=\"text-align:right;\"><strong>A</strong></td></tr><tr><td>Κλάση Απόδοσης Στυψίματος</td><td style=\"text-align:right;\"><strong>A</strong></td></tr><tr><td>Χωρητικότητα Πλύσης</td><td style=\"text-align:right;\"><strong>12 κιλά</strong></td></tr><tr><td>Επίπεδο Θορύβου Πλυσίματος σε dB</td><td style=\"text-align:right;\"><strong>-</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Γενικά χαρακτηριστικά</strong></td></tr></thead><tbody><tr><td>Χρώμα</td><td style=\"text-align:right;\"><strong>Μαύρο</strong></td></tr><tr><td>Εγγύηση Κατασκευαστή</td><td style=\"text-align:right;\"><strong>2 έτη</strong></td></tr><tr><td>Βάρος Συσκευής σε Κιλά</td><td style=\"text-align:right;\"><strong>77</strong></td></tr><tr><td>Πλάτος Συσκευής σε Εκατοστά</td><td style=\"text-align:right;\"><strong>59.50</strong></td></tr><tr><td>Βάθος Συσκευής σε Εκατοστά</td><td style=\"text-align:right;\"><strong>64.00</strong></td></tr></tbody></table>",
+    "category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια///Πλυντήρια Ρούχων",
+    "image": "catalog/01_main/235340/235340-1.jpg",
+    "additional_image": "catalog/01_main/235340/235340-2.jpg:::catalog/01_main/235340/235340-3.jpg",
+    "manufacturer": "Hisense",
+    "price": "699",
+    "quantity": "0",
+    "minimum": "1",
+    "subtract": "1",
+    "stock_status": "Έως 30 ημέρες",
+    "status": "0",
+    "meta_keyword": "Hisense WF7S1247BB, πλυντήριο ρούχων Hisense, πλυντήριο 12 κιλά, πλυντήριο 1400 rpm",
+    "meta_title": "Hisense WF7S1247BB Πλυντήριο ρούχων 12 kg A | eTranoulis",
+    "meta_description": "Το Hisense WF7S1247BB είναι πλυντήριο ρούχων 12 kg με ενεργειακή κλάση A και μέγιστες στροφές στυψίματος 1400 rpm.",
+    "seo_keyword": "hisense-wf7s1247bb-plyntirio-rouchon-12-kg-a",
+    "product_url": "https://www.etranoulis.gr/hisense-wf7s1247bb-plyntirio-rouchon-12-kg-a",
+    "related_product": "",
+    "bestprice_status": "1",
+    "skroutz_status": "1",
+    "boxnow": "0"
+  },
+  "mapping_warnings": [
+    "characteristics_template_used:schema:sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "characteristics_template_unresolved_fields:10"
+  ]
+}
