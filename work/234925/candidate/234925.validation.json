@@ -1,0 +1,291 @@
+{
+  "ok": true,
+  "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234925\\candidate\\234925.csv",
+  "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
+  "baseline_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\products\\234925.csv",
+  "errors": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "characteristics_template_unresolved_fields:10"
+  ],
+  "field_health": {
+    "model": {
+      "status": "match",
+      "candidate_length": 6,
+      "baseline_length": 6,
+      "encoding_issues": [],
+      "candidate_preview": "234925",
+      "baseline_preview": "234925"
+    },
+    "mpn": {
+      "status": "match",
+      "candidate_length": 10,
+      "baseline_length": 10,
+      "encoding_issues": [],
+      "candidate_preview": "WF7S1247BW",
+      "baseline_preview": "WF7S1247BW"
+    },
+    "name": {
+      "status": "match",
+      "candidate_length": 45,
+      "baseline_length": 45,
+      "encoding_issues": [],
+      "candidate_preview": "Hisense WF7S1247BW – Πλυντήριο ρούχων 12 kg A",
+      "baseline_preview": "Hisense WF7S1247BW – Πλυντήριο ρούχων 12 kg A"
+    },
+    "description": {
+      "status": "different_but_valid",
+      "candidate_length": 1646,
+      "baseline_length": 1614,
+      "encoding_issues": [],
+      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Hisense WF7S1247BW – Πλυντήριο",
+      "baseline_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Hisense WF7S1247BW – Πλυντήριο"
+    },
+    "characteristics": {
+      "status": "match",
+      "candidate_length": 4027,
+      "baseline_length": 4027,
+      "encoding_issues": [],
+      "candidate_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><t",
+      "baseline_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><t"
+    },
+    "category": {
+      "status": "match",
+      "candidate_length": 124,
+      "baseline_length": 124,
+      "encoding_issues": [],
+      "candidate_preview": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια///Πλυντήρια Ρο",
+      "baseline_preview": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια///Πλυντήρια Ρο"
+    },
+    "image": {
+      "status": "match",
+      "candidate_length": 35,
+      "baseline_length": 35,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/234925/234925-1.jpg",
+      "baseline_preview": "catalog/01_main/234925/234925-1.jpg"
+    },
+    "additional_image": {
+      "status": "match",
+      "candidate_length": 187,
+      "baseline_length": 187,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/234925/234925-2.jpg:::catalog/01_main/234925/234925-3.jpg:::catalog/01_main/234925/234925-4.jpg:::catalo",
+      "baseline_preview": "catalog/01_main/234925/234925-2.jpg:::catalog/01_main/234925/234925-3.jpg:::catalog/01_main/234925/234925-4.jpg:::catalo"
+    },
+    "manufacturer": {
+      "status": "match",
+      "candidate_length": 7,
+      "baseline_length": 7,
+      "encoding_issues": [],
+      "candidate_preview": "Hisense",
+      "baseline_preview": "Hisense"
+    },
+    "price": {
+      "status": "match",
+      "candidate_length": 3,
+      "baseline_length": 3,
+      "encoding_issues": [],
+      "candidate_preview": "669",
+      "baseline_preview": "669"
+    },
+    "quantity": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "minimum": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "subtract": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "stock_status": {
+      "status": "match",
+      "candidate_length": 13,
+      "baseline_length": 13,
+      "encoding_issues": [],
+      "candidate_preview": "Έως 30 ημέρες",
+      "baseline_preview": "Έως 30 ημέρες"
+    },
+    "status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "meta_keyword": {
+      "status": "match",
+      "candidate_length": 83,
+      "baseline_length": 83,
+      "encoding_issues": [],
+      "candidate_preview": "Hisense WF7S1247BW, πλυντήριο ρούχων Hisense, πλυντήριο 12 κιλά, πλυντήριο 1400 rpm",
+      "baseline_preview": "Hisense WF7S1247BW, πλυντήριο ρούχων Hisense, πλυντήριο 12 κιλά, πλυντήριο 1400 rpm"
+    },
+    "meta_title": {
+      "status": "match",
+      "candidate_length": 56,
+      "baseline_length": 56,
+      "encoding_issues": [],
+      "candidate_preview": "Hisense WF7S1247BW Πλυντήριο ρούχων 12 kg A | eTranoulis",
+      "baseline_preview": "Hisense WF7S1247BW Πλυντήριο ρούχων 12 kg A | eTranoulis"
+    },
+    "meta_description": {
+      "status": "match",
+      "candidate_length": 114,
+      "baseline_length": 114,
+      "encoding_issues": [],
+      "candidate_preview": "Το Hisense WF7S1247BW είναι πλυντήριο ρούχων 12 kg με ενεργειακή κλάση A και μέγιστες στροφές στυψίματος 1400 rpm.",
+      "baseline_preview": "Το Hisense WF7S1247BW είναι πλυντήριο ρούχων 12 kg με ενεργειακή κλάση A και μέγιστες στροφές στυψίματος 1400 rpm."
+    },
+    "seo_keyword": {
+      "status": "match",
+      "candidate_length": 44,
+      "baseline_length": 44,
+      "encoding_issues": [],
+      "candidate_preview": "hisense-wf7s1247bw-plyntirio-rouchon-12-kg-a",
+      "baseline_preview": "hisense-wf7s1247bw-plyntirio-rouchon-12-kg-a"
+    },
+    "product_url": {
+      "status": "match",
+      "candidate_length": 70,
+      "baseline_length": 70,
+      "encoding_issues": [],
+      "candidate_preview": "https://www.etranoulis.gr/hisense-wf7s1247bw-plyntirio-rouchon-12-kg-a",
+      "baseline_preview": "https://www.etranoulis.gr/hisense-wf7s1247bw-plyntirio-rouchon-12-kg-a"
+    },
+    "related_product": {
+      "status": "match",
+      "candidate_length": 0,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "",
+      "baseline_preview": ""
+    },
+    "bestprice_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "skroutz_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "boxnow": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    }
+  },
+  "expected_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "actual_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "baseline_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "summary": {
+    "match": 23,
+    "different_but_valid": 1,
+    "filled": 0,
+    "missing": 0,
+    "encoding_issue": 0,
+    "empty": 0
+  }
+}

@@ -1,0 +1,701 @@
+{
+  "input": {
+    "model": "235340",
+    "url": "https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/plyntiria-royhon-emprosthias-fortosis/plyntirio-royhon-hisense-wf7s1247bb-12-kg?v=39658",
+    "photos": 3,
+    "sections": 0,
+    "skroutz_status": 1,
+    "boxnow": 0,
+    "price": "699",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape"
+  },
+  "source": "electronet",
+  "fetch_mode": "httpx",
+  "source_resolution": {
+    "requested_url": "https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/plyntiria-royhon-emprosthias-fortosis/plyntirio-royhon-hisense-wf7s1247bb-12-kg?v=39658",
+    "detected_source": "electronet",
+    "resolved_url": "https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/plyntiria-royhon-emprosthias-fortosis/plyntirio-royhon-hisense-wf7s1247bb-12-kg?v=39658"
+  },
+  "identity_checks": {
+    "source": "electronet",
+    "input_model": "235340",
+    "page_type": "product",
+    "page_product_code": "235340",
+    "name_present": true,
+    "brand_present": true,
+    "mpn_present": true
+  },
+  "url_scope_validation": {
+    "ok": true,
+    "reason": "electronet_domain",
+    "final_url_source": "electronet"
+  },
+  "skroutz_blocks_found": {
+    "hero_summary_present": true,
+    "gallery_images_count": 3,
+    "spec_sections_count": 5,
+    "manufacturer_spec_sections_count": 0
+  },
+  "characteristics_pairs": {
+    "count": 35,
+    "source_count": 35,
+    "manufacturer_count": 0
+  },
+  "taxonomy_resolution": {
+    "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+    "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+    "sub_category": "Πλυντήρια Ρούχων",
+    "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Ρούχων",
+    "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-rouxwn",
+    "confidence": 20.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,leaf_name_overlap,sub_name_overlap,filter_map_tiebreak",
+    "gender": "neut",
+    "plural_label": "Πλυντήρια Ρούχων"
+  },
+  "manufacturer_enrichment": {
+    "applied": false,
+    "provider": "",
+    "providers_considered": [],
+    "matched_providers": [],
+    "documents": [],
+    "documents_discovered": 0,
+    "documents_parsed": 0,
+    "warnings": [],
+    "section_count": 0,
+    "field_count": 0,
+    "fallback_reason": "not_applicable_non_skroutz"
+  },
+  "schema_resolution": {
+    "matched_schema_id": "sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "matched_sub_category": "Πλυντήρια Ρούχων",
+    "score": 1.01,
+    "warnings": []
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "selection_reason": "matched_schema_template",
+    "template_source": "schema_library",
+    "matched_schema_id": "sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "custom_template_id": "",
+    "preferred_schema_source_files": [
+      "entoixizomena_plyntiria_royxon.json"
+    ],
+    "field_count": 35,
+    "unresolved_count": 10,
+    "fields": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τροπος φορτωσης πλυντηριου",
+        "label": "Τρόπος Φόρτωσης Πλυντηρίου",
+        "value": "Εμπρόσθιας φόρτωσης",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τρόπος Φόρτωσης Πλυντηρίου"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τροπος τοποθετησης",
+        "label": "Τρόπος Τοποθέτησης",
+        "value": "Ελεύθερος",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τρόπος Τοποθέτησης"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χωρητικοτητα πλυσης",
+        "label": "Χωρητικότητα Πλύσης",
+        "value": "12 κιλά",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Χωρητικότητα Πλύσης"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος μεγιστες στροφες στυψιματος",
+        "label": "Μέγιστες Στροφές Στυψίματος",
+        "value": "1400 rpm",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Μέγιστες Στροφές Στυψίματος"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος μετοπη με κειμενο στα ελληνικα",
+        "label": "Μετόπη με Κείμενο στα Ελληνικά",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος ενδειξεις λειτουργιας",
+        "label": "Ενδείξεις Λειτουργίας",
+        "value": "Ψηφιακή οθόνη",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Ενδείξεις Λειτουργίας"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αριθμος προγραμματων",
+        "label": "Αριθμός Προγραμμάτων",
+        "value": "20",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Αριθμός Προγραμμάτων"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος προγραμματα",
+        "label": "Προγράμματα",
+        "value": "Βαμβακερά,Συνθετικά,Ανάμεικτα,Ευαίσθητα,Βαμβακερά ECO,Γρήγορο 15',Ξέβγαλμα+Στύψιμο,Στύψιμο,Σκουρόχρωμα/Jeans,Αθλητικά/Μικροίνες,Ματαξωτά,Βρεφικά,Κλινοσκεπάσματα,Πουκάμισα,Αντιαλλεργικό,Καθημερινό φορτίο,Ατμός,Καθαρισμός κάδου,Αυτόματο απαλό,Μάλλινα",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Προγράμματα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αναγνωριση βαρους ρουχων",
+        "label": "Αναγνώριση Βάρους Ρούχων",
+        "value": "Ναι",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Αναγνώριση Βάρους Ρούχων"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αναγνωριση αφρου",
+        "label": "Αναγνώριση Αφρού",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος μειωση κραδασμων",
+        "label": "Μείωση Κραδασμών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος διπλη παροχη νερου",
+        "label": "Διπλή Παροχή Νερού",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος κινητητηρα μοτερ",
+        "label": "Τύπος Κινητήτηρα(μοτέρ",
+        "value": "Inverter",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τύπος Κινητήτηρα(μοτέρ"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος συνδεσιμοτητα",
+        "label": "Συνδεσιμότητα",
+        "value": "WiFi",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Συνδεσιμότητα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αλλα χαρακτηριστικα",
+        "label": "Άλλα Χαρακτηριστικά",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος διαστασεις συσκευης σε εκατοστα υ χ π χ β",
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+        "value": "84.50 x 59.50 x 64.00",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης θερμοκρασιων",
+        "label": "Θερμοκρασιών",
+        "value": "Ναι",
+        "resolved_from": "section:Επιλογές Πλύσης/Θερμοκρασιών"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης στροφων",
+        "label": "Στροφών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης προπλυσης",
+        "label": "Πρόπλυσης",
+        "value": "Ναι",
+        "resolved_from": "section:Επιλογές Πλύσης/Πρόπλυσης"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης επιπλεον ξεβγαλματος",
+        "label": "Επιπλέον Ξεβγάλματος",
+        "value": "Ναι",
+        "resolved_from": "section:Επιλογές Πλύσης/Επιπλέον Ξεβγάλματος"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης ευκολου σιδερωματος",
+        "label": "Εύκολου Σιδερώματος",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης προγραμματισμος εναρξης",
+        "label": "Προγραμματισμός Έναρξης",
+        "value": "Ναι",
+        "resolved_from": "section:Επιλογές Πλύσης/Προγραμματισμός Έναρξης"
+      },
+      {
+        "section": "Επιλογές Πλύσης",
+        "key": "επιλογες πλυσης αλλες επιλογες",
+        "label": "Άλλες Επιλογές",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Ασφάλεια",
+        "key": "ασφαλεια κλειδωμα ασφαλειας για παιδια",
+        "label": "Κλείδωμα Ασφαλείας για Παιδιά",
+        "value": "Ναι",
+        "resolved_from": "section:Ασφάλεια/Κλείδωμα Ασφαλείας για Παιδιά"
+      },
+      {
+        "section": "Ασφάλεια",
+        "key": "ασφαλεια συστημα προστασιας απο διαρροες",
+        "label": "Σύστημα Προστασίας από Διαρροές",
+        "value": "Ναι",
+        "resolved_from": "section:Ασφάλεια/Σύστημα Προστασίας από Διαρροές"
+      },
+      {
+        "section": "Ασφάλεια",
+        "key": "ασφαλεια συστημα αυτοδιαγνωσης βλαβων",
+        "label": "Σύστημα Αυτοδιάγνωσης Βλαβών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα ενεργειακη κλαση",
+        "label": "Ενεργειακή Κλάση",
+        "value": "A",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Ενεργειακή Κλάση"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα κλαση αποδοσης στυψιματος",
+        "label": "Κλάση Απόδοσης Στυψίματος",
+        "value": "A",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Κλάση Απόδοσης Στυψίματος"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα χωρητικοτητα πλυσης",
+        "label": "Χωρητικότητα Πλύσης",
+        "value": "12 κιλά",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Χωρητικότητα Πλύσης"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα επιπεδο θορυβου πλυσιματος σε db",
+        "label": "Επίπεδο Θορύβου Πλυσίματος σε dB",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα χρωμα",
+        "label": "Χρώμα",
+        "value": "Μαύρο",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Χρώμα"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα εγγυηση κατασκευαστη",
+        "label": "Εγγύηση Κατασκευαστή",
+        "value": "2 έτη",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Εγγύηση Κατασκευαστή"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαρος συσκευης σε κιλα",
+        "label": "Βάρος Συσκευής σε Κιλά",
+        "value": "77",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Βάρος Συσκευής σε Κιλά"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα πλατος συσκευης σε εκατοστα",
+        "label": "Πλάτος Συσκευής σε Εκατοστά",
+        "value": "59,5",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Πλάτος Συσκευής σε Εκατοστά"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαθος συσκευης σε εκατοστα",
+        "label": "Βάθος Συσκευής σε Εκατοστά",
+        "value": "64",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Βάθος Συσκευής σε Εκατοστά"
+      }
+    ]
+  },
+  "skroutz_taxonomy_diagnostics": {
+    "family_key": "",
+    "raw_category_tag": "",
+    "raw_category_href": "",
+    "normalized_href_slug": "",
+    "matched_rule": "",
+    "source_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Πλυντήρια-Στεγνωτήρια///Πλυντήρια Ρούχων",
+    "match_type": "exact_category",
+    "tv_inches": null,
+    "ambiguity": false,
+    "escalation_reason": ""
+  },
+  "schema_preference": {
+    "preferred_source_files": []
+  },
+  "unsupported_features": [],
+  "critical_extractors": {
+    "product_code": "dom:#cscp-sku",
+    "brand": "dom:#product-brand-logo a",
+    "mpn": "title_after_brand",
+    "name": "dom:h1.product-title",
+    "price": "dom:#product-price .price",
+    "taxonomy": "resolved",
+    "schema_match": "matched"
+  },
+  "field_diagnostics": {
+    "breadcrumbs": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#block-mytheme-breadcrumbs .breadcrumb__link",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#block-mytheme-breadcrumbs .breadcrumb__link",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Αρχική",
+          "note": "4 breadcrumbs"
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#cscp-sku",
+      "value_present": true,
+      "value_preview": "235340",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#cscp-sku",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "235340",
+          "note": ""
+        }
+      ]
+    },
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:h1.product-title",
+      "value_present": true,
+      "value_preview": "Πλυντήριο Ρούχων Hisense WF7S1247BB 12 kg A",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1.product-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Πλυντήριο Ρούχων Hisense WF7S1247BB 12 kg A",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-brand-logo a",
+      "value_present": true,
+      "value_preview": "Hisense",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-brand-logo a",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Hisense",
+          "note": ""
+        }
+      ]
+    },
+    "price": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-price .price",
+      "value_present": true,
+      "value_preview": "699,00 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-price .price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "699,00 €",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.product-desc p",
+      "value_present": true,
+      "value_preview": "Πλυντήριο ρούχων με ΑΙ Super Wash για αυτόματη επιλογή του τέλειου κύκλου πλύσης για τα ρούχα σας, με ζύγιση και ανίχνευση φορτίου, λειτουργία Smart Dosing που ",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".product-desc p",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Πλυντήριο ρούχων με ΑΙ Super Wash για αυτόματη επιλογή του τέλειου κύκλου πλύσης για τα ρούχα σας, με ζύγιση και ανίχνευση φορτίου, λειτουργία Smart Dosing που ",
+          "note": ""
+        }
+      ]
+    },
+    "presentation_blocks": {
+      "confidence": 0.0,
+      "selected_strategy": "missing",
+      "value_present": true,
+      "value_preview": "0",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-presentation .ck-text.inline",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": "0 blocks"
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.94,
+      "selected_strategy": "dom:#product-main-attributes .product-main-attribute",
+      "value_present": true,
+      "value_preview": "4 items; first=Χωρητικότητα Πλύσης:12 κιλά",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-main-attributes .product-main-attribute",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Χωρητικότητα Πλύσης 12 κιλά",
+          "note": "4 rows"
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.98,
+      "selected_strategy": "dom:#product-details .prop-group-wrapper",
+      "value_present": true,
+      "value_preview": "5 sections; first=Επισκόπηση Προϊόντος",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-details .prop-group-wrapper",
+          "match_count": 5,
+          "success": true,
+          "chosen_preview": "Επισκόπηση Προϊόντος Τρόπος Φόρτωσης Πλυντηρίου Εμπρόσθιας φόρτωσης Τρόπος Τοποθέτησης Ελεύθερος Χωρητικότητα Πλύσης 12 κιλά Μέγιστες Στροφές Στυψίματος 1400 rp",
+          "note": "5 sections"
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.8,
+      "selected_strategy": "title_after_brand",
+      "value_present": true,
+      "value_preview": "WF7S1247BB",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.96,
+      "selected_strategy": "dom:img.lightbox",
+      "value_present": true,
+      "value_preview": "3 images; first=https://www.electronet.gr/sites/default/files/styles/product_large/public/235340.jpg.webp?itok=PTU3nQf0",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "img.lightbox",
+          "match_count": 3,
+          "success": true,
+          "chosen_preview": "Πλυντήριο Ρούχων Hisense WF7S1247BB 12 kg A /sites/default/files/styles/product_large/public/235340.jpg.webp?itok=PTU3nQf0",
+          "note": "3 gallery candidates"
+        }
+      ]
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+    "characteristics_template_unresolved_fields:10",
+    "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,leaf_name_overlap,sub_name_overlap,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Πλυντήρια Ρούχων",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Ρούχων",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-rouxwn",
+      "confidence": 20.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_breadcrumb",
+        "full_breadcrumb_path",
+        "url_overlap",
+        "leaf_name_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Πλυντήρια Ρούχων",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Πλυντήρια Ρούχων",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-plynthria-rouxwn",
+      "confidence": 10.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "sub_breadcrumb",
+        "url_overlap",
+        "sub_name_overlap"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Στεγνωτήρια Ρούχων",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Στεγνωτήρια Ρούχων",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/stegnwthria-rouxwn",
+      "confidence": 9.75,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap",
+        "leaf_name_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Πλυντήρια-Στεγνωτήρια",
+      "sub_category": "Πλυντήρια Στεγνωτήρια 2 in1",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Στεγνωτήρια 2 in1",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-stegnwthria-2-1",
+      "confidence": 9.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap",
+        "leaf_name_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Εντοιχιζόμενες Συσκευές",
+      "sub_category": "Πλυντήρια Πιάτων",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Πλυντήρια Πιάτων",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-plynthria-piatwn",
+      "confidence": 5.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 5,
+      "n_rows_total": 35,
+      "source_files": [
+        "entoixizomena_plyntiria_royxon.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:5dd5b1d1398630b950232cbf39069774fbf003cc",
+      "matched_sub_category": null,
+      "score": 0.9968,
+      "n_sections": 5,
+      "n_rows_total": 35,
+      "source_files": [
+        "plyntiria_rouxwn.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:2c20efe5796bd53a1ff1c5a70225c16439398ee4",
+      "matched_sub_category": null,
+      "score": 0.835,
+      "n_sections": 4,
+      "n_rows_total": 28,
+      "source_files": [
+        "plyntiria_stegnwthria_2in1.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:b6561906abf4eea130e08e0de5f6f76ef398d80b",
+      "matched_sub_category": null,
+      "score": 0.76,
+      "n_sections": 1,
+      "n_rows_total": 9,
+      "source_files": [
+        "karvoynoy.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:fd4436f62fc83f6056f2fc641a982e41e383b00b",
+      "matched_sub_category": null,
+      "score": 0.7529,
+      "n_sections": 1,
+      "n_rows_total": 7,
+      "source_files": [
+        "electric_scooter.json"
+      ]
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 3,
+    "downloaded_count": 3,
+    "requested_photos": 3
+  },
+  "sections_requested": 0,
+  "sections_extracted": 0,
+  "section_titles": [],
+  "section_image_candidates": [],
+  "section_image_urls_resolved": [],
+  "section_downloads": [],
+  "section_extraction_window": {
+    "candidate_count": 0,
+    "duplicate_signatures_skipped": 0,
+    "selected_container_index": null,
+    "start_anchor": "",
+    "stop_anchor": "",
+    "title_signature": []
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 0,
+    "extracted_count": 0,
+    "downloaded_count": 0,
+    "requested_sections": 0
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\235340.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\235340.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\235340.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\235340.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\235340.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\gallery\\235340-1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\gallery\\235340-2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\235340\\scrape\\gallery\\235340-3.jpg"
+  ]
+}

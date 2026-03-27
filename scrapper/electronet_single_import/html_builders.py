@@ -9,6 +9,17 @@ from .models import SpecSection
 from .normalize import make_absolute_url, normalize_for_match, normalize_whitespace, split_visible_lines
 
 
+GENDER_SUFFIX = {"fem": "ες", "neut": "α", "masc": "ους"}
+
+
+def build_deterministic_cta(gender: str, plural_label: str) -> str:
+    suffix = GENDER_SUFFIX.get(gender, "α")
+    label = normalize_whitespace(plural_label)
+    if not label:
+        return "Δείτε περισσότερα εδώ"
+    return f"Δείτε περισσότερ{suffix} {label} εδώ"
+
+
 def default_cta_text(cta_label: str) -> str:
     label = normalize_whitespace(cta_label)
     return f"Δείτε περισσότερα {label} εδώ" if label else "Δείτε περισσότερα εδώ"

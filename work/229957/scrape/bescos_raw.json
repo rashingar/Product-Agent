@@ -1,0 +1,88 @@
+{
+  "source": "skroutz",
+  "requested_sections": 6,
+  "window": {
+    "candidate_count": 2,
+    "duplicate_signatures_skipped": 1,
+    "selected_container_index": 0,
+    "start_anchor": "Περιγραφή",
+    "stop_anchor": "Κατασκευαστής",
+    "title_signature": [
+      "Ξέχνα την Απόψυξη και την Υγρασία!",
+      "Ελευθερία Τοποθέτησης με Perfect Fit",
+      "Φωτίζεται και Αναδεικνύει τα Τρόφιμά Σου",
+      "Η Τέλεια Ψύξη, Χωρίς Άγχη",
+      "Απόλυτη Προστασία για τα Κατεψυγμένα",
+      "Σήμα Ειδοποίησης για Ανοιχτή Πόρτα",
+      "Γιατί να το επιλέξεις;"
+    ]
+  },
+  "sections": [
+    {
+      "position": 1,
+      "title": "Ξέχνα την Απόψυξη και την Υγρασία!",
+      "body": "Με την τεχνολογία Total No Frost , δε θα χρειαστεί ποτέ ξανά να ασχοληθείς με την απόψυξη του καταψύκτη σου. Η υγρασία αφαιρείται από τον αέρα, αποτρέποντας τον σχηματισμό πάγου και διατηρώντας τα τρόφιμα σου φρέσκα και χωρίς ίχνη υγρασίας. Η τεχνολογία αυτή δεν είναι μόνο βολική, αλλά κάνει και το ψυγείο σου πιο ενεργειακά αποδοτικό !",
+      "image_candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://d.scdn.gr/ds/rich_description_components_images/3151209/20250430115951_screenshot_from_2025_04_28_10_14_41.png"
+      ],
+      "resolved_image_url": "https://d.scdn.gr/ds/rich_description_components_images/3151209/20250430115951_screenshot_from_2025_04_28_10_14_41.png",
+      "target_filename": "besco1.jpg"
+    },
+    {
+      "position": 2,
+      "title": "Ελευθερία Τοποθέτησης με Perfect Fit",
+      "body": "Βάλε το ψυγείο σου ακριβώς εκεί που το θέλεις, χωρίς να χρειαστεί να αφήσεις άδειο χώρο για να ανοίγουν οι πόρτες και τα συρτάρια. Με την τεχνολογία Perfect Fit , μπορείς να τοποθετήσεις το ψυγείο σου δίπλα σε τοίχους και έπιπλα χωρίς να χάνεις ούτε χιλιοστό από τον διαθέσιμο χώρο!",
+      "image_candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://c.scdn.gr/ds/rich_description_components_images/3151213/20250430115952_screenshot_from_2025_04_28_10_14_56.png"
+      ],
+      "resolved_image_url": "https://c.scdn.gr/ds/rich_description_components_images/3151213/20250430115952_screenshot_from_2025_04_28_10_14_56.png",
+      "target_filename": "besco2.jpg"
+    },
+    {
+      "position": 3,
+      "title": "Φωτίζεται και Αναδεικνύει τα Τρόφιμά Σου",
+      "body": "Μην ψάχνεις ποτέ ξανά στο σκοτάδι για το αγαπημένο σου φαγητό! Ο φωτισμός LED του ψυγείου σου παρέχει φωτεινότητα και εξοικονόμηση ενέργειας. Βλέπεις τα πάντα με ευκρίνεια και χωρίς να κουράζεσαι από έναν αχνό φωτισμό.",
+      "image_candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://c.scdn.gr/ds/rich_description_components_images/3151217/20250430115952_screenshot_from_2025_04_28_10_15_12.png"
+      ],
+      "resolved_image_url": "https://c.scdn.gr/ds/rich_description_components_images/3151217/20250430115952_screenshot_from_2025_04_28_10_15_12.png",
+      "target_filename": "besco3.jpg"
+    },
+    {
+      "position": 4,
+      "title": "Η Τέλεια Ψύξη, Χωρίς Άγχη",
+      "body": "Το σύστημα MultiAirflow εξασφαλίζει ότι ο κρύος αέρας κατανέμεται ομοιόμορφα σε όλο το ψυγείο και την κατάψυξη. Χάρη σε αυτό, οι θερμοκρασίες παραμένουν σταθερές και τα τρόφιμα διατηρούν τη φρεσκάδα τους για περισσότερο καιρό. Άφησε τις διακυμάνσεις θερμοκρασίας πίσω σου!",
+      "image_candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://d.scdn.gr/ds/rich_description_components_images/3151222/20250430115953_screenshot_from_2025_04_28_10_15_46.png"
+      ],
+      "resolved_image_url": "https://d.scdn.gr/ds/rich_description_components_images/3151222/20250430115953_screenshot_from_2025_04_28_10_15_46.png",
+      "target_filename": "besco4.jpg"
+    },
+    {
+      "position": 5,
+      "title": "Απόλυτη Προστασία για τα Κατεψυγμένα",
+      "body": "Όταν προσθέτεις νέα τρόφιμα στον καταψύκτη, η λειτουργία SuperFreezing εξασφαλίζει ότι τα τρόφιμα παγώνουν αμέσως, χωρίς να επηρεάζουν τα υπόλοιπα. Έτσι τα κατεψυγμένα σου διατηρούν τη γεύση τους, χωρίς να υπάρχει φόβος για ξεπάγωμα. Όταν φτάσει η σωστή θερμοκρασία, το ψυγείο επανέρχεται στη φυσιολογική λειτουργία του, εξοικονομώντας ενέργεια.",
+      "image_candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://b.scdn.gr/ds/rich_description_components_images/3151227/20250430115953_screenshot_from_2025_04_28_10_16_04.png"
+      ],
+      "resolved_image_url": "https://b.scdn.gr/ds/rich_description_components_images/3151227/20250430115953_screenshot_from_2025_04_28_10_16_04.png",
+      "target_filename": "besco5.jpg"
+    },
+    {
+      "position": 6,
+      "title": "Σήμα Ειδοποίησης για Ανοιχτή Πόρτα",
+      "body": "Ξέχασες την πόρτα ανοιχτή; Μην ανησυχείς! Το ψυγείο σου θα σε ειδοποιήσει αμέσως με ηχητική ή φωτεινή ένδειξη , για να αποφύγεις απώλειες ενέργειας και να διατηρήσεις την ιδανική θερμοκρασία.",
+      "image_candidates": [
+        "https://www.skroutz.gr/assets/transparent.gif",
+        "https://c.scdn.gr/ds/rich_description_components_images/3151231/20250430115954_screenshot_from_2025_04_28_10_16_17.png"
+      ],
+      "resolved_image_url": "https://c.scdn.gr/ds/rich_description_components_images/3151231/20250430115954_screenshot_from_2025_04_28_10_16_17.png",
+      "target_filename": "besco6.jpg"
+    }
+  ]
+}

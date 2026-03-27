@@ -21,11 +21,36 @@ ALIASES = {
 }
 
 
+def _common_prefix_length(left: str, right: str) -> int:
+    limit = min(len(left), len(right))
+    idx = 0
+    while idx < limit and left[idx] == right[idx]:
+        idx += 1
+    return idx
+
+
+def _tokens_soft_overlap(left_tokens: set[str], right_tokens: set[str], min_prefix: int = 6) -> int:
+    if not left_tokens or not right_tokens:
+        return 0
+    matches = 0
+    for left in left_tokens:
+        if any(
+            left == right
+            or left.startswith(right)
+            or right.startswith(left)
+            or _common_prefix_length(left, right) >= min_prefix
+            for right in right_tokens
+        ):
+            matches += 1
+    return matches
+
+
 class TaxonomyResolver:
     def __init__(self, taxonomy_path: str = str(CATALOG_TAXONOMY_PATH), filter_map_path: str = str(FILTER_MAP_PATH)) -> None:
         self.taxonomy = read_json(taxonomy_path)
         self.filter_map = read_json(filter_map_path)
         self.paths: list[dict[str, Any]] = self.taxonomy.get("paths", [])
+        self.gender_map: dict[str, dict[str, str]] = self.taxonomy.get("gender_map", {})
         self.filter_rows: list[dict[str, Any]] = self.filter_map.get("subcategories", [])
         self.filter_by_path = {
             normalize_for_match(item.get("path", "")): item
@@ -88,11 +113,13 @@ class TaxonomyResolver:
 
             leaf_tokens = set(leaf_norm.split())
             sub_tokens = set(sub_norm.split()) if sub_norm else set()
-            if leaf_tokens and leaf_tokens & name_tokens:
-                score += 1.5
+            leaf_overlap = _tokens_soft_overlap(leaf_tokens, name_tokens)
+            sub_overlap = _tokens_soft_overlap(sub_tokens, name_tokens)
+            if leaf_overlap:
+                score += 1.5 * (leaf_overlap / max(len(leaf_tokens), 1))
                 reasons.append("leaf_name_overlap")
-            if sub_tokens and sub_tokens & name_tokens:
-                score += 2.0
+            if sub_overlap:
+                score += 2.0 * (sub_overlap / max(len(sub_tokens), 1))
                 reasons.append("sub_name_overlap")
 
             filter_row = self.filter_by_path.get(candidate_path_norm)
@@ -135,6 +162,7 @@ class TaxonomyResolver:
         if not resolved:
             return TaxonomyResolution(confidence=best["confidence"], reason="low_confidence"), candidates[:5]
 
+        gender, plural_label = self._lookup_gender(best.get("sub_category"), best.get("leaf_category", ""))
         return (
             TaxonomyResolution(
                 parent_category=best["parent_category"],
@@ -144,6 +172,8 @@ class TaxonomyResolver:
                 cta_url=best.get("cta_url", ""),
                 confidence=best["confidence"],
                 reason=",".join(best["reasons"]),
+                gender=gender,
+                plural_label=plural_label,
             ),
             candidates[:5],
         )
@@ -160,6 +190,13 @@ class TaxonomyResolver:
         if int(boxnow) == 1:
             serialized += ":::Μικροσυσκευές"
         return serialized
+
+    def _lookup_gender(self, sub_category: str | None, leaf_category: str) -> tuple[str, str]:
+        for key in [sub_category or "", leaf_category]:
+            entry = self.gender_map.get(key)
+            if entry:
+                return entry.get("gender", ""), entry.get("plural_label", "")
+        return "", ""
 
     def _alias(self, value: str) -> str:
         normalized = normalize_for_match(value)

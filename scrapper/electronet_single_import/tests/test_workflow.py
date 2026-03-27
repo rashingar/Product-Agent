@@ -86,6 +86,70 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert "120-180 Greek words" in prompt_text
 
 
+def test_run_cli_input_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
+    from electronet_single_import import cli as cli_module
+    from electronet_single_import.models import FetchResult
+
+    cli = CLIInput(
+        model="229957",
+        url="https://www.electronet.gr/example",
+        photos=2,
+        sections=0,
+        skroutz_status=1,
+        boxnow=0,
+        price="599",
+        out=str(tmp_path),
+    )
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            url=cli.url,
+            canonical_url=cli.url,
+            product_code="235370",
+            brand="LG",
+            name="LG RHX5009TWB",
+        ),
+    )
+
+    class DummyFetcher:
+        def fetch_httpx(self, _url):
+            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="httpx", fallback_used=False, response_headers={})
+
+        def fetch_playwright(self, _url):
+            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
+
+        def download_gallery_images(self, **_kwargs):
+            return [], [], []
+
+        def download_besco_images(self, **_kwargs):
+            return [], [], []
+
+    class DummyResolver:
+        def resolve(self, **_kwargs):
+            return TaxonomyResolution(parent_category="A", leaf_category="B", sub_category="C"), []
+
+    class DummySchemaMatcher:
+        known_section_titles = set()
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def match(self, *_args, **_kwargs):
+            return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
+
+    monkeypatch.setattr(cli_module, "detect_source", lambda _url: "electronet")
+    monkeypatch.setattr(cli_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
+    monkeypatch.setattr(cli_module, "ElectronetFetcher", lambda: DummyFetcher())
+    monkeypatch.setattr(cli_module, "ElectronetProductParser", lambda known_section_titles=None: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
+    monkeypatch.setattr(cli_module, "SkroutzProductParser", lambda: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
+    monkeypatch.setattr(cli_module, "TaxonomyResolver", lambda: DummyResolver())
+    monkeypatch.setattr(cli_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(cli_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {})
+
+    result = cli_module.run_cli_input(cli)
+
+    assert result["parsed"].warnings == ["source_product_code_mismatch:input=229957:page=235370"]
+
+
 def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monkeypatch) -> None:
     from electronet_single_import import workflow
 
@@ -256,5 +320,8 @@ def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) ->
     result = render_workflow(model)
 
     assert result["candidate_csv_path"].exists()
+    assert result["published_csv_path"].exists()
+    assert result["published_csv_path"] == products_dir / f"{model}.csv"
+    assert result["published_csv_path"].read_text(encoding="utf-8-sig") == result["candidate_csv_path"].read_text(encoding="utf-8-sig")
     assert result["validation_report_path"].exists()
     assert "field_health" in result["validation_report"]

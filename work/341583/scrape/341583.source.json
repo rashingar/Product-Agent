@@ -1,0 +1,165 @@
+{
+  "source_name": "",
+  "page_type": "product",
+  "url": "https://www.electronet.gr/exoplismos-spitioy/gynaikeia-frontida/sesoyar/sesoyar-mallion-rowenta-cv1801-1600-watt",
+  "canonical_url": "https://www.electronet.gr/exoplismos-spitioy/gynaikeia-frontida/sesoyar/sesoyar-mallion-rowenta-cv1801-1600-watt",
+  "breadcrumbs": [
+    "Αρχική",
+    "Εξοπλισμός Σπιτιού",
+    "Γυναικεία Φροντίδα",
+    "Σεσουάρ"
+  ],
+  "skroutz_family": "",
+  "category_tag_text": "",
+  "category_tag_href": "",
+  "category_tag_slug": "",
+  "taxonomy_source_category": "",
+  "taxonomy_match_type": "",
+  "taxonomy_rule_id": "",
+  "taxonomy_ambiguity": false,
+  "taxonomy_escalation_reason": "",
+  "taxonomy_tv_inches": null,
+  "product_code": "341583",
+  "brand": "Rowenta",
+  "name": "Σεσουάρ Μαλλιών Rowenta CV1801 1600 Watt",
+  "hero_summary": "Προσφέρει μια ισχυρή ροή αέρα σε κομψό μέγεθος για γρήγορο και πανεύκολο στέγνωμα. Η τεχνολογία εξοικονόμησης ενέργειας Effiwatt προσφέρει ισχυρό στέγνωμα και διαθέτει 2 ταχύτητες/ρυθμίσεις θερμοκρασίας για εύκολο έλεγχο και προσαρμογή!",
+  "price_text": "18,90 €",
+  "price_value": 18.9,
+  "installments_text": "",
+  "delivery_text": "Διαθέσιμο για παράδοση στον χώρο σου",
+  "pickup_text": "Επιλέξτε κατάστημα για να δείτε τη διαθεσιμότητα",
+  "gallery_images": [
+    {
+      "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/341583.jpg.webp?itok=UrQsNxeg",
+      "alt": "Σεσουάρ Μαλλιών Rowenta CV1801 1600 Watt",
+      "position": 1,
+      "local_filename": "341583-1.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341583\\scrape\\gallery\\341583-1.jpg",
+      "content_type": "image/jpeg",
+      "downloaded": true
+    },
+    {
+      "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/341583_1.jpg.webp?itok=jE_CAuuZ",
+      "alt": "Σεσουάρ Μαλλιών Rowenta CV1801 1600 Watt",
+      "position": 2,
+      "local_filename": "341583-2.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341583\\scrape\\gallery\\341583-2.jpg",
+      "content_type": "image/jpeg",
+      "downloaded": true
+    }
+  ],
+  "besco_images": [],
+  "energy_label_asset_url": "",
+  "product_sheet_asset_url": "",
+  "key_specs": [
+    {
+      "label": "Ισχύς σε Watts",
+      "value": "1600"
+    },
+    {
+      "label": "Ρυθμίσεις Ταχύτητας",
+      "value": "2 επιπέδων"
+    },
+    {
+      "label": "Σύστημα Ιονισμού",
+      "value": null
+    }
+  ],
+  "spec_sections": [
+    {
+      "section": "Επισκόπηση Προϊόντος",
+      "items": [
+        {
+          "label": "Ισχύς σε Watts",
+          "value": "1600"
+        },
+        {
+          "label": "Mοτέρ AC",
+          "value": null
+        },
+        {
+          "label": "Ρυθμίσεις Θερμοκρασίας",
+          "value": "2 επιπέδων"
+        },
+        {
+          "label": "Ρυθμίσεις Ταχύτητας",
+          "value": "2 επιπέδων"
+        },
+        {
+          "label": "Συνδυασμοί Ροής Αέρα/Θερμοκρασίας",
+          "value": null
+        },
+        {
+          "label": "Ριπή Ψυχρού Αέρα",
+          "value": "Ναι"
+        },
+        {
+          "label": "Σύστημα Ιονισμού",
+          "value": null
+        },
+        {
+          "label": "Στόμιο Φορμαρίσματος",
+          "value": "1"
+        },
+        {
+          "label": "Φυσούνα",
+          "value": null
+        },
+        {
+          "label": "Αποσπώμενο Φίλτρο Καθαρισμού",
+          "value": null
+        },
+        {
+          "label": "Προστασία από Υπερθέρμανση",
+          "value": null
+        },
+        {
+          "label": "Κεραμική Επίστρωση",
+          "value": null
+        },
+        {
+          "label": "Άλλα Χαρακτηριστικά",
+          "value": null
+        },
+        {
+          "label": "Κρίκος για Κρέμασμα",
+          "value": "Ναι"
+        },
+        {
+          "label": "Δυνατότητα Επιλογής Volt",
+          "value": null
+        }
+      ]
+    },
+    {
+      "section": "Γενικά Χαρακτηριστικά",
+      "items": [
+        {
+          "label": "Χρώμα",
+          "value": "Μαύρο"
+        },
+        {
+          "label": "Βάρος Συσκευής σε Κιλά",
+          "value": "0,55"
+        },
+        {
+          "label": "Μήκος Καλωδίου σε Μέτρα",
+          "value": "1,8"
+        },
+        {
+          "label": "Εγγύηση Κατασκευαστή",
+          "value": "2 έτη"
+        }
+      ]
+    }
+  ],
+  "manufacturer_spec_sections": [],
+  "manufacturer_source_text": "",
+  "manufacturer_documents": [],
+  "presentation_source_html": "",
+  "presentation_source_text": "",
+  "raw_html_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341583\\scrape\\341583.raw.html",
+  "scraped_at": "2026-03-27T11:57:38+00:00",
+  "fallback_used": false,
+  "mpn": "CV1801"
+}

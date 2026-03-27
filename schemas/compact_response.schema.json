@@ -32,14 +32,10 @@
       "additionalProperties": false,
       "required": [
         "intro_html",
-        "cta_text",
         "sections"
       ],
       "properties": {
         "intro_html": {
-          "type": "string"
-        },
-        "cta_text": {
           "type": "string"
         },
         "sections": {

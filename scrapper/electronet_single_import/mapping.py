@@ -5,7 +5,7 @@ from typing import Any
 
 from .characteristics_pipeline import build_characteristics_for_product
 from .deterministic_fields import build_deterministic_product_fields
-from .html_builders import build_description_html, build_description_html_from_llm
+from .html_builders import build_description_html, build_description_html_from_llm, build_deterministic_cta
 from .models import CLIInput, ParsedProduct, SchemaMatchResult, TaxonomyResolution
 from .normalize import slugify_greek_for_seo
 from .utils import as_decimal_string, build_additional_image_value
@@ -54,6 +54,7 @@ def build_row(
     warnings: list[str] = []
     source = parsed.source
     cta_label = taxonomy.sub_category or taxonomy.leaf_category
+    cta_text = build_deterministic_cta(taxonomy.gender, taxonomy.plural_label)
     deterministic = build_deterministic_product_fields(
         source=source,
         taxonomy=taxonomy,
@@ -73,7 +74,7 @@ def build_row(
             cta_url=taxonomy.cta_url,
             cta_label=cta_label,
             intro_html=str(llm_presentation.get("intro_html", "")),
-            cta_text=str(llm_presentation.get("cta_text", "")),
+            cta_text=cta_text,
             sections=list(llm_presentation.get("sections", [])),
             besco_filenames_by_section=besco_filenames_by_section,
         )

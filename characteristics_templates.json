@@ -2,6 +2,95 @@
   "version": "2026-03-21",
   "templates": [
     {
+      "template_id": "skroutz_fridge_freezer_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_sub": "Ψυγειοκαταψύκτες"
+      },
+      "preferred_schema_source_files": [
+        "psygeiokatapsyktes.json"
+      ],
+      "sections": [
+        {
+          "title": "Επισκόπηση Προϊόντος",
+          "fields": [
+            { "label": "Τύπος Ψυγείου", "aliases": ["Τύπος"] },
+            { "label": "Τρόπος Τοποθέτησης", "aliases": ["Εντοιχιζόμενο", "Εντοιχιζόμενη / Ελεύθερη", "Τύπος εγκατάστασης"], "resolver": "fridge_installation_type" },
+            { "label": "Τεχνολογία Ψύξης", "aliases": ["Σύστημα Ψύξης", "Σύστημα No Frost"] },
+            { "label": "Συνολική Καθαρή Χωρητικότητα", "aliases": ["Συνολική Χωρητικότητα", "Συνολική Καθαρή Χωρητικότητα"] },
+            { "label": "Χρώμα", "aliases": ["Χρώμα"] },
+            { "label": "Χρώμα Πλαϊνών", "aliases": ["Χρώμα Πλαϊνών"] },
+            { "label": "Έλενχος και Ενδείξεις Θερμοκρασίας", "resolver": "fridge_temperature_control" },
+            { "label": "Αριθμός Συμπιεστών (μοτέρ", "aliases": ["Αριθμός συμπιεστών"] },
+            { "label": "Δύο Κυκλώματα Ψύξης", "aliases": ["Αριθμός ανεξάρτητων συστημάτων ψύξης"], "resolver": "fridge_dual_cooling_circuits" },
+            { "label": "Αισθητήρες Ψύξης", "aliases": ["Αισθητήρες Ψύξης"] },
+            { "label": "Πολλαπλή Ροή Αέρα", "resolver": "fridge_multi_airflow" },
+            { "label": "Σύστημα Εξουδετέρωσης Οσμών", "aliases": ["Σύστημα Εξουδετέρωσης Οσμών"] },
+            { "label": "Αντιβακτηριδιακή Τεχνολογία", "aliases": ["Αντιβακτηριδιακή Τεχνολογία"] },
+            { "label": "Συνδεσιμότητα", "aliases": ["Wi-Fi"], "resolver": "fridge_connectivity" },
+            { "label": "Σήμα Ειδοποίησης Ανοικτής Πόρτας", "resolver": "fridge_open_door_alert" },
+            { "label": "Δυνατότητα Αλλαγής Φοράς Πόρτας", "aliases": ["Αναστρέψιμη Πόρτα", "Αναστρέψιμη φορά πόρτας"] },
+            { "label": "Επιπλέον Χαρακτηριστικά", "aliases": ["Extra Δυνατότητες"], "resolver": "fridge_overview_features" },
+            { "label": "Πλάτος Συσκευής σε Εκατοστά", "aliases": ["Πλάτος"] },
+            { "label": "Υψος Συσκευής σε Εκατοστά", "aliases": ["Ύψος"] }
+          ]
+        },
+        {
+          "title": "Συντήρηση",
+          "fields": [
+            { "label": "Καθαρή Χωρητικότητα Συντήρησης σε Λίτρα", "aliases": ["Χωρητικότητα Συντήρησης", "Καθαρή Χωρητικότητα Συντήρησης"] },
+            { "label": "Αριθμός Ραφιών", "resolver": "fridge_fridge_shelf_count" },
+            { "label": "Ρυθμιζόμενα Ράφια σε Ύψος", "aliases": ["Αριθμός ρυθμιζόμενων ραφιών στη συντήρηση"], "resolver": "fridge_adjustable_shelves" },
+            { "label": "Υλικό Ραφιών", "resolver": "fridge_shelf_material" },
+            { "label": "Αριθμός Συρταριών", "resolver": "fridge_fridge_drawer_count" },
+            { "label": "Αριθμός Συρταριών Μισού Μεγέθους", "aliases": ["Αριθμός Συρταριών Μισού Μεγέθους"] },
+            { "label": "Συρτάρι με Ρύθμιση Υγρασίας", "resolver": "fridge_humidity_drawer" },
+            { "label": "Συρτάρι Μηδενικής Ζώνης 0˚C", "aliases": ["Συρτάρι Μηδενικής Ζώνης 0˚C"] },
+            { "label": "Θήκες στην Πόρτα", "resolver": "fridge_door_shelves" },
+            { "label": "Θήκη για Μπουκάλια", "aliases": ["Μπουκαλοθήκη"] },
+            { "label": "Εσωτερικός Φωτισμός", "resolver": "fridge_internal_light" },
+            { "label": "Εξωτερικό Βρυσάκι Νερού", "aliases": ["Έξοδος Κρύου Νερού"] },
+            { "label": "Λειτουργία Ταχείας Ψύξης", "resolver": "fridge_fast_cool" },
+            { "label": "Επιπλέον Χαρακτηριστικά", "aliases": ["Στην Συντήρηση"], "resolver": "fridge_storage_features" }
+          ]
+        },
+        {
+          "title": "Κατάψυξη",
+          "fields": [
+            { "label": "Κατάψυξη με Αστέρια", "aliases": ["Κατάψυξη με Αστέρια"] },
+            { "label": "Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα", "aliases": ["Χωρητικότητα Κατάψυξης", "Καθαρή Χωρητικότητα Κατάψυξης"] },
+            { "label": "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά", "aliases": ["Ικανότητα Κατάψυξης σε 24 ώρες"] },
+            { "label": "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες", "aliases": ["Αυτονομία σε περίπτωση διακοπής ρεύματος"] },
+            { "label": "Αριθμός Συρταριών", "resolver": "fridge_freezer_drawer_count" },
+            { "label": "Αριθμός Ραφιών", "resolver": "fridge_freezer_shelf_count" },
+            { "label": "Θήκες στην Πόρτα", "aliases": ["Θήκες στην Πόρτα"] },
+            { "label": "Λειτουργία Ταχείας Κατάψυξης", "resolver": "fridge_fast_freeze" },
+            { "label": "Σύστημα Παροχής Πάγου", "aliases": ["Έξοδος για Παγάκια"] },
+            { "label": "Επιπλέον Χαρακτηριστικά", "aliases": ["Στην Κατάψυξη"], "resolver": "fridge_freezer_features" }
+          ]
+        },
+        {
+          "title": "Ενεργειακά χαρακτηριστικά",
+          "fields": [
+            { "label": "Ενεργειακή Κλάση", "aliases": ["Ενεργειακή Κλάση"] },
+            { "label": "Καθαρή Χωρητικότητα Συντήρησης σε Λίτρα", "aliases": ["Χωρητικότητα Συντήρησης", "Καθαρή Χωρητικότητα Συντήρησης"] },
+            { "label": "Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα", "aliases": ["Χωρητικότητα Κατάψυξης", "Καθαρή Χωρητικότητα Κατάψυξης"] },
+            { "label": "Κατάψυξη με Αστέρια", "aliases": ["Κατάψυξη με Αστέρια"] },
+            { "label": "Επίπεδο Θορύβου σε dB", "aliases": ["Επίπεδο Θορύβου", "Εκπομπές αερόφερτου ακουστικού θορύβου"] },
+            { "label": "Κλιματική Κλάση", "aliases": ["Κλιματική Κλάση"], "resolver": "fridge_climate_class" }
+          ]
+        },
+        {
+          "title": "Γενικά χαρακτηριστικά",
+          "fields": [
+            { "label": "Βάρος Συσκευής σε Κιλά", "aliases": ["Καθαρό βάρος"] },
+            { "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β", "resolver": "fridge_dimensions_triplet" },
+            { "label": "Εγγύηση Κατασκευαστή", "aliases": ["Επιμέρους Εγγύηση Κατασκευαστή"], "resolver": "fridge_warranty" }
+          ]
+        }
+      ]
+    },
+    {
       "template_id": "skroutz_tv_v1",
       "match": {
         "source_name": "skroutz",
@@ -215,6 +304,75 @@
               "key": "dimensions_with_stand",
               "label": "Διαστάσεις Συσκευής σε Εκατοστά με Βάση (Υ x Π x Β)",
               "resolver": "tv_dimensions_with_stand"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "template_id": "skroutz_soundbar_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_leaf": "Audio Systems",
+        "taxonomy_sub": "Sound Bars"
+      },
+      "preferred_schema_source_files": [
+        "sound_bars.json"
+      ],
+      "sections": []
+    },
+    {
+      "template_id": "skroutz_robot_vacuum_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_sub": "Σκούπες Ρομπότ"
+      },
+      "preferred_schema_source_files": [
+        "skoypes_rompot.json"
+      ],
+      "sections": [
+        {
+          "title": "Επισκόπηση προϊόντος",
+          "fields": [
+            {
+              "label": "Ισχύς (Pa",
+              "aliases": [
+                "Απορρόφηση",
+                "Πίεση απορρόφησης"
+              ]
+            },
+            {
+              "label": "Χρόνος φόρτισης μπαταρίας σε min",
+              "aliases": [
+                "Διάρκεια Φόρτισης",
+                "Χρόνος επαναφόρτισης"
+              ]
+            },
+            {
+              "label": "Χώρος Κάλυψης (m²",
+              "aliases": [
+                "Κάλυψη Χώρου"
+              ]
+            },
+            {
+              "label": "Χωρητικότητα σε λίτρα",
+              "aliases": [
+                "Χωρητικότητα Κάδου Στερεών",
+                "Χωρητικότητα δοχείου σκόνης"
+              ]
+            },
+            {
+              "label": "Τύπος δαπέδου",
+              "aliases": [
+                "Τύπος δαπέδου"
+              ]
+            },
+            {
+              "label": "Σφουγγάρισμα",
+              "aliases": [
+                "Σφουγγάρισμα",
+                "Λειτουργία απορρόφησης και σφουγγαρίσματος"
+              ]
             }
           ]
         }

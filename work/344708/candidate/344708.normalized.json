@@ -1,0 +1,648 @@
+{
+  "input": {
+    "model": "344708",
+    "url": "https://www.skroutz.gr/s/64954633/rowenta-s90-skoupa-rompot-gia-skoupisma-sfougarisma-me-chartografisi-kai-wi-fi-leyki.html",
+    "photos": 4,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 1,
+    "price": "0",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\candidate"
+  },
+  "source": {
+    "source_name": "skroutz",
+    "page_type": "product",
+    "url": "https://www.skroutz.gr/s/64954633/rowenta-s90-skoupa-rompot-gia-skoupisma-sfougarisma-me-chartografisi-kai-wi-fi-leyki.html",
+    "canonical_url": "https://www.skroutz.gr/s/64954633/rowenta-s90-skoupa-rompot-gia-skoupisma-sfougarisma-me-chartografisi-kai-wi-fi-leyki.html",
+    "breadcrumbs": [
+      "Αρχική",
+      "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "Σκούπισμα",
+      "Σκούπες Ρομπότ"
+    ],
+    "skroutz_family": "robot_vacuum",
+    "category_tag_text": "Σκούπες Ρομπότ",
+    "category_tag_href": "https://www.skroutz.gr/c/2401/Skoypa-Rompot.html",
+    "category_tag_slug": "Skoypa Rompot",
+    "taxonomy_source_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα///Σκούπες Ρομπότ",
+    "taxonomy_match_type": "exact_category",
+    "taxonomy_rule_id": "family:robot_vacuum",
+    "taxonomy_ambiguity": false,
+    "taxonomy_escalation_reason": "",
+    "taxonomy_tv_inches": null,
+    "product_code": "RR8797WH",
+    "brand": "Rowenta",
+    "name": "Rowenta S90+ Σκούπα Ρομπότ για Σκούπισμα & Σφουγγάρισμα με Χαρτογράφηση και Wi-Fi Λευκή",
+    "hero_summary": "Η σκούπα ρομπότ της Rowenta προσφέρει μια εξαιρετική λύση για τον καθαρισμό του σπιτιού, συνδυάζοντας σκούπισμα και σφουγγάρισμα. Με κάδο χωρητικότητας 260ml, είναι ιδανική για να συλλέγει σκόνη, τρίχες και μικρά σκουπιδάκια από διάφορους τύπους δαπέδων, όπως ξύλινα, πλακάκια και μάρμαρα. Έχει σχεδιαστεί για να κινείται αυτόματα στον χώρο, αναγνωρίζοντας τα εμπόδια και επιλέγοντας την καλύτερη διαδρομή καθαρισμού μέσω της προηγμένης τεχνολογίας πλοήγησης με αισθητήρες και χαρτογράφηση. Η σκούπα διαθέτει λειτουργίες όπως η αυτόματη φόρτιση, επιστρέφοντας στην βάση της όταν ολοκληρωθεί ο καθαρισμός ή όταν χρειάζεται φόρτιση. Το αυτόματο άδειασμα του κάδου εξοικονομεί χρόνο, επιτρέποντάς σου να μην ανησυχείς για τη συχνή αδειάσματα της σκούπας. Επιπλέον, με τη δυνατότητα σφουγγαρίσματος μπορείς να πετύχεις περισσότερη καθαριότητα σε βάθος. Η συνδεσιμότητα μέσω Wi-Fi σου προσφέρει την ευκολία του απομακρυσμένου ελέγχου μέσω εφαρμογής, καθώς και τη δυνατότητα να την ελέγχεις με φωνητικές εντολές από βοηθούς όπως η Alexa και η Google Home. Έτσι, μπορείς να προγραμματίζεις τον καθαρισμό και να επιλέγεις το επίπεδο αναρρόφησης ακόμα κι όταν είσαι μακριά από το σπίτι. Σφουγγάρισμα Διάρκεια Μπαταρίας (Αυτονομία): 270 λεπτά Θόρυβος: 74 dB Ύψος: 9.7 cm Πλάτος: 32.5 cm Βάθος: 32.5 cm",
+    "price_text": "198,00 €",
+    "price_value": 198.0,
+    "installments_text": "",
+    "delivery_text": "",
+    "pickup_text": "",
+    "gallery_images": [
+      {
+        "url": "https://b.scdn.gr/images/sku_main_images/064954/64954633/20260109161913_rowenta_rr8797wh_skoupa_rompot_gia_skoupisma_sfougarisma_me_chartografisi_kai_wi_fi_leyki.jpeg",
+        "alt": "Rowenta S90+ Σκούπα Ρομπότ για Σκούπισμα & Σφουγγάρισμα με Χαρτογράφηση και Wi-Fi Λευκή",
+        "position": 1,
+        "local_filename": "344708-1.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\gallery\\344708-1.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      },
+      {
+        "url": "https://a.scdn.gr/images/sku_images/123016/123016654/20260302155405_382ca4ed.jpeg",
+        "alt": "Rowenta S90+ Σκούπα Ρομπότ για Σκούπισμα & Σφουγγάρισμα με Χαρτογράφηση και Wi-Fi Λευκή",
+        "position": 2,
+        "local_filename": "344708-2.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\gallery\\344708-2.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      },
+      {
+        "url": "https://a.scdn.gr/images/sku_images/123785/123785927/20260320163235_b1d60a3e.jpeg",
+        "alt": "Rowenta S90+ Σκούπα Ρομπότ για Σκούπισμα & Σφουγγάρισμα με Χαρτογράφηση και Wi-Fi Λευκή",
+        "position": 3,
+        "local_filename": "344708-3.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\gallery\\344708-3.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      },
+      {
+        "url": "https://b.scdn.gr/images/sku_images/123785/123785929/20260320163236_33b17e48.jpeg",
+        "alt": "Rowenta S90+ Σκούπα Ρομπότ για Σκούπισμα & Σφουγγάρισμα με Χαρτογράφηση και Wi-Fi Λευκή",
+        "position": 4,
+        "local_filename": "344708-4.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\gallery\\344708-4.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      }
+    ],
+    "besco_images": [],
+    "energy_label_asset_url": "",
+    "product_sheet_asset_url": "",
+    "key_specs": [
+      {
+        "label": "Κωδικός Προϊόντος",
+        "value": "RR8797WH"
+      },
+      {
+        "label": "Χωρητικότητα Κάδου Στερεών",
+        "value": "260 ml"
+      },
+      {
+        "label": "Χωρητικότητα Κάδου Νερού",
+        "value": "290 ml"
+      },
+      {
+        "label": "Διάρκεια Φόρτισης",
+        "value": "240 min"
+      },
+      {
+        "label": "Διάρκεια Μπαταρίας (Αυτονομία)",
+        "value": "270 min"
+      },
+      {
+        "label": "Θόρυβος",
+        "value": "74 dB"
+      },
+      {
+        "label": "Απορρόφηση",
+        "value": "6000 Pa"
+      },
+      {
+        "label": "Χρώμα",
+        "value": "Λευκό"
+      }
+    ],
+    "spec_sections": [
+      {
+        "section": "Γενικά",
+        "items": [
+          {
+            "label": "Κωδικός Προϊόντος",
+            "value": "RR8797WH"
+          }
+        ]
+      },
+      {
+        "section": "Γενικά",
+        "items": [
+          {
+            "label": "Χωρητικότητα Κάδου Στερεών",
+            "value": "260 ml"
+          },
+          {
+            "label": "Χωρητικότητα Κάδου Νερού",
+            "value": "290 ml"
+          },
+          {
+            "label": "Διάρκεια Φόρτισης",
+            "value": "240 min"
+          },
+          {
+            "label": "Διάρκεια Μπαταρίας (Αυτονομία)",
+            "value": "270 min"
+          },
+          {
+            "label": "Θόρυβος",
+            "value": "74 dB"
+          },
+          {
+            "label": "Απορρόφηση",
+            "value": "6000 Pa"
+          },
+          {
+            "label": "Χρώμα",
+            "value": "Λευκό"
+          },
+          {
+            "label": "Κάλυψη Χώρου",
+            "value": "270 m²"
+          }
+        ]
+      },
+      {
+        "section": "Δυνατότητες & Λειτουργίες",
+        "items": [
+          {
+            "label": "Σφουγγάρισμα",
+            "value": "Ναι"
+          },
+          {
+            "label": "Κατά του Μπερδέματος",
+            "value": "Ναι"
+          },
+          {
+            "label": "Smart",
+            "value": "Ναι"
+          },
+          {
+            "label": "με Φίλτρο HEPA",
+            "value": "Ναι"
+          },
+          {
+            "label": "Καθάρισμα Χαλιών",
+            "value": "Ναι"
+          },
+          {
+            "label": "Πολλαπλή Χαρτογράφηση",
+            "value": "Ναι"
+          },
+          {
+            "label": "Επιλογή Περιοχών Σκουπίσματος (No-Go Zones)",
+            "value": "Ναι"
+          }
+        ]
+      },
+      {
+        "section": "Πλοήγηση",
+        "items": [
+          {
+            "label": "Τύπος Πλοήγησης",
+            "value": "με Αισθητήρες & Χαρτογράφηση"
+          },
+          {
+            "label": "με LIDAR",
+            "value": "Ναι"
+          },
+          {
+            "label": "με Κάμερα (vSLAM)",
+            "value": "Ναι"
+          },
+          {
+            "label": "Αποφυγή Εμποδίων με AI",
+            "value": "Όχι"
+          },
+          {
+            "label": "με Γυροσκόπιο",
+            "value": "Όχι"
+          }
+        ]
+      },
+      {
+        "section": "Βάση",
+        "items": [
+          {
+            "label": "με Βάση Φόρτισης",
+            "value": "Ναι"
+          },
+          {
+            "label": "Αυτόματη Φόρτιση",
+            "value": "Ναι"
+          },
+          {
+            "label": "Γρήγορη Φόρτιση",
+            "value": "Όχι"
+          },
+          {
+            "label": "Αυτόματο Άδειασμα Κάδου",
+            "value": "Ναι"
+          },
+          {
+            "label": "Χωρητικότητα Κάδου Στερεών Βάσης",
+            "value": "3000 ml"
+          }
+        ]
+      },
+      {
+        "section": "Διαστάσεις",
+        "items": [
+          {
+            "label": "Ύψος",
+            "value": "9,7 cm"
+          },
+          {
+            "label": "Πλάτος",
+            "value": "32,5 cm"
+          },
+          {
+            "label": "Βάθος",
+            "value": "32,5 cm"
+          }
+        ]
+      },
+      {
+        "section": "Smart Ιδιότητες",
+        "items": [
+          {
+            "label": "Συνδεσιμότητα",
+            "value": "Wi-Fi"
+          },
+          {
+            "label": "Smart Οικοσύστημα",
+            "value": "Alexa, Google Home"
+          }
+        ]
+      }
+    ],
+    "manufacturer_spec_sections": [
+      {
+        "section": "Χαρακτηριστικά Κατασκευαστή",
+        "items": [
+          {
+            "label": "Τεχνολογία",
+            "value": "Περιστρεφόμενη κεντρική βούρτσα"
+          },
+          {
+            "label": "Τύπος βούρτσας",
+            "value": "Βούρτσα Animal Turbo"
+          },
+          {
+            "label": "Πλαϊνή βούρτσα",
+            "value": "1"
+          },
+          {
+            "label": "Τεχνολογία Cyclonic",
+            "value": "ΟΧΙ"
+          },
+          {
+            "label": "Κινητήρας",
+            "value": "Χωρίς καρβουνάκια (ψήκτρες)"
+          },
+          {
+            "label": "Επίπεδα ισχύος",
+            "value": "4"
+          },
+          {
+            "label": "Απόδοση καθαρισμού",
+            "value": "Εξαιρετική (>=4000 Pa)"
+          },
+          {
+            "label": "Σφουγγάρισμα",
+            "value": "Ηλεκτρονικό"
+          },
+          {
+            "label": "Λειτουργία απορρόφησης και σφουγγαρίσματος",
+            "value": "Ναι (συμπεριλ. το σφουγγαρόπανο)"
+          },
+          {
+            "label": "Διαχείριση πολλαπλών χώρων",
+            "value": "ΝΑΙ"
+          },
+          {
+            "label": "Διαχείριση εμποδίων",
+            "value": "Κανονική (αναγνώριση εμποδίων >10 cm)"
+          },
+          {
+            "label": "Εικονικοί τοίχοι",
+            "value": "Ναι: μέσω εφαρμογής"
+          },
+          {
+            "label": "Είδος πλοήγησης",
+            "value": "Έξυπνη (κάμερα και λέιζερ)"
+          },
+          {
+            "label": "Χαρτογράφηση χώρου στην εφαρμογή",
+            "value": "Διαχείριση χώρων και αναφορά καθαρισμού"
+          },
+          {
+            "label": "Ικανότητα να πηγαίνει κάτω από χαμηλά έπιπλα",
+            "value": "Εξαιρετική"
+          },
+          {
+            "label": "Προγραμματισμός",
+            "value": "ΝΑΙ"
+          },
+          {
+            "label": "Επιλογή δωματίου προς καθαρισμό",
+            "value": "Ναι (εξατομικευμένος καθαρισμός)"
+          },
+          {
+            "label": "Τύπος μπαταρίας",
+            "value": "Ιόντων Λιθίου"
+          },
+          {
+            "label": "Χρόνος επαναφόρτισης",
+            "value": "4 ώρες"
+          },
+          {
+            "label": "Τύπος επαναφόρτισης και στήριξης",
+            "value": "Σταθμός σύνδεσης"
+          },
+          {
+            "label": "Αυτοεπαναφορτίζεται",
+            "value": "ΝΑΙ"
+          },
+          {
+            "label": "Τροφοδοσία κ.λπ.",
+            "value": "ΝΑΙ"
+          },
+          {
+            "label": "Συχνότητα",
+            "value": "50-60 Hz"
+          },
+          {
+            "label": "Τάση",
+            "value": "220-240 V"
+          },
+          {
+            "label": "Συνδεσιμότητα μέσω Wifi (εφαρμογή Rowenta robots και ψηφιακούς βοηθούς)",
+            "value": "ΝΑΙ"
+          },
+          {
+            "label": "Σύστημα ελέγχου",
+            "value": "Ναι: μέσω εφαρμογής"
+          },
+          {
+            "label": "Χωρητικότητα δοχείου σκόνης",
+            "value": "0.26 L"
+          },
+          {
+            "label": "Δείκτης πλήρωσης περιέκτη",
+            "value": "ΟΧΙ"
+          },
+          {
+            "label": "Φιλτράρισμα",
+            "value": "Φίλτρο υψηλής απόδοσης"
+          },
+          {
+            "label": "Χωρητικότητα δοχείου νερού",
+            "value": "0.29 L"
+          },
+          {
+            "label": "Επίπεδο θορύβου",
+            "value": "74 dB(A)"
+          },
+          {
+            "label": "Διαστάσεις ( ...x...x...)",
+            "value": "50X35X40 cm"
+          },
+          {
+            "label": "Χρώματα",
+            "value": "ΛΕΥΚΟ ΤΟΥ ΧΙΟΝΙΟΥ"
+          },
+          {
+            "label": "Αυτονομία",
+            "value": "270 min (*στη λειτουργία eco)"
+          },
+          {
+            "label": "Για αλλεργικούς",
+            "value": "ΝΑΙ"
+          },
+          {
+            "label": "Για όσους έχουν κατοικίδια",
+            "value": "ΝΑΙ"
+          }
+        ]
+      }
+    ],
+    "manufacturer_source_text": "Rowenta X-Plorer Serie 90+ Σκούπα Ρομπότ RR8797 Animal – Tefal.gr arrow-right arrow-left arrow-down chevron-right chevron-left chevron-down chevron-up chevron-big-up chevron-big-down chevron-big-right chevron-big-left close pause culinaire plus moins check poubelle close-big back addtocart download Tefal Moulinex Rowenta Krups Lien vers la naviguation principale Lien vers la recherche Lien vers le contenu Lien vers le pied de page close close search-big Μπορεί να σας ενδιαφέρει Rowenta Access Steam Σίδερο Ατμού DW4301 €50,60 Moulinex Bake Partner Κουζινομηχανή 1100 W QA525810 €289,00 Moulinex BlendForce 2 Μπλέντερ LM4358 €44,90 €63,00 -29% Tefal ClipsoMinut' Easy Χύτρα Ταχύτητας 6L P4620768 €149,90 Tefal Easy Fry & Grill XXL Φριτέζα Αέρος EY8018 €119,90 €139,90 -14% Το καλάθι σας ( 0 ) Χωρίς προϊόντα Συνέχεια Αγορών Φόρτωση... Δωρεάν μεταφορικά άνω των 35€ 4 μάρκες - 1 οικογένεια burger Αναζήτηση search-big account 0 bag Τα προϊόντα μας ΣΚΟΥΠΙΣΜΑ Σκούπες Stick Σκούπες Wet and Dry Νέο Σκούπες με Σακούλα Σκούπες χωρίς Σακούλα Σκουπάκια Χειρός Σκούπες Ρομπότ Άλλες συσκευές καθαρισμού ΣΙΔΕΡΩΜΑ Συστήματα Σιδερώματος Σίδερα Ατμού Άλλες συσκευές φροντίδας ρούχων ΠΡΟΣΩΠΙΚΗ ΦΡΟΝΤΙΔΑ Σεσουάρ Ισιωτικές Μαλλιών Βούρτσες & Ψαλίδια Μαλλιών Ανδρική Περιποίηση Ultimate Experience Νέο Karl Lagerfeld ΦΡΟΝΤΙΔΑ ΣΠΙΤΙΟΥ Αερόθερμα Ανεμιστήρες Σκούπες Stick Σειρά Ultimate experience 💙Women's Month Offers💙 🌼Spring Offers 🌼 Σχετικά με την Rowenta Services close Αναζήτηση search-big Τα προϊόντα μας chevron-right 💙Women's Month Offers💙 chevron-right 🌼Spring Offers 🌼 chevron-right Σχετικά με την Rowenta chevron-right Services chevron-right account Ο λογαριασμός μου facebook instagram close Αναζήτηση search-big arrow-left Τα προϊόντα μας ΣΚΟΥΠΙΣΜΑ chevron-down Σκούπες Stick Σκούπες Wet and Dry Νέο Σκούπες με Σακούλα Σκούπες χωρίς Σακούλα Σκουπάκια Χειρός Σκούπες Ρομπότ Άλλες συσκευές καθαρισμού ΣΙΔΕΡΩΜΑ chevron-down Συστήματα Σιδερώματος Σίδερα Ατμού Άλλες συσκευές φροντίδας ρούχων ΠΡΟΣΩΠΙΚΗ ΦΡΟΝΤΙΔΑ chevron-down Σεσουάρ Ισιωτικές Μαλλιών Βούρτσες & Ψαλίδια Μαλλιών Ανδρική Περιποίηση Ultimate Experience Νέο Karl Lagerfeld ΦΡΟΝΤΙΔΑ ΣΠΙΤΙΟΥ chevron-down Αερόθερμα Ανεμιστήρες Σκούπες Stick Σειρά Ultimate experience close Αναζήτηση search-big arrow-left 💙Women's Month Offers💙 close Αναζήτηση search-big arrow-left 🌼Spring Offers 🌼 close Αναζήτηση search-big arrow-left Σχετικά με την Rowenta close Αναζήτηση search-big arrow-left Services Αρχική Σελίδα • Rowenta X-Plorer ... 0 / 0 Rowenta X-Plorer Serie 90+ Σκούπα Ρομπότ RR8797 Animal Ισχυρή σκούπα ρομπότ με λέιζερ για βαθύ απρόσκοπτο καθαρισμό €199,00 €399,00 -50% Διαθέσιμο Προσθήκη 2 χρόνια εγγύηση για όλα τα προϊόντα Περιγραφή Περιγραφή Ισχυρή απόδοση που παρέχει πίεση απορρόφησης έως και 6000 Pa Απολαύστε έως και 60 ημέρες αυτονομίας με τον σταθμό αυτόματης συλλογής σκόνης, για απόλυτη ξεγνοιασιά και άνεση Έξυπνη πλοήγηση με τεχνολογία ανίχνευσης με λέιζερ 360° που προσφέρει ακριβή καθαρισμό, πλήρη κάλυψη των χώρων και μόνιμη χαρτογράφηση Ακριβές σφουγγάρισμα με το σύστημα Smart Aqua Power: Το σύστημα ηλεκτρονικού δοχείου νερού που ρυθμίζει τον όγκο του νερού ανάλογα με τις ανάγκες σας Καθαριστική δράση 2 σε 1: Σκουπίστε και σφουγγαρίστε ταυτόχρονα με βούρτσες που συλλέγουν ακαθαρσίες όλων των μεγεθών και το σύστημα Smart Aqua Power Αδιάκοπος αυτόματος καθαρισμός: Η σκούπα ρομπότ επιστρέφει μόνη της στο σταθμό για επαναφόρτιση και στη συνέχεια συνεχίζει τον κύκλο καθαρισμού της Πλήρης κάλυψη επιφάνειας: 120 m2 σε 120 λεπτά, στη συνέχεια η σκούπα ρομπότ επιστρέφει αυτόματα στη βάση φόρτισής του για επαναφόρτιση Εξατομικευμένος καθαρισμός: Η εφαρμογή για κινητά σας επιτρέπει να διαχειρίζεστε χάρτες, να προγραμματίζετε το σημείο και τον χρόνο καθαρισμού και πολλά άλλα Τι περιέχει η συσκευασία Τι περιέχει η συσκευασία Περιλαμβάνονται το προϊόν και τα εξαρτήματα: X-PLORER Serie 90+ σκούπα ρομπότ Δοχείο σφουγγαρίσματος 3 σφουγγαρόπανα: 1 γκρι για τυπική χρήση, 1 μπλε για σκληρούς λεκέδες, 1 πράσινο για τη συλλογή λεπτής σκόνης Σταθμός αυτόματου αδειάσματος δοχείου σκόνης 3 σακούλες Hygiene+ Τεχνικά χαρακτηριστικά Τεχνικά χαρακτηριστικά Σχετικά με το προϊόν Περιβάλλον Τεχνολογία Περιστρεφόμενη κεντρική βούρτσα Τύπος βούρτσας Βούρτσα Animal Turbo Πλαϊνή βούρτσα 1 Τεχνολογία Cyclonic ΟΧΙ Κινητήρας Χωρίς καρβουνάκια (ψήκτρες) Επίπεδα ισχύος 4 Απόδοση καθαρισμού Εξαιρετική (>=4000 Pa) Σφουγγάρισμα Ηλεκτρονικό Λειτουργία απορρόφησης και σφουγγαρίσματος Ναι (συμπεριλ. το σφουγγαρόπανο) Διαχείριση πολλαπλών χώρων ΝΑΙ Διαχείριση εμποδίων Κανονική (αναγνώριση εμποδίων >10 cm) Εικονικοί τοίχοι Ναι: μέσω εφαρμογής Είδος πλοήγησης Έξυπνη (κάμερα και λέιζερ) Χαρτογράφηση χώρου στην εφαρμογή Διαχείριση χώρων και αναφορά καθαρισμού Ικανότητα να πηγαίνει κάτω από χαμηλά έπιπλα Εξαιρετική Προγραμματισμός ΝΑΙ Επιλογή δωματίου προς καθαρισμό Ναι (εξατομικευμένος καθαρισμός) Τύπος μπαταρίας Ιόντων Λιθίου Χρόνος επαναφόρτισης 4 ώρες Τύπος επαναφόρτισης και στήριξης Σταθμός σύνδεσης Αυτοεπαναφορτίζεται ΝΑΙ Τροφοδοσία κ.λπ. ΝΑΙ Συχνότητα 50-60 Hz Τάση 220-240 V Συνδεσιμότητα μέσω Wifi (εφαρμογή Rowenta robots και ψηφιακούς βοηθούς) ΝΑΙ Σύστημα ελέγχου Ναι: μέσω εφαρμογής Χωρητικότητα δοχείου σκόνης 0.26 L Δείκτης πλήρωσης περιέκτη ΟΧΙ Φιλτράρισμα Φίλτρο υψηλής απόδοσης Χωρητικότητα δοχείου νερού 0.29 L Επίπεδο θορύβου 74 dB(A) Διαστάσεις ( ...x...x...) 50X35X40 cm Χρώματα ΛΕΥΚΟ ΤΟΥ ΧΙΟΝΙΟΥ Αυτονομία 270 min (*στη λειτουργία eco) Για αλλεργικούς ΝΑΙ Για όσους έχουν κατοικίδια ΝΑΙ Χρήσιμα έγγραφα Χρήσιμα έγγραφα download Φύλλο Ασφαλείας Δωρεάν μεταφορικά άνω των 35€ Δωρεάν αντικαταβολή Δωρεάν επιστροφή 1 - 5 ημέρες παράδοση Μπορεί επίσης να σας αρέσουν Tefal UltraGliss Plus Σίδερο ατμού FV6840 €79,00 Rowenta X-Plorer Serie 130 Ai Σκούπα Ρομπότ RR9075 €454,90 Tefal Excellence Αντικολλητικό Τηγάνι 26εκ G32005 €47,90 Rowenta X-Plorer Serie 65+ Σκούπα Ρομπότ RR8L85 €449,00 Rowenta X-Force Flex 13.60 Επαναφορτιζόμενη Σκούπα Stick RH9AD1 Animal Aqua €399,00 Rowenta X-Force Flex 13.60 Επαναφορτιζόμενη σκούπα Stick RH9A73 Animal €309,00 Rowenta X-Force Flex 9.60 Επαναφορτιζόμενη σκούπα stick RH2099 Parquet €199,00 €249,90 -20% Rowenta X-Force Flex 9.60 Επαναφορτιζόμενη Σκούπα Stick RH20C0 Aqua €269,00 Rowenta X-pert 7.60 Επαναφορτιζόμενη Σκούπα Stick RH6A73 Animal €149,00 Rowenta X-Nano Επαναφορτιζόμενη Σκούπα Stick RH1128 €109,00 €142,90 -24% Η σκούπα ρομπότ που προσφέρει βαθύ καθαρισμό έως 6000 Pa Η σειρά X-PLORER 90 της Rowenta προσφέρει πίεση απορρόφησης έως 6000 Pa για βαθύ καθαρισμό και τέλεια αποτελέσματα κάθε φορά. Εξοπλισμένη με κεντρική και πλευρική βούρτσα, αυτή η σκούπα ρομπότ συλλέγει όλα τα απορρίμματα της καθημερινότητας από όλους τους τύπους δαπέδων — με εξατομικευμένο σφουγγάρισμα και σκούπισμα κάθε δωματίου, για πανεύκολο καθάρισμα του σπιτιού. Πλεονεκτήματα Έως 60 ημέρες αυτονομίας Το αυτόματο καθάρισμα είναι ευκολότερο από ποτέ, χάρη στο αυτόματο άδειασμα της σκόνης στο σταθμό συλλογής μετά από κάθε κύκλο καθαρισμού και αυτονομία έως και 60 ημέρες. Έξυπνη πλοήγηση Η ακριβής τεχνολογία ανίχνευσης με λέιζερ 360° εξασφαλίζει εξαιρετικά ακριβή καθαρισμό με μόνιμη χαρτογράφηση, για την πλήρη κάλυψη της επιφάνειας. Ακριβές σφουγγάρισμα Με το σύστημα Smart Aqua Power, το ηλεκτρονικό δοχείο νερού ελέγχει τον όγκο του νερού κατά το σφουγγάρισμα ενώ σας επιτρέπει να ρυθμίζετε το επίπεδο υγρασίας. 2 σε 1: Σκούπισμα και σφουγγάρισμα Σκουπίστε και σφουγγαρίστε ταυτόχρονα χάρη στην πλευρική βούρτσα για δυσπρόσιτα σημεία, την ηλεκτρική βούρτσα Animal για τρίχες και χνούδια και το σύστημα Smart Aqua Power. Αδιάκοπος αυτόματος καθαρισμός Η σκούπα ρομπότ επιστρέφει μόνη της στο σταθμό για επαναφόρτιση και στη συνέχεια συνεχίζει τον κύκλο καθαρισμού της χωρίς καμία παρέμβαση. Πλήρης κάλυψη επιφάνειας Η σκούπα ρομπότ καθαρίζει έως 120 m² με ένα μόνο πέρασμα (120 λεπτά) ενώ στη συνέχεια επιστρέφει στη βάση φόρτισης για επαναφόρτιση πριν συνεχίσει τον καθαρισμό. Εξατομικευμένος καθαρισμός Χρησιμοποιήστε την εφαρμογή για κινητά για να διαχειρίζεστε χάρτες, να προγραμματίζετε το σημείο και το χρόνο καθαρισμού, να ρυθμίζετε τις απαγορευμένες περιοχές/περιοχές μη σφουγγαρίσματος, καθώς και πολλά άλλα — για πραγματικά απρόσκοπτο καθάρισμα 1-5 μέρες Αποστολή 15 χρόνια επισκευής σε χαμηλό κόστος Εγγύηση ασφαλούς πληρωμής 2 χρόνια διεθνούς εγγύησης Αντικαταβολή Χωρίς επιπλέον κόστος Μπείτε στην Tefal Family! Εγγραφείτε στο newsletter και διεκδικήστε -15% έκπτωση στην πρώτη σας παραγγελία Εγγραφή Συμφωνώ με τη χρήση των προσωπικών μου δεδομένων από την Groupe Seb. facebook instagram Εξυπηρέτηση Καταναλωτών Εγγύηση και επισκευές Οδηγίες χρήσης Φόρμα Επικοινωνίας 15 χρόνια επισκευασίμοτητα Rowenta Ανακάλυψε την Rowenta Η Ιστορία μας Οι Δεσμεύσεις μας Τα κατασκευασμένα στην Γαλλία προϊόντα μας Οδηγός Αγορών Πως να επιλέξεις Ισιωτική Μαλλιών Πως να επιλέξεις Σεσουάρ Μαλλιών Πως να επιλέξεις την Ιδανική Σκούπα Καθαρισμού Πως να επιλέξεις Σίδερο Ατμού Πως να επιλέξεις Ρομποτική Σκούπα Νομικά Πολιτική Cookies Πολιτική Απορρήτου Όροι και Προϋποθέσεις Πώλησης Όροι και Προϋποθέσεις Χρήσης Επικοινωνία mail contact@shoptefalgr.groupeseb.com phone Δευτέρα - Παρασκευή | 9:30-17:30 | 210-6371262 address Tefal Factory Χαλάνδρι Tefal Outlet Designer Outlet Athens facebook instagram Cookies Πολιτική Απορρήτου Νομική Ενημέρωση Όροι Χρήσης Φόρμα Επικοινωνίας © 2026 Rowenta - Όλα τα δικαιώματα διατηρούνται",
+    "manufacturer_documents": [
+      {
+        "name": "product_page",
+        "provider_id": "tefal_shop",
+        "document_type": "html",
+        "url": "https://shop.tefal.gr/products/rowenta-x-plorer-serie-90-skoupa-robot-rr8797-animal",
+        "final_url": "https://shop.tefal.gr/products/rowenta-x-plorer-serie-90-skoupa-robot-rr8797-animal",
+        "content_type_hint": "text/html",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\manufacturer\\product_page.html",
+        "text_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\manufacturer\\product_page.txt",
+        "content_type": "text/html",
+        "available": true,
+        "parsed": true,
+        "field_count": 36,
+        "section_count": 1,
+        "warnings": []
+      }
+    ],
+    "presentation_source_html": "<div class=\"sku-description\">\n<div class=\"simple-description js-description-html\">\n<p>Η σκούπα ρομπότ της Rowenta προσφέρει μια εξαιρετική λύση για τον καθαρισμό του σπιτιού, συνδυάζοντας σκούπισμα και σφουγγάρισμα. Με κάδο χωρητικότητας 260ml, είναι ιδανική για να συλλέγει σκόνη, τρίχες και μικρά σκουπιδάκια από διάφορους τύπους δαπέδων, όπως ξύλινα, πλακάκια και μάρμαρα. Έχει σχεδιαστεί για να κινείται αυτόματα στον χώρο, αναγνωρίζοντας τα εμπόδια και επιλέγοντας την καλύτερη διαδρομή καθαρισμού μέσω της προηγμένης τεχνολογίας πλοήγησης με αισθητήρες και χαρτογράφηση.</p>\n<p>Η σκούπα διαθέτει λειτουργίες όπως η αυτόματη φόρτιση, επιστρέφοντας στην βάση της όταν ολοκληρωθεί ο καθαρισμός ή όταν χρειάζεται φόρτιση. Το αυτόματο άδειασμα του κάδου εξοικονομεί χρόνο, επιτρέποντάς σου να μην ανησυχείς για τη συχνή αδειάσματα της σκούπας. Επιπλέον, με τη δυνατότητα σφουγγαρίσματος μπορείς να πετύχεις περισσότερη καθαριότητα σε βάθος.</p>\n<p>Η συνδεσιμότητα μέσω Wi-Fi σου προσφέρει την ευκολία του απομακρυσμένου ελέγχου μέσω εφαρμογής, καθώς και τη δυνατότητα να την ελέγχεις με φωνητικές εντολές από βοηθούς όπως η Alexa και η Google Home. Έτσι, μπορείς να προγραμματίζεις τον καθαρισμό και να επιλέγεις το επίπεδο αναρρόφησης ακόμα κι όταν είσαι μακριά από το σπίτι.</p>\n<ul>\n<li><strong>Σφουγγάρισμα</strong></li>\n<li>\n<strong>Διάρκεια Μπαταρίας (Αυτονομία):</strong> 270 λεπτά</li>\n<li>\n<strong>Θόρυβος:</strong> 74 dB</li>\n<li>\n<strong>Ύψος:</strong> 9.7 cm</li>\n<li>\n<strong>Πλάτος:</strong> 32.5 cm</li>\n<li>\n<strong>Βάθος:</strong> 32.5 cm</li>\n</ul>\n</div>\n</div>",
+    "presentation_source_text": "Η σκούπα ρομπότ της Rowenta προσφέρει μια εξαιρετική λύση για τον καθαρισμό του σπιτιού, συνδυάζοντας σκούπισμα και σφουγγάρισμα. Με κάδο χωρητικότητας 260ml, είναι ιδανική για να συλλέγει σκόνη, τρίχες και μικρά σκουπιδάκια από διάφορους τύπους δαπέδων, όπως ξύλινα, πλακάκια και μάρμαρα. Έχει σχεδιαστεί για να κινείται αυτόματα στον χώρο, αναγνωρίζοντας τα εμπόδια και επιλέγοντας την καλύτερη διαδρομή καθαρισμού μέσω της προηγμένης τεχνολογίας πλοήγησης με αισθητήρες και χαρτογράφηση. Η σκούπα διαθέτει λειτουργίες όπως η αυτόματη φόρτιση, επιστρέφοντας στην βάση της όταν ολοκληρωθεί ο καθαρισμός ή όταν χρειάζεται φόρτιση. Το αυτόματο άδειασμα του κάδου εξοικονομεί χρόνο, επιτρέποντάς σου να μην ανησυχείς για τη συχνή αδειάσματα της σκούπας. Επιπλέον, με τη δυνατότητα σφουγγαρίσματος μπορείς να πετύχεις περισσότερη καθαριότητα σε βάθος. Η συνδεσιμότητα μέσω Wi-Fi σου προσφέρει την ευκολία του απομακρυσμένου ελέγχου μέσω εφαρμογής, καθώς και τη δυνατότητα να την ελέγχεις με φωνητικές εντολές από βοηθούς όπως η Alexa και η Google Home. Έτσι, μπορείς να προγραμματίζεις τον καθαρισμό και να επιλέγεις το επίπεδο αναρρόφησης ακόμα κι όταν είσαι μακριά από το σπίτι. Σφουγγάρισμα Διάρκεια Μπαταρίας (Αυτονομία): 270 λεπτά Θόρυβος: 74 dB Ύψος: 9.7 cm Πλάτος: 32.5 cm Βάθος: 32.5 cm",
+    "raw_html_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\344708.raw.html",
+    "scraped_at": "2026-03-27T08:14:51+00:00",
+    "fallback_used": true,
+    "mpn": "RR8797WH"
+  },
+  "taxonomy": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Σκούπισμα",
+    "sub_category": "Σκούπες Ρομπότ",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Ρομπότ",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
+    "confidence": 19.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,leaf_name_overlap,sub_name_overlap",
+    "gender": "fem",
+    "plural_label": "Σκούπες Ρομπότ"
+  },
+  "schema_match": {
+    "matched_schema_id": "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "matched_sub_category": "Σκούπες Ρομπότ",
+    "score": 0.085,
+    "warnings": [
+      "weak_schema_match",
+      "missing_expected_sections:1",
+      "schema_sentinel_section_missing"
+    ]
+  },
+  "deterministic_product": {
+    "brand": "Rowenta",
+    "mpn": "RR8797WH",
+    "manufacturer": "Rowenta",
+    "category_phrase": "Σκούπα Ρομπότ",
+    "name_differentiators": [
+      "270 min (*στη λειτουργία eco)",
+      "Χαρτογράφηση"
+    ],
+    "preserve_parsed_title": false,
+    "name": "Rowenta RR8797WH – Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση",
+    "name_draft_tail": "Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση",
+    "meta_title": "Rowenta RR8797WH Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση | eTranoulis",
+    "meta_description_draft": "Η Rowenta RR8797WH είναι Σκούπα Ρομπότ με 270 min (*στη λειτουργία eco), Χαρτογράφηση.",
+    "seo_keyword": "rowenta-rr8797wh-skoupa-rompot-270-min-sti-leitourgia-eco-chartografisi"
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "selection_reason": "matched_schema_template_with_custom_overrides",
+    "template_source": "schema_library_with_custom_overrides",
+    "matched_schema_id": "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "custom_template_id": "skroutz_robot_vacuum_v1",
+    "preferred_schema_source_files": [
+      "skoypes_rompot.json"
+    ],
+    "field_count": 6,
+    "unresolved_count": 1,
+    "fields": [
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος ισχυς pa",
+        "label": "Ισχύς (Pa",
+        "value": "6000 Pa",
+        "resolved_from": "spec_alias:Απορρόφηση"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος χρονος φορτισης μπαταριας σε min",
+        "label": "Χρόνος φόρτισης μπαταρίας σε min",
+        "value": "240 min",
+        "resolved_from": "spec_alias:Διάρκεια Φόρτισης"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος χωρος καλυψης m",
+        "label": "Χώρος Κάλυψης (m²",
+        "value": "270 m²",
+        "resolved_from": "spec_alias:Κάλυψη Χώρου"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος χωρητικοτητα σε λιτρα",
+        "label": "Χωρητικότητα σε λίτρα",
+        "value": "260 ml",
+        "resolved_from": "spec_alias:Χωρητικότητα Κάδου Στερεών"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος δαπεδου",
+        "label": "Τύπος δαπέδου",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος σφουγγαρισμα",
+        "label": "Σφουγγάρισμα",
+        "value": "Ηλεκτρονικό",
+        "resolved_from": "spec_alias:Σφουγγάρισμα"
+      }
+    ]
+  },
+  "downloaded_gallery_count": 4,
+  "downloaded_besco_count": 0,
+  "llm_product": {
+    "meta_description": "Η Rowenta RR8797WH είναι σκούπα ρομπότ με χαρτογράφηση, σκούπισμα και σφουγγάρισμα, ισχύ αναρρόφησης 6000 Pa και συνδεσιμότητα Wi-Fi.",
+    "meta_keywords": [
+      "Rowenta RR8797WH",
+      "σκούπα ρομπότ",
+      "σκούπα ρομπότ με χαρτογράφηση",
+      "σκούπα ρομπότ με σφουγγάρισμα",
+      "σκούπα ρομπότ Wi-Fi"
+    ],
+    "meta_keyword_csv": "Rowenta RR8797WH, σκούπα ρομπότ, σκούπα ρομπότ με χαρτογράφηση, σκούπα ρομπότ με σφουγγάρισμα, σκούπα ρομπότ Wi-Fi"
+  },
+  "llm_presentation": {
+    "intro_html": "Η <strong>Rowenta RR8797WH</strong> είναι μια σκούπα ρομπότ που συνδυάζει σκούπισμα και σφουγγάρισμα, προσφέροντας πρακτική φροντίδα για την καθημερινή καθαριότητα του σπιτιού. Διαθέτει χαρτογράφηση για οργανωμένη κίνηση στον χώρο και συνδεσιμότητα Wi-Fi για απομακρυσμένο έλεγχο μέσω εφαρμογής, ενώ υποστηρίζει και φωνητικές εντολές με Alexa και Google Home. Η ισχύς αναρρόφησης φτάνει τα 6000 Pa, η χωρητικότητα του κάδου στερεών είναι 260 ml και του δοχείου νερού 290 ml, ώστε να καλύπτει αποτελεσματικά τις ανάγκες καθαρισμού σε κάθε χρήση. Η διάρκεια φόρτισης είναι 240 λεπτά και η αυτονομία φτάνει τα 270 λεπτά, ενώ όταν χρειάζεται επιστρέφει αυτόματα στη βάση φόρτισης. Με ύψος 9,7 cm, πλάτος 32,5 cm και βάθος 32,5 cm, κινείται με ευελιξία, ενώ ολοκληρώνει το σύνολο της εμπειρίας σε λευκό χρώμα.",
+    "sections": []
+  },
+  "csv_row": {
+    "model": "344708",
+    "mpn": "RR8797WH",
+    "name": "Rowenta RR8797WH – Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση",
+    "description": "<div class=\"etr-desc\">\n<h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Rowenta RR8797WH – Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση</strong></span></h2>\n\n<p style=\"margin-left:auto; margin-right:auto; text-align:left\"><span style=\"font-size:24px\">\nΗ <strong>Rowenta RR8797WH</strong> είναι μια σκούπα ρομπότ που συνδυάζει σκούπισμα και σφουγγάρισμα, προσφέροντας πρακτική φροντίδα για την καθημερινή καθαριότητα του σπιτιού. Διαθέτει χαρτογράφηση για οργανωμένη κίνηση στον χώρο και συνδεσιμότητα Wi-Fi για απομακρυσμένο έλεγχο μέσω εφαρμογής, ενώ υποστηρίζει και φωνητικές εντολές με Alexa και Google Home. Η ισχύς αναρρόφησης φτάνει τα 6000 Pa, η χωρητικότητα του κάδου στερεών είναι 260 ml και του δοχείου νερού 290 ml, ώστε να καλύπτει αποτελεσματικά τις ανάγκες καθαρισμού σε κάθε χρήση. Η διάρκεια φόρτισης είναι 240 λεπτά και η αυτονομία φτάνει τα 270 λεπτά, ενώ όταν χρειάζεται επιστρέφει αυτόματα στη βάση φόρτισης. Με ύψος 9,7 cm, πλάτος 32,5 cm και βάθος 32,5 cm, κινείται με ευελιξία, ενώ ολοκληρώνει το σύνολο της εμπειρίας σε λευκό χρώμα.\n</span></p>\n\n<div style=\"margin-bottom:20px; margin-left:auto; margin-right:auto; margin-top:20px; text-align:center\">\n<a href=\"https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot\" style=\"font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;\">Δείτε περισσότερες Σκούπες Ρομπότ εδώ</a>\n</div>\n\n<hr />\n<div class=\"etr-desc\">\n\n</div>\n</div>",
+    "characteristics": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση προϊόντος</strong></td></tr></thead><tbody><tr><td>Ισχύς (Pa</td><td style=\"text-align:right;\"><strong>6000 Pa</strong></td></tr><tr><td>Χρόνος φόρτισης μπαταρίας σε min</td><td style=\"text-align:right;\"><strong>240 min</strong></td></tr><tr><td>Χώρος Κάλυψης (m²</td><td style=\"text-align:right;\"><strong>270 m²</strong></td></tr><tr><td>Χωρητικότητα σε λίτρα</td><td style=\"text-align:right;\"><strong>260 ml</strong></td></tr><tr><td>Τύπος δαπέδου</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Σφουγγάρισμα</td><td style=\"text-align:right;\"><strong>Ηλεκτρονικό</strong></td></tr></tbody></table>",
+    "category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα///Σκούπες Ρομπότ:::Μικροσυσκευές",
+    "image": "catalog/01_main/344708/344708-1.jpg",
+    "additional_image": "catalog/01_main/344708/344708-2.jpg:::catalog/01_main/344708/344708-3.jpg:::catalog/01_main/344708/344708-4.jpg",
+    "manufacturer": "Rowenta",
+    "price": "0",
+    "quantity": "0",
+    "minimum": "1",
+    "subtract": "1",
+    "stock_status": "Έως 30 ημέρες",
+    "status": "0",
+    "meta_keyword": "Rowenta RR8797WH, σκούπα ρομπότ, σκούπα ρομπότ με χαρτογράφηση, σκούπα ρομπότ με σφουγγάρισμα, σκούπα ρομπότ Wi-Fi",
+    "meta_title": "Rowenta RR8797WH Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση | eTranoulis",
+    "meta_description": "Η Rowenta RR8797WH είναι σκούπα ρομπότ με χαρτογράφηση, σκούπισμα και σφουγγάρισμα, ισχύ αναρρόφησης 6000 Pa και συνδεσιμότητα Wi-Fi.",
+    "seo_keyword": "rowenta-rr8797wh-skoupa-rompot-270-min-sti-leitourgia-eco-chartografisi",
+    "product_url": "https://www.etranoulis.gr/rowenta-rr8797wh-skoupa-rompot-270-min-sti-leitourgia-eco-chartografisi",
+    "related_product": "",
+    "bestprice_status": "1",
+    "skroutz_status": "0",
+    "boxnow": "1"
+  },
+  "csv_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "csv_ordered_row": {
+    "model": "344708",
+    "mpn": "RR8797WH",
+    "name": "Rowenta RR8797WH – Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση",
+    "description": "<div class=\"etr-desc\">\n<h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Rowenta RR8797WH – Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση</strong></span></h2>\n\n<p style=\"margin-left:auto; margin-right:auto; text-align:left\"><span style=\"font-size:24px\">\nΗ <strong>Rowenta RR8797WH</strong> είναι μια σκούπα ρομπότ που συνδυάζει σκούπισμα και σφουγγάρισμα, προσφέροντας πρακτική φροντίδα για την καθημερινή καθαριότητα του σπιτιού. Διαθέτει χαρτογράφηση για οργανωμένη κίνηση στον χώρο και συνδεσιμότητα Wi-Fi για απομακρυσμένο έλεγχο μέσω εφαρμογής, ενώ υποστηρίζει και φωνητικές εντολές με Alexa και Google Home. Η ισχύς αναρρόφησης φτάνει τα 6000 Pa, η χωρητικότητα του κάδου στερεών είναι 260 ml και του δοχείου νερού 290 ml, ώστε να καλύπτει αποτελεσματικά τις ανάγκες καθαρισμού σε κάθε χρήση. Η διάρκεια φόρτισης είναι 240 λεπτά και η αυτονομία φτάνει τα 270 λεπτά, ενώ όταν χρειάζεται επιστρέφει αυτόματα στη βάση φόρτισης. Με ύψος 9,7 cm, πλάτος 32,5 cm και βάθος 32,5 cm, κινείται με ευελιξία, ενώ ολοκληρώνει το σύνολο της εμπειρίας σε λευκό χρώμα.\n</span></p>\n\n<div style=\"margin-bottom:20px; margin-left:auto; margin-right:auto; margin-top:20px; text-align:center\">\n<a href=\"https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot\" style=\"font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;\">Δείτε περισσότερες Σκούπες Ρομπότ εδώ</a>\n</div>\n\n<hr />\n<div class=\"etr-desc\">\n\n</div>\n</div>",
+    "characteristics": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση προϊόντος</strong></td></tr></thead><tbody><tr><td>Ισχύς (Pa</td><td style=\"text-align:right;\"><strong>6000 Pa</strong></td></tr><tr><td>Χρόνος φόρτισης μπαταρίας σε min</td><td style=\"text-align:right;\"><strong>240 min</strong></td></tr><tr><td>Χώρος Κάλυψης (m²</td><td style=\"text-align:right;\"><strong>270 m²</strong></td></tr><tr><td>Χωρητικότητα σε λίτρα</td><td style=\"text-align:right;\"><strong>260 ml</strong></td></tr><tr><td>Τύπος δαπέδου</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Σφουγγάρισμα</td><td style=\"text-align:right;\"><strong>Ηλεκτρονικό</strong></td></tr></tbody></table>",
+    "category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα///Σκούπες Ρομπότ:::Μικροσυσκευές",
+    "image": "catalog/01_main/344708/344708-1.jpg",
+    "additional_image": "catalog/01_main/344708/344708-2.jpg:::catalog/01_main/344708/344708-3.jpg:::catalog/01_main/344708/344708-4.jpg",
+    "manufacturer": "Rowenta",
+    "price": "0",
+    "quantity": "0",
+    "minimum": "1",
+    "subtract": "1",
+    "stock_status": "Έως 30 ημέρες",
+    "status": "0",
+    "meta_keyword": "Rowenta RR8797WH, σκούπα ρομπότ, σκούπα ρομπότ με χαρτογράφηση, σκούπα ρομπότ με σφουγγάρισμα, σκούπα ρομπότ Wi-Fi",
+    "meta_title": "Rowenta RR8797WH Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση | eTranoulis",
+    "meta_description": "Η Rowenta RR8797WH είναι σκούπα ρομπότ με χαρτογράφηση, σκούπισμα και σφουγγάρισμα, ισχύ αναρρόφησης 6000 Pa και συνδεσιμότητα Wi-Fi.",
+    "seo_keyword": "rowenta-rr8797wh-skoupa-rompot-270-min-sti-leitourgia-eco-chartografisi",
+    "product_url": "https://www.etranoulis.gr/rowenta-rr8797wh-skoupa-rompot-270-min-sti-leitourgia-eco-chartografisi",
+    "related_product": "",
+    "bestprice_status": "1",
+    "skroutz_status": "0",
+    "boxnow": "1"
+  },
+  "mapping_warnings": [
+    "characteristics_template_used:schema:sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "characteristics_template_unresolved_fields:1"
+  ]
+}

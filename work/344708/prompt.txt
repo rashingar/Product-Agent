@@ -1,0 +1,189 @@
+You are my Senior Product Manager and expert in eCommerce & SEO.
+
+This is the compact Product-Agent prompt.
+
+You will receive one JSON object in `LLM_CONTEXT_JSON`.
+That context is already preprocessed by local scripts.
+The local renderer already owns:
+- brand
+- mpn
+- manufacturer
+- name
+- meta_title
+- seo_keyword
+- CSV generation
+- category serialization
+- image paths
+- technical specs HTML
+- final description wrapper HTML
+- CTA URL insertion
+
+Your job is to generate only the unresolved fields that need LLM writing.
+
+OUTPUT RULE
+- Return JSON only.
+- Do not wrap the JSON in Markdown.
+- Do not add commentary before or after the JSON.
+- Use Greek for all user-facing text fields.
+
+YOU MUST RETURN THIS EXACT TOP-LEVEL SHAPE
+{
+  "product": {
+    "meta_description": "",
+    "meta_keywords": []
+  },
+  "presentation": {
+    "intro_html": "",
+    "sections": [
+      {
+        "title": "",
+        "body_html": ""
+      }
+    ]
+  }
+}
+
+FIELD RULES
+- `meta_description`: Smooth the Greek grammar of `deterministic_product.meta_description_draft`. Keep all facts. Fix article agreement and natural phrasing. Exactly one sentence. No quotes, no emojis.
+- `meta_keywords`: array of verified keywords only. No stuffing.
+- `intro_html`: inner HTML only for the intro paragraph. Allowed inline tag: `<strong>`. Keep it between 120 and 180 Greek words.
+- `sections`: exactly the number required by `LLM_CONTEXT_JSON.writer_rules.sections_required`.
+- `sections[].title`: Greek section heading.
+- `sections[].body_html`: inner HTML only for the paragraph. Allowed inline tag: `<strong>`.
+
+CONTENT RULES
+- Use only facts present in the context.
+- Do not invent specs, technologies, capacities, claims, or benefits.
+- Do not cite sources.
+- Do not output filters.
+- Do not output technical specs HTML.
+- Do not output categories.
+- Do not repeat deterministic fields already resolved by the renderer.
+
+META RULES
+- Prefer the strongest verified selling points from `source.key_specs`.
+- Avoid repeating the same phrase mechanically across `deterministic_product.name`, `deterministic_product.meta_title`, and `product.meta_description`.
+
+PRESENTATION RULES
+- Preserve source meaning.
+- Keep the order of `presentation_source_sections`.
+- Do not merge or reorder source sections.
+- Slight paraphrase is allowed only if the meaning stays intact.
+- If source sections are weak, stay conservative instead of inventing claims.
+- The intro paragraph must be 120-180 Greek words, natural, SEO-friendly, and based only on verified facts in the context.
+
+IF `sections_required = 0`
+- Return `"sections": []`.
+
+LLM_CONTEXT_JSON
+{
+  "input": {
+    "model": "344708",
+    "url": "https://www.skroutz.gr/s/64954633/rowenta-s90-skoupa-rompot-gia-skoupisma-sfougarisma-me-chartografisi-kai-wi-fi-leyki.html",
+    "price": "0",
+    "photos": 4,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 1
+  },
+  "source": {
+    "canonical_url": "https://www.skroutz.gr/s/64954633/rowenta-s90-skoupa-rompot-gia-skoupisma-sfougarisma-me-chartografisi-kai-wi-fi-leyki.html",
+    "title": "Rowenta S90+ Σκούπα Ρομπότ για Σκούπισμα & Σφουγγάρισμα με Χαρτογράφηση και Wi-Fi Λευκή",
+    "hero_summary": "Η σκούπα ρομπότ της Rowenta προσφέρει μια εξαιρετική λύση για τον καθαρισμό του σπιτιού, συνδυάζοντας σκούπισμα και σφουγγάρισμα. Με κάδο χωρητικότητας 260ml, είναι ιδανική για να συλλέγει σκόνη, τρίχες και μικρά σκουπιδάκια από διάφορους τύπους δαπέδων, όπως ξύλινα, πλακάκια και μάρμαρα. Έχει σχεδιαστεί για να κινείται αυτόματα στον χώρο, αναγνωρίζοντας τα εμπόδια και επιλέγοντας την καλύτερη διαδρομή καθαρισμού μέσω της προηγμένης τεχνολογίας πλοήγησης με αισθητήρες και χαρτογράφηση. Η σκούπα διαθέτει λειτουργίες όπως η αυτόματη φόρτιση, επιστρέφοντας στην βάση της όταν ολοκληρωθεί ο καθαρισμός ή όταν χρειάζεται φόρτιση. Το αυτόματο άδειασμα του κάδου εξοικονομεί χρόνο, επιτρέποντάς σου να μην ανησυχείς για τη συχνή αδειάσματα της σκούπας. Επιπλέον, με τη δυνατότητα σφουγγαρίσματος μπορείς να πετύχεις περισσότερη καθαριότητα σε βάθος. Η συνδεσιμότητα μέσω Wi-Fi σου προσφέρει την ευκολία του απομακρυσμένου ελέγχου μέσω εφαρμογής, καθώς και τη δυνατότητα να την ελέγχεις με φωνητικές εντολές από βοηθούς όπως η Alexa και η Google Home. Έτσι, μπορείς να προγραμματίζεις τον καθαρισμό και να επιλέγεις το επίπεδο αναρρόφησης ακόμα κι όταν είσαι μακριά από το σπίτι. Σφουγγάρισμα Διάρκεια Μπαταρίας (Αυτονομία): 270 λεπτά Θόρυβος: 74 dB Ύψος: 9.7 cm Πλάτος: 32.5 cm Βάθος: 32.5 cm",
+    "breadcrumbs": [
+      "Αρχική",
+      "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "Σκούπισμα",
+      "Σκούπες Ρομπότ"
+    ],
+    "price_text": "198,00 €",
+    "key_specs": [
+      {
+        "label": "Κωδικός Προϊόντος",
+        "value": "RR8797WH"
+      },
+      {
+        "label": "Χωρητικότητα Κάδου Στερεών",
+        "value": "260 ml"
+      },
+      {
+        "label": "Χωρητικότητα Κάδου Νερού",
+        "value": "290 ml"
+      },
+      {
+        "label": "Διάρκεια Φόρτισης",
+        "value": "240 min"
+      },
+      {
+        "label": "Διάρκεια Μπαταρίας (Αυτονομία)",
+        "value": "270 min"
+      },
+      {
+        "label": "Θόρυβος",
+        "value": "74 dB"
+      },
+      {
+        "label": "Απορρόφηση",
+        "value": "6000 Pa"
+      },
+      {
+        "label": "Χρώμα",
+        "value": "Λευκό"
+      }
+    ],
+    "product_code": "RR8797WH",
+    "brand": "Rowenta",
+    "mpn": "RR8797WH"
+  },
+  "taxonomy": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Σκούπισμα",
+    "sub_category": "Σκούπες Ρομπότ",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Ρομπότ",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
+    "confidence": 19.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,leaf_name_overlap,sub_name_overlap",
+    "gender": "fem",
+    "plural_label": "Σκούπες Ρομπότ"
+  },
+  "schema_match": {
+    "matched_schema_id": "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "matched_sub_category": "Σκούπες Ρομπότ",
+    "score": 0.085,
+    "warnings": [
+      "weak_schema_match",
+      "missing_expected_sections:1",
+      "schema_sentinel_section_missing"
+    ]
+  },
+  "deterministic_product": {
+    "brand": "Rowenta",
+    "mpn": "RR8797WH",
+    "manufacturer": "Rowenta",
+    "category_phrase": "Σκούπα Ρομπότ",
+    "name_differentiators": [
+      "270 min (*στη λειτουργία eco)",
+      "Χαρτογράφηση"
+    ],
+    "preserve_parsed_title": false,
+    "name": "Rowenta RR8797WH – Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση",
+    "name_draft_tail": "Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση",
+    "meta_title": "Rowenta RR8797WH Σκούπα Ρομπότ 270 min (*στη λειτουργία eco) Χαρτογράφηση | eTranoulis",
+    "meta_description_draft": "Η Rowenta RR8797WH είναι Σκούπα Ρομπότ με 270 min (*στη λειτουργία eco), Χαρτογράφηση.",
+    "seo_keyword": "rowenta-rr8797wh-skoupa-rompot-270-min-sti-leitourgia-eco-chartografisi"
+  },
+  "presentation_source_sections": [],
+  "writer_rules": {
+    "language": "Greek",
+    "sections_required": 0,
+    "llm_owned_fields": [
+      "presentation.intro_html",
+      "presentation.sections[].title",
+      "presentation.sections[].body_html",
+      "product.meta_description",
+      "product.meta_keywords"
+    ],
+    "meta_description_rule": "Smooth the Greek grammar of `deterministic_product.meta_description_draft`. Keep all facts. Fix article agreement and natural phrasing. Exactly one sentence.",
+    "intro_html_rule": "120-180 Greek words in one intro paragraph."
+  }
+}

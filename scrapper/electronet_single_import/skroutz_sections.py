@@ -23,6 +23,11 @@ IMAGE_DATA_ATTRS = (
     "data-lazy-media-src-value",
     "data-lazy-media-srcset-value",
 )
+SKIPPED_SECTION_TITLES = {
+    normalize_for_match("Με μια ματιά"),
+    normalize_for_match("Οι χρήστες είπαν:"),
+    normalize_for_match("Οι χρηστες ειπαν:"),
+}
 
 
 def is_placeholder_image_url(url: str | None) -> bool:
@@ -169,7 +174,7 @@ def _extract_section_blocks_from_container(container: Tag, base_url: str) -> lis
     blocks: list[dict[str, Any]] = []
     rich_components = container.select_one("div.rich-components")
     root = rich_components if isinstance(rich_components, Tag) else container
-    for section in root.select("section.two-column, section[class*='two-column']"):
+    for section in root.select("section.two-column, section[class*='two-column'], section.one-column, section[class*='one-column']"):
         block = _extract_section_block(section, base_url)
         if block:
             blocks.append(block)
@@ -180,6 +185,8 @@ def _extract_section_block(section: Tag, base_url: str) -> dict[str, Any] | None
     title_node = section.find(["h1", "h2", "h3", "h4"])
     title = normalize_whitespace(title_node.get_text(" ", strip=True) if isinstance(title_node, Tag) else "")
     if not title:
+        return None
+    if normalize_for_match(title) in SKIPPED_SECTION_TITLES:
         return None
 
     body = _extract_section_body(section)

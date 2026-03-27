@@ -1,0 +1,291 @@
+{
+  "ok": true,
+  "csv_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\229957\\candidate\\229957.csv",
+  "template_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\product_import_template.csv",
+  "baseline_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\products\\229957.csv",
+  "errors": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "characteristics_template_unresolved_fields:11"
+  ],
+  "field_health": {
+    "model": {
+      "status": "match",
+      "candidate_length": 6,
+      "baseline_length": 6,
+      "encoding_issues": [],
+      "candidate_preview": "229957",
+      "baseline_preview": "229957"
+    },
+    "mpn": {
+      "status": "match",
+      "candidate_length": 9,
+      "baseline_length": 9,
+      "encoding_issues": [],
+      "candidate_preview": "KGN36NLEA",
+      "baseline_preview": "KGN36NLEA"
+    },
+    "name": {
+      "status": "different_but_valid",
+      "candidate_length": 69,
+      "baseline_length": 43,
+      "encoding_issues": [],
+      "candidate_preview": "Bosch KGN36NLEA – Ψυγειοκαταψύκτης Total No Frost 305 lt Inox 60 cm E",
+      "baseline_preview": "Bosch KGN36NLEA – Ψυγειοκαταψύκτης 186 cm E"
+    },
+    "description": {
+      "status": "different_but_valid",
+      "candidate_length": 5646,
+      "baseline_length": 5585,
+      "encoding_issues": [],
+      "candidate_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Bosch KGN36NLEA – Ψυγειοκαταψύ",
+      "baseline_preview": "<div class=\"etr-desc\"> <h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Bosch KGN36NLEA – Ψυγειοκαταψύ"
+    },
+    "characteristics": {
+      "status": "different_but_valid",
+      "candidate_length": 5657,
+      "baseline_length": 743,
+      "encoding_issues": [],
+      "candidate_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><t",
+      "baseline_preview": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Χαρακτηριστικά Μοντέλου</strong></td></tr></thead"
+    },
+    "category": {
+      "status": "match",
+      "candidate_length": 120,
+      "baseline_length": 120,
+      "encoding_issues": [],
+      "candidate_preview": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες///Ψυγειοκαταψύκτες",
+      "baseline_preview": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες///Ψυγειοκαταψύκτες"
+    },
+    "image": {
+      "status": "match",
+      "candidate_length": 35,
+      "baseline_length": 35,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/229957/229957-1.jpg",
+      "baseline_preview": "catalog/01_main/229957/229957-1.jpg"
+    },
+    "additional_image": {
+      "status": "match",
+      "candidate_length": 418,
+      "baseline_length": 418,
+      "encoding_issues": [],
+      "candidate_preview": "catalog/01_main/229957/229957-2.jpg:::catalog/01_main/229957/229957-3.jpg:::catalog/01_main/229957/229957-4.jpg:::catalo",
+      "baseline_preview": "catalog/01_main/229957/229957-2.jpg:::catalog/01_main/229957/229957-3.jpg:::catalog/01_main/229957/229957-4.jpg:::catalo"
+    },
+    "manufacturer": {
+      "status": "match",
+      "candidate_length": 5,
+      "baseline_length": 5,
+      "encoding_issues": [],
+      "candidate_preview": "Bosch",
+      "baseline_preview": "Bosch"
+    },
+    "price": {
+      "status": "match",
+      "candidate_length": 3,
+      "baseline_length": 3,
+      "encoding_issues": [],
+      "candidate_preview": "599",
+      "baseline_preview": "599"
+    },
+    "quantity": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "minimum": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "subtract": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "stock_status": {
+      "status": "match",
+      "candidate_length": 13,
+      "baseline_length": 13,
+      "encoding_issues": [],
+      "candidate_preview": "Έως 30 ημέρες",
+      "baseline_preview": "Έως 30 ημέρες"
+    },
+    "status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    },
+    "meta_keyword": {
+      "status": "different_but_valid",
+      "candidate_length": 76,
+      "baseline_length": 105,
+      "encoding_issues": [],
+      "candidate_preview": "Bosch KGN36NLEA, ψυγειοκαταψύκτης Bosch, Total No Frost, 305 lt, Inox, 60 cm",
+      "baseline_preview": "Bosch KGN36NLEA, ψυγειοκαταψύκτης Bosch, ψυγειοκαταψύκτης 305 lt, Total No Frost, ψυγειοκαταψύκτης 186 cm"
+    },
+    "meta_title": {
+      "status": "different_but_valid",
+      "candidate_length": 67,
+      "baseline_length": 54,
+      "encoding_issues": [],
+      "candidate_preview": "Bosch KGN36NLEA Ψυγειοκαταψύκτης Total No Frost 305 lt | eTranoulis",
+      "baseline_preview": "Bosch KGN36NLEA Ψυγειοκαταψύκτης 186 cm E | eTranoulis"
+    },
+    "meta_description": {
+      "status": "different_but_valid",
+      "candidate_length": 138,
+      "baseline_length": 70,
+      "encoding_issues": [],
+      "candidate_preview": "Ο Bosch KGN36NLEA είναι ψυγειοκαταψύκτης με Total No Frost, συνολική χωρητικότητα 305 lt, χρώμα Inox, πλάτος 60 cm και ε",
+      "baseline_preview": "Ο Bosch KGN36NLEA είναι ψυγειοκαταψύκτης 186 cm, ενεργειακής κλάσης E."
+    },
+    "seo_keyword": {
+      "status": "different_but_valid",
+      "candidate_length": 69,
+      "baseline_length": 43,
+      "encoding_issues": [],
+      "candidate_preview": "bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305-lt-inox-60-cm-e",
+      "baseline_preview": "bosch-kgn36nlea-psygeiokatapsyktis-186-cm-e"
+    },
+    "product_url": {
+      "status": "different_but_valid",
+      "candidate_length": 95,
+      "baseline_length": 69,
+      "encoding_issues": [],
+      "candidate_preview": "https://www.etranoulis.gr/bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305-lt-inox-60-cm-e",
+      "baseline_preview": "https://www.etranoulis.gr/bosch-kgn36nlea-psygeiokatapsyktis-186-cm-e"
+    },
+    "related_product": {
+      "status": "match",
+      "candidate_length": 0,
+      "baseline_length": 0,
+      "encoding_issues": [],
+      "candidate_preview": "",
+      "baseline_preview": ""
+    },
+    "bestprice_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "skroutz_status": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "1",
+      "baseline_preview": "1"
+    },
+    "boxnow": {
+      "status": "match",
+      "candidate_length": 1,
+      "baseline_length": 1,
+      "encoding_issues": [],
+      "candidate_preview": "0",
+      "baseline_preview": "0"
+    }
+  },
+  "expected_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "actual_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "baseline_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "summary": {
+    "match": 16,
+    "different_but_valid": 8,
+    "filled": 0,
+    "missing": 0,
+    "encoding_issue": 0,
+    "empty": 0
+  }
+}

@@ -11,8 +11,8 @@ import httpx
 
 from .image_pipeline import ImageConversionError, convert_image_bytes_to_jpg
 from .models import FetchResult, GalleryImage
-from .normalize import normalize_whitespace
-from .skroutz_sections import resolve_skroutz_section_image_url
+from .normalize import normalize_for_match, normalize_whitespace
+from .skroutz_sections import SKIPPED_SECTION_TITLES, resolve_skroutz_section_image_url
 from .utils import ensure_directory, guess_extension, write_bytes
 
 USER_AGENT = (
@@ -140,7 +140,11 @@ class ElectronetFetcher:
                 context = browser.new_context(user_agent=self.user_agent, locale="el-GR")
                 page = context.new_page()
                 page.goto(url, wait_until="domcontentloaded", timeout=45000)
-                page.wait_for_load_state("networkidle", timeout=15000)
+                try:
+                    page.wait_for_load_state("networkidle", timeout=15000)
+                except Exception:
+                    # Skroutz pages may keep background requests open indefinitely.
+                    pass
                 page.wait_for_timeout(3000)
 
                 container_locator = page.locator("div.sku-description")
@@ -187,6 +191,8 @@ class ElectronetFetcher:
                     page.wait_for_timeout(500)
                     title = normalize_whitespace(section_locator.locator("h2, h3, h4").first.inner_text(timeout=10000))
                     if not title:
+                        continue
+                    if normalize_for_match(title) in SKIPPED_SECTION_TITLES:
                         continue
                     body = ""
                     body_locator = section_locator.locator(".body-text")

@@ -1,0 +1,576 @@
+{
+  "input": {
+    "model": "341973",
+    "url": "https://www.electronet.gr/exoplismos-spitioy/mikroi-mageires/tostieres/tostiera-rohnson-mod-r-2122g-prasino",
+    "photos": 4,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 1,
+    "price": "27,90",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape"
+  },
+  "source": "electronet",
+  "fetch_mode": "httpx",
+  "source_resolution": {
+    "requested_url": "https://www.electronet.gr/exoplismos-spitioy/mikroi-mageires/tostieres/tostiera-rohnson-mod-r-2122g-prasino",
+    "detected_source": "electronet",
+    "resolved_url": "https://www.electronet.gr/exoplismos-spitioy/mikroi-mageires/tostieres/tostiera-rohnson-mod-r-2122g-prasino"
+  },
+  "identity_checks": {
+    "source": "electronet",
+    "input_model": "341973",
+    "page_type": "product",
+    "page_product_code": "341973",
+    "name_present": true,
+    "brand_present": true,
+    "mpn_present": true
+  },
+  "url_scope_validation": {
+    "ok": true,
+    "reason": "electronet_domain",
+    "final_url_source": "electronet"
+  },
+  "skroutz_blocks_found": {
+    "hero_summary_present": true,
+    "gallery_images_count": 4,
+    "spec_sections_count": 3,
+    "manufacturer_spec_sections_count": 0
+  },
+  "characteristics_pairs": {
+    "count": 19,
+    "source_count": 19,
+    "manufacturer_count": 0
+  },
+  "taxonomy_resolution": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Μικροί Μάγειρες",
+    "sub_category": "Τοστιέρες",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Τοστιέρες",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/tostieres",
+    "confidence": 19.75,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,sub_name_overlap,filter_map_tiebreak",
+    "gender": "fem",
+    "plural_label": "Τοστιέρες"
+  },
+  "manufacturer_enrichment": {
+    "applied": false,
+    "provider": "unsupported_brand_or_missing_mpn",
+    "documents": [],
+    "warnings": [],
+    "section_count": 0,
+    "field_count": 0
+  },
+  "schema_resolution": {
+    "matched_schema_id": "sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+    "matched_sub_category": "Τοστιέρες",
+    "score": 1.01,
+    "warnings": []
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+    "selection_reason": "matched_schema_template",
+    "template_source": "schema_library",
+    "matched_schema_id": "sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+    "custom_template_id": "",
+    "preferred_schema_source_files": [
+      "tostieres.json"
+    ],
+    "field_count": 19,
+    "unresolved_count": 11,
+    "fields": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος συσκευης",
+        "label": "Τύπος Συσκευής",
+        "value": "Τοστιέρα",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τύπος Συσκευής"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χωρητικοτητα τοστ",
+        "label": "Χωρητικότητα Τόστ",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος ισχυς σε watts",
+        "label": "Ισχύς σε Watts",
+        "value": "1000",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Ισχύς σε Watts"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος υλικο πλακας",
+        "label": "Υλικό Πλάκας",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος διαστασεις πλακας ψησιματος σε εκατοστα",
+        "label": "Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά",
+        "value": "23X15",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος διαμετρος κρεπας σε εκατοστα",
+        "label": "Διάμετρος Κρέπας σε Εκατοστά",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος θερμομονωτικες λαβες",
+        "label": "Θερμομονωτικές Λαβές",
+        "value": "Ναι",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Θερμομονωτικές Λαβές"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος δοχειο συλλογης υγρων",
+        "label": "Δοχείο Συλλογής Υγρών",
+        "value": "Ναι",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Δοχείο Συλλογής Υγρών"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος καθετη αποθηκευση",
+        "label": "Κάθετη Αποθήκευση",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αποθηκευση καλωδιου",
+        "label": "Αποθήκευση Καλωδίου",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος εξαρτηματα",
+        "label": "Εξαρτήματα",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "key": "λειτουργιες ενδειξεις θεσεις ψησιματος",
+        "label": "Θέσεις Ψησίματος",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "key": "λειτουργιες ενδειξεις ρυθμιζομενος θερμοστατης",
+        "label": "Ρυθμιζόμενος Θερμοστάτης",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "key": "λειτουργιες ενδειξεις βαθμιδες θερμοκρασιας",
+        "label": "Βαθμίδες Θερμοκρασίας",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "key": "λειτουργιες ενδειξεις λυχνια θερμανσης",
+        "label": "Λυχνία Θέρμανσης",
+        "value": "Ναι",
+        "resolved_from": "section:Λειτουργίες - Ενδείξεις/Λυχνία Θέρμανσης"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα χρωμα",
+        "label": "Χρώμα",
+        "value": "Πράσινο",
+        "resolved_from": "section:Γενικά Χαρακτηριστικά/Χρώμα"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα διαστασεις συσκευης σε εκατοστα υ χ π χ β",
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαρος συσκευης σε κιλα",
+        "label": "Βάρος Συσκευής σε Κιλά",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα εγγυηση κατασκευαστη",
+        "label": "Εγγύηση Κατασκευαστή",
+        "value": "2 έτη",
+        "resolved_from": "section:Γενικά Χαρακτηριστικά/Εγγύηση Κατασκευαστή"
+      }
+    ]
+  },
+  "skroutz_taxonomy_diagnostics": {
+    "family_key": "",
+    "raw_category_tag": "",
+    "raw_category_href": "",
+    "normalized_href_slug": "",
+    "matched_rule": "",
+    "source_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες///Τοστιέρες",
+    "match_type": "exact_category",
+    "tv_inches": null,
+    "ambiguity": false,
+    "escalation_reason": ""
+  },
+  "schema_preference": {
+    "preferred_source_files": []
+  },
+  "unsupported_features": [],
+  "critical_extractors": {
+    "product_code": "dom:#cscp-sku",
+    "brand": "dom:#product-brand-logo a",
+    "mpn": "title_after_brand",
+    "name": "dom:h1.product-title",
+    "price": "dom:#product-price .price",
+    "taxonomy": "resolved",
+    "schema_match": "matched"
+  },
+  "field_diagnostics": {
+    "breadcrumbs": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#block-mytheme-breadcrumbs .breadcrumb__link",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#block-mytheme-breadcrumbs .breadcrumb__link",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Αρχική",
+          "note": "4 breadcrumbs"
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#cscp-sku",
+      "value_present": true,
+      "value_preview": "341973",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#cscp-sku",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "341973",
+          "note": ""
+        }
+      ]
+    },
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:h1.product-title",
+      "value_present": true,
+      "value_preview": "Τοστιέρα Rohnson MOD R-2122G Πράσινο",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1.product-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Τοστιέρα Rohnson MOD R-2122G Πράσινο",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-brand-logo a",
+      "value_present": true,
+      "value_preview": "Rohnson",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-brand-logo a",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Rohnson",
+          "note": ""
+        }
+      ]
+    },
+    "price": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-price .price",
+      "value_present": true,
+      "value_preview": "27,90 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-price .price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "27,90 €",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.product-desc p",
+      "value_present": true,
+      "value_preview": "Η ασφάλεια χρήσης συναντά την λειτουργικότητα στη νέα τοστιέρα Rohnson R-2122G με πλάκα μαρμάρινης επίστρωσης.O κομψός σχεδιασμός συναντά την αντιθερμαινόμενη λ",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".product-desc p",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Η ασφάλεια χρήσης συναντά την λειτουργικότητα στη νέα τοστιέρα Rohnson R-2122G με πλάκα μαρμάρινης επίστρωσης.O κομψός σχεδιασμός συναντά την αντιθερμαινόμενη λ",
+          "note": ""
+        }
+      ]
+    },
+    "presentation_blocks": {
+      "confidence": 0.0,
+      "selected_strategy": "missing",
+      "value_present": true,
+      "value_preview": "0",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-presentation .ck-text.inline",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": "0 blocks"
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.94,
+      "selected_strategy": "dom:#product-main-attributes .product-main-attribute",
+      "value_present": true,
+      "value_preview": "5 items; first=Τύπος Συσκευής:Τοστιέρα",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-main-attributes .product-main-attribute",
+          "match_count": 5,
+          "success": true,
+          "chosen_preview": "Τύπος Συσκευής Τοστιέρα",
+          "note": "5 rows"
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.98,
+      "selected_strategy": "dom:#product-details .prop-group-wrapper",
+      "value_present": true,
+      "value_preview": "3 sections; first=Επισκόπηση Προϊόντος",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-details .prop-group-wrapper",
+          "match_count": 3,
+          "success": true,
+          "chosen_preview": "Επισκόπηση Προϊόντος Τύπος Συσκευής Τοστιέρα Χωρητικότητα Τόστ - Ισχύς σε Watts 1000 Υλικό Πλάκας - Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά 23X15 Διάμετρος Κρέπ",
+          "note": "3 sections"
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.8,
+      "selected_strategy": "title_after_brand",
+      "value_present": true,
+      "value_preview": "R-2122G",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.96,
+      "selected_strategy": "dom:img.lightbox",
+      "value_present": true,
+      "value_preview": "4 images; first=https://www.electronet.gr/sites/default/files/styles/product_large/public/341973.jpg.webp?itok=U-EYDLOR",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "img.lightbox",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Τοστιέρα Rohnson MOD R-2122G Πράσινο /sites/default/files/styles/product_large/public/341973.jpg.webp?itok=U-EYDLOR",
+          "note": "4 gallery candidates"
+        }
+      ]
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+    "characteristics_template_unresolved_fields:11",
+    "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,sub_name_overlap,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Τοστιέρες",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Τοστιέρες",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/tostieres",
+      "confidence": 19.75,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_breadcrumb",
+        "full_breadcrumb_path",
+        "url_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Εστίες",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Εστίες",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/esties_small",
+      "confidence": 8.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Παρασκευαστής Ποπ Κορν",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Παρασκευαστής Ποπ Κορν",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/popcorn-maker",
+      "confidence": 8.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Φουρνάκια",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Φουρνάκια",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fournakia",
+      "confidence": 8.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Μικροί Μάγειρες",
+      "sub_category": "Ατμομάγειρες",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Ατμομάγειρες",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/atmomageires",
+      "confidence": 8.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 3,
+      "n_rows_total": 19,
+      "source_files": [
+        "tostieres.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:f2704dfe227e48220c6b26f6a6393efb70f2a3ae",
+      "matched_sub_category": null,
+      "score": 0.8023,
+      "n_sections": 2,
+      "n_rows_total": 13,
+      "source_files": [
+        "mplenter.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:cd9ee57d9fa534540b89587b8b4f0384fb81bbf6",
+      "matched_sub_category": null,
+      "score": 0.77,
+      "n_sections": 2,
+      "n_rows_total": 15,
+      "source_files": [
+        "ravdomplenter.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+      "matched_sub_category": null,
+      "score": 0.7645,
+      "n_sections": 2,
+      "n_rows_total": 11,
+      "source_files": [
+        "skoypes_stick.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:41d4e1d08e82978687d40db7acfe37ec3bcc5fab",
+      "matched_sub_category": null,
+      "score": 0.7645,
+      "n_sections": 2,
+      "n_rows_total": 11,
+      "source_files": [
+        "skoypakia.json"
+      ]
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 4,
+    "downloaded_count": 4,
+    "requested_photos": 4
+  },
+  "sections_requested": 0,
+  "sections_extracted": 0,
+  "section_titles": [],
+  "section_image_candidates": [],
+  "section_image_urls_resolved": [],
+  "section_downloads": [],
+  "section_extraction_window": {
+    "candidate_count": 0,
+    "duplicate_signatures_skipped": 0,
+    "selected_container_index": null,
+    "start_anchor": "",
+    "stop_anchor": "",
+    "title_signature": []
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 0,
+    "extracted_count": 0,
+    "downloaded_count": 0,
+    "requested_sections": 0
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\341973.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\341973.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\341973.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\341973.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\341973.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\gallery\\341973-1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\gallery\\341973-2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\gallery\\341973-3.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\gallery\\341973-4.jpg"
+  ]
+}

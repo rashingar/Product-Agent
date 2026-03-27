@@ -2,7 +2,11 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from electronet_single_import.characteristics_pipeline import CharacteristicsTemplateRegistry, build_characteristics_for_product
+from electronet_single_import.characteristics_pipeline import (
+    CharacteristicsTemplateRegistry,
+    _labels_related,
+    build_characteristics_for_product,
+)
 from electronet_single_import.mapping import build_row
 from electronet_single_import.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from electronet_single_import.normalize import normalize_for_match
@@ -12,6 +16,80 @@ from electronet_single_import.schema_matcher import SchemaMatcher
 TV_TEMPLATE_SCHEMA_ID = "sha1:954c8413f2da941e78f3ddce65df522654336c8c"
 HOOD_SCHEMA_ID = "sha1:0afca19ffd5ea62d89eedacca3c889e8d0e67b37"
 BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
+FRIDGE_FREEZER_SCHEMA_ID = "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b"
+
+
+def test_skroutz_fridge_freezer_characteristics_keep_electronet_shape() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="Bosch",
+        mpn="KGN36NLEA",
+        name="Bosch Ψυγειοκαταψύκτης 305lt Total NoFrost Υ186xΠ60xΒ66εκ. Metal Look KGN36NLEA",
+        key_specs=[
+            SpecItem(label="Τύπος", value="Ψυγειοκαταψύκτης"),
+            SpecItem(label="Συνολική Χωρητικότητα", value="305 lt"),
+            SpecItem(label="Χωρητικότητα Κατάψυξης", value="89 lt"),
+            SpecItem(label="Χωρητικότητα Συντήρησης", value="216 lt"),
+            SpecItem(label="Σύστημα Ψύξης", value="Total NoFrost"),
+            SpecItem(label="Χρώμα", value="Inox"),
+        ],
+        spec_sections=[
+            SpecSection(section="Στην Συντήρηση", items=[SpecItem(label="Στην Συντήρηση", value="4 ράφια (ρυθμιζόμενα), 1 συρτάρι, 4 ράφια στην πόρτα")]),
+            SpecSection(section="Στην Κατάψυξη", items=[SpecItem(label="Στην Κατάψυξη", value="3 συρτάρια")]),
+            SpecSection(section="Νέα Ενεργειακή Ετικέτα", items=[SpecItem(label="Ενεργειακή Κλάση", value="E"), SpecItem(label="Επίπεδο Θορύβου", value="42 dB")]),
+            SpecSection(section="Δυνατότητες & Λειτουργίες", items=[SpecItem(label="Αναστρέψιμη Πόρτα", value="Ναι"), SpecItem(label="Έξοδος Κρύου Νερού", value="Όχι"), SpecItem(label="Έξοδος για Παγάκια", value="Όχι"), SpecItem(label="Extra Δυνατότητες", value="Ηχητική Ειδοποίηση Πόρτας, Γρήγορη Ψύξη-Κατάψυξη, Οθόνη Ενδείξεων")]),
+            SpecSection(section="Διαστάσεις", items=[SpecItem(label="Ύψος", value="186 cm"), SpecItem(label="Πλάτος", value="60 cm"), SpecItem(label="Βάθος", value="66 cm")]),
+            SpecSection(section="Smart Ιδιότητες", items=[SpecItem(label="Wi-Fi", value="Όχι")]),
+            SpecSection(section="Εγγύηση", items=[SpecItem(label="Επιμέρους Εγγύηση Κατασκευαστή", value="10 χρόνια στον Συμπιεστή")]),
+        ],
+        manufacturer_source_text=(
+            "Εντοιχιζόμενη / Ελεύθερη: Ελεύθερη συσκευή Αριθμός συμπιεστών: 1 Αριθμός ανεξάρτητων συστημάτων ψύξης: 1 "
+            "Αριθμός ρυθμιζόμενων ραφιών στη συντήρηση: 3 Μπουκαλοθήκη: Όχι Σύστημα No Frost: Ψυγείο και καταψύκτης "
+            "Total No Frost Dynamic MultiAirFlow για ομοιόμορφη κατανομή της ψύξης Ηλεκτρονικό panel ελέγχου (LED) "
+            "Δυνατότητα αλλαγής φοράς πόρτας 4 ράφια από γυαλί ασφαλείας MultiBox 4 ράφια θύρας Εσωτερικός φωτισμός LED "
+            "SuperFreezing Ικανότητα Κατάψυξης σε 24 ώρες : 10 κιλό Αυτονομία σε περίπτωση διακοπής ρεύματος: 12 h ώρες "
+            "Διαστάσεις συσκευής ΥxΠxΒ: 186x60x66 cm Καθαρό βάρος: 61.5 kg Κλιματική Κλάση SN-T"
+        ),
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        leaf_category="Ψυγεία & Καταψύκτες",
+        sub_category="Ψυγειοκαταψύκτες",
+    )
+
+    html, diagnostics, warnings = build_characteristics_for_product(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=FRIDGE_FREEZER_SCHEMA_ID, score=0.95),
+    )
+
+    soup = BeautifulSoup(html, "lxml")
+    values = {
+        (normalize_for_match(field["section"]), normalize_for_match(field["label"])): field["value"]
+        for field in diagnostics["fields"]
+    }
+
+    assert diagnostics["template_source"] == "schema_library_with_custom_overrides"
+    assert diagnostics["matched_schema_id"] == FRIDGE_FREEZER_SCHEMA_ID
+    assert "psygeiokatapsyktes.json" in diagnostics["preferred_schema_source_files"]
+    assert f"characteristics_template_used:schema:{FRIDGE_FREEZER_SCHEMA_ID}" in warnings
+    assert values[(normalize_for_match("Επισκόπηση Προϊόντος"), normalize_for_match("Τεχνολογία Ψύξης"))] == "Total NoFrost"
+    assert values[(normalize_for_match("Επισκόπηση Προϊόντος"), normalize_for_match("Συνολική Καθαρή Χωρητικότητα"))] == "305 lt"
+    assert values[(normalize_for_match("Επισκόπηση Προϊόντος"), normalize_for_match("Πολλαπλή Ροή Αέρα"))] == "Ναι"
+    assert values[(normalize_for_match("Επισκόπηση Προϊόντος"), normalize_for_match("Σήμα Ειδοποίησης Ανοικτής Πόρτας"))] == "Ναι"
+    assert values[(normalize_for_match("Συντήρηση"), normalize_for_match("Αριθμός Ραφιών"))] == "4"
+    assert values[(normalize_for_match("Συντήρηση"), normalize_for_match("Ρυθμιζόμενα Ράφια σε Ύψος"))] == "3"
+    assert values[(normalize_for_match("Συντήρηση"), normalize_for_match("Υλικό Ραφιών"))] == "Γυαλί Ασφαλείας"
+    assert values[(normalize_for_match("Κατάψυξη"), normalize_for_match("Λειτουργία Ταχείας Κατάψυξης"))] == "Ναι"
+    assert values[(normalize_for_match("Γενικά χαρακτηριστικά"), normalize_for_match("Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"))] == "186 x 60 x 66 cm"
+    assert values[(normalize_for_match("Γενικά χαρακτηριστικά"), normalize_for_match("Εγγύηση Κατασκευαστή"))] == "10 χρόνια στον Συμπιεστή"
+
+
+def test_labels_related_treats_dimension_separators_as_equivalent() -> None:
+    assert _labels_related(
+        normalize_for_match("Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"),
+        normalize_for_match("Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β)"),
+    )
 
 
 def write_tv_raw_html(tmp_path: Path) -> Path:
@@ -362,6 +440,30 @@ def test_characteristics_registry_prefers_built_in_hob_schema_for_skroutz() -> N
     assert template["custom_template_id"] == "skroutz_built_in_hob_v1"
 
 
+def test_characteristics_registry_prefers_soundbar_schema_for_skroutz() -> None:
+    registry = CharacteristicsTemplateRegistry()
+    source = SourceProductData(source_name="skroutz", name="TCL Soundbar")
+    taxonomy = TaxonomyResolution(
+        parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+        leaf_category="Audio Systems",
+        sub_category="Sound Bars",
+    )
+
+    preferred_source_files = registry.preferred_schema_source_files(source, taxonomy)
+    template = registry.select_template(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id="sha1:108010e7d8977d4fcfae80de0cac1bd5a99171d1", score=0.9),
+    )
+
+    assert preferred_source_files == ["sound_bars.json"]
+    assert template is not None
+    assert template["matched_schema_id"] == "sha1:108010e7d8977d4fcfae80de0cac1bd5a99171d1"
+    assert template["preferred_schema_source_files"] == ["sound_bars.json"]
+    assert template["template_source"] == "schema_library_with_custom_overrides"
+    assert template["custom_template_id"] == "skroutz_soundbar_v1"
+
+
 def test_built_in_hob_characteristics_use_source_and_manufacturer_evidence() -> None:
     source = SourceProductData(
         source_name="skroutz",
@@ -470,3 +572,55 @@ def test_built_in_hob_characteristics_use_source_and_manufacturer_evidence() -> 
     assert values[normalize_for_match("Βάρος Συσκευής σε Κιλά")] == "8.0"
     assert values[normalize_for_match("Ύψος Διάστασης Εντοιχισμού")] == "4.8 cm"
     assert values[normalize_for_match("Βάθος Διάστασης Εντοιχισμού σε Εκατοστά")] == "49 - 50 cm"
+def test_built_in_hob_characteristics_prefer_manufacturer_values_on_conflict() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="Neff",
+        mpn="T16BT60N0",
+        name="Neff T16BT60N0 Hob",
+        spec_sections=[
+            SpecSection(
+                section="Γενικά",
+                items=[
+                    SpecItem(label="Τύπος", value="Κεραμική"),
+                    SpecItem(label="Αριθμός Εστιών", value="2"),
+                    SpecItem(label="Διακόπτες", value="Αφής"),
+                ],
+            ),
+        ],
+        manufacturer_spec_sections=[
+            SpecSection(
+                section="Τεχνικά στοιχεία",
+                items=[
+                    SpecItem(label="Τύπος εγκατάστασης", value="Εντοιχιζόμενη συσκευή"),
+                    SpecItem(label="Τύπος λειτουργίας", value="Ηλεκτρική"),
+                    SpecItem(label="Βασικό υλικό επιφανειών", value="Υαλοκεραμική"),
+                    SpecItem(label="Συνολικός αριθμός ζωνών που μπορούν να χρησιμοποιηθούν ταυτόχρονα", value="4"),
+                ],
+            ),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        leaf_category="Εντοιχιζόμενες Συσκευές",
+        sub_category="Εστίες",
+    )
+
+    html, diagnostics, _warnings = build_characteristics_for_product(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=BUILT_IN_HOB_SCHEMA_ID, score=0.9),
+    )
+
+    soup = BeautifulSoup(html, "lxml")
+    values = {
+        normalize_for_match(cells[0].get_text(" ", strip=True)): cells[1].get_text(" ", strip=True)
+        for cells in (row.find_all("td") for row in soup.select("tbody tr"))
+        if len(cells) == 2
+    }
+
+    assert diagnostics["template_source"] == "schema_library_with_custom_overrides"
+    assert values[normalize_for_match("Τρόπος Τοποθέτησης")] == "Εντοιχιζόμενη συσκευή"
+    assert values[normalize_for_match("Τεχνολογία Πλατώ Εστιών")] == "Υαλοκεραμική"
+    assert values[normalize_for_match("Αριθμός Ζωνών")] == "4"
+    assert values[normalize_for_match("Αριθμός Ζωνών")] != "2"

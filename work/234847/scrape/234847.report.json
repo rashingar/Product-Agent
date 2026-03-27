@@ -1,0 +1,810 @@
+{
+  "input": {
+    "model": "234847",
+    "url": "https://www.electronet.gr/oikiakes-syskeyes/psygeia-katapsyktes/psygeiokatapsyktes/psygeiokatapsyktis-hisense-rb390n4wbe-mayro-e",
+    "photos": 3,
+    "sections": 0,
+    "skroutz_status": 1,
+    "boxnow": 0,
+    "price": "529",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape"
+  },
+  "source": "electronet",
+  "fetch_mode": "httpx",
+  "source_resolution": {
+    "requested_url": "https://www.electronet.gr/oikiakes-syskeyes/psygeia-katapsyktes/psygeiokatapsyktes/psygeiokatapsyktis-hisense-rb390n4wbe-mayro-e",
+    "detected_source": "electronet",
+    "resolved_url": "https://www.electronet.gr/oikiakes-syskeyes/psygeia-katapsyktes/psygeiokatapsyktes/psygeiokatapsyktis-hisense-rb390n4wbe-mayro-e"
+  },
+  "identity_checks": {
+    "source": "electronet",
+    "input_model": "234847",
+    "page_type": "product",
+    "page_product_code": "234847",
+    "name_present": true,
+    "brand_present": true,
+    "mpn_present": true
+  },
+  "url_scope_validation": {
+    "ok": true,
+    "reason": "electronet_domain",
+    "final_url_source": "electronet"
+  },
+  "skroutz_blocks_found": {
+    "hero_summary_present": true,
+    "gallery_images_count": 3,
+    "spec_sections_count": 5,
+    "manufacturer_spec_sections_count": 0
+  },
+  "characteristics_pairs": {
+    "count": 52,
+    "source_count": 52,
+    "manufacturer_count": 0
+  },
+  "taxonomy_resolution": {
+    "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+    "leaf_category": "Ψυγεία & Καταψύκτες",
+    "sub_category": "Ψυγειοκαταψύκτες",
+    "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγειοκαταψύκτες",
+    "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeiokatapsyktes",
+    "confidence": 12.5,
+    "reason": "parent_breadcrumb,sub_breadcrumb,url_overlap,sub_name_overlap,filter_map_tiebreak",
+    "gender": "masc",
+    "plural_label": "Ψυγειοκαταψύκτες"
+  },
+  "manufacturer_enrichment": {
+    "applied": false,
+    "provider": "",
+    "providers_considered": [],
+    "matched_providers": [],
+    "documents": [],
+    "documents_discovered": 0,
+    "documents_parsed": 0,
+    "warnings": [],
+    "section_count": 0,
+    "field_count": 0,
+    "fallback_reason": "not_applicable_non_skroutz"
+  },
+  "schema_resolution": {
+    "matched_schema_id": "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "matched_sub_category": "Ψυγειοκαταψύκτες",
+    "score": 1.01,
+    "warnings": []
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "selection_reason": "matched_schema_template",
+    "template_source": "schema_library",
+    "matched_schema_id": "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "custom_template_id": "",
+    "preferred_schema_source_files": [
+      "entoixizomena_psygeia.json",
+      "psygeiokatapsyktes.json"
+    ],
+    "field_count": 52,
+    "unresolved_count": 16,
+    "fields": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος ψυγειου",
+        "label": "Τύπος Ψυγείου",
+        "value": "Δίπορτο με κάτω την κατάψυξη",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τύπος Ψυγείου"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τροπος τοποθετησης",
+        "label": "Τρόπος Τοποθέτησης",
+        "value": "Ελεύθερος",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τρόπος Τοποθέτησης"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τεχνολογια ψυξης",
+        "label": "Τεχνολογία Ψύξης",
+        "value": "No Frost",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τεχνολογία Ψύξης"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος συνολικη καθαρη χωρητικοτητα",
+        "label": "Συνολική Καθαρή Χωρητικότητα",
+        "value": "304",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Συνολική Καθαρή Χωρητικότητα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χρωμα",
+        "label": "Χρώμα",
+        "value": "Μαύρο",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Χρώμα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χρωμα πλαινων",
+        "label": "Χρώμα Πλαϊνών",
+        "value": "Μαύρο",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Χρώμα Πλαϊνών"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος ελενχος και ενδειξεις θερμοκρασιας",
+        "label": "Έλενχος και Ενδείξεις Θερμοκρασίας",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αριθμος συμπιεστων μοτερ",
+        "label": "Αριθμός Συμπιεστών (μοτέρ",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος δυο κυκλωματα ψυξης",
+        "label": "Δύο Κυκλώματα Ψύξης",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αισθητηρες ψυξης",
+        "label": "Αισθητήρες Ψύξης",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος πολλαπλη ροη αερα",
+        "label": "Πολλαπλή Ροή Αέρα",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος συστημα εξουδετερωσης οσμων",
+        "label": "Σύστημα Εξουδετέρωσης Οσμών",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αντιβακτηριδιακη τεχνολογια",
+        "label": "Αντιβακτηριδιακή Τεχνολογία",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος συνδεσιμοτητα",
+        "label": "Συνδεσιμότητα",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος σημα ειδοποιησης ανοικτης πορτας",
+        "label": "Σήμα Ειδοποίησης Ανοικτής Πόρτας",
+        "value": "Ακουστικό",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Σήμα Ειδοποίησης Ανοικτής Πόρτας"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος δυνατοτητα αλλαγης φορας πορτας",
+        "label": "Δυνατότητα Αλλαγής Φοράς Πόρτας",
+        "value": "Ναι",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Δυνατότητα Αλλαγής Φοράς Πόρτας"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος επιπλεον χαρακτηριστικα",
+        "label": "Επιπλέον Χαρακτηριστικά",
+        "value": "χειρολαβή με εσοχή",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Επιπλέον Χαρακτηριστικά"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος πλατος συσκευης σε εκατοστα",
+        "label": "Πλάτος Συσκευής σε Εκατοστά",
+        "value": "59,5",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Πλάτος Συσκευής σε Εκατοστά"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος υψος συσκευης σε εκατοστα",
+        "label": "Υψος Συσκευής σε Εκατοστά",
+        "value": "186",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Υψος Συσκευής σε Εκατοστά"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση καθαρη χωρητικοτητα συντηρησης σε λιτρα",
+        "label": "Καθαρή Χωρητικότητα Συντήρησης σε Λίτρα",
+        "value": "207",
+        "resolved_from": "section:Συντήρηση/Καθαρή Χωρητικότητα Συντήρησης σε Λίτρα"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση αριθμος ραφιων",
+        "label": "Αριθμός Ραφιών",
+        "value": "4",
+        "resolved_from": "section:Συντήρηση/Αριθμός Ραφιών"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση ρυθμιζομενα ραφια σε υψος",
+        "label": "Ρυθμιζόμενα Ράφια σε Ύψος",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση υλικο ραφιων",
+        "label": "Υλικό Ραφιών",
+        "value": "Γυαλί",
+        "resolved_from": "section:Συντήρηση/Υλικό Ραφιών"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση αριθμος συρταριων",
+        "label": "Αριθμός Συρταριών",
+        "value": "1",
+        "resolved_from": "section:Συντήρηση/Αριθμός Συρταριών"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση αριθμος συρταριων μισου μεγεθους",
+        "label": "Αριθμός Συρταριών Μισού Μεγέθους",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση συρταρι με ρυθμιση υγρασιας",
+        "label": "Συρτάρι με Ρύθμιση Υγρασίας",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση συρταρι μηδενικης ζωνης 0 c",
+        "label": "Συρτάρι Μηδενικής Ζώνης 0˚C",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση θηκες στην πορτα",
+        "label": "Θήκες στην Πόρτα",
+        "value": "Ναι",
+        "resolved_from": "section:Συντήρηση/Θήκες στην Πόρτα"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση θηκη για μπουκαλια",
+        "label": "Θήκη για Μπουκάλια",
+        "value": "στην πόρτα",
+        "resolved_from": "section:Συντήρηση/Θήκη για Μπουκάλια"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση εσωτερικος φωτισμος",
+        "label": "Εσωτερικός Φωτισμός",
+        "value": "Ναι (με λαμπτήρα LED)",
+        "resolved_from": "section:Συντήρηση/Εσωτερικός Φωτισμός"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση εξωτερικο βρυσακι νερου",
+        "label": "Εξωτερικό Βρυσάκι Νερού",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση λειτουργια ταχειας ψυξης",
+        "label": "Λειτουργία Ταχείας Ψύξης",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Συντήρηση",
+        "key": "συντηρηση επιπλεον χαρακτηριστικα",
+        "label": "Επιπλέον Χαρακτηριστικά",
+        "value": "θήκη για αυγά",
+        "resolved_from": "section:Συντήρηση/Επιπλέον Χαρακτηριστικά"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη καταψυξη με αστερια",
+        "label": "Κατάψυξη με Αστέρια",
+        "value": "4 αστέρια (****)",
+        "resolved_from": "section:Κατάψυξη/Κατάψυξη με Αστέρια"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη καθαρη χωρητικοτητα καταψυξης σε λιτρα",
+        "label": "Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα",
+        "value": "97",
+        "resolved_from": "section:Κατάψυξη/Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη ικανοτητα καταψυξης σε 24 ωρες κιλα",
+        "label": "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά",
+        "value": "6",
+        "resolved_from": "section:Κατάψυξη/Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη αυτονομια καταψυξης σε περιπτωση διακοπης ρευματος ωρες",
+        "label": "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες",
+        "value": "10",
+        "resolved_from": "section:Κατάψυξη/Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη αριθμος συρταριων",
+        "label": "Αριθμός Συρταριών",
+        "value": "1",
+        "resolved_from": "spec_alias:Αριθμός Συρταριών"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη αριθμος ραφιων",
+        "label": "Αριθμός Ραφιών",
+        "value": "4",
+        "resolved_from": "spec_alias:Αριθμός Ραφιών"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη θηκες στην πορτα",
+        "label": "Θήκες στην Πόρτα",
+        "value": "Ναι",
+        "resolved_from": "spec_alias:Θήκες στην Πόρτα"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη λειτουργια ταχειας καταψυξης",
+        "label": "Λειτουργία Ταχείας Κατάψυξης",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη συστημα παροχης παγου",
+        "label": "Σύστημα Παροχής Πάγου",
+        "value": "Παγοκυψέλες",
+        "resolved_from": "section:Κατάψυξη/Σύστημα Παροχής Πάγου"
+      },
+      {
+        "section": "Κατάψυξη",
+        "key": "καταψυξη επιπλεον χαρακτηριστικα",
+        "label": "Επιπλέον Χαρακτηριστικά",
+        "value": "Ρόδες για εύκολη μετακίνηση,1 χ παγοκυψέλη",
+        "resolved_from": "section:Κατάψυξη/Επιπλέον Χαρακτηριστικά"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα ενεργειακη κλαση",
+        "label": "Ενεργειακή Κλάση",
+        "value": "E",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Ενεργειακή Κλάση"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα καθαρη χωρητικοτητα συντηρησης σε λιτρα",
+        "label": "Καθαρή Χωρητικότητα Συντήρησης σε Λίτρα",
+        "value": "207",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Καθαρή Χωρητικότητα Συντήρησης σε Λίτρα"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα καθαρη χωρητικοτητα καταψυξης σε λιτρα",
+        "label": "Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα",
+        "value": "97",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα καταψυξη με αστερια",
+        "label": "Κατάψυξη με Αστέρια",
+        "value": "4 αστέρια (****)",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Κατάψυξη με Αστέρια"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα επιπεδο θορυβου σε db",
+        "label": "Επίπεδο Θορύβου σε dB",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Ενεργειακά χαρακτηριστικά",
+        "key": "ενεργειακα χαρακτηριστικα κλιματικη κλαση",
+        "label": "Κλιματική Κλάση",
+        "value": "SN,Ν,ST,T",
+        "resolved_from": "section:Ενεργειακά χαρακτηριστικά/Κλιματική Κλάση"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαρος συσκευης σε κιλα",
+        "label": "Βάρος Συσκευής σε Κιλά",
+        "value": "57",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Βάρος Συσκευής σε Κιλά"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα διαστασεις συσκευης σε εκατοστα υ χ π χ β",
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+        "value": "186.00 x 59.50 x 58.90",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+      },
+      {
+        "section": "Γενικά χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα εγγυηση κατασκευαστη",
+        "label": "Εγγύηση Κατασκευαστή",
+        "value": "2 έτη",
+        "resolved_from": "section:Γενικά χαρακτηριστικά/Εγγύηση Κατασκευαστή"
+      }
+    ]
+  },
+  "skroutz_taxonomy_diagnostics": {
+    "family_key": "",
+    "raw_category_tag": "",
+    "raw_category_href": "",
+    "normalized_href_slug": "",
+    "matched_rule": "",
+    "source_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες:::ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ///Ψυγεία & Καταψύκτες///Ψυγειοκαταψύκτες",
+    "match_type": "exact_category",
+    "tv_inches": null,
+    "ambiguity": false,
+    "escalation_reason": ""
+  },
+  "schema_preference": {
+    "preferred_source_files": []
+  },
+  "unsupported_features": [],
+  "critical_extractors": {
+    "product_code": "dom:#cscp-sku",
+    "brand": "dom:#product-brand-logo a",
+    "mpn": "title_after_brand",
+    "name": "dom:h1.product-title",
+    "price": "dom:#product-price .price",
+    "taxonomy": "resolved",
+    "schema_match": "matched"
+  },
+  "field_diagnostics": {
+    "breadcrumbs": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#block-mytheme-breadcrumbs .breadcrumb__link",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#block-mytheme-breadcrumbs .breadcrumb__link",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Αρχική",
+          "note": "4 breadcrumbs"
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#cscp-sku",
+      "value_present": true,
+      "value_preview": "234847",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#cscp-sku",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "234847",
+          "note": ""
+        }
+      ]
+    },
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:h1.product-title",
+      "value_present": true,
+      "value_preview": "Ψυγειοκαταψύκτης Hisense RB390N4WBE Μαύρο E",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1.product-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Ψυγειοκαταψύκτης Hisense RB390N4WBE Μαύρο E",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-brand-logo a",
+      "value_present": true,
+      "value_preview": "Hisense",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-brand-logo a",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Hisense",
+          "note": ""
+        }
+      ]
+    },
+    "price": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-price .price",
+      "value_present": true,
+      "value_preview": "529,00 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-price .price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "529,00 €",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.product-desc p",
+      "value_present": true,
+      "value_preview": "Ψυγειοκαταψύκτης NoFrost Plus με ηλεκτρονική οθόνη LED, εξωτερικό βρυσάκι νερού, ειδικό ράφι για μπουκάλια και μεγάλη φρουτολεκάνη λαχανικών και φρούτων από την",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".product-desc p",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Ψυγειοκαταψύκτης NoFrost Plus με ηλεκτρονική οθόνη LED, εξωτερικό βρυσάκι νερού, ειδικό ράφι για μπουκάλια και μεγάλη φρουτολεκάνη λαχανικών και φρούτων από την",
+          "note": ""
+        }
+      ]
+    },
+    "presentation_blocks": {
+      "confidence": 0.0,
+      "selected_strategy": "missing",
+      "value_present": true,
+      "value_preview": "0",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-presentation .ck-text.inline",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": "0 blocks"
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.94,
+      "selected_strategy": "dom:#product-main-attributes .product-main-attribute",
+      "value_present": true,
+      "value_preview": "5 items; first=Τεχνολογία Ψύξης:No Frost",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-main-attributes .product-main-attribute",
+          "match_count": 5,
+          "success": true,
+          "chosen_preview": "Τεχνολογία Ψύξης No Frost",
+          "note": "5 rows"
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.98,
+      "selected_strategy": "dom:#product-details .prop-group-wrapper",
+      "value_present": true,
+      "value_preview": "5 sections; first=Επισκόπηση Προϊόντος",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-details .prop-group-wrapper",
+          "match_count": 5,
+          "success": true,
+          "chosen_preview": "Επισκόπηση Προϊόντος Τύπος Ψυγείου Δίπορτο με κάτω την κατάψυξη Τρόπος Τοποθέτησης Ελεύθερος Τεχνολογία Ψύξης No Frost Συνολική Καθαρή Χωρητικότητα 304 Χρώμα Μα",
+          "note": "5 sections"
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.8,
+      "selected_strategy": "title_after_brand",
+      "value_present": true,
+      "value_preview": "RB390N4WBE",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.96,
+      "selected_strategy": "dom:img.lightbox",
+      "value_present": true,
+      "value_preview": "3 images; first=https://www.electronet.gr/sites/default/files/styles/product_large/public/234847.jpg.webp?itok=ChcqofNf",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "img.lightbox",
+          "match_count": 3,
+          "success": true,
+          "chosen_preview": "Ψυγειοκαταψύκτης Hisense RB390N4WBE Μαύρο E /sites/default/files/styles/product_large/public/234847.jpg.webp?itok=ChcqofNf",
+          "note": "3 gallery candidates"
+        }
+      ]
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+    "characteristics_template_unresolved_fields:16",
+    "parent_breadcrumb,sub_breadcrumb,url_overlap,sub_name_overlap,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγειοκαταψύκτες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγειοκαταψύκτες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeiokatapsyktes",
+      "confidence": 12.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "sub_breadcrumb",
+        "url_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia",
+      "confidence": 5.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Ψυγεία Ντουλάπες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Ψυγεία Ντουλάπες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+      "confidence": 5.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Καταψύκτες",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Καταψύκτες",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/katapsyktes",
+      "confidence": 5.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+      "leaf_category": "Ψυγεία & Καταψύκτες",
+      "sub_category": "Συντηρητές Κρασιών",
+      "taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Ψυγεία & Καταψύκτες > Συντηρητές Κρασιών",
+      "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/synthrhtes-krasiwn",
+      "confidence": 4.5,
+      "reasons": [
+        "parent_breadcrumb",
+        "url_overlap"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 5,
+      "n_rows_total": 52,
+      "source_files": [
+        "entoixizomena_psygeia.json",
+        "psygeiokatapsyktes.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:27acd23e244876dd0f9eee68083304a7800e9aee",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 5,
+      "n_rows_total": 52,
+      "source_files": [
+        "psygeia.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:69cddb69ff2da7918e2607a809c6e9e098d0e632",
+      "matched_sub_category": null,
+      "score": 0.92,
+      "n_sections": 4,
+      "n_rows_total": 31,
+      "source_files": [
+        "entoixizomenoi_katapsyktes.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:771a63f424bb546fed15d1c9b6beaec997bad407",
+      "matched_sub_category": null,
+      "score": 0.9084,
+      "n_sections": 4,
+      "n_rows_total": 32,
+      "source_files": [
+        "katapsyktes.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:b6561906abf4eea130e08e0de5f6f76ef398d80b",
+      "matched_sub_category": null,
+      "score": 0.76,
+      "n_sections": 1,
+      "n_rows_total": 9,
+      "source_files": [
+        "karvoynoy.json"
+      ]
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 3,
+    "downloaded_count": 3,
+    "requested_photos": 3
+  },
+  "sections_requested": 0,
+  "sections_extracted": 0,
+  "section_titles": [],
+  "section_image_candidates": [],
+  "section_image_urls_resolved": [],
+  "section_downloads": [],
+  "section_extraction_window": {
+    "candidate_count": 0,
+    "duplicate_signatures_skipped": 0,
+    "selected_container_index": null,
+    "start_anchor": "",
+    "stop_anchor": "",
+    "title_signature": []
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 0,
+    "extracted_count": 0,
+    "downloaded_count": 0,
+    "requested_sections": 0
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape\\234847.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape\\234847.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape\\234847.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape\\234847.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape\\234847.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape\\gallery\\234847-1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape\\gallery\\234847-2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234847\\scrape\\gallery\\234847-3.jpg"
+  ]
+}

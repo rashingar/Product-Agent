@@ -1,0 +1,471 @@
+{
+  "input": {
+    "model": "341973",
+    "url": "https://www.electronet.gr/exoplismos-spitioy/mikroi-mageires/tostieres/tostiera-rohnson-mod-r-2122g-prasino",
+    "photos": 4,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 1,
+    "price": "27,90",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape"
+  },
+  "source": {
+    "source_name": "",
+    "page_type": "product",
+    "url": "https://www.electronet.gr/exoplismos-spitioy/mikroi-mageires/tostieres/tostiera-rohnson-mod-r-2122g-prasino",
+    "canonical_url": "https://www.electronet.gr/exoplismos-spitioy/mikroi-mageires/tostieres/tostiera-rohnson-mod-r-2122g-prasino",
+    "breadcrumbs": [
+      "Αρχική",
+      "Εξοπλισμός Σπιτιού",
+      "Μικροί Μάγειρες",
+      "Τοστιέρες"
+    ],
+    "skroutz_family": "",
+    "category_tag_text": "",
+    "category_tag_href": "",
+    "category_tag_slug": "",
+    "taxonomy_source_category": "",
+    "taxonomy_match_type": "",
+    "taxonomy_rule_id": "",
+    "taxonomy_ambiguity": false,
+    "taxonomy_escalation_reason": "",
+    "taxonomy_tv_inches": null,
+    "product_code": "341973",
+    "brand": "Rohnson",
+    "name": "Τοστιέρα Rohnson MOD R-2122G Πράσινο",
+    "hero_summary": "Η ασφάλεια χρήσης συναντά την λειτουργικότητα στη νέα τοστιέρα Rohnson R-2122G με πλάκα μαρμάρινης επίστρωσης.O κομψός σχεδιασμός συναντά την αντιθερμαινόμενη λαβή και τις φωτεινές ενδείξεις ετοιμότητας και λειτουργίας για μέγιστη ασφάλεια!",
+    "price_text": "27,90 €",
+    "price_value": 27.9,
+    "installments_text": "",
+    "delivery_text": "Διαθέσιμο για παράδοση στον χώρο σου",
+    "pickup_text": "Επιλέξτε κατάστημα για να δείτε τη διαθεσιμότητα",
+    "gallery_images": [
+      {
+        "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/341973.jpg.webp?itok=U-EYDLOR",
+        "alt": "Τοστιέρα Rohnson MOD R-2122G Πράσινο",
+        "position": 1,
+        "local_filename": "341973-1.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\gallery\\341973-1.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      },
+      {
+        "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/341973_1.jpg.webp?itok=IaXpJs0c",
+        "alt": "Τοστιέρα Rohnson MOD R-2122G Πράσινο",
+        "position": 2,
+        "local_filename": "341973-2.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\gallery\\341973-2.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      },
+      {
+        "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/341973_2.jpg.webp?itok=hyfTT0Jg",
+        "alt": "Τοστιέρα Rohnson MOD R-2122G Πράσινο",
+        "position": 3,
+        "local_filename": "341973-3.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\gallery\\341973-3.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      },
+      {
+        "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/341973_3.jpg.webp?itok=_1ijCYFj",
+        "alt": "Τοστιέρα Rohnson MOD R-2122G Πράσινο",
+        "position": 4,
+        "local_filename": "341973-4.jpg",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\gallery\\341973-4.jpg",
+        "content_type": "image/jpeg",
+        "downloaded": true
+      }
+    ],
+    "besco_images": [],
+    "energy_label_asset_url": "",
+    "product_sheet_asset_url": "",
+    "key_specs": [
+      {
+        "label": "Τύπος Συσκευής",
+        "value": "Τοστιέρα"
+      },
+      {
+        "label": "Χωρητικότητα Τόστ",
+        "value": null
+      },
+      {
+        "label": "Ισχύς σε Watts",
+        "value": "1000"
+      },
+      {
+        "label": "Υλικό Πλάκας",
+        "value": null
+      },
+      {
+        "label": "Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά",
+        "value": "23X15"
+      }
+    ],
+    "spec_sections": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "items": [
+          {
+            "label": "Τύπος Συσκευής",
+            "value": "Τοστιέρα"
+          },
+          {
+            "label": "Χωρητικότητα Τόστ",
+            "value": null
+          },
+          {
+            "label": "Ισχύς σε Watts",
+            "value": "1000"
+          },
+          {
+            "label": "Υλικό Πλάκας",
+            "value": null
+          },
+          {
+            "label": "Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά",
+            "value": "23X15"
+          },
+          {
+            "label": "Διάμετρος Κρέπας σε Εκατοστά",
+            "value": null
+          },
+          {
+            "label": "Θερμομονωτικές Λαβές",
+            "value": "Ναι"
+          },
+          {
+            "label": "Δοχείο Συλλογής Υγρών",
+            "value": "Ναι"
+          },
+          {
+            "label": "Κάθετη Αποθήκευση",
+            "value": null
+          },
+          {
+            "label": "Αποθήκευση Καλωδίου",
+            "value": null
+          },
+          {
+            "label": "Εξαρτήματα",
+            "value": null
+          }
+        ]
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "items": [
+          {
+            "label": "Θέσεις Ψησίματος",
+            "value": null
+          },
+          {
+            "label": "Ρυθμιζόμενος Θερμοστάτης",
+            "value": null
+          },
+          {
+            "label": "Βαθμίδες Θερμοκρασίας",
+            "value": null
+          },
+          {
+            "label": "Λυχνία Θέρμανσης",
+            "value": "Ναι"
+          }
+        ]
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "items": [
+          {
+            "label": "Χρώμα",
+            "value": "Πράσινο"
+          },
+          {
+            "label": "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
+            "value": null
+          },
+          {
+            "label": "Βάρος Συσκευής σε Κιλά",
+            "value": null
+          },
+          {
+            "label": "Εγγύηση Κατασκευαστή",
+            "value": "2 έτη"
+          }
+        ]
+      }
+    ],
+    "manufacturer_spec_sections": [],
+    "manufacturer_source_text": "",
+    "manufacturer_documents": [],
+    "presentation_source_html": "",
+    "presentation_source_text": "",
+    "raw_html_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\341973\\scrape\\341973.raw.html",
+    "scraped_at": "2026-03-24T11:40:18+00:00",
+    "fallback_used": false,
+    "mpn": "R-2122G"
+  },
+  "taxonomy": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Μικροί Μάγειρες",
+    "sub_category": "Τοστιέρες",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Τοστιέρες",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/tostieres",
+    "confidence": 19.75,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,sub_name_overlap,filter_map_tiebreak",
+    "gender": "fem",
+    "plural_label": "Τοστιέρες"
+  },
+  "schema_match": {
+    "matched_schema_id": "sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+    "matched_sub_category": "Τοστιέρες",
+    "score": 1.01,
+    "warnings": []
+  },
+  "deterministic_product": {
+    "brand": "Rohnson",
+    "mpn": "R-2122G",
+    "manufacturer": "Rohnson",
+    "category_phrase": "Τοστιέρα",
+    "name_differentiators": [
+      "MOD",
+      "Πράσινο"
+    ],
+    "preserve_parsed_title": false,
+    "name": "Rohnson R-2122G – Τοστιέρα MOD Πράσινο",
+    "name_draft_tail": "Τοστιέρα MOD Πράσινο",
+    "meta_title": "Rohnson R-2122G Τοστιέρα MOD Πράσινο | eTranoulis",
+    "meta_description_draft": "Η Rohnson R-2122G είναι Τοστιέρα με MOD, Πράσινο.",
+    "seo_keyword": "rohnson-r-2122g-tostiera-mod-prasino"
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+    "selection_reason": "matched_schema_template",
+    "template_source": "schema_library",
+    "matched_schema_id": "sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+    "custom_template_id": "",
+    "preferred_schema_source_files": [
+      "tostieres.json"
+    ],
+    "field_count": 19,
+    "unresolved_count": 11,
+    "fields": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος συσκευης",
+        "label": "Τύπος Συσκευής",
+        "value": "Τοστιέρα",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τύπος Συσκευής"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χωρητικοτητα τοστ",
+        "label": "Χωρητικότητα Τόστ",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος ισχυς σε watts",
+        "label": "Ισχύς σε Watts",
+        "value": "1000",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Ισχύς σε Watts"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος υλικο πλακας",
+        "label": "Υλικό Πλάκας",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος διαστασεις πλακας ψησιματος σε εκατοστα",
+        "label": "Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά",
+        "value": "23X15",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος διαμετρος κρεπας σε εκατοστα",
+        "label": "Διάμετρος Κρέπας σε Εκατοστά",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος θερμομονωτικες λαβες",
+        "label": "Θερμομονωτικές Λαβές",
+        "value": "Ναι",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Θερμομονωτικές Λαβές"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος δοχειο συλλογης υγρων",
+        "label": "Δοχείο Συλλογής Υγρών",
+        "value": "Ναι",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Δοχείο Συλλογής Υγρών"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος καθετη αποθηκευση",
+        "label": "Κάθετη Αποθήκευση",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος αποθηκευση καλωδιου",
+        "label": "Αποθήκευση Καλωδίου",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος εξαρτηματα",
+        "label": "Εξαρτήματα",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "key": "λειτουργιες ενδειξεις θεσεις ψησιματος",
+        "label": "Θέσεις Ψησίματος",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "key": "λειτουργιες ενδειξεις ρυθμιζομενος θερμοστατης",
+        "label": "Ρυθμιζόμενος Θερμοστάτης",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "key": "λειτουργιες ενδειξεις βαθμιδες θερμοκρασιας",
+        "label": "Βαθμίδες Θερμοκρασίας",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Λειτουργίες - Ενδείξεις",
+        "key": "λειτουργιες ενδειξεις λυχνια θερμανσης",
+        "label": "Λυχνία Θέρμανσης",
+        "value": "Ναι",
+        "resolved_from": "section:Λειτουργίες - Ενδείξεις/Λυχνία Θέρμανσης"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα χρωμα",
+        "label": "Χρώμα",
+        "value": "Πράσινο",
+        "resolved_from": "section:Γενικά Χαρακτηριστικά/Χρώμα"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα διαστασεις συσκευης σε εκατοστα υ χ π χ β",
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαρος συσκευης σε κιλα",
+        "label": "Βάρος Συσκευής σε Κιλά",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα εγγυηση κατασκευαστη",
+        "label": "Εγγύηση Κατασκευαστή",
+        "value": "2 έτη",
+        "resolved_from": "section:Γενικά Χαρακτηριστικά/Εγγύηση Κατασκευαστή"
+      }
+    ]
+  },
+  "downloaded_gallery_count": 4,
+  "downloaded_besco_count": 0,
+  "llm_product": {},
+  "llm_presentation": {},
+  "csv_row": {
+    "model": "341973",
+    "mpn": "R-2122G",
+    "name": "Rohnson R-2122G – Τοστιέρα MOD Πράσινο",
+    "description": "<div class=\"etr-desc\">\n<h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Rohnson R-2122G – Τοστιέρα MOD Πράσινο</strong></span></h2>\n\n<p style=\"margin-left:auto; margin-right:auto; text-align:left\"><span style=\"font-size:24px\">\nΗ ασφάλεια χρήσης συναντά την λειτουργικότητα στη νέα τοστιέρα Rohnson R-2122G με πλάκα μαρμάρινης επίστρωσης.O κομψός σχεδιασμός συναντά την αντιθερμαινόμενη λαβή και τις φωτεινές ενδείξεις ετοιμότητας και λειτουργίας για μέγιστη ασφάλεια!\n</span></p>\n\n<div style=\"margin-bottom:20px; margin-left:auto; margin-right:auto; margin-top:20px; text-align:center\">\n<a href=\"https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/tostieres\" style=\"font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;\">Δείτε περισσότερα Τοστιέρες εδώ</a>\n</div>\n\n<hr />\n<div class=\"etr-desc\">\n\n</div>\n</div>",
+    "characteristics": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><tbody><tr><td>Τύπος Συσκευής</td><td style=\"text-align:right;\"><strong>Τοστιέρα</strong></td></tr><tr><td>Χωρητικότητα Τόστ</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Ισχύς σε Watts</td><td style=\"text-align:right;\"><strong>1000</strong></td></tr><tr><td>Υλικό Πλάκας</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά</td><td style=\"text-align:right;\"><strong>23 × 15</strong></td></tr><tr><td>Διάμετρος Κρέπας σε Εκατοστά</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Θερμομονωτικές Λαβές</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Δοχείο Συλλογής Υγρών</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Κάθετη Αποθήκευση</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Αποθήκευση Καλωδίου</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Εξαρτήματα</td><td style=\"text-align:right;\"><strong>-</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Λειτουργίες - Ενδείξεις</strong></td></tr></thead><tbody><tr><td>Θέσεις Ψησίματος</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Ρυθμιζόμενος Θερμοστάτης</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Βαθμίδες Θερμοκρασίας</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Λυχνία Θέρμανσης</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Γενικά Χαρακτηριστικά</strong></td></tr></thead><tbody><tr><td>Χρώμα</td><td style=\"text-align:right;\"><strong>Πράσινο</strong></td></tr><tr><td>Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Βάρος Συσκευής σε Κιλά</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Εγγύηση Κατασκευαστή</td><td style=\"text-align:right;\"><strong>2 έτη</strong></td></tr></tbody></table>",
+    "category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες///Τοστιέρες:::Μικροσυσκευές",
+    "image": "catalog/01_main/341973/341973-1.jpg",
+    "additional_image": "catalog/01_main/341973/341973-2.jpg:::catalog/01_main/341973/341973-3.jpg:::catalog/01_main/341973/341973-4.jpg",
+    "manufacturer": "Rohnson",
+    "price": "27,90",
+    "quantity": "0",
+    "minimum": "1",
+    "subtract": "1",
+    "stock_status": "Έως 30 ημέρες",
+    "status": "0",
+    "meta_keyword": "",
+    "meta_title": "Rohnson R-2122G Τοστιέρα MOD Πράσινο | eTranoulis",
+    "meta_description": "",
+    "seo_keyword": "rohnson-r-2122g-tostiera-mod-prasino",
+    "product_url": "https://www.etranoulis.gr/rohnson-r-2122g-tostiera-mod-prasino",
+    "related_product": "",
+    "bestprice_status": "1",
+    "skroutz_status": "0",
+    "boxnow": "1"
+  },
+  "csv_headers": [
+    "model",
+    "mpn",
+    "name",
+    "description",
+    "characteristics",
+    "category",
+    "image",
+    "additional_image",
+    "manufacturer",
+    "price",
+    "quantity",
+    "minimum",
+    "subtract",
+    "stock_status",
+    "status",
+    "meta_keyword",
+    "meta_title",
+    "meta_description",
+    "seo_keyword",
+    "product_url",
+    "related_product",
+    "bestprice_status",
+    "skroutz_status",
+    "boxnow"
+  ],
+  "csv_ordered_row": {
+    "model": "341973",
+    "mpn": "R-2122G",
+    "name": "Rohnson R-2122G – Τοστιέρα MOD Πράσινο",
+    "description": "<div class=\"etr-desc\">\n<h2 style=\"text-align:center\"><span style=\"font-size:36px\"><strong>Rohnson R-2122G – Τοστιέρα MOD Πράσινο</strong></span></h2>\n\n<p style=\"margin-left:auto; margin-right:auto; text-align:left\"><span style=\"font-size:24px\">\nΗ ασφάλεια χρήσης συναντά την λειτουργικότητα στη νέα τοστιέρα Rohnson R-2122G με πλάκα μαρμάρινης επίστρωσης.O κομψός σχεδιασμός συναντά την αντιθερμαινόμενη λαβή και τις φωτεινές ενδείξεις ετοιμότητας και λειτουργίας για μέγιστη ασφάλεια!\n</span></p>\n\n<div style=\"margin-bottom:20px; margin-left:auto; margin-right:auto; margin-top:20px; text-align:center\">\n<a href=\"https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/tostieres\" style=\"font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;\">Δείτε περισσότερα Τοστιέρες εδώ</a>\n</div>\n\n<hr />\n<div class=\"etr-desc\">\n\n</div>\n</div>",
+    "characteristics": "<table class=\"table table-bordered\"><thead><tr><td colspan=\"2\"><strong>Επισκόπηση Προϊόντος</strong></td></tr></thead><tbody><tr><td>Τύπος Συσκευής</td><td style=\"text-align:right;\"><strong>Τοστιέρα</strong></td></tr><tr><td>Χωρητικότητα Τόστ</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Ισχύς σε Watts</td><td style=\"text-align:right;\"><strong>1000</strong></td></tr><tr><td>Υλικό Πλάκας</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Διαστάσεις Πλάκας Ψησίματος σε Εκατοστά</td><td style=\"text-align:right;\"><strong>23 × 15</strong></td></tr><tr><td>Διάμετρος Κρέπας σε Εκατοστά</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Θερμομονωτικές Λαβές</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Δοχείο Συλλογής Υγρών</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr><tr><td>Κάθετη Αποθήκευση</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Αποθήκευση Καλωδίου</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Εξαρτήματα</td><td style=\"text-align:right;\"><strong>-</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Λειτουργίες - Ενδείξεις</strong></td></tr></thead><tbody><tr><td>Θέσεις Ψησίματος</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Ρυθμιζόμενος Θερμοστάτης</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Βαθμίδες Θερμοκρασίας</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Λυχνία Θέρμανσης</td><td style=\"text-align:right;\"><strong>Ναι</strong></td></tr></tbody><thead><tr><td colspan=\"2\"><strong>Γενικά Χαρακτηριστικά</strong></td></tr></thead><tbody><tr><td>Χρώμα</td><td style=\"text-align:right;\"><strong>Πράσινο</strong></td></tr><tr><td>Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Βάρος Συσκευής σε Κιλά</td><td style=\"text-align:right;\"><strong>-</strong></td></tr><tr><td>Εγγύηση Κατασκευαστή</td><td style=\"text-align:right;\"><strong>2 έτη</strong></td></tr></tbody></table>",
+    "category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες///Τοστιέρες:::Μικροσυσκευές",
+    "image": "catalog/01_main/341973/341973-1.jpg",
+    "additional_image": "catalog/01_main/341973/341973-2.jpg:::catalog/01_main/341973/341973-3.jpg:::catalog/01_main/341973/341973-4.jpg",
+    "manufacturer": "Rohnson",
+    "price": "27,90",
+    "quantity": "0",
+    "minimum": "1",
+    "subtract": "1",
+    "stock_status": "Έως 30 ημέρες",
+    "status": "0",
+    "meta_keyword": "",
+    "meta_title": "Rohnson R-2122G Τοστιέρα MOD Πράσινο | eTranoulis",
+    "meta_description": "",
+    "seo_keyword": "rohnson-r-2122g-tostiera-mod-prasino",
+    "product_url": "https://www.etranoulis.gr/rohnson-r-2122g-tostiera-mod-prasino",
+    "related_product": "",
+    "bestprice_status": "1",
+    "skroutz_status": "0",
+    "boxnow": "1"
+  }
+}

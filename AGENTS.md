@@ -63,13 +63,35 @@ treat it as a request to run the full pipeline.
 ## Validation Expectations
 
 - Treat `work/{model}/candidate/{model}.validation.json` as the final machine-readable health report.
-- If `products/{model}.csv` exists, compare against it field by field.
-- Call out:
-  - `match`
-  - `different_but_valid`
-  - `missing`
-  - `encoding_issue`
+- Treat `products/{model}.csv` as the final deliverable path for the user, not as a baseline for comparison.
 - Prefer fixing pipeline issues over hand-editing generated output files.
+
+## Completion Message
+
+After the pipeline completes successfully, reply in chat with this fixed completion template first, then add any extra notes if needed:
+
+- `Model`
+- `Source URL`
+- `Final CSV`
+- `Validation`
+- `Taxonomy`
+- `Product SEO`
+  - `name`
+  - `meta_title`
+  - `meta_description`
+  - `seo_keyword`
+  - `product_url`
+- `Warnings`
+- `Unresolved Source-Null Fields`
+- `Category Filters`
+
+Rules for the completion message:
+
+- The `Category Filters` section must list only the category filters defined by `filter_map.json` for the resolved taxonomy path.
+- Do not dump the full characteristics table in place of category filters.
+- Resolve each category filter value from the scraped source/spec data when possible.
+- If a category filter exists in `filter_map.json` but no source value exists, show it as `-`.
+- The fixed completion template must always appear first in the final chat response for template-triggered pipeline runs.
 
 ## Source Scope
 

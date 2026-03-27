@@ -1,0 +1,482 @@
+{
+  "input": {
+    "model": "344708",
+    "url": "https://www.skroutz.gr/s/64954633/rowenta-s90-skoupa-rompot-gia-skoupisma-sfougarisma-me-chartografisi-kai-wi-fi-leyki.html",
+    "photos": 4,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 1,
+    "price": "0",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape"
+  },
+  "source": "skroutz",
+  "fetch_mode": "playwright",
+  "source_resolution": {
+    "requested_url": "https://www.skroutz.gr/s/64954633/rowenta-s90-skoupa-rompot-gia-skoupisma-sfougarisma-me-chartografisi-kai-wi-fi-leyki.html",
+    "detected_source": "skroutz",
+    "resolved_url": "https://www.skroutz.gr/s/64954633/rowenta-s90-skoupa-rompot-gia-skoupisma-sfougarisma-me-chartografisi-kai-wi-fi-leyki.html"
+  },
+  "identity_checks": {
+    "source": "skroutz",
+    "input_model": "344708",
+    "page_type": "product",
+    "page_product_code": "RR8797WH",
+    "name_present": true,
+    "brand_present": true,
+    "mpn_present": true
+  },
+  "url_scope_validation": {
+    "ok": true,
+    "reason": "skroutz_product_path",
+    "final_url_source": "skroutz"
+  },
+  "skroutz_blocks_found": {
+    "hero_summary_present": true,
+    "gallery_images_count": 4,
+    "spec_sections_count": 7,
+    "manufacturer_spec_sections_count": 1
+  },
+  "characteristics_pairs": {
+    "count": 67,
+    "source_count": 31,
+    "manufacturer_count": 36
+  },
+  "taxonomy_resolution": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Σκούπισμα",
+    "sub_category": "Σκούπες Ρομπότ",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Ρομπότ",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
+    "confidence": 19.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,leaf_name_overlap,sub_name_overlap",
+    "gender": "fem",
+    "plural_label": "Σκούπες Ρομπότ"
+  },
+  "manufacturer_enrichment": {
+    "applied": true,
+    "provider": "mapped_html",
+    "providers_considered": [
+      "bosch",
+      "neff",
+      "mapped_html"
+    ],
+    "matched_providers": [
+      "mapped_html"
+    ],
+    "documents": [
+      {
+        "name": "product_page",
+        "provider_id": "tefal_shop",
+        "document_type": "html",
+        "url": "https://shop.tefal.gr/products/rowenta-x-plorer-serie-90-skoupa-robot-rr8797-animal",
+        "final_url": "https://shop.tefal.gr/products/rowenta-x-plorer-serie-90-skoupa-robot-rr8797-animal",
+        "content_type_hint": "text/html",
+        "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\manufacturer\\product_page.html",
+        "text_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\manufacturer\\product_page.txt",
+        "content_type": "text/html",
+        "available": true,
+        "parsed": true,
+        "field_count": 36,
+        "section_count": 1,
+        "warnings": []
+      }
+    ],
+    "documents_discovered": 1,
+    "documents_parsed": 1,
+    "warnings": [],
+    "section_count": 1,
+    "field_count": 36,
+    "fallback_reason": ""
+  },
+  "schema_resolution": {
+    "matched_schema_id": "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "matched_sub_category": "Σκούπες Ρομπότ",
+    "score": 0.085,
+    "warnings": [
+      "weak_schema_match",
+      "missing_expected_sections:1",
+      "schema_sentinel_section_missing"
+    ]
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "selection_reason": "matched_schema_template_with_custom_overrides",
+    "template_source": "schema_library_with_custom_overrides",
+    "matched_schema_id": "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "custom_template_id": "skroutz_robot_vacuum_v1",
+    "preferred_schema_source_files": [
+      "skoypes_rompot.json"
+    ],
+    "field_count": 6,
+    "unresolved_count": 1,
+    "fields": [
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος ισχυς pa",
+        "label": "Ισχύς (Pa",
+        "value": "6000 Pa",
+        "resolved_from": "spec_alias:Απορρόφηση"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος χρονος φορτισης μπαταριας σε min",
+        "label": "Χρόνος φόρτισης μπαταρίας σε min",
+        "value": "240 min",
+        "resolved_from": "spec_alias:Διάρκεια Φόρτισης"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος χωρος καλυψης m",
+        "label": "Χώρος Κάλυψης (m²",
+        "value": "270 m²",
+        "resolved_from": "spec_alias:Κάλυψη Χώρου"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος χωρητικοτητα σε λιτρα",
+        "label": "Χωρητικότητα σε λίτρα",
+        "value": "260 ml",
+        "resolved_from": "spec_alias:Χωρητικότητα Κάδου Στερεών"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος δαπεδου",
+        "label": "Τύπος δαπέδου",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Επισκόπηση προϊόντος",
+        "key": "επισκοπηση προιοντος σφουγγαρισμα",
+        "label": "Σφουγγάρισμα",
+        "value": "Ηλεκτρονικό",
+        "resolved_from": "spec_alias:Σφουγγάρισμα"
+      }
+    ]
+  },
+  "skroutz_taxonomy_diagnostics": {
+    "family_key": "robot_vacuum",
+    "raw_category_tag": "Σκούπες Ρομπότ",
+    "raw_category_href": "https://www.skroutz.gr/c/2401/Skoypa-Rompot.html",
+    "normalized_href_slug": "Skoypa Rompot",
+    "matched_rule": "family:robot_vacuum",
+    "source_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα///Σκούπες Ρομπότ",
+    "match_type": "exact_category",
+    "tv_inches": null,
+    "ambiguity": false,
+    "escalation_reason": ""
+  },
+  "schema_preference": {
+    "preferred_source_files": [
+      "skoypes_rompot.json"
+    ]
+  },
+  "unsupported_features": [],
+  "critical_extractors": {
+    "product_code": "dom:h1 small.sku-code",
+    "brand": "jsonld:brand",
+    "mpn": "jsonld:mpn",
+    "name": "dom:div.sku-title h1.page-title",
+    "price": "dom:.prices .final-price",
+    "taxonomy": "resolved",
+    "schema_match": "weak"
+  },
+  "field_diagnostics": {
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:div.sku-title h1.page-title",
+      "value_present": true,
+      "value_preview": "Rowenta S90+ Σκούπα Ρομπότ για Σκούπισμα & Σφουγγάρισμα με Χαρτογράφηση και Wi-Fi Λευκή",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "div.sku-title h1.page-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Rowenta S90+ Σκούπα Ρομπότ για Σκούπισμα & Σφουγγάρισμα με Χαρτογράφηση και Wi-Fi Λευκή Κωδικός: RR8797WH",
+          "note": ""
+        }
+      ]
+    },
+    "category_tag": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:div.sku-title a.category-tag",
+      "value_present": true,
+      "value_preview": "Σκούπες Ρομπότ",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "div.sku-title a.category-tag",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Σκούπες Ρομπότ",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.96,
+      "selected_strategy": "jsonld:brand",
+      "value_present": true,
+      "value_preview": "Rowenta",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "a.brand-page-link img",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": ""
+        },
+        {
+          "strategy": "dom",
+          "selector": "a.brand-page-link span",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": ""
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:h1 small.sku-code",
+      "value_present": true,
+      "value_preview": "RR8797WH",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1 small.sku-code",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Κωδικός: RR8797WH",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.88,
+      "selected_strategy": "dom:.sku-description",
+      "value_present": true,
+      "value_preview": "Η σκούπα ρομπότ της Rowenta προσφέρει μια εξαιρετική λύση για τον καθαρισμό του σπιτιού, συνδυάζοντας σκούπισμα και σφουγγάρισμα. Με κάδο χωρητικότητας 260ml, ε",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".sku-description",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Η σκούπα ρομπότ της Rowenta προσφέρει μια εξαιρετική λύση για τον καθαρισμό του σπιτιού, συνδυάζοντας σκούπισμα και σφου",
+          "note": ""
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.92,
+      "selected_strategy": "jsonld:mpn",
+      "value_present": true,
+      "value_preview": "RR8797WH",
+      "selector_trace": []
+    },
+    "price": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.prices .final-price",
+      "value_present": true,
+      "value_preview": "198,00 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".prices .final-price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "198 00 €",
+          "note": ""
+        }
+      ]
+    },
+    "breadcrumbs": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:div.sku-title a.category-tag",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "div.sku-title a.category-tag",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Σκούπες Ρομπότ",
+          "note": ""
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.92,
+      "selected_strategy": "dom:#specs .spec-groups",
+      "value_present": true,
+      "value_preview": "7 sections; first=Γενικά",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#specs .spec-groups",
+          "match_count": 2,
+          "success": true,
+          "chosen_preview": "Κωδικός Προϊόντος RR8797WH Γενικά Χωρητικότητα Κάδου Στερεών 260 ml Χωρητικότητα Κάδου Νερού 290 ml Διάρκεια Φόρτισης 24",
+          "note": ""
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.9,
+      "selected_strategy": "canonical_from_specs",
+      "value_present": true,
+      "value_preview": "8 items; first=Κωδικός Προϊόντος",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.95,
+      "selected_strategy": "jsonld:image",
+      "value_present": true,
+      "value_preview": "4 images; first=https://b.scdn.gr/images/sku_main_images/064954/64954633/20260109161913_rowenta_rr8797wh_skoupa_rompot_gia_skoupisma_sfougarisma_me_chartografisi_kai_wi_fi_leyki.jpeg",
+      "selector_trace": []
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "merchant_summary_and_structured_characteristics_present",
+    "characteristics_template_used:schema:sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+    "characteristics_template_unresolved_fields:1",
+    "weak_schema_match",
+    "missing_expected_sections:1",
+    "schema_sentinel_section_missing",
+    "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,leaf_name_overlap,sub_name_overlap"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Ρομπότ",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Ρομπότ",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
+      "confidence": 19.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_breadcrumb",
+        "full_breadcrumb_path",
+        "url_overlap",
+        "leaf_name_overlap",
+        "sub_name_overlap"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκουπάκια",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκουπάκια",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupakia",
+      "confidence": 11.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap",
+        "leaf_name_overlap",
+        "sub_name_overlap"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes",
+      "confidence": 9.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap",
+        "leaf_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Stick",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Stick",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-stick",
+      "confidence": 9.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap",
+        "leaf_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Ατμοκαθαριστές",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Ατμοκαθαριστές",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/atmokathharistes",
+      "confidence": 9.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "url_overlap",
+        "leaf_name_overlap"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+      "matched_sub_category": null,
+      "score": 0.085,
+      "n_sections": 1,
+      "n_rows_total": 6,
+      "source_files": [
+        "skoypes_rompot.json"
+      ]
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 4,
+    "downloaded_count": 4,
+    "requested_photos": 4
+  },
+  "sections_requested": 0,
+  "sections_extracted": 0,
+  "section_titles": [],
+  "section_image_candidates": [],
+  "section_image_urls_resolved": [],
+  "section_downloads": [],
+  "section_extraction_window": {
+    "candidate_count": 0,
+    "duplicate_signatures_skipped": 0,
+    "selected_container_index": null,
+    "start_anchor": "",
+    "stop_anchor": "",
+    "title_signature": []
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 0,
+    "extracted_count": 0,
+    "downloaded_count": 0,
+    "requested_sections": 0
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\344708.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\344708.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\344708.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\344708.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\344708.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\manufacturer\\product_page.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\manufacturer\\product_page.txt",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\gallery\\344708-1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\gallery\\344708-2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\gallery\\344708-3.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\344708\\scrape\\gallery\\344708-4.jpg"
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "source_name": "",
+  "page_type": "product",
+  "url": "https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/plyntiria-royhon-emprosthias-fortosis/plyntirio-royhon-hisense-wf7s1247bw-12-kg",
+  "canonical_url": "https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/plyntiria-royhon-emprosthias-fortosis/plyntirio-royhon-hisense-wf7s1247bw-12-kg",
+  "breadcrumbs": [
+    "Αρχική",
+    "Οικιακές Συσκευές",
+    "Πλυντήρια - Στεγνωτήρια",
+    "Πλυντήρια Ρούχων Εμπρόσθιας Φόρτωσης"
+  ],
+  "skroutz_family": "",
+  "category_tag_text": "",
+  "category_tag_href": "",
+  "category_tag_slug": "",
+  "taxonomy_source_category": "",
+  "taxonomy_match_type": "",
+  "taxonomy_rule_id": "",
+  "taxonomy_ambiguity": false,
+  "taxonomy_escalation_reason": "",
+  "taxonomy_tv_inches": null,
+  "product_code": "234925",
+  "brand": "Hisense",
+  "name": "Πλυντήριο Ρούχων Hisense WF7S1247BW 12 kg A",
+  "hero_summary": "Πλυντήριο ρούχων με AI Super Wash για ευκολότερο και καλύτερο πλύσιμο, αυτόματη δοσολογία απορρυπαντικού Smart Dosing, εξ αποστάσεως χηρισμός, χάρη στο ConnectLife και λειτουργία ατμού από την Hisense!",
+  "price_text": "669,00 €",
+  "price_value": 669.0,
+  "installments_text": "24 άτοκες δόσεις",
+  "delivery_text": "Διαθέσιμο για παράδοση στον χώρο σου",
+  "pickup_text": "Επιλέξτε κατάστημα για να δείτε τη διαθεσιμότητα",
+  "gallery_images": [
+    {
+      "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/234925.jpg.webp?itok=EYR7p6-r",
+      "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BW 12 kg A",
+      "position": 1,
+      "local_filename": "234925-1.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234925\\scrape\\gallery\\234925-1.jpg",
+      "content_type": "image/jpeg",
+      "downloaded": true
+    },
+    {
+      "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/234925_1.jpg.webp?itok=gRGXgL4V",
+      "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BW 12 kg A",
+      "position": 2,
+      "local_filename": "234925-2.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234925\\scrape\\gallery\\234925-2.jpg",
+      "content_type": "image/jpeg",
+      "downloaded": true
+    },
+    {
+      "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/234925_2.jpg.webp?itok=qoNIKS48",
+      "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BW 12 kg A",
+      "position": 3,
+      "local_filename": "234925-3.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234925\\scrape\\gallery\\234925-3.jpg",
+      "content_type": "image/jpeg",
+      "downloaded": true
+    },
+    {
+      "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/234925_3.jpg.webp?itok=kvKoJ7hx",
+      "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BW 12 kg A",
+      "position": 4,
+      "local_filename": "234925-4.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234925\\scrape\\gallery\\234925-4.jpg",
+      "content_type": "image/jpeg",
+      "downloaded": true
+    },
+    {
+      "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/234925_4.jpg.webp?itok=FftWjGIH",
+      "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BW 12 kg A",
+      "position": 5,
+      "local_filename": "234925-5.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234925\\scrape\\gallery\\234925-5.jpg",
+      "content_type": "image/jpeg",
+      "downloaded": true
+    },
+    {
+      "url": "https://www.electronet.gr/sites/default/files/styles/product_large/public/234925_5.jpg.webp?itok=bEIrewBP",
+      "alt": "Πλυντήριο Ρούχων Hisense WF7S1247BW 12 kg A",
+      "position": 6,
+      "local_filename": "234925-6.jpg",
+      "local_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234925\\scrape\\gallery\\234925-6.jpg",
+      "content_type": "image/jpeg",
+      "downloaded": true
+    }
+  ],
+  "besco_images": [],
+  "energy_label_asset_url": "https://www.electronet.gr/modules/custom/custom_eprel/energy_arrows/A-Left-DarkGreen-WithAGScale.svg",
+  "product_sheet_asset_url": "",
+  "key_specs": [
+    {
+      "label": "Χωρητικότητα Πλύσης",
+      "value": "12 κιλά"
+    },
+    {
+      "label": "Μέγιστες Στροφές Στυψίματος",
+      "value": "1400 rpm"
+    },
+    {
+      "label": "Ενεργειακή Κλάση",
+      "value": "A"
+    },
+    {
+      "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
+      "value": "84.50 x 59.50 x 64.00"
+    }
+  ],
+  "spec_sections": [
+    {
+      "section": "Επισκόπηση Προϊόντος",
+      "items": [
+        {
+          "label": "Τρόπος Φόρτωσης Πλυντηρίου",
+          "value": "Εμπρόσθιας φόρτωσης"
+        },
+        {
+          "label": "Τρόπος Τοποθέτησης",
+          "value": "Ελεύθερος"
+        },
+        {
+          "label": "Χωρητικότητα Πλύσης",
+          "value": "12 κιλά"
+        },
+        {
+          "label": "Μέγιστες Στροφές Στυψίματος",
+          "value": "1400 rpm"
+        },
+        {
+          "label": "Μετόπη με Κείμενο στα Ελληνικά",
+          "value": null
+        },
+        {
+          "label": "Ενδείξεις Λειτουργίας",
+          "value": "Ψηφιακή οθόνη"
+        },
+        {
+          "label": "Αριθμός Προγραμμάτων",
+          "value": "20"
+        },
+        {
+          "label": "Προγράμματα",
+          "value": "Γρήγορο 15',Ατμός,Βαμβακερά ECO,Αθλητικά/Μικροίνες,Ανάμεικτα,Αντιαλλεργικό,Βαμβακερά,Βρεφικά,Ευαίσθητα,Μάλλινα,Σκουρόχρωμα/Jeans,Συνθετικά,Καθημερινό φορτίο,Καθαρισμός κάδου"
+        },
+        {
+          "label": "Αναγνώριση Βάρους Ρούχων",
+          "value": "Ναι"
+        },
+        {
+          "label": "Αναγνώριση Αφρού",
+          "value": null
+        },
+        {
+          "label": "Μείωση Κραδασμών",
+          "value": null
+        },
+        {
+          "label": "Διπλή Παροχή Νερού",
+          "value": null
+        },
+        {
+          "label": "Τύπος Κινητήτηρα(μοτέρ)",
+          "value": "Inverter"
+        },
+        {
+          "label": "Συνδεσιμότητα",
+          "value": "WiFi"
+        },
+        {
+          "label": "Άλλα Χαρακτηριστικά",
+          "value": null
+        },
+        {
+          "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
+          "value": "84.50 x 59.50 x 64.00"
+        }
+      ]
+    },
+    {
+      "section": "Επιλογές Πλύσης",
+      "items": [
+        {
+          "label": "Θερμοκρασιών",
+          "value": "Ναι"
+        },
+        {
+          "label": "Στροφών",
+          "value": null
+        },
+        {
+          "label": "Πρόπλυσης",
+          "value": "Ναι"
+        },
+        {
+          "label": "Επιπλέον Ξεβγάλματος",
+          "value": "Ναι"
+        },
+        {
+          "label": "Εύκολου Σιδερώματος",
+          "value": null
+        },
+        {
+          "label": "Προγραμματισμός Έναρξης",
+          "value": "Ναι"
+        },
+        {
+          "label": "Άλλες Επιλογές",
+          "value": "Ατμός"
+        }
+      ]
+    },
+    {
+      "section": "Ασφάλεια",
+      "items": [
+        {
+          "label": "Κλείδωμα Ασφαλείας για Παιδιά",
+          "value": null
+        },
+        {
+          "label": "Σύστημα Προστασίας από Διαρροές",
+          "value": null
+        },
+        {
+          "label": "Σύστημα Αυτοδιάγνωσης Βλαβών",
+          "value": "Ναι"
+        }
+      ]
+    },
+    {
+      "section": "Ενεργειακά χαρακτηριστικά",
+      "items": [
+        {
+          "label": "Ενεργειακή Κλάση",
+          "value": "A"
+        },
+        {
+          "label": "Κλάση Απόδοσης Στυψίματος",
+          "value": "B"
+        },
+        {
+          "label": "Χωρητικότητα Πλύσης",
+          "value": "12 κιλά"
+        },
+        {
+          "label": "Επίπεδο Θορύβου Πλυσίματος σε dB",
+          "value": null
+        }
+      ]
+    },
+    {
+      "section": "Γενικά χαρακτηριστικά",
+      "items": [
+        {
+          "label": "Χρώμα",
+          "value": "Λευκό"
+        },
+        {
+          "label": "Εγγύηση Κατασκευαστή",
+          "value": "2 έτη"
+        },
+        {
+          "label": "Βάρος Συσκευής σε Κιλά",
+          "value": "77"
+        },
+        {
+          "label": "Πλάτος Συσκευής σε Εκατοστά",
+          "value": "59,5"
+        },
+        {
+          "label": "Βάθος Συσκευής σε Εκατοστά",
+          "value": "64"
+        }
+      ]
+    }
+  ],
+  "manufacturer_spec_sections": [],
+  "manufacturer_source_text": "",
+  "manufacturer_documents": [],
+  "presentation_source_html": "",
+  "presentation_source_text": "",
+  "raw_html_path": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\234925\\scrape\\234925.raw.html",
+  "scraped_at": "2026-03-27T08:44:31+00:00",
+  "fallback_used": false,
+  "mpn": "WF7S1247BW"
+}

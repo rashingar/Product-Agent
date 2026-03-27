@@ -13,7 +13,6 @@ def test_validate_llm_output_accepts_reduced_contract() -> None:
         },
         "presentation": {
             "intro_html": build_intro(),
-            "cta_text": "Ξ”ΞµΞ―Ο„Ξµ Ο€ΞµΟΞΉΟƒΟƒΟΟ„ΞµΟΞ± ΟΟ…Ξ³ΞµΞ―Ξ± Ξ½Ο„ΞΏΟ…Ξ»Ξ¬Ο€ΞµΟ‚ ΞµΞ΄Ο",
             "sections": [
                 {"title": "NatureFRESH Ξ³ΞΉΞ± ΞΊΞ±ΞΈΞ·ΞΌΞµΟΞΉΞ½Ξ® Ο†ΟΞµΟƒΞΊΞ¬Ξ΄Ξ±", "body_html": "Ξ¤ΞΏ <strong>NatureFRESH</strong> Ξ²ΞΏΞ·ΞΈΞ¬ ΟƒΟ„Ξ· ΟƒΟ‰ΟƒΟ„Ξ® ΟƒΟ…Ξ½Ο„Ξ®ΟΞ·ΟƒΞ·."},
                 {"title": "DoorCooling+ Ξ³ΞΉΞ± ΞΏΞΌΞΏΞΉΟΞΌΞΏΟΟ†Ξ· ΟΟΞΎΞ·", "body_html": "Ξ— Ξ»ΞµΞΉΟ„ΞΏΟ…ΟΞ³Ξ―Ξ± <strong>DoorCooling+</strong> ΞµΞ½ΞΉΟƒΟ‡ΟΞµΞΉ Ο„Ξ·Ξ½ ΟΟΞΎΞ·."},
@@ -38,7 +37,6 @@ def test_validate_llm_output_rejects_old_contract_shape() -> None:
         },
         "presentation": {
             "intro_html": "",
-            "cta_text": "",
             "sections": [],
         },
     }
@@ -56,7 +54,6 @@ def test_validate_llm_output_rejects_short_intro() -> None:
         },
         "presentation": {
             "intro_html": "Ξ£ΟΞ½Ο„ΞΏΞΌΞΏ ΞΊΞµΞ―ΞΌΞµΞ½ΞΏ.",
-            "cta_text": "Ξ”ΞµΞ―Ο„Ξµ Ο€ΞµΟΞΉΟƒΟƒΟΟ„ΞµΟΞ± ΞµΞ΄Ο",
             "sections": [],
         },
     }
@@ -74,7 +71,6 @@ def test_validate_llm_output_rejects_long_intro() -> None:
         },
         "presentation": {
             "intro_html": build_intro(INTRO_MAX_WORDS + 1),
-            "cta_text": "Ξ”ΞµΞ―Ο„Ξµ Ο€ΞµΟΞΉΟƒΟƒΟΟ„ΞµΟΞ± ΞµΞ΄Ο",
             "sections": [],
         },
     }

@@ -1,0 +1,518 @@
+{
+  "input": {
+    "model": "343581",
+    "url": "https://www.electronet.gr/exoplismos-spitioy/skoypisma/skoypes-stick/skoypa-stick-wet-dry-rohnson-mamba-m30-mayro",
+    "photos": 3,
+    "sections": 0,
+    "skroutz_status": 0,
+    "boxnow": 0,
+    "price": "329",
+    "out": "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape"
+  },
+  "source": "electronet",
+  "fetch_mode": "httpx",
+  "source_resolution": {
+    "requested_url": "https://www.electronet.gr/exoplismos-spitioy/skoypisma/skoypes-stick/skoypa-stick-wet-dry-rohnson-mamba-m30-mayro",
+    "detected_source": "electronet",
+    "resolved_url": "https://www.electronet.gr/exoplismos-spitioy/skoypisma/skoypes-stick/skoypa-stick-wet-dry-rohnson-mamba-m30-mayro"
+  },
+  "identity_checks": {
+    "source": "electronet",
+    "input_model": "343581",
+    "page_type": "product",
+    "page_product_code": "343581",
+    "name_present": true,
+    "brand_present": true,
+    "mpn_present": true
+  },
+  "url_scope_validation": {
+    "ok": true,
+    "reason": "electronet_domain",
+    "final_url_source": "electronet"
+  },
+  "skroutz_blocks_found": {
+    "hero_summary_present": true,
+    "gallery_images_count": 3,
+    "spec_sections_count": 2,
+    "manufacturer_spec_sections_count": 0
+  },
+  "characteristics_pairs": {
+    "count": 11,
+    "source_count": 11,
+    "manufacturer_count": 0
+  },
+  "taxonomy_resolution": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Σκούπισμα",
+    "sub_category": "Σκούπες Stick",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Stick",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-stick",
+    "confidence": 18.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,sub_name_overlap,filter_map_tiebreak",
+    "gender": "fem",
+    "plural_label": "Σκούπες Stick"
+  },
+  "manufacturer_enrichment": {
+    "applied": false,
+    "provider": "unsupported_brand_or_missing_mpn",
+    "documents": [],
+    "warnings": [],
+    "section_count": 0,
+    "field_count": 0
+  },
+  "schema_resolution": {
+    "matched_schema_id": "sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+    "matched_sub_category": "Σκούπες Stick",
+    "score": 1.01,
+    "warnings": []
+  },
+  "characteristics_diagnostics": {
+    "mode": "template",
+    "template_id": "schema:sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+    "selection_reason": "matched_schema_template",
+    "template_source": "schema_library",
+    "matched_schema_id": "sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+    "custom_template_id": "",
+    "preferred_schema_source_files": [
+      "skoypes_stick.json"
+    ],
+    "field_count": 11,
+    "unresolved_count": 3,
+    "fields": [
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος τυπος μπαταριας",
+        "label": "Τύπος Μπαταρίας",
+        "value": "Λιθίου",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τύπος Μπαταρίας"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος ταση volt",
+        "label": "Τάση Volt",
+        "value": "28,8",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Τάση Volt"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χρονος λειτουργιας σε λεπτα",
+        "label": "Χρόνος Λειτουργίας σε Λεπτά",
+        "value": "55",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Χρόνος Λειτουργίας σε Λεπτά"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος χωρητικοτητα καδου σε λιτρα",
+        "label": "Χωρητικότητα Κάδου σε Λίτρα",
+        "value": "0,65",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Χωρητικότητα Κάδου σε Λίτρα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος φιλτρο εξαγωγης αερα",
+        "label": "Φίλτρο Εξαγωγής Αέρα",
+        "value": "Πλενόμενο φίλτρο",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Φίλτρο Εξαγωγής Αέρα"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος βαση φορτισης με κιτ στηριξης τοιχου",
+        "label": "Βάση Φόρτισης με κιτ Στήριξης Τοίχου",
+        "value": "Ναι",
+        "resolved_from": "section:Επισκόπηση Προϊόντος/Βάση Φόρτισης με κιτ Στήριξης Τοίχου"
+      },
+      {
+        "section": "Επισκόπηση Προϊόντος",
+        "key": "επισκοπηση προιοντος εξαρτηματα",
+        "label": "Εξαρτήματα",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα χρωμα",
+        "label": "Χρώμα",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα βαρος συσκευης σε κιλα",
+        "label": "Βάρος Συσκευής σε Κιλά",
+        "value": "4,5",
+        "resolved_from": "section:Γενικά Χαρακτηριστικά/Βάρος Συσκευής σε Κιλά"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα διαστασεις συσκευης σε εκατοστα υ χ π χ β",
+        "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+        "value": "-",
+        "resolved_from": "unresolved"
+      },
+      {
+        "section": "Γενικά Χαρακτηριστικά",
+        "key": "γενικα χαρακτηριστικα εγγυηση κατασκευαστη",
+        "label": "Εγγύηση Κατασκευαστή",
+        "value": "2 έτη",
+        "resolved_from": "section:Γενικά Χαρακτηριστικά/Εγγύηση Κατασκευαστή"
+      }
+    ]
+  },
+  "skroutz_taxonomy_diagnostics": {
+    "family_key": "",
+    "raw_category_tag": "",
+    "raw_category_href": "",
+    "normalized_href_slug": "",
+    "matched_rule": "",
+    "source_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Σκούπισμα///Σκούπες Stick",
+    "match_type": "exact_category",
+    "tv_inches": null,
+    "ambiguity": false,
+    "escalation_reason": ""
+  },
+  "schema_preference": {
+    "preferred_source_files": []
+  },
+  "unsupported_features": [],
+  "critical_extractors": {
+    "product_code": "dom:#cscp-sku",
+    "brand": "dom:#product-brand-logo a",
+    "mpn": "title_after_brand",
+    "name": "dom:h1.product-title",
+    "price": "dom:#product-price .price",
+    "taxonomy": "resolved",
+    "schema_match": "matched"
+  },
+  "field_diagnostics": {
+    "breadcrumbs": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#block-mytheme-breadcrumbs .breadcrumb__link",
+      "value_present": true,
+      "value_preview": "4 items",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#block-mytheme-breadcrumbs .breadcrumb__link",
+          "match_count": 4,
+          "success": true,
+          "chosen_preview": "Αρχική",
+          "note": "4 breadcrumbs"
+        }
+      ]
+    },
+    "product_code": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#cscp-sku",
+      "value_present": true,
+      "value_preview": "343581",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#cscp-sku",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "343581",
+          "note": ""
+        }
+      ]
+    },
+    "name": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:h1.product-title",
+      "value_present": true,
+      "value_preview": "Σκούπα Stick Wet & Dry Rohnson Mamba M30 Μαύρο",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "h1.product-title",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Σκούπα Stick Wet & Dry Rohnson Mamba M30 Μαύρο",
+          "note": ""
+        }
+      ]
+    },
+    "brand": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-brand-logo a",
+      "value_present": true,
+      "value_preview": "Rohnson",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-brand-logo a",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Rohnson",
+          "note": ""
+        }
+      ]
+    },
+    "price": {
+      "confidence": 0.99,
+      "selected_strategy": "dom:#product-price .price",
+      "value_present": true,
+      "value_preview": "329,00 €",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-price .price",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "329,00 €",
+          "note": ""
+        }
+      ]
+    },
+    "hero_summary": {
+      "confidence": 0.95,
+      "selected_strategy": "dom:.product-desc p",
+      "value_present": true,
+      "value_preview": "Ανακάλυψε την απόλυτη ελευθερία καθαρισμού με τη Rohnson Mamba M30 Cordless Wet&Dry. Ιδανική για κάθε τύπο δαπέδου, αυτή η ασύρματη σκούπα stick προσφέρει ισχυρ",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": ".product-desc p",
+          "match_count": 1,
+          "success": true,
+          "chosen_preview": "Ανακάλυψε την απόλυτη ελευθερία καθαρισμού με τη Rohnson Mamba M30 Cordless Wet&Dry. Ιδανική για κάθε τύπο δαπέδου, αυτή η ασύρματη σκούπα stick προσφέρει ισχυρ",
+          "note": ""
+        }
+      ]
+    },
+    "presentation_blocks": {
+      "confidence": 0.0,
+      "selected_strategy": "missing",
+      "value_present": true,
+      "value_preview": "0",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-presentation .ck-text.inline",
+          "match_count": 0,
+          "success": false,
+          "chosen_preview": "",
+          "note": "0 blocks"
+        }
+      ]
+    },
+    "key_specs": {
+      "confidence": 0.94,
+      "selected_strategy": "dom:#product-main-attributes .product-main-attribute",
+      "value_present": true,
+      "value_preview": "3 items; first=Τάση Volt:28,8",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-main-attributes .product-main-attribute",
+          "match_count": 3,
+          "success": true,
+          "chosen_preview": "Τάση Volt 28,8",
+          "note": "3 rows"
+        }
+      ]
+    },
+    "spec_sections": {
+      "confidence": 0.98,
+      "selected_strategy": "dom:#product-details .prop-group-wrapper",
+      "value_present": true,
+      "value_preview": "2 sections; first=Επισκόπηση Προϊόντος",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "#product-details .prop-group-wrapper",
+          "match_count": 2,
+          "success": true,
+          "chosen_preview": "Επισκόπηση Προϊόντος Τύπος Μπαταρίας Λιθίου Τάση Volt 28,8 Χρόνος Λειτουργίας σε Λεπτά 55 Χωρητικότητα Κάδου σε Λίτρα 0,65 Φίλτρο Εξαγωγής Αέρα Πλενόμενο φίλτρο",
+          "note": "2 sections"
+        }
+      ]
+    },
+    "mpn": {
+      "confidence": 0.8,
+      "selected_strategy": "title_after_brand",
+      "value_present": true,
+      "value_preview": "M30",
+      "selector_trace": []
+    },
+    "gallery_images": {
+      "confidence": 0.96,
+      "selected_strategy": "dom:img.lightbox",
+      "value_present": true,
+      "value_preview": "3 images; first=https://www.electronet.gr/sites/default/files/styles/product_large/public/343581.jpg.webp?itok=6s9k9jHL",
+      "selector_trace": [
+        {
+          "strategy": "dom",
+          "selector": "img.lightbox",
+          "match_count": 3,
+          "success": true,
+          "chosen_preview": "Σκούπα Stick Wet & Dry Rohnson Mamba M30 Μαύρο /sites/default/files/styles/product_large/public/343581.jpg.webp?itok=6s9k9jHL",
+          "note": "3 gallery candidates"
+        }
+      ]
+    }
+  },
+  "missing_fields": [],
+  "warnings": [
+    "characteristics_template_used:schema:sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+    "characteristics_template_unresolved_fields:3",
+    "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,url_overlap,sub_name_overlap,filter_map_tiebreak"
+  ],
+  "taxonomy_candidates": [
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Stick",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Stick",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-stick",
+      "confidence": 18.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_breadcrumb",
+        "full_breadcrumb_path",
+        "url_overlap",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκουπάκια",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκουπάκια",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupakia",
+      "confidence": 9.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "sub_name_overlap",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes",
+      "confidence": 7.25,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb",
+        "filter_map_tiebreak"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Σκούπες Ρομπότ",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκούπες Ρομπότ",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
+      "confidence": 7.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb"
+      ]
+    },
+    {
+      "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "leaf_category": "Σκούπισμα",
+      "sub_category": "Ατμοκαθαριστές",
+      "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Ατμοκαθαριστές",
+      "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/atmokathharistes",
+      "confidence": 7.0,
+      "reasons": [
+        "parent_breadcrumb",
+        "leaf_breadcrumb"
+      ]
+    }
+  ],
+  "schema_candidates": [
+    {
+      "matched_schema_id": "sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 2,
+      "n_rows_total": 11,
+      "source_files": [
+        "skoypes_stick.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:41d4e1d08e82978687d40db7acfe37ec3bcc5fab",
+      "matched_sub_category": null,
+      "score": 1.01,
+      "n_sections": 2,
+      "n_rows_total": 11,
+      "source_files": [
+        "skoypakia.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:b6561906abf4eea130e08e0de5f6f76ef398d80b",
+      "matched_sub_category": null,
+      "score": 0.76,
+      "n_sections": 1,
+      "n_rows_total": 9,
+      "source_files": [
+        "karvoynoy.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:fd4436f62fc83f6056f2fc641a982e41e383b00b",
+      "matched_sub_category": null,
+      "score": 0.7529,
+      "n_sections": 1,
+      "n_rows_total": 7,
+      "source_files": [
+        "electric_scooter.json"
+      ]
+    },
+    {
+      "matched_schema_id": "sha1:c93e9cc3b2eacb8da30d0d2fea5e3fa2e381ab1c",
+      "matched_sub_category": null,
+      "score": 0.74,
+      "n_sections": 1,
+      "n_rows_total": 5,
+      "source_files": [
+        "tsantes_laptop.json"
+      ]
+    }
+  ],
+  "gallery_summary": {
+    "extracted_count": 3,
+    "downloaded_count": 3,
+    "requested_photos": 3
+  },
+  "sections_requested": 0,
+  "sections_extracted": 0,
+  "section_titles": [],
+  "section_image_candidates": [],
+  "section_image_urls_resolved": [],
+  "section_downloads": [],
+  "section_extraction_window": {
+    "candidate_count": 0,
+    "duplicate_signatures_skipped": 0,
+    "selected_container_index": null,
+    "start_anchor": "",
+    "stop_anchor": "",
+    "title_signature": []
+  },
+  "besco_summary": {
+    "presentation_blocks_count": 0,
+    "extracted_count": 0,
+    "downloaded_count": 0,
+    "requested_sections": 0
+  },
+  "files_written": [
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape\\343581.raw.html",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape\\343581.source.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape\\343581.normalized.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape\\343581.report.json",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape\\343581.csv",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape\\gallery\\343581-1.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape\\gallery\\343581-2.jpg",
+    "C:\\Users\\user\\Documents\\VS_Projects\\tranoulis\\Product-Agent\\work\\343581\\scrape\\gallery\\343581-3.jpg"
+  ]
+}

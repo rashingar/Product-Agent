@@ -43,3 +43,18 @@ def test_taxonomy_resolution_maps_koptiria_ravdomplenter_to_exact_subcategory() 
 
     assert resolution.sub_category == "Κοπτήρια-Ράβδοι"
     assert resolution.cta_url == "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kopthria-ravdoi"
+
+
+def test_taxonomy_resolution_prefers_dryer_subcategory_for_singular_product_name() -> None:
+    resolver = TaxonomyResolver()
+    resolution, candidates = resolver.resolve(
+        breadcrumbs=["Αρχική", "Οικιακές Συσκευές", "Πλυντήρια - Στεγνωτήρια", "Στεγνωτήρια"],
+        url="https://www.electronet.gr/oikiakes-syskeyes/plyntiria-stegnotiria/stegnotiria/stegnotirio-royhon-lg-rhx5009twb-9-kg-b",
+        name="Στεγνωτήριο ρούχων LG RHX5009TWB 9 kg B",
+        key_specs=[],
+        spec_sections=[],
+    )
+
+    assert resolution.sub_category == "Στεγνωτήρια Ρούχων"
+    assert resolution.cta_url == "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/stegnwthria-rouxwn"
+    assert candidates[0]["sub_category"] == "Στεγνωτήρια Ρούχων"
