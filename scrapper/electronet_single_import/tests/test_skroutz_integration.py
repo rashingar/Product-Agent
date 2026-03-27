@@ -151,12 +151,39 @@ def test_validate_input_accepts_skroutz_sections_for_v2() -> None:
     assert cli.skroutz_status == 1
 
 
+def test_validate_input_accepts_tefal_manufacturer_product_url() -> None:
+    args = argparse.Namespace(
+        model="344709",
+        url="https://shop.tefal.gr/products/dolci-%CF%80%CE%B1%CE%B3%CF%89%CF%84%CE%BF%CE%BC%CE%B7%CF%87%CE%B1%CE%BD%CE%AE-ig602a",
+        photos=3,
+        sections=7,
+        skroutz_status=0,
+        boxnow=1,
+        price="219",
+        out="out",
+    )
+    cli = validate_input(args)
+    assert cli.model == "344709"
+    assert cli.sections == 7
+    assert cli.boxnow == 1
+
+
 def test_validate_input_rejects_non_product_skroutz_url() -> None:
     args = argparse.Namespace(model="341490", url="https://www.skroutz.gr/c/699/vrastires.html", photos=1, sections=0, skroutz_status=0, boxnow=0, price="19", out="out")
     try:
         validate_input(args)
     except ValueError as exc:
-        assert str(exc) == "Input URL must be an Electronet product URL or a Skroutz product URL"
+        assert str(exc) == "Input URL must be an Electronet product URL, a Skroutz product URL, or a supported manufacturer product URL"
+    else:
+        raise AssertionError("Expected ValueError")
+
+
+def test_validate_input_rejects_non_product_tefal_url() -> None:
+    args = argparse.Namespace(model="344709", url="https://shop.tefal.gr/collections/all", photos=1, sections=0, skroutz_status=0, boxnow=0, price="219", out="out")
+    try:
+        validate_input(args)
+    except ValueError as exc:
+        assert str(exc) == "Input URL must be an Electronet product URL, a Skroutz product URL, or a supported manufacturer product URL"
     else:
         raise AssertionError("Expected ValueError")
 

@@ -91,6 +91,12 @@ class CharacteristicsTemplateRegistry:
         schema_match: SchemaMatchResult | None = None,
     ) -> dict[str, Any] | None:
         custom_template = self.select_custom_template(source, taxonomy)
+        if custom_template is not None and _template_requests_raw_spec_sections(custom_template):
+            return {
+                **custom_template,
+                "template_source": "custom",
+                "matched_schema_id": schema_match.matched_schema_id if schema_match else "",
+            }
         schema_template = self.select_schema_template(schema_match.matched_schema_id if schema_match else None)
         if schema_template is not None:
             if custom_template is not None:
@@ -217,19 +223,10 @@ def build_characteristics_for_product(
     registry = get_characteristics_registry()
     template = registry.select_template(source, taxonomy, schema_match=schema_match)
     if template is None:
-        html = build_characteristics_html(_effective_spec_sections(source))
-        diagnostics = {
-            "mode": "raw_spec_sections",
-            "template_id": "",
-            "selection_reason": "no_matching_template",
-            "template_source": "",
-            "matched_schema_id": schema_match.matched_schema_id if schema_match else "",
-            "preferred_schema_source_files": [],
-            "field_count": sum(len(section.items) for section in source.spec_sections),
-            "unresolved_count": 0,
-            "fields": [],
-        }
-        return html, diagnostics, []
+        return _build_raw_spec_sections_result(source, schema_match=schema_match)
+
+    if _template_requests_raw_spec_sections(template):
+        return _build_raw_spec_sections_result(source, schema_match=schema_match, template=template)
 
     context = _build_resolution_context(source, taxonomy)
     warnings = [f"characteristics_template_used:{template['template_id']}"]
@@ -280,6 +277,34 @@ def build_characteristics_for_product(
         "fields": diagnostics_fields,
     }
     return build_characteristics_html(resolved_sections), diagnostics, warnings
+
+
+def _build_raw_spec_sections_result(
+    source: SourceProductData,
+    schema_match: SchemaMatchResult | None = None,
+    template: dict[str, Any] | None = None,
+) -> tuple[str, dict[str, Any], list[str]]:
+    effective_sections = _effective_spec_sections(source)
+    template_source = normalize_whitespace(template.get("template_source")) if template else ""
+    diagnostics = {
+        "mode": "raw_spec_sections",
+        "template_id": template.get("template_id", "") if template else "",
+        "selection_reason": "taxonomy_template_raw_spec_sections" if template else "no_matching_template",
+        "template_source": template_source,
+        "matched_schema_id": schema_match.matched_schema_id if schema_match else "",
+        "preferred_schema_source_files": list(template.get("preferred_schema_source_files", [])) if template else [],
+        "custom_template_id": template.get("template_id", "") if template_source == "custom" else "",
+        "field_count": sum(len(section.items) for section in effective_sections),
+        "unresolved_count": 0,
+        "fields": [],
+    }
+    return build_characteristics_html(effective_sections), diagnostics, []
+
+
+def _template_requests_raw_spec_sections(template: dict[str, Any]) -> bool:
+    normalized = normalize_whitespace(str(template.get("render_mode", ""))).lower()
+    normalized = normalized.replace("-", "_").replace(" ", "_")
+    return normalized == "raw_spec_sections"
 
 
 def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResolution) -> _ResolutionContext:

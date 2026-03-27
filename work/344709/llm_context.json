@@ -1,0 +1,145 @@
+{
+  "input": {
+    "model": "344709",
+    "url": "https://shop.tefal.gr/products/dolci-%CF%80%CE%B1%CE%B3%CF%89%CF%84%CE%BF%CE%BC%CE%B7%CF%87%CE%B1%CE%BD%CE%AE-ig602a",
+    "price": "219",
+    "photos": 3,
+    "sections": 7,
+    "skroutz_status": 0,
+    "boxnow": 1
+  },
+  "source": {
+    "canonical_url": "https://shop.tefal.gr/products/dolci-%cf%80%ce%b1%ce%b3%cf%89%cf%84%ce%bf%ce%bc%ce%b7%cf%87%ce%b1%ce%bd%ce%ae-ig602a",
+    "title": "Tefal Dolci Παγωτομηχανή IG602A",
+    "hero_summary": "Λαχταριστό σπιτικό παγωτό — 100% προσαρμοσμένο στις προτιμήσεις και τις ανάγκες σας! Από πεντανόστιμο σορμπέ, λαχταριστό παγωτό και κρεμώδες τζελάτο μέχρι παγωμένο γιαούρτι, σμούθι, μιλκσέικ και άλλα, η παγωτομηχανή Dolci σας δίνει τη δυνατότητα να απολαμβάνετε στο σπίτι σας νόστιμα παγωτά, ακριβώς όπως σας αρέσουν. Προσαρμόστε τις συνταγές σας με μια μεγάλη ποικιλία από γαρνιτούρες και ετοιμάστε την ιδανική ποσότητα κάθε φορά. Οι δυνατότητες είναι ατελείωτες! Παγωτομηχανή που διαθέτει 10 προγράμματα σε 1 για ατελείωτες παγωμένες λιχουδιές Ειδικό πρόγραμμα γαρνιτούρας για να προσαρμόζετε τις δημιουργίες σας: κομματάκια σοκολάτας, ζελεδάκια, αμύγδαλα και άλλα Αυτόματο πρόγραμμα ξεπλύματος και πλήρης πρόσβαση σε κάθε τμήμα που έρχεται σε επαφή με τα τρόφιμα — για εύκολο καθάρισμα Μοναδική τεχνολογία 1-Step Perfector για τέλεια αποτελέσματα με μία μόνο κίνηση, χωρίς να απαιτείται επανάληψη της διαδικασίας Ψηφιακό βιβλίο συνταγών με 50 ιδέες για να ξεκινήσετε, μεταξύ άλλων χωρίς γαλακτοκομικά, vegan, χωρίς ζάχαρη, αλμυρές γλυκές και πολλά άλλα. Ετοιμάστε έως 1,4 L παγωτού, για εσάς μόνο ή για όλη την οικογένεια, χρησιμοποιώντας τα 3 μπολ από tritan που περιλαμβάνονται",
+    "breadcrumbs": [
+      "Αρχική",
+      "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+      "Μικροί Μάγειρες",
+      "Παγωτομηχανές"
+    ],
+    "price_text": "€229,90",
+    "key_specs": [
+      {
+        "label": "Κωδικός Προϊόντος",
+        "value": "IG602A"
+      },
+      {
+        "label": "Χωρητικότητα",
+        "value": "1,4 lt"
+      },
+      {
+        "label": "Αριθμός Δοχείων",
+        "value": "3"
+      },
+      {
+        "label": "Αριθμός Προγραμμάτων",
+        "value": "10"
+      },
+      {
+        "label": "Διατροφικές Επιλογές",
+        "value": "Vegan"
+      },
+      {
+        "label": "Τάση",
+        "value": "220-240 V"
+      },
+      {
+        "label": "Συχνότητα",
+        "value": "50-60 Hz"
+      }
+    ],
+    "product_code": "IG602A",
+    "brand": "Tefal",
+    "mpn": "IG602A"
+  },
+  "taxonomy": {
+    "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+    "leaf_category": "Μικροί Μάγειρες",
+    "sub_category": "Παγωτομηχανές",
+    "taxonomy_path": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Μικροί Μάγειρες > Παγωτομηχανές",
+    "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/pagwtomhxanes",
+    "confidence": 18.0,
+    "reason": "parent_breadcrumb,leaf_breadcrumb,sub_breadcrumb,full_breadcrumb_path,sub_name_overlap",
+    "gender": "fem",
+    "plural_label": "Παγωτομηχανές"
+  },
+  "schema_match": {
+    "matched_schema_id": "sha1:fb24efeacf0495fc3359e8528122e32ba3f7ec00",
+    "matched_sub_category": "Παγωτομηχανές",
+    "score": 0.01,
+    "warnings": [
+      "weak_schema_match",
+      "missing_expected_sections:1",
+      "schema_sentinel_section_missing",
+      "schema_sentinel_label_missing"
+    ]
+  },
+  "deterministic_product": {
+    "brand": "Tefal",
+    "mpn": "IG602A",
+    "manufacturer": "Tefal",
+    "category_phrase": "Παγωτομηχανή",
+    "name_differentiators": [
+      "1,4Lt",
+      "10 Προγραμμάτων",
+      "3 Δοχείων"
+    ],
+    "preserve_parsed_title": false,
+    "name": "Tefal IG602A – Παγωτομηχανή 1,4Lt 10 Προγραμμάτων 3 Δοχείων",
+    "name_draft_tail": "Παγωτομηχανή 1,4Lt 10 Προγραμμάτων 3 Δοχείων",
+    "meta_title": "Tefal IG602A Παγωτομηχανή 1,4Lt 10 Προγραμμάτων | eTranoulis",
+    "meta_description_draft": "Η Tefal IG602A είναι Παγωτομηχανή με 1,4Lt, 10 Προγραμμάτων, 3 Δοχείων.",
+    "seo_keyword": "tefal-ig602a-pagotomichani-14lt-10-programmaton-3-docheion"
+  },
+  "presentation_source_sections": [
+    {
+      "title": "Εξατομίκευση στο μέγιστο",
+      "paragraph": "Αφήστε τη δημιουργικότητά σας ελεύθερη με ένα ειδικό πρόγραμμα για την προσθήκη νόστιμων γαρνιτούρων, όπως κομματάκια σοκολάτας, ζελεδάκια, αμύγδαλα και άλλα.",
+      "image_url": "https://shop.tefal.gr/cdn/shop/files/120C19E78C81F02CC030DE77DBEC823B8A9169E10D958CF4DF54E30BC1BE0EC7.png?v=1772149800&width=500"
+    },
+    {
+      "title": "Ο απόλυτος βοηθός καθαρισμού",
+      "paragraph": "Το πρόγραμμα αυτόματου ξεπλύματος, καθώς και η πλήρης πρόσβαση σε κάθε τμήμα που έρχεται σε επαφή με τα υλικά, διευκολύνουν το καθάρισμα.",
+      "image_url": "https://shop.tefal.gr/cdn/shop/files/EAA37167CC4F092F3C0727DA950567ABB60349CE9D560C9D4C901D6163E34B10.png?v=1772149800&width=500"
+    },
+    {
+      "title": "Παγωτό με μία μόνο κίνηση",
+      "paragraph": "Η μοναδική τεχνολογία 1-Step Perfector εξασφαλίζει τέλειο, ομοιόμορφο και κρεμώδες αποτέλεσμα με μία μόνο κίνηση, χωρίς να απαιτείται επανάληψη της διαδικασίας.",
+      "image_url": "https://shop.tefal.gr/cdn/shop/files/FFCE77C2EAFE631422B6463B4D9A6A9CA8EF834850D8C3C2DCAB6C9B56A2DA29.png?v=1772149800&width=500"
+    },
+    {
+      "title": "Εμπνευστείτε",
+      "paragraph": "Ψηφιακό βιβλίο συνταγών με 50 ιδέες για να ξεκινήσετε, μεταξύ άλλων χωρίς γαλακτοκομικά, vegan, χωρίς ζάχαρη, αλμυρές γλυκές και πολλά άλλα.",
+      "image_url": "https://shop.tefal.gr/cdn/shop/files/771043EEE970A6D55968AF0C7B479C017643D83451B4CCC8724D133F340EAF0A.png?v=1772149802&width=500"
+    },
+    {
+      "title": "Εξατομικευμένες ποσότητες",
+      "paragraph": "Ετοιμάστε έως 1,4 L παγωτού, για εσάς μόνο ή για όλη την οικογένεια, χρησιμοποιώντας τα 3 μπολ από tritan που διατίθενται με την παγωτομηχανή.",
+      "image_url": "https://shop.tefal.gr/cdn/shop/files/7C707673096FDF380D569C74BD88E361F65973BEFDE9CE6AA1EC02120ED86EF1.png?v=1772149802&width=500"
+    },
+    {
+      "title": "Πεντανόστιμο παγωτό με μία μόνο κίνηση",
+      "paragraph": "Σε αντίθεση με άλλες παγωτομηχανές για το σπίτι, η μοναδική τεχνολογία 1-Step Perfector της εταιρείας μας προσφέρει τον ευκολότερο τρόπο για να επιτύχετε τέλεια αποτελέσματα με μία μόνο κίνηση. Εμπνευσμένες από επαγγελματικές μηχανές, οι λεπίδες 1-Step Perfector έχουν διπλή δράση για απαλό και κρεμώδες αποτέλεσμα από την πρώτη χρήση, χωρίς να απαιτείται επανάληψη της διαδικασίας!",
+      "image_url": "https://shop.tefal.gr/cdn/shop/files/2C57236776B0B959A7657BB7F85D1EBD4EC54FCBA31A09697F6F0C7CE5B98C7E.png?v=1772149780&width=500"
+    },
+    {
+      "title": "Ο απόλυτος βοηθός καθαρισμού",
+      "paragraph": "Ξεχάστε την ταλαιπωρία του χρονοβόρου και κουραστικού καθαρισμού. Χάρη στο ειδικό πρόγραμμα ξεπλύματος και στα εξαρτήματα του μπολ και της λεπίδας που πλένονται στο πλυντήριο πιάτων, το καθάρισμα γίνεται εύκολα και αβίαστα. Η παγωτομηχανή Dolci έχει επίσης σχεδιαστεί ώστε να προσφέρει πλήρη πρόσβαση σε κάθε τμήμα που έρχεται σε επαφή με τα υλικά.",
+      "image_url": "https://shop.tefal.gr/cdn/shop/files/C39D5273E81CCC4D489A98A6EF2459E0F5D5D741D656A37A148A769A30EF98D4.png?v=1772149787&width=500"
+    }
+  ],
+  "writer_rules": {
+    "language": "Greek",
+    "sections_required": 7,
+    "llm_owned_fields": [
+      "presentation.intro_html",
+      "presentation.sections[].title",
+      "presentation.sections[].body_html",
+      "product.meta_description",
+      "product.meta_keywords"
+    ],
+    "meta_description_rule": "Smooth the Greek grammar of `deterministic_product.meta_description_draft`. Keep all facts. Fix article agreement and natural phrasing. Exactly one sentence.",
+    "intro_html_rule": "120-180 Greek words in one intro paragraph."
+  }
+}

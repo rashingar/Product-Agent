@@ -151,3 +151,25 @@ def test_explicit_tabletop_hob_category_still_resolves_to_small_appliance_hobs()
     assert taxonomy.parent_category == "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ"
     assert taxonomy.leaf_category == "Μικροί Μάγειρες"
     assert taxonomy.sub_category == "Εστίες"
+
+
+def test_ice_cream_maker_category_resolves_to_small_appliance_taxonomy() -> None:
+    parser = SkroutzProductParser()
+    resolver = TaxonomyResolver()
+    row = {
+        "name": "Tefal Dolci Παγωτομηχανή 3x1.4lt Καφέ IG602A",
+        "category_tag_text": "Παγωτομηχανές",
+        "category_tag_href": "https://www.skroutz.gr/c/3014/pagotomichanes.html",
+        "manufacturer": "Tefal",
+        "skroutz_product_url": "https://www.skroutz.gr/s/66043021/tefal-dolci-pagotomichani-3x1-4lt-kafe.html",
+        "model": "IG602A",
+    }
+
+    parsed = parser.parse(build_minimal_taxonomy_html(row), row["skroutz_product_url"])
+    taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url, parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
+
+    assert parsed.source.page_type == "product"
+    assert parsed.source.skroutz_family == "ice_cream_maker"
+    assert taxonomy.parent_category == "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ"
+    assert taxonomy.leaf_category == "Μικροί Μάγειρες"
+    assert taxonomy.sub_category == "Παγωτομηχανές"

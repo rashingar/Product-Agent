@@ -150,6 +150,112 @@ def test_run_cli_input_allows_electronet_product_code_mismatch(monkeypatch, tmp_
     assert result["parsed"].warnings == ["source_product_code_mismatch:input=229957:page=235370"]
 
 
+def test_run_cli_input_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
+    from electronet_single_import import cli as cli_module
+    from electronet_single_import.models import FetchResult
+
+    cli = CLIInput(
+        model="344709",
+        url="https://shop.tefal.gr/products/dolci-%CF%80%CE%B1%CE%B3%CF%89%CF%84%CE%BF%CE%BC%CE%B7%CF%87%CE%B1%CE%BD%CE%AE-ig602a",
+        photos=3,
+        sections=0,
+        skroutz_status=0,
+        boxnow=1,
+        price="219",
+        out=str(tmp_path),
+    )
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            source_name="manufacturer_tefal",
+            page_type="product",
+            url=cli.url,
+            canonical_url=cli.url,
+            product_code="IG602A",
+            brand="Tefal",
+            mpn="IG602A",
+            name="Tefal Dolci Παγωτομηχανή IG602A",
+            breadcrumbs=["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Μικροί Μάγειρες", "Παγωτομηχανές"],
+            taxonomy_source_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες///Παγωτομηχανές",
+            taxonomy_match_type="exact_category",
+            taxonomy_rule_id="manufacturer_tefal:ice_cream_maker",
+            price_text="229,90 €",
+            price_value=229.9,
+            key_specs=[
+                SpecItem(label="Χωρητικότητα", value="1.4 lt"),
+                SpecItem(label="Αριθμός Προγραμμάτων", value="10"),
+                SpecItem(label="Αριθμός Δοχείων", value="3"),
+            ],
+            spec_sections=[
+                SpecSection(
+                    section="Παραγωγή & Δυνατότητες",
+                    items=[
+                        SpecItem(label="Χωρητικότητα", value="1.4 lt"),
+                        SpecItem(label="Αριθμός Προγραμμάτων", value="10"),
+                        SpecItem(label="Αριθμός Δοχείων", value="3"),
+                    ],
+                )
+            ],
+            manufacturer_spec_sections=[
+                SpecSection(
+                    section="Χαρακτηριστικά Κατασκευαστή",
+                    items=[SpecItem(label="Τάση", value="220-240 V")],
+                )
+            ],
+        ),
+    )
+
+    class DummyFetcher:
+        def fetch_httpx(self, _url):
+            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="httpx", fallback_used=False, response_headers={})
+
+        def fetch_playwright(self, _url):
+            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
+
+        def download_gallery_images(self, **_kwargs):
+            return [], [], []
+
+        def download_besco_images(self, **_kwargs):
+            return [], [], []
+
+    class DummyResolver:
+        def resolve(self, **_kwargs):
+            return TaxonomyResolution(parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", leaf_category="Μικροί Μάγειρες", sub_category="Παγωτομηχανές"), []
+
+    class DummySchemaMatcher:
+        known_section_titles = set()
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def match(self, *_args, **_kwargs):
+            return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
+
+    class DummyManufacturerParser:
+        def parse(self, _html, _url, *, source_name, fallback_used=False):
+            assert source_name == "manufacturer_tefal"
+            assert fallback_used is False
+            return parsed
+
+    class UnexpectedParser:
+        def parse(self, *_args, **_kwargs):
+            raise AssertionError("Unexpected parser used")
+
+    monkeypatch.setattr(cli_module, "detect_source", lambda _url: "manufacturer_tefal")
+    monkeypatch.setattr(cli_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
+    monkeypatch.setattr(cli_module, "ElectronetFetcher", lambda: DummyFetcher())
+    monkeypatch.setattr(cli_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
+    monkeypatch.setattr(cli_module, "SkroutzProductParser", lambda: UnexpectedParser())
+    monkeypatch.setattr(cli_module, "ManufacturerProductParser", lambda: DummyManufacturerParser())
+    monkeypatch.setattr(cli_module, "TaxonomyResolver", lambda: DummyResolver())
+    monkeypatch.setattr(cli_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(cli_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
+
+    result = cli_module.run_cli_input(cli)
+
+    assert result["parsed"].source.source_name == "manufacturer_tefal"
+    assert result["normalized"]["deterministic_product"]["mpn"] == "IG602A"
+
+
 def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monkeypatch) -> None:
     from electronet_single_import import workflow
 
