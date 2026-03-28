@@ -60,8 +60,7 @@ This file is the source of truth for the staged cleanup and reorganization of th
 - `master_prompt+.txt`
 
 ### Move now
-- `docs/superpowers/specs/2026-03-22-pipeline-optimization-design.md`
-- `work/IMPLEMENTATION_CHECKPOINT.md`
+- none; M4 completed the two previously approved safe documentation/planning moves
 
 ### Archive
 - `RULES_legacy.md`
@@ -97,9 +96,10 @@ Evidence:
 - Routed the existing support-asset path hub in `scrapper/electronet_single_import/utils.py` through the new module while preserving downstream imports.
 
 ### M4 — Move safe docs/checkpoint files
-Move:
-- `docs/superpowers/specs/2026-03-22-pipeline-optimization-design.md`
-- `work/IMPLEMENTATION_CHECKPOINT.md`
+Status: completed
+Evidence:
+- Moved the pipeline optimization design doc into `docs/specs/2026-03-22-pipeline-optimization-design.md`.
+- Moved the implementation checkpoint into `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md`.
 
 ### M5 — Archive legacy files
 Move:

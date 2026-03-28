@@ -39,8 +39,8 @@ No material contradiction was found between the requested classifications and th
 | Path | Classification | Evidence |
 | --- | --- | --- |
 | `schemas/compact_response.schema.json` | move later after path centralization | Named in `AGENTS.md` and `RULES.md`; loaded from `REPO_ROOT / "schemas" / "compact_response.schema.json"` in `scrapper/electronet_single_import/utils.py`. |
-| `docs/superpowers/specs/2026-03-22-pipeline-optimization-design.md` | move now | Search found planning and design references only; no runtime callsites were found. |
-| `work/IMPLEMENTATION_CHECKPOINT.md` | move now | Search found planning references only; no runtime callsites were found, and its current location inside `work/` conflicts with the runtime-artifact purpose of that tree. |
+| `docs/specs/2026-03-22-pipeline-optimization-design.md` | move now | Search found planning and design references only; no runtime callsites were found. |
+| `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md` | move now | Search found planning references only; no runtime callsites were found, and the prior location inside `work/` conflicted with the runtime-artifact purpose of that tree. |
 
 ## Risks And Postponed Items
 - `requirements.txt` remains postponed to the dependency audit milestone because the current evidence does not establish whether the repo-root file or `scrapper/requirements.txt` is authoritative.

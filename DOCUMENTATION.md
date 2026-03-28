@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M3 completed. M4 is the next planned milestone.
+M4 completed. M5 is the next planned milestone.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -45,7 +45,7 @@ Changes:
 - created `docs/audits/repo_cleanup_audit.md`
 - classified every current root-level file into `keep in root`, `move later after path centralization`, `archive as legacy`, or `uncertain`
 - explicitly classified `schemas/compact_response.schema.json` as `move later after path centralization`
-- explicitly classified `docs/superpowers/specs/2026-03-22-pipeline-optimization-design.md` and `work/IMPLEMENTATION_CHECKPOINT.md` as safe `move now` candidates
+- explicitly classified `docs/specs/2026-03-22-pipeline-optimization-design.md` and `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md` as safe `move now` candidates
 - documented evidence for non-obvious classifications from runtime path callsites and current repo docs
 - updated `PLAN.md` to mark M2 complete
 
@@ -87,7 +87,28 @@ Notes:
 - no support assets were moved or renamed
 
 ### M4 — Safe docs/checkpoint moves
-Status: pending
+Status: completed
+Goal:
+- move the two approved non-runtime documentation and planning files out of their old locations without changing runtime behavior
+
+Changes:
+- moved the pipeline optimization design doc into `docs/specs/2026-03-22-pipeline-optimization-design.md`
+- moved the implementation checkpoint into `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md`
+- updated path references in `PLAN.md`, `DOCUMENTATION.md`, and `docs/audits/repo_cleanup_audit.md`
+
+Validation:
+- pre-move checks confirmed both source files existed and both destination files were absent
+- post-move checks confirmed the old source files no longer exist and the new destination files do exist
+- `rg` for the old paths returned no remaining references after the updates
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- no runtime code was edited
+- no support assets were moved
+- scraper smoke validation was intentionally skipped because no runtime pathing or behavior changed
+- empty directories were intentionally left in place because they may still be part of the intended docs/work scaffolding
+- the remaining old-path mentions are intentionally preserved in the command log as historical execution records
 
 ### M5 — Legacy archive move
 Status: pending
@@ -124,6 +145,10 @@ Status: pending
 - `Get-Content scrapper/electronet_single_import/repo_paths.py`
 - post-edit `rg` over `scrapper/electronet_single_import/*.py` for approved support-asset filenames
 - `python -m pytest -q electronet_single_import/tests/test_utils_support_paths.py` from `scrapper/`
+- source/destination existence checks for the two approved M4 moves
+- `Move-Item` for `docs/superpowers/specs/2026-03-22-pipeline-optimization-design.md` to `docs/specs/2026-03-22-pipeline-optimization-design.md`
+- `Move-Item` for `work/IMPLEMENTATION_CHECKPOINT.md` to `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md`
+- `rg` for old and new M4 paths before and after the move
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
@@ -135,4 +160,4 @@ Status: pending
 - some tests still use hardcoded absolute repo paths and were intentionally deferred
 
 ## Next approved action
-Run M4 only.
+Run M5 only.
