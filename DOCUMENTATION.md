@@ -1,7 +1,63 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-Pre-M15 control-doc refresh completed. Next active milestone: M15 — define run contract.
+M15 completed. Next active milestone: M16 — write structured run metadata alongside current files.
+
+## M15 — define run contract
+
+Goal:
+- add import-safe run contract models for future service, metadata, CLI, and API seams without changing current runtime behavior
+
+Files created:
+- `scrapper/electronet_single_import/services/__init__.py`
+- `scrapper/electronet_single_import/services/models.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Models added:
+- `RunType`
+- `RunStatus`
+- `PrepareRequest`
+- `RenderRequest`
+- `FullRunRequest`
+- `RunArtifacts`
+- `RunMetadata`
+- `ServiceResult`
+
+Changes:
+- created the new `scrapper/electronet_single_import/services/` package as import-safe package setup only
+- added contract-only dataclass and enum definitions in `scrapper/electronet_single_import/services/models.py`
+- included the planned `metadata_path` artifact field so M16 can emit metadata without reshaping the contract
+- kept metadata-facing warnings and error fields on `RunMetadata`
+- kept `ServiceResult` lean with only `run`, `artifacts`, and `details`
+- updated `PLAN.md` to mark M15 complete and note that the run contract exists but is not wired into runtime behavior
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q` from `scrapper/` did not match the requested baseline and finished at `69 passed, 9 failed`
+- failing tests:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+  - `test_skroutz_parser_and_deterministic_fields_cover_supported_families`
+  - `test_prepare_and_render_workflow_with_skroutz_fixtures`
+  - `test_143481_html_fixture_resolves_9_sections_in_stable_order`
+  - `test_placeholder_urls_are_rejected_for_resolved_section_images`
+  - `test_143481_rendered_description_preserves_locked_wrappers`
+  - `test_taxonomy_regression_fixture_resolves_expected_categories`
+  - `test_representative_taxonomy_html_fixtures_cover_supported_skroutz_combos`
+- `git status --short` confirmed only the expected milestone files changed, alongside the pre-existing untracked `.claude/worktrees/`
+
+Risks:
+- the current repo test baseline does not match the milestone's expected `75 passed, 2 failed` result
+- seven additional Skroutz fixture-path failures are present in `test_skroutz_integration.py`, `test_skroutz_sections.py`, and `test_skroutz_taxonomy.py`, all failing with `FileNotFoundError` against hardcoded absolute fixture paths outside the current workspace
+- the two existing manufacturer enrichment failures remain in `test_manufacturer_enrichment.py`
+
+Deferred:
+- metadata emission and file writing remain deferred to M16
+- runtime wiring for CLI and workflow remains deferred to later milestones
+- serializers, validators, helper methods, and service wrappers remain intentionally out of scope for M15
 
 ## Pre-M15 control-doc refresh
 
@@ -390,6 +446,17 @@ Notes:
 - higher-risk cleanup remains deferred, including `workflow.py` output-root refactors, hardcoded absolute repo paths in some tests, and broader utility API reshaping
 
 ## Commands run
+- `rg -n "M15|Current milestone|Phase 2 milestones|M14 detail|Next active milestone" PLAN.md DOCUMENTATION.md`
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content IMPLEMENT.md`
+- `git status --short`
+- `Get-Content PLAN.md | Select-Object -First 90`
+- `Get-Content PLAN.md | Select-Object -Skip 180`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 60`
+- `Get-Content DOCUMENTATION.md | Select-Object -Skip 350`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q` from `scrapper/`
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
 - post-creation filesystem check for approved target paths, `.gitkeep` presence, and empty-directory state
