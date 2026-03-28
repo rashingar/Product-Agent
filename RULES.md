@@ -38,13 +38,13 @@ If `model` is missing or not exactly 6 digits, fail with:
 ## Source Of Truth
 
 Use these local files as runtime sources:
-- `catalog_taxonomy.json`
-- `electronet_schema_library.json`
-- `filter_map.json`
-- `product_import_template.csv`
-- `TEMPLATE_presentation.html`
-- `master_prompt+.txt`
-- `schemas/compact_response.schema.json`
+- `resources/mappings/catalog_taxonomy.json`
+- `resources/schemas/electronet_schema_library.json`
+- `resources/mappings/filter_map.json`
+- `resources/templates/product_import_template.csv`
+- `resources/templates/TEMPLATE_presentation.html`
+- `resources/prompts/master_prompt+.txt`
+- `resources/schemas/compact_response.schema.json`
 
 ## Local Responsibilities
 
@@ -96,5 +96,5 @@ Render stage writes:
 ## Legacy Workflow
 
 The old script-driven flow is preserved only as historical reference:
-- `master_prompt_legacy.txt`
-- `RULES_legacy.md`
+- `archive/legacy/master_prompt_legacy.txt`
+- `archive/legacy/RULES_legacy.md`

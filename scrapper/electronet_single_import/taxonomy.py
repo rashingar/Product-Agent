@@ -6,7 +6,8 @@ from urllib.parse import urlparse
 
 from .models import SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match
-from .utils import CATALOG_TAXONOMY_PATH, FILTER_MAP_PATH, dedupe_strings, read_json
+from .repo_paths import CATALOG_TAXONOMY_PATH, FILTER_MAP_PATH
+from .utils import dedupe_strings, read_json
 
 ALIASES = {
     normalize_for_match("Εξοπλισμός Σπιτιού"): "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",

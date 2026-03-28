@@ -12,31 +12,11 @@ from urllib.parse import urlparse
 from .normalize import normalize_for_match, normalize_whitespace
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-PRODUCT_TEMPLATE_PATH = REPO_ROOT / "product_import_template.csv"
-RULES_PATH = REPO_ROOT / "RULES.md"
-PRESENTATION_TEMPLATE_PATH = REPO_ROOT / "TEMPLATE_presentation.html"
-CATALOG_TAXONOMY_PATH = REPO_ROOT / "catalog_taxonomy.json"
-SCHEMA_LIBRARY_PATH = REPO_ROOT / "electronet_schema_library.json"
-CHARACTERISTICS_TEMPLATES_PATH = REPO_ROOT / "characteristics_templates.json"
-FILTER_MAP_PATH = REPO_ROOT / "filter_map.json"
-NAME_RULES_PATH = REPO_ROOT / "name_rules.json"
-DIFFERENTIATOR_PRIORITY_MAP_PATH = REPO_ROOT / "differentiator_priority_map.csv"
-MASTER_PROMPT_PATH = REPO_ROOT / "master_prompt+.txt"
-COMPACT_RESPONSE_SCHEMA_PATH = REPO_ROOT / "schemas" / "compact_response.schema.json"
-MANUFACTURER_SOURCE_MAP_PATH = REPO_ROOT / "MANUFACTURER_SOURCE_MAP.json"
-
-
 
 def ensure_directory(path: str | Path) -> Path:
     out = Path(path)
     out.mkdir(parents=True, exist_ok=True)
     return out
-
-
-
-def build_model_output_dir(base_out: str | Path, model: str) -> Path:
-    return ensure_directory(Path(base_out) / model)
 
 
 
@@ -70,7 +50,7 @@ def write_bytes(path: str | Path, payload: bytes) -> None:
 
 
 
-def load_template_headers(path: str | Path = PRODUCT_TEMPLATE_PATH) -> list[str]:
+def load_template_headers(path: str | Path) -> list[str]:
     with open(path, "r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.reader(handle)
         return next(reader)

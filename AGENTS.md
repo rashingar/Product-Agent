@@ -30,7 +30,7 @@ treat it as a request to run the full pipeline.
    - `work/{model}/scrape/{model}.source.json`
    - `work/{model}/scrape/{model}.report.json`
 4. The assistant is the LLM stage in this workflow.
-5. Using the reduced contract from `master_prompt+.txt` and `schemas/compact_response.schema.json`, author:
+5. Using the reduced contract from `resources/prompts/master_prompt+.txt` and `resources/schemas/compact_response.schema.json`, author:
    - `work/{model}/llm_output.json`
 6. The assistant must write only the LLM-owned fields:
    - `product.meta_description`
@@ -87,10 +87,10 @@ After the pipeline completes successfully, reply in chat with this fixed complet
 
 Rules for the completion message:
 
-- The `Category Filters` section must list only the category filters defined by `filter_map.json` for the resolved taxonomy path.
+- The `Category Filters` section must list only the category filters defined by `resources/mappings/filter_map.json` for the resolved taxonomy path.
 - Do not dump the full characteristics table in place of category filters.
 - Resolve each category filter value from the scraped source/spec data when possible.
-- If a category filter exists in `filter_map.json` but no source value exists, show it as `-`.
+- If a category filter exists in `resources/mappings/filter_map.json` but no source value exists, show it as `-`.
 - The fixed completion template must always appear first in the final chat response for template-triggered pipeline runs.
 
 ## Source Scope
@@ -105,3 +105,54 @@ Rules for the completion message:
 - Keep rendered outputs in `work/{model}/candidate/`.
 - When the user asks for testing or debugging on a sample model, rerun the actual workflow instead of reasoning from stale files.
 - If a bug appears on one product, fix it generically in the pipeline and verify against the active regression samples already present in `work/`.
+
+## Execution docs policy
+
+Use these files as follows:
+
+### PLAN.md
+Update `PLAN.md` only when one of these is true:
+- a milestone status changed
+- a planned step must be revised based on evidence
+- a new dependency/order/risk changes the execution plan
+- a milestone is split, merged, postponed, or removed
+
+Do not rewrite `PLAN.md` wholesale.
+Do not make cosmetic edits.
+Treat `PLAN.md` as the milestone source of truth.
+
+### IMPLEMENT.md
+Update `IMPLEMENT.md` only when one of these is true:
+- you discovered a recurring execution rule that should apply to future milestones
+- validation procedure needs a permanent correction
+- a repo-wide guardrail is missing and should become standing guidance
+- a repeated failure suggests a durable process change
+
+Do not update `IMPLEMENT.md` for one-off task notes.
+Do not use it as a changelog.
+
+### DOCUMENTATION.md
+Update `DOCUMENTATION.md` on every milestone that changes files, directories, validation steps, or decisions.
+
+Record:
+- what was changed
+- which files/directories were affected
+- commands run
+- validation results
+- risks, blockers, or skipped items
+- any follow-up needed for the next milestone
+
+Treat `DOCUMENTATION.md` as the running engineering log.
+
+### Priority rule
+If a fact belongs to:
+- execution plan/order -> `PLAN.md`
+- durable operating rule -> `IMPLEMENT.md`
+- milestone history/results -> `DOCUMENTATION.md`
+
+If unsure, prefer updating `DOCUMENTATION.md` instead of changing `PLAN.md` or `IMPLEMENT.md`.
+
+### Edit discipline
+Do not create duplicate versions of these files.
+Do not overwrite them wholesale.
+Make targeted edits only.

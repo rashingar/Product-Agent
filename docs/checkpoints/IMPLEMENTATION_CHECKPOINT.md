@@ -1,6 +1,6 @@
 # Execution Checklist For Approved Implementation
 
-- Create `work/IMPLEMENTATION_CHECKPOINT.md` and record the approved implementation checklist there.
+- Create `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md` and record the approved implementation checklist there.
 - Extend scraper reporting with per-field confidence diagnostics for key parsed fields.
 - Capture DOM-selector traces for DOM-backed extraction paths so parse drift is visible in reports.
 - Harden parser scoping so title, brand, specs, and key-spec extraction stay inside product content and exclude footer/menu/search noise.

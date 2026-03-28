@@ -11,7 +11,8 @@ from .csv_writer import write_csv_row
 from .llm_contract import build_llm_context, render_prompt, validate_llm_output
 from .mapping import build_row
 from .models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
-from .utils import MASTER_PROMPT_PATH, REPO_ROOT, ensure_directory, read_json, write_json, write_text
+from .repo_paths import MASTER_PROMPT_PATH, REPO_ROOT
+from .utils import ensure_directory, read_json, write_json, write_text
 from .validator import validate_candidate_csv, write_validation_report
 
 WORK_ROOT = REPO_ROOT / "work"

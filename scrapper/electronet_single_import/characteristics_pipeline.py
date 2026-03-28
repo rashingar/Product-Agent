@@ -11,7 +11,8 @@ from .deterministic_fields import build_spec_lookup, effective_spec_sections
 from .html_builders import build_characteristics_html
 from .models import SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match, normalize_whitespace
-from .utils import CHARACTERISTICS_TEMPLATES_PATH, SCHEMA_LIBRARY_PATH, dedupe_strings, read_json
+from .repo_paths import CHARACTERISTICS_TEMPLATES_PATH, SCHEMA_LIBRARY_PATH
+from .utils import dedupe_strings, read_json
 
 
 TV_INCH_TO_CM = {

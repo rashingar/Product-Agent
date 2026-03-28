@@ -1,19 +1,53 @@
-from electronet_single_import.utils import (
+from electronet_single_import.repo_paths import (
     CATALOG_TAXONOMY_PATH,
+    CHARACTERISTICS_TEMPLATES_PATH,
+    COMPACT_RESPONSE_SCHEMA_PATH,
+    DIFFERENTIATOR_PRIORITY_MAP_PATH,
     FILTER_MAP_PATH,
+    MANUFACTURER_SOURCE_MAP_PATH,
+    MASTER_PROMPT_PATH,
+    NAME_RULES_PATH,
     PRESENTATION_TEMPLATE_PATH,
     PRODUCT_TEMPLATE_PATH,
     REPO_ROOT,
-    RULES_PATH,
     SCHEMA_LIBRARY_PATH,
+    SCHEMA_INDEX_PATH,
+    TAXONOMY_MAPPING_TEMPLATE_PATH,
 )
 
 
-def test_support_files_resolve_from_repo_root() -> None:
+def test_support_files_resolve_from_resources_layout() -> None:
     assert REPO_ROOT.name == "Product-Agent"
-    assert PRODUCT_TEMPLATE_PATH.exists()
-    assert RULES_PATH.exists()
-    assert PRESENTATION_TEMPLATE_PATH.exists()
-    assert CATALOG_TAXONOMY_PATH.exists()
-    assert SCHEMA_LIBRARY_PATH.exists()
-    assert FILTER_MAP_PATH.exists()
+    expected_paths = [
+        (PRODUCT_TEMPLATE_PATH, REPO_ROOT / "resources" / "templates" / "product_import_template.csv"),
+        (PRESENTATION_TEMPLATE_PATH, REPO_ROOT / "resources" / "templates" / "TEMPLATE_presentation.html"),
+        (CATALOG_TAXONOMY_PATH, REPO_ROOT / "resources" / "mappings" / "catalog_taxonomy.json"),
+        (SCHEMA_LIBRARY_PATH, REPO_ROOT / "resources" / "schemas" / "electronet_schema_library.json"),
+        (
+            CHARACTERISTICS_TEMPLATES_PATH,
+            REPO_ROOT / "resources" / "templates" / "characteristics_templates.json",
+        ),
+        (FILTER_MAP_PATH, REPO_ROOT / "resources" / "mappings" / "filter_map.json"),
+        (NAME_RULES_PATH, REPO_ROOT / "resources" / "mappings" / "name_rules.json"),
+        (
+            DIFFERENTIATOR_PRIORITY_MAP_PATH,
+            REPO_ROOT / "resources" / "mappings" / "differentiator_priority_map.csv",
+        ),
+        (MASTER_PROMPT_PATH, REPO_ROOT / "resources" / "prompts" / "master_prompt+.txt"),
+        (
+            COMPACT_RESPONSE_SCHEMA_PATH,
+            REPO_ROOT / "resources" / "schemas" / "compact_response.schema.json",
+        ),
+        (
+            MANUFACTURER_SOURCE_MAP_PATH,
+            REPO_ROOT / "resources" / "mappings" / "MANUFACTURER_SOURCE_MAP.json",
+        ),
+        (SCHEMA_INDEX_PATH, REPO_ROOT / "resources" / "schemas" / "schema_index.csv"),
+        (
+            TAXONOMY_MAPPING_TEMPLATE_PATH,
+            REPO_ROOT / "resources" / "mappings" / "taxonomy_mapping_template.csv",
+        ),
+    ]
+    for actual_path, expected_path in expected_paths:
+        assert actual_path == expected_path
+        assert actual_path.exists()

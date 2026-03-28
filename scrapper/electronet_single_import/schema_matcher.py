@@ -5,7 +5,8 @@ from typing import Any
 
 from .models import SchemaMatchResult, SpecSection
 from .normalize import normalize_for_match
-from .utils import SCHEMA_LIBRARY_PATH, read_json
+from .repo_paths import SCHEMA_LIBRARY_PATH
+from .utils import read_json
 
 
 class SchemaMatcher:

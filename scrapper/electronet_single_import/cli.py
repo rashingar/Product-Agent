@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -22,7 +23,8 @@ from .skroutz_sections import build_skroutz_presentation_source_html, extract_sk
 from .skroutz_taxonomy import serialize_source_category
 from .source_detection import detect_source, validate_url_scope
 from .taxonomy import TaxonomyResolver
-from .utils import SCHEMA_LIBRARY_PATH, build_model_output_dir, write_json, write_text
+from .repo_paths import SCHEMA_LIBRARY_PATH
+from .utils import ensure_directory, write_json, write_text
 
 FAIL_MESSAGE = "Generation failed, provide 6-digit model"
 SKROUTZ_V1_MPN_HINTS = {
@@ -133,7 +135,7 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
     if not parsed.source.name and not parsed.source.spec_sections:
         raise RuntimeError("Total parse failure")
 
-    model_dir = build_model_output_dir(cli.out, cli.model)
+    model_dir = ensure_directory(Path(cli.out) / cli.model)
     raw_html_path = model_dir / f"{cli.model}.raw.html"
     source_json_path = model_dir / f"{cli.model}.source.json"
     normalized_json_path = model_dir / f"{cli.model}.normalized.json"
