@@ -108,11 +108,10 @@ Evidence:
 - Updated `scrapper/electronet_single_import/repo_paths.py` so centralized runtime path resolution now targets the new `resources/` locations without changing loader semantics.
 
 ### M7 — Normalize documentation
-Update:
-- `README.md`
-- `RULES.md`
-- `AGENTS.md`
-- `docs/runbooks/repo-layout.md`
+Status: completed
+Evidence:
+- Updated `README.md` to describe the post-M6 `resources/`, `docs/`, `archive/`, `work/`, and `products/` layout accurately.
+- Created `docs/runbooks/repo-layout.md` as the repo-specific layout guide for future operators and Codex runs.
 
 ### M8 — Audit dependency strategy
 Inspect root vs scraper requirements before any dependency-file move.

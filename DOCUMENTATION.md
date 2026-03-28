@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M6 completed. M7 is the next planned milestone.
+M7 completed. M8 is the next planned milestone.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -138,7 +138,7 @@ Notes:
 Status: completed
 
 ### M7 — Documentation normalization
-Status: pending
+Status: completed
 
 ### M8 — Dependency audit
 Status: pending
@@ -176,6 +176,26 @@ Notes:
 - scraper smoke validation was intentionally skipped because the targeted path test, full pytest run, and code inspection were sufficient for this relocation-only milestone
 - archived legacy files and historical command-log entries still contain old basenames intentionally and were not rewritten as part of M6
 
+## M7 detail
+Goal:
+- normalize repo layout documentation after the M6 `resources/` move without changing runtime behavior
+
+Changes:
+- updated `README.md` to describe the post-M6 repo layout and current directory responsibilities
+- created `docs/runbooks/repo-layout.md` as the practical repo-specific layout guide
+- updated `PLAN.md` to mark M7 completed after the documentation normalization pass
+- corrected documentation drift in active layout guidance without changing `AGENTS.md`, `RULES.md`, `IMPLEMENT.md`, or runtime code
+
+Validation:
+- `rg` over repo docs confirmed active layout guidance now points to `resources/` for shared support assets
+- `rg` over repo docs confirmed `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md` and `docs/specs/2026-03-22-pipeline-optimization-design.md` are the current post-M4 locations in active guidance, with old-path mentions retained only in historical command logs
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- `AGENTS.md`, `RULES.md`, and runtime Python files were intentionally left unchanged because no broken active layout reference was found in them during M7
+- scraper smoke validation was intentionally skipped because this was a docs-only milestone
+
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
@@ -210,6 +230,9 @@ Notes:
 - `Move-Item` for the approved M6 support assets into `resources/mappings/`, `resources/schemas/`, `resources/templates/`, and `resources/prompts/`
 - `Remove-Item` for `.gitkeep` in `resources/mappings/`, `resources/schemas/`, `resources/templates/`, and `resources/prompts/` after those directories became non-empty
 - `Remove-Item` for the old `schemas/` directory after it became empty
+- `Get-Content README.md`
+- existence check for `docs/runbooks/repo-layout.md`
+- `rg` over repo docs for pre-M6 support-asset paths and post-M4 moved doc paths
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
@@ -222,4 +245,4 @@ Notes:
 - historical docs and archived legacy files intentionally retain some old support-asset basenames as prior-state evidence
 
 ## Next approved action
-Run M7 only.
+Run M8 only.
