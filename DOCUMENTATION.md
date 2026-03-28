@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M13 completed. No further cleanup milestone is scheduled.
+M14 completed. No further cleanup milestone is scheduled.
 
 ## Historical reference note
 - Completed milestone entries, audit summaries, and command logs below preserve prior-state file paths intentionally.
@@ -329,6 +329,31 @@ Notes:
 - provenance was preserved by adding clarification notes instead of rewriting the underlying historical outcomes
 - scraper smoke validation was intentionally skipped because this was a docs-only milestone
 
+## M14 detail
+Goal:
+- reduce proven runtime-code redundancy and improve concision without changing behavior
+
+Changes:
+- switched the confirmed support-asset path consumers from `utils.py` compatibility re-exports to direct imports from `scrapper/electronet_single_import/repo_paths.py`
+- removed the dead `RULES_PATH` constant from `scrapper/electronet_single_import/utils.py`
+- removed the one-callsite `build_model_output_dir()` wrapper and inlined its exact current behavior in `scrapper/electronet_single_import/cli.py`
+- simplified `scrapper/electronet_single_import/utils.py` so it now keeps only actual utility helpers rather than mixed utility and path-ownership responsibilities
+- made a small concision cleanup in `scrapper/electronet_single_import/deterministic_fields.py` by collapsing duplicate typing imports while touching the file for the path-import change
+
+Validation:
+- confirmed before editing that `RULES_PATH` had no callsites, `build_model_output_dir()` had exactly one caller in `scrapper/electronet_single_import/cli.py`, and the path-constant compatibility seam was limited to the edited runtime modules
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_utils_support_paths.py` from `scrapper/` passed
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py electronet_single_import/tests/test_csv_writer.py electronet_single_import/tests/test_validator.py electronet_single_import/tests/test_taxonomy.py electronet_single_import/tests/test_schema_matcher.py` from `scrapper/` passed
+- `python -m pytest -q electronet_single_import/tests/test_characteristics_pipeline.py electronet_single_import/tests/test_deterministic_fields.py electronet_single_import/tests/test_deterministic_fields_ice_cream_maker.py electronet_single_import/tests/test_manufacturer_enrichment_tefal.py` from `scrapper/` passed
+- full `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- runtime behavior remained unchanged because this pass only reduced a dead constant, a one-callsite wrapper, and the `utils.py` path-compatibility seam
+- no tests needed edits because the path values and behavior under test stayed the same
+- higher-risk cleanup remains deferred, including `workflow.py` output-root refactors, hardcoded absolute repo paths in some tests, and broader utility API reshaping
+
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
@@ -384,6 +409,13 @@ Notes:
 - `rg` for `scrapper/README.md` references after README consolidation
 - targeted `rg` for stale old-file references across current guidance docs
 - targeted `rg` for stale old-file references across `docs/audits/`, `docs/specs/`, `archive/legacy/`, and `DOCUMENTATION.md`
+- `Get-ChildItem -Recurse -File scrapper/electronet_single_import`
+- `rg` over `scrapper/electronet_single_import/` for `REPO_ROOT`, path constants, `build_model_output_dir`, `RULES_PATH`, and utility callsites
+- `Get-Content` inspection for `scrapper/electronet_single_import/utils.py`, `repo_paths.py`, `cli.py`, `workflow.py`, `csv_writer.py`, `validator.py`, `taxonomy.py`, `schema_matcher.py`, `manufacturer_enrichment.py`, `characteristics_pipeline.py`, and `deterministic_fields.py`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q electronet_single_import/tests/test_utils_support_paths.py` from `scrapper/`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py electronet_single_import/tests/test_csv_writer.py electronet_single_import/tests/test_validator.py electronet_single_import/tests/test_taxonomy.py electronet_single_import/tests/test_schema_matcher.py` from `scrapper/`
+- `python -m pytest -q electronet_single_import/tests/test_characteristics_pipeline.py electronet_single_import/tests/test_deterministic_fields.py electronet_single_import/tests/test_deterministic_fields_ice_cream_maker.py electronet_single_import/tests/test_manufacturer_enrichment_tefal.py` from `scrapper/`
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
@@ -394,6 +426,7 @@ Notes:
 - some tests still use hardcoded absolute repo paths and were intentionally deferred
 - historical docs and archived legacy files intentionally retain some old support-asset basenames as prior-state evidence
 - redundant `.gitkeep` files remain in non-empty `docs/audits/`, `docs/checkpoints/`, `docs/runbooks/`, and `docs/specs/` directories
+- broader runtime utility/API reshaping beyond the current path-ownership seam remains intentionally deferred to avoid behavior risk
 
 ## Next approved action
 No cleanup follow-up is scheduled by default. If approved, open a narrowly scoped follow-up for deferred path assumptions, test path cleanup, or redundant `.gitkeep` removal.

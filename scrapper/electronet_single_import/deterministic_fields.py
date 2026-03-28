@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import csv
 import re
-from typing import Iterable
-
-from typing import Any
+from typing import Any, Iterable
 
 from .models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match, normalize_whitespace
-from .utils import DIFFERENTIATOR_PRIORITY_MAP_PATH
+from .repo_paths import DIFFERENTIATOR_PRIORITY_MAP_PATH
 
 MODEL_TOKEN_RE = re.compile(r"^(?=.*[A-Z])(?=.*\d)[A-Z0-9][A-Z0-9._/-]{2,}$")
 PURE_NUMERIC_TOKEN_RE = re.compile(r"^\d+(?:[.,]\d+)?$")

@@ -149,6 +149,12 @@ Evidence:
 - Added short historical-context notes to the affected audits, spec, archived legacy files, and `DOCUMENTATION.md` so pre-move paths are explicitly labeled as prior-state references.
 - Preserved the underlying milestone outcomes and archived text rather than rewriting history into current guidance.
 
+### M14 - Runtime-code redundancy reduction and concision pass
+Status: completed
+Evidence:
+- Moved the confirmed support-asset path consumers to direct imports from `scrapper/electronet_single_import/repo_paths.py`, removing the remaining `utils.py` compatibility-reexport seam.
+- Removed the dead `RULES_PATH` constant and the one-callsite `build_model_output_dir()` wrapper without changing the known pytest baseline.
+
 ## Validation rules
 After each milestone:
 1. run repo-appropriate tests

@@ -12,7 +12,8 @@ from bs4 import BeautifulSoup, Tag
 
 from .models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import make_absolute_url, normalize_for_match, normalize_whitespace
-from .utils import MANUFACTURER_SOURCE_MAP_PATH, dedupe_strings, ensure_directory, read_json, write_bytes, write_text
+from .repo_paths import MANUFACTURER_SOURCE_MAP_PATH
+from .utils import dedupe_strings, ensure_directory, read_json, write_bytes, write_text
 
 try:  # pragma: no cover - dependency availability is environment-dependent
     from pypdf import PdfReader

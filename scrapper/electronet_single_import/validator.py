@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Any
 
 from .normalize import normalize_whitespace
-from .utils import PRODUCT_TEMPLATE_PATH, load_template_headers, write_json
+from .repo_paths import PRODUCT_TEMPLATE_PATH
+from .utils import load_template_headers, write_json
 
 REPLACEMENT_CHAR = "\ufffd"
 MOJIBAKE_RE = re.compile(r"(?:Ã.|Â.|Î.|Ï.|â€.|â€œ|â€™|â€\x9d)")

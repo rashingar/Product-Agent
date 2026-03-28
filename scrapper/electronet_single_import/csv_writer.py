@@ -4,7 +4,8 @@ import csv
 from pathlib import Path
 from typing import Any
 
-from .utils import PRODUCT_TEMPLATE_PATH, load_template_headers
+from .repo_paths import PRODUCT_TEMPLATE_PATH
+from .utils import load_template_headers
 
 
 

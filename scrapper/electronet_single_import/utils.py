@@ -10,23 +10,6 @@ from typing import Any, Iterable
 from urllib.parse import urlparse
 
 from .normalize import normalize_for_match, normalize_whitespace
-from .repo_paths import (
-    CHARACTERISTICS_TEMPLATES_PATH,
-    CATALOG_TAXONOMY_PATH,
-    COMPACT_RESPONSE_SCHEMA_PATH,
-    DIFFERENTIATOR_PRIORITY_MAP_PATH,
-    FILTER_MAP_PATH,
-    MANUFACTURER_SOURCE_MAP_PATH,
-    MASTER_PROMPT_PATH,
-    NAME_RULES_PATH,
-    PRESENTATION_TEMPLATE_PATH,
-    PRODUCT_TEMPLATE_PATH,
-    REPO_ROOT,
-    SCHEMA_LIBRARY_PATH,
-)
-
-
-RULES_PATH = REPO_ROOT / "RULES.md"
 
 
 
@@ -34,11 +17,6 @@ def ensure_directory(path: str | Path) -> Path:
     out = Path(path)
     out.mkdir(parents=True, exist_ok=True)
     return out
-
-
-
-def build_model_output_dir(base_out: str | Path, model: str) -> Path:
-    return ensure_directory(Path(base_out) / model)
 
 
 
@@ -72,7 +50,7 @@ def write_bytes(path: str | Path, payload: bytes) -> None:
 
 
 
-def load_template_headers(path: str | Path = PRODUCT_TEMPLATE_PATH) -> list[str]:
+def load_template_headers(path: str | Path) -> list[str]:
     with open(path, "r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.reader(handle)
         return next(reader)
