@@ -2,7 +2,10 @@ import argparse
 import json
 from pathlib import Path
 
+import pytest
+
 from electronet_single_import.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from electronet_single_import.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 from electronet_single_import.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
 
@@ -51,7 +54,7 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     )
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_run_cli_input(_cli):
+    def fake_execute_full_run(_cli):
         return {
             "normalized": {
                 "deterministic_product": {
@@ -73,22 +76,42 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
             "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
         }
 
-    monkeypatch.setattr(workflow, "run_cli_input", fake_run_cli_input)
+    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
 
     result = prepare_workflow(cli)
 
     assert result["llm_context_path"].exists()
     assert result["prompt_path"].exists()
+    assert result["metadata_path"].exists()
     llm_context = json.loads(result["llm_context_path"].read_text(encoding="utf-8"))
+    metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
     prompt_text = result["prompt_path"].read_text(encoding="utf-8")
     assert llm_context["writer_rules"]["intro_html_rule"] == "120-180 Greek words in one intro paragraph."
     assert "between 120 and 180 Greek words" in prompt_text
     assert "120-180 Greek words" in prompt_text
+    assert result["metadata_path"].name == "prepare.run.json"
+    assert metadata["run"]["model"] == "233541"
+    assert metadata["run"]["run_type"] == "prepare"
+    assert metadata["run"]["status"] == "completed"
+    assert metadata["artifacts"]["llm_context_path"] == str(result["llm_context_path"])
+    assert metadata["artifacts"]["prompt_path"] == str(result["prompt_path"])
+    assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
+    assert metadata["artifacts"]["llm_output_path"] == str(result["model_root"] / "llm_output.json")
+    assert metadata["details"]["source"] == ""
 
 
-def test_run_cli_input_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
-    from electronet_single_import import cli as cli_module
+def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
+    from electronet_single_import import full_run as run_module
     from electronet_single_import.models import FetchResult
+    from electronet_single_import.providers.models import (
+        ProviderCapability,
+        ProviderDefinition,
+        ProviderInputIdentity,
+        ProviderKind,
+        ProviderResult,
+        ProviderSnapshot,
+        ProviderSnapshotKind,
+    )
 
     cli = CLIInput(
         model="229957",
@@ -136,22 +159,186 @@ def test_run_cli_input_allows_electronet_product_code_mismatch(monkeypatch, tmp_
         def match(self, *_args, **_kwargs):
             return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
 
-    monkeypatch.setattr(cli_module, "detect_source", lambda _url: "electronet")
-    monkeypatch.setattr(cli_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
-    monkeypatch.setattr(cli_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(cli_module, "ElectronetProductParser", lambda known_section_titles=None: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
-    monkeypatch.setattr(cli_module, "SkroutzProductParser", lambda: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
-    monkeypatch.setattr(cli_module, "TaxonomyResolver", lambda: DummyResolver())
-    monkeypatch.setattr(cli_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(cli_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {})
+    provider_calls: list[ProviderInputIdentity] = []
 
-    result = cli_module.run_cli_input(cli)
+    class UnexpectedParser:
+        def parse(self, *_args, **_kwargs):
+            raise AssertionError("Electronet parser should not be called directly")
 
+    class DummyElectronetProvider:
+        def __init__(self, *, fetcher, parser):
+            assert isinstance(fetcher, DummyFetcher)
+            assert isinstance(parser, UnexpectedParser)
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="electronet",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "httpx", "fallback_used": False},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=ProviderDefinition(
+                    provider_id="electronet",
+                    source_name="electronet",
+                    kind=ProviderKind.VENDOR_SITE,
+                    capabilities=frozenset(
+                        {
+                            ProviderCapability.URL_INPUT,
+                            ProviderCapability.LIVE_FETCH,
+                            ProviderCapability.HTML_SNAPSHOT,
+                            ProviderCapability.NORMALIZED_PRODUCT,
+                        }
+                    ),
+                ),
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
+
+    monkeypatch.setattr(run_module, "detect_source", lambda _url: "electronet")
+    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
+    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
+    monkeypatch.setattr(run_module, "ElectronetProvider", DummyElectronetProvider)
+    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
+    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
+    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {})
+
+    result = run_module.execute_full_run(cli)
+
+    assert provider_calls == [ProviderInputIdentity(model="229957", url="https://www.electronet.gr/example")]
     assert result["parsed"].warnings == ["source_product_code_mismatch:input=229957:page=235370"]
+    assert result["report"]["source"] == "electronet"
+    assert result["report"]["identity_checks"]["source"] == "electronet"
 
 
-def test_run_cli_input_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
-    from electronet_single_import import cli as cli_module
+def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_path: Path) -> None:
+    from electronet_single_import import full_run as run_module
+    from electronet_single_import.models import FetchResult
+
+    cli = CLIInput(
+        model="341490",
+        url="https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html",
+        photos=2,
+        sections=0,
+        skroutz_status=0,
+        boxnow=1,
+        price="19",
+        out=str(tmp_path),
+    )
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            source_name="skroutz",
+            page_type="product",
+            url=cli.url,
+            canonical_url=cli.url,
+            product_code=cli.model,
+            brand="Estia",
+            mpn="06-24567",
+            name="Estia 06-24567",
+            breadcrumbs=["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Συσκευές Κουζίνας", "Βραστήρες"],
+            taxonomy_source_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::Συσκευές Κουζίνας///Βραστήρες",
+            taxonomy_match_type="exact_category",
+            taxonomy_rule_id="family:kettle",
+            price_text="19,00 €",
+            price_value=19.0,
+            key_specs=[SpecItem(label="Ισχύς", value="2200 W")],
+            spec_sections=[SpecSection(section="Χαρακτηριστικά", items=[SpecItem(label="Ισχύς", value="2200 W")])],
+        ),
+    )
+    calls = {"playwright": 0, "parser": 0}
+
+    class DummyFetcher:
+        def fetch_httpx(self, _url):
+            raise AssertionError("Default Skroutz flow should not fall back to httpx when playwright succeeds")
+
+        def fetch_playwright(self, _url):
+            calls["playwright"] += 1
+            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
+
+        def download_gallery_images(self, **_kwargs):
+            return [], [], []
+
+        def download_besco_images(self, **_kwargs):
+            return [], [], []
+
+    class DummyResolver:
+        def resolve(self, **_kwargs):
+            return TaxonomyResolution(parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", leaf_category="Συσκευές Κουζίνας", sub_category="Βραστήρες"), []
+
+    class DummySchemaMatcher:
+        known_section_titles = set()
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def match(self, *_args, **_kwargs):
+            return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
+
+    class DummySkroutzParser:
+        def parse(self, _html, _url, fallback_used=False):
+            assert fallback_used is True
+            calls["parser"] += 1
+            return parsed
+
+    class UnexpectedElectronetProvider:
+        def __init__(self, **_kwargs):
+            raise AssertionError("Electronet provider should not be selected for Skroutz by default")
+
+    monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
+    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("skroutz", True, "skroutz_product_path"))
+    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
+    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: DummySkroutzParser())
+    monkeypatch.setattr(run_module, "ElectronetProvider", UnexpectedElectronetProvider)
+    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
+    monkeypatch.setattr(
+        run_module,
+        "enrich_source_from_manufacturer_docs",
+        lambda **_kwargs: {
+            "applied": False,
+            "provider": "",
+            "providers_considered": [],
+            "matched_providers": [],
+            "documents": [],
+            "documents_discovered": 0,
+            "documents_parsed": 0,
+            "warnings": [],
+            "section_count": 0,
+            "field_count": 0,
+            "hero_summary_applied": False,
+            "presentation_applied": False,
+            "presentation_block_count": 0,
+            "fallback_reason": "test_stub",
+        },
+    )
+
+    result = run_module.execute_full_run(cli)
+
+    assert calls == {"playwright": 1, "parser": 1}
+    assert result["report"]["source"] == "skroutz"
+    assert result["report"]["fetch_mode"] == "playwright"
+    assert result["fetch"].method == "playwright"
+
+
+def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
+    from electronet_single_import import full_run as run_module
     from electronet_single_import.models import FetchResult
 
     cli = CLIInput(
@@ -240,17 +427,17 @@ def test_run_cli_input_uses_manufacturer_parser_for_tefal_source(monkeypatch, tm
         def parse(self, *_args, **_kwargs):
             raise AssertionError("Unexpected parser used")
 
-    monkeypatch.setattr(cli_module, "detect_source", lambda _url: "manufacturer_tefal")
-    monkeypatch.setattr(cli_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
-    monkeypatch.setattr(cli_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(cli_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
-    monkeypatch.setattr(cli_module, "SkroutzProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(cli_module, "ManufacturerProductParser", lambda: DummyManufacturerParser())
-    monkeypatch.setattr(cli_module, "TaxonomyResolver", lambda: DummyResolver())
-    monkeypatch.setattr(cli_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(cli_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
+    monkeypatch.setattr(run_module, "detect_source", lambda _url: "manufacturer_tefal")
+    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
+    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
+    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
+    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: DummyManufacturerParser())
+    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
+    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
 
-    result = cli_module.run_cli_input(cli)
+    result = run_module.execute_full_run(cli)
 
     assert result["parsed"].source.source_name == "manufacturer_tefal"
     assert result["normalized"]["deterministic_product"]["mpn"] == "IG602A"
@@ -316,7 +503,7 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
     )
     cli = CLIInput(model=model, url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_run_cli_input(_cli):
+    def fake_execute_full_run(_cli):
         return {
             "normalized": normalized_payload,
             "parsed": parsed,
@@ -336,7 +523,7 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
             "csv_path": csv_path,
         }
 
-    monkeypatch.setattr(workflow, "run_cli_input", fake_run_cli_input)
+    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
 
     result = prepare_workflow(cli)
     scrape_dir = result["scrape_dir"]
@@ -347,6 +534,31 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
     assert rewritten_source["raw_html_path"] == str(scrape_dir / f"{model}.raw.html")
     assert all(Path(path).parent == scrape_dir for path in rewritten_report["files_written"])
     assert rewritten_source["gallery_images"][0]["local_path"] == str(scrape_dir / "gallery" / f"{model}-1.jpg")
+
+
+def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkeypatch) -> None:
+    from electronet_single_import import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=1, sections=0, skroutz_status=0, boxnow=0, price="0", out=str(tmp_path))
+
+    def fake_execute_full_run(_cli):
+        raise RuntimeError("prepare exploded")
+
+    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+
+    try:
+        prepare_workflow(cli)
+    except RuntimeError as exc:
+        assert str(exc) == "prepare exploded"
+    else:
+        raise AssertionError("Expected RuntimeError")
+
+    metadata_path = tmp_path / "work" / "233541" / "prepare.run.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    assert metadata["run"]["status"] == "failed"
+    assert metadata["run"]["error_code"] == "RuntimeError"
+    assert metadata["run"]["error_detail"] == "prepare exploded"
 
 
 def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) -> None:
@@ -430,4 +642,160 @@ def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) ->
     assert result["published_csv_path"] == products_dir / f"{model}.csv"
     assert result["published_csv_path"].read_text(encoding="utf-8-sig") == result["candidate_csv_path"].read_text(encoding="utf-8-sig")
     assert result["validation_report_path"].exists()
+    assert result["metadata_path"].exists()
     assert "field_health" in result["validation_report"]
+    metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
+    assert result["metadata_path"].name == "render.run.json"
+    assert metadata["run"]["model"] == model
+    assert metadata["run"]["run_type"] == "render"
+    assert metadata["run"]["status"] == "completed"
+    assert metadata["artifacts"]["candidate_csv_path"] == str(result["candidate_csv_path"])
+    assert metadata["artifacts"]["published_csv_path"] == str(result["published_csv_path"])
+    assert metadata["artifacts"]["validation_report_path"] == str(result["validation_report_path"])
+    assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
+    assert metadata["details"]["validation_ok"] == result["validation_report"]["ok"]
+
+
+def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from electronet_single_import import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+    source = SourceProductData(url="https://www.electronet.gr/example", canonical_url="https://www.electronet.gr/example", product_code=model, brand="LG", name="LG Example")
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {
+                    "model": model,
+                    "url": "https://www.electronet.gr/example",
+                    "photos": 1,
+                    "sections": 0,
+                    "skroutz_status": 0,
+                    "boxnow": 0,
+                    "price": "0",
+                },
+                "taxonomy": {},
+                "schema_match": {},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        render_workflow(model)
+    except FileNotFoundError as exc:
+        assert str(exc) == f"Missing LLM output: {tmp_path / 'work' / model / 'llm_output.json'}"
+    else:
+        raise AssertionError("Expected FileNotFoundError")
+
+    metadata_path = tmp_path / "work" / model / "render.run.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    assert metadata["run"]["status"] == "failed"
+    assert metadata["run"]["error_code"] == "FileNotFoundError"
+    assert "Missing LLM output" in metadata["run"]["error_detail"]
+
+
+def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsys, tmp_path: Path) -> None:
+    from electronet_single_import import workflow
+
+    cli = CLIInput(
+        model="233541",
+        url="https://www.electronet.gr/example",
+        photos=2,
+        sections=1,
+        skroutz_status=1,
+        boxnow=0,
+        price="2099",
+        out=str(tmp_path),
+    )
+
+    def fake_build_cli_input_from_args(_args):
+        return cli
+
+    def fake_prepare_product(request: PrepareRequest) -> ServiceResult:
+        assert request.model == cli.model
+        assert request.url == cli.url
+        return ServiceResult(
+            run=RunMetadata(model=cli.model, run_type=RunType.PREPARE, status=RunStatus.COMPLETED),
+            artifacts=RunArtifacts(
+                scrape_dir=tmp_path / "work" / cli.model / "scrape",
+                llm_context_path=tmp_path / "work" / cli.model / "llm_context.json",
+                prompt_path=tmp_path / "work" / cli.model / "prompt.txt",
+                metadata_path=tmp_path / "work" / cli.model / "prepare.run.json",
+            ),
+        )
+
+    monkeypatch.setattr(workflow, "build_cli_input_from_args", fake_build_cli_input_from_args)
+    monkeypatch.setattr(workflow, "prepare_product", fake_prepare_product)
+
+    exit_code = workflow.main(["prepare"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert f"Scrape artifacts: {tmp_path / 'work' / cli.model / 'scrape'}" in captured.out
+    assert f"Metadata path: {tmp_path / 'work' / cli.model / 'prepare.run.json'}" in captured.out
+
+
+def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys, tmp_path: Path) -> None:
+    from electronet_single_import import workflow
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        assert request.model == "233541"
+        return ServiceResult(
+            run=RunMetadata(model="233541", run_type=RunType.RENDER, status=RunStatus.COMPLETED),
+            artifacts=RunArtifacts(
+                candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+                validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+                metadata_path=tmp_path / "work" / "233541" / "render.run.json",
+            ),
+            details={"validation_ok": True},
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
+    assert "Validation ok: True" in captured.out
+
+
+def test_run_cli_input_calls_service_layer(monkeypatch) -> None:
+    from electronet_single_import import cli as cli_module
+
+    cli = CLIInput(
+        model="233541",
+        url="https://www.electronet.gr/example",
+        photos=2,
+        sections=1,
+        skroutz_status=1,
+        boxnow=0,
+        price="2099",
+        out="out",
+    )
+    expected = ServiceResult(
+        run=RunMetadata(model="233541", run_type=RunType.FULL, status=RunStatus.COMPLETED),
+        artifacts=RunArtifacts(),
+        details={},
+    )
+
+    def fake_run_product(request):
+        assert request.model == cli.model
+        assert request.url == cli.url
+        assert request.out == cli.out
+        return expected
+
+    monkeypatch.setattr(cli_module, "run_product", fake_run_product)
+
+    assert cli_module.run_cli_input(cli) is expected

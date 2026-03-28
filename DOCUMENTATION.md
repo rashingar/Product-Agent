@@ -1,7 +1,618 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-Pre-M15 control-doc refresh completed. Next active milestone: M15 — define run contract.
+M22 completed. The provider abstraction is now proven with a minimal private selection seam plus a deterministic fixture-backed second provider, while default production Skroutz routing remains unchanged.
+
+## M22 — add provider selection and one second provider proof
+
+Goal:
+- add the smallest private provider-selection seam needed to prove a second provider behind the M20 contract without changing CLI/workflow behavior, source detection, default production Skroutz routing, artifact locations, or validation semantics
+- keep Electronet as the only production-selected provider and prove `SkroutzProvider` only through deterministic test injection
+
+Files created:
+- `scrapper/electronet_single_import/providers/skroutz_provider.py`
+- `scrapper/electronet_single_import/tests/test_provider_selection.py`
+
+Files edited:
+- `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/providers/__init__.py`
+- `scrapper/electronet_single_import/tests/test_workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- added `SkroutzProvider` as a fixture-only provider adapter with constructor-injected fixture HTML paths only:
+  - no built-in production fixture URL map
+  - no live HTTP fetching
+  - no Playwright fetching
+- added a private `_resolve_provider_for_source(...)` helper in `scrapper/electronet_single_import/full_run.py`
+- kept default production routing unchanged:
+  - `electronet` resolves to `ElectronetProvider`
+  - `skroutz` resolves to no provider by default and continues through the legacy Skroutz branch
+  - manufacturer handling remains on the existing non-provider branch
+- generalized the existing provider execution block in `full_run.py` so any resolved provider still converts back into the current `FetchResult` and `ParsedProduct` runtime shapes before downstream processing
+- exported `SkroutzProvider` from `scrapper/electronet_single_import/providers/__init__.py`
+- added focused provider tests that cover:
+  - default resolver behavior selecting Electronet only
+  - `SkroutzProvider.fetch_snapshot()` reading deterministic fixture HTML
+  - `SkroutzProvider.normalize()` returning the expected provider/runtime shapes
+  - test-only injection of `SkroutzProvider` through the private resolver seam
+- added a workflow regression test proving Skroutz still uses the legacy runtime path by default when no override is applied
+- did not change `cli.py`, `workflow.py`, `source_detection.py`, `providers/registry.py`, `providers/base.py`, `providers/models.py`, dependency files, README files, `AGENTS.md`, `RULES.md`, or `IMPLEMENT.md`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import`
+  - passed
+- `python -m pytest -q electronet_single_import/tests/test_provider_selection.py`
+  - passed, `4 passed`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py`
+  - passed, `12 passed`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_integration.py`
+  - passed, `7 passed`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_sections.py`
+  - passed, `5 passed`
+- `python -m pytest -q`
+  - expected baseline only, `92 passed` and `2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+
+Risks:
+- the second-provider proof is intentionally test-only for Skroutz routing; production Skroutz execution still depends on the legacy branch until a later milestone adds a live provider path
+- the repo still carries the two pre-existing manufacturer enrichment failures
+
+Deferred:
+- production Skroutz provider routing remains deferred
+- broader provider routing for manufacturer sources remains deferred
+- registry-driven runtime routing remains deferred
+
+## M21 — extract the current primary source into a provider adapter
+
+Goal:
+- extract exactly one current primary source flow behind the M20 provider contract by routing the Electronet primary path through a concrete provider adapter without changing runtime inputs, workflow/CLI behavior, artifact locations, validation semantics, or non-Electronet execution paths
+
+Files created:
+- `scrapper/electronet_single_import/providers/electronet_provider.py`
+
+Files edited:
+- `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/tests/test_workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Primary source extracted:
+- `electronet`
+
+Integration points changed:
+- `scrapper/electronet_single_import/full_run.py` now routes only the Electronet source branch through `ElectronetProvider`
+- `scrapper/electronet_single_import/full_run.py` converts the provider result back into the existing `FetchResult` and `ParsedProduct` runtime shapes before the rest of the pipeline continues
+- non-Electronet branches in `full_run.py` continue using the existing Skroutz and manufacturer fetch/parse logic
+- `scrapper/electronet_single_import/tests/test_workflow.py` now verifies the Electronet path uses the provider adapter while preserving the existing mismatch-warning and downstream report behavior
+
+Changes:
+- added `ElectronetProvider` as the single concrete M21 adapter, with provider metadata aligned to the M20 contract:
+  - provider id `electronet`
+  - source name `electronet`
+  - provider kind `vendor_site`
+  - capabilities `url_input`, `live_fetch`, `html_snapshot`, and `normalized_product`
+- moved the existing Electronet-only fetch/normalize seam into the provider without widening the M20 contract
+- preserved the current Electronet fetch order inside the provider:
+  - try HTTPX first
+  - fall back to Playwright on fetch failure
+- preserved the current Electronet critical-missing recovery inside the provider:
+  - if the initial parse still has `critical_missing`, rerun a Playwright fetch and reparse
+  - only replace the first parse when the fallback reduces the critical-missing count
+- stored fetch-only details not modeled directly by `ProviderSnapshot` in `snapshot.metadata`, specifically `fetch_method` and `fallback_used`
+- kept the downstream runtime behavior unchanged by translating the provider result back into the existing local execution models before taxonomy resolution, schema matching, artifact writing, and validation
+- left source detection, URL-scope validation, workflow entrypoints, CLI/service entrypoints, Skroutz extraction, and manufacturer enrichment behavior unchanged
+- did not add provider selection, registry-driven runtime routing, or a second provider
+
+Commands run:
+- `Get-ChildItem -Force`
+- `rg --files AGENTS.md RULES.md IMPLEMENT.md PLAN.md DOCUMENTATION.md scrapper/electronet_single_import`
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content IMPLEMENT.md`
+- `rg -n "M20|M21|provider" PLAN.md DOCUMENTATION.md scrapper/electronet_single_import/providers scrapper/electronet_single_import/full_run.py scrapper/electronet_single_import/services/run_service.py scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/providers/models.py`
+- `Get-Content scrapper/electronet_single_import/providers/base.py`
+- `Get-Content scrapper/electronet_single_import/providers/registry.py`
+- `Get-Content scrapper/electronet_single_import/providers/__init__.py`
+- `Get-Content scrapper/electronet_single_import/full_run.py`
+- `Get-Content scrapper/electronet_single_import/source_detection.py`
+- `Get-Content scrapper/electronet_single_import/services/run_service.py`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_electronet.py`
+- `Get-Content scrapper/electronet_single_import/fetcher.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_skroutz.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_manufacturer.py`
+- `rg -n "execute_full_run|detect_source\(|manufacturer_tefal" scrapper/electronet_single_import`
+- `rg -n "electronet" scrapper/electronet_single_import/tests`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_services.py`
+- `Get-Content PLAN.md | Select-Object -First 120`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 120`
+- `git status --short`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q scrapper/electronet_single_import/tests/test_workflow.py`
+- `python -m pytest -q` from `scrapper/`
+- `python -m pytest -q scrapper/electronet_single_import/tests/test_workflow.py scrapper/electronet_single_import/tests/test_skroutz_integration.py scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded before and after the final fix
+- targeted validation succeeded:
+  - `python -m pytest -q scrapper/electronet_single_import/tests/test_workflow.py` returned `11 passed`
+  - `python -m pytest -q scrapper/electronet_single_import/tests/test_workflow.py scrapper/electronet_single_import/tests/test_skroutz_integration.py scrapper/electronet_single_import/tests/test_skroutz_sections.py` returned `23 passed`
+- `python -m pytest -q` from `scrapper/` returned `87 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- one intermediate M21 regression in the Skroutz branch was introduced during extraction and then fixed in `full_run.py`; no new failures remained after the fix
+
+Risks:
+- the provider seam is still only proven for the Electronet primary source; runtime provider selection and secondary-provider support remain unimplemented until M22
+- the repo still carries the two pre-existing manufacturer enrichment failures
+
+Deferred:
+- provider selection and registry-driven runtime routing remain M22 work
+- adding a second concrete provider remains M22 work
+- expanding provider-based routing beyond the Electronet branch remains deferred
+- no changes were made to `cli.py`, `input_validation.py`, `source_detection.py`, dependency files, README files, `AGENTS.md`, `RULES.md`, or `IMPLEMENT.md`
+
+## M20 — define provider contract and registry
+
+Goal:
+- define a narrow internal provider abstraction and registration seam for future manufacturer, vendor-site, and fixture-backed adapters without changing current runtime behavior, source detection, workflow wiring, or CLI entrypoints
+
+Files created:
+- `scrapper/electronet_single_import/providers/__init__.py`
+- `scrapper/electronet_single_import/providers/base.py`
+- `scrapper/electronet_single_import/providers/models.py`
+- `scrapper/electronet_single_import/providers/registry.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Contract elements added:
+- `ProviderDefinition` with provider identifier, emitted `source_name`, provider kind, and capability declaration
+- `ProviderInputIdentity` with typed optional identity fields for `model`, `url`, `sku`, `brand`, `vendor_code`, `mpn`, and extensible extras
+- `ProviderSnapshot` with fetch/snapshot fields for requested and final URL, snapshot kind, content type, status, headers, and text/byte payloads
+- `ProviderResult` with normalized product output anchored to current `SourceProductData` plus provenance, field diagnostics, missing-field tracking, warnings, and overall confidence
+- `ProviderErrorInfo` and `ProviderError` with structured provider error code, stage, retryability, and details
+- `ProductProvider` abstract base contract with `fetch_snapshot(...)` and `normalize(...)`
+- `ProviderRegistry` with explicit provider registration, lookup, required lookup, and definition listing
+
+Changes:
+- added a new standalone `scrapper/electronet_single_import/providers/` package so the provider seam exists without touching current execution modules
+- kept the normalized provider output aligned to the current parser/runtime shape by reusing `SourceProductData` and `FieldDiagnostic` instead of inventing a second normalization model
+- separated provider type from runtime source naming via `ProviderKind` and `ProviderDefinition.source_name`
+- made the contract broad enough for future vendor-site, manufacturer-site, and fixture-backed adapters through explicit kind, capability, identity, and snapshot enums
+- added structured provider error metadata for identity, fetch, normalize, and registry stages
+- added a simple in-memory registry for provider registration and lookup only
+- did not add any concrete provider adapters
+- did not route source detection, `full_run.py`, CLI entrypoints, workflow entrypoints, or the service layer through the new provider package
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scrapper/electronet_single_import/source_detection.py`
+- `Get-Content scrapper/electronet_single_import/full_run.py`
+- `Get-Content scrapper/electronet_single_import/input_validation.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `Get-Content scrapper/electronet_single_import/services/errors.py`
+- `Get-Content scrapper/electronet_single_import/services/run_service.py`
+- `Get-ChildItem scrapper/electronet_single_import -File | Select-Object -ExpandProperty Name`
+- `rg -n "class Parsed|class .*Source|@dataclass|provenance|confidence|page_type|source_name|critical_missing|field_diagnostics|spec_sections|gallery_images|presentation_source_html|manufacturer_enrichment" scrapper/electronet_single_import -g "*.py"`
+- `Get-Content scrapper/electronet_single_import/models.py`
+- `Get-Content scrapper/electronet_single_import/manufacturer_enrichment.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_electronet.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_skroutz.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_manufacturer.py`
+- `Get-Content scrapper/electronet_single_import/providers/models.py`
+- `Get-Content scrapper/electronet_single_import/providers/base.py`
+- `Get-Content scrapper/electronet_single_import/providers/registry.py`
+- `Get-Content scrapper/electronet_single_import/providers/__init__.py`
+- `rg -n "Current milestone|M20|Phase 2 milestones" PLAN.md DOCUMENTATION.md`
+- `Get-Content PLAN.md | Select-Object -First 90`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 80`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q` from `scrapper/` returned `87 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- no new failures were introduced by M20
+
+Risks:
+- the new provider contract is intentionally unwired, so it still depends on later milestones to prove adapter extraction and runtime selection
+- the repo still carries the two pre-existing manufacturer enrichment failures
+
+Deferred:
+- extracting the current Electronet/Skroutz/manufacturer logic into concrete provider adapters remains M21+
+- wiring provider selection into runtime behavior remains M22
+- provider-contract tests were intentionally deferred in M20 to keep the milestone inside the approved file scope and because the package is currently import-safe and unused by runtime code
+
+## M19a — remove remaining cross-layer imports after service routing
+
+Goal:
+- remove the remaining cross-layer imports between `cli.py`, `workflow.py`, and `full_run.py` without changing commands, flags, validation behavior, artifact paths, metadata filenames, or exit semantics
+
+Files created:
+- `scrapper/electronet_single_import/input_validation.py`
+
+Files edited:
+- `scrapper/electronet_single_import/cli.py`
+- `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `scrapper/electronet_single_import/workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- moved shared `FAIL_MESSAGE` and `validate_input(...)` into the neutral module `scrapper/electronet_single_import/input_validation.py`
+- updated `cli.py` to import validation from the neutral module and removed its unused import of `_select_skroutz_image_backed_sections` from `full_run.py`
+- updated `workflow.py` to import `FAIL_MESSAGE` and `validate_input(...)` from the neutral module instead of from `cli.py`
+- updated `full_run.py` to import `FAIL_MESSAGE` from the neutral module so it remains an execution module rather than a shared constants bucket
+- updated `test_skroutz_sections.py` to import `_select_skroutz_image_backed_sections` from its actual lower-layer owner, `full_run.py`
+- kept `execute_full_run(...)` in `full_run.py` and left service-layer contracts unchanged
+
+Cross-layer imports removed:
+- `scrapper/electronet_single_import/cli.py` no longer imports `FAIL_MESSAGE` or `_select_skroutz_image_backed_sections` from `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/workflow.py` no longer imports `FAIL_MESSAGE` or `validate_input(...)` from `scrapper/electronet_single_import/cli.py`
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content scrapper/electronet_single_import/cli.py`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/full_run.py`
+- `Get-Content scrapper/electronet_single_import/services/run_service.py`
+- `Get-Content scrapper/electronet_single_import/models.py`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "FAIL_MESSAGE|validate_input|_select_skroutz_image_backed_sections|execute_full_run|from \\.cli|from \\.full_run" scrapper/electronet_single_import -g "*.py"`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_services.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_integration.py`
+- `rg -n "from electronet_single_import\\.cli import _select_skroutz_image_backed_sections|from \\.full_run import FAIL_MESSAGE|from \\.cli import FAIL_MESSAGE, validate_input" scrapper/electronet_single_import/tests scrapper/electronet_single_import -g "*.py"`
+- `rg -n "Current milestone|M19 —|M20|M19a" PLAN.md DOCUMENTATION.md`
+- `Get-Content PLAN.md -TotalCount 80`
+- `Get-Content DOCUMENTATION.md -TotalCount 120`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py electronet_single_import/tests/test_services.py electronet_single_import/tests/test_skroutz_integration.py electronet_single_import/tests/test_skroutz_sections.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py electronet_single_import/tests/test_services.py electronet_single_import/tests/test_skroutz_integration.py electronet_single_import/tests/test_skroutz_sections.py` from `scrapper/` passed with `29 passed`
+- `python -m pytest -q` from `scrapper/` returned `87 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- `git status --short` showed only the expected M19a edits plus the new neutral helper module
+
+Risks:
+- the repo still carries the two pre-existing manufacturer enrichment failures
+- `cli.py` still re-exports `validate_input(...)` by import for backward-compatible test and caller access, but the implementation now lives in the neutral module rather than in the CLI layer
+
+Deferred:
+- no service-layer files were changed because the boundary cleanup did not require contract adjustments
+- no provider abstraction work was started; that remains M20
+
+## M19 — route CLI through the service layer
+
+Goal:
+- refactor the CLI-facing entrypoints to call the M18 service layer instead of duplicating orchestration logic, while preserving command names, flags, exit semantics, artifact locations, metadata filenames, and provider behavior
+
+Files edited:
+- `scrapper/electronet_single_import/cli.py`
+- `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/services/run_service.py`
+- `scrapper/electronet_single_import/tests/test_services.py`
+- `scrapper/electronet_single_import/tests/test_workflow.py`
+- `scrapper/electronet_single_import/workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- extracted the pre-existing standalone full-run implementation into the lower-layer module `scrapper/electronet_single_import/full_run.py`
+- changed `run_cli_input()` into a thin CLI adapter that builds `FullRunRequest` and calls `run_product()`
+- restored `run_product()` to orchestrate below the CLI layer through `prepare_product()` and `render_product()` rather than calling anything in `cli.py`
+- kept `FullRunRequest.out` so the CLI adapter can pass output-root intent into the service layer without inverting module dependencies
+- routed `python -m electronet_single_import.workflow prepare` through `prepare_product()` and `python -m electronet_single_import.workflow render` through `render_product()`
+- updated `prepare_workflow()` to use the extracted lower-layer executor instead of importing standalone CLI orchestration
+- added focused tests that verify CLI-to-service routing and that the service layer composes stage services without importing `cli.py`
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content scrapper/electronet_single_import/cli.py`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-ChildItem scrapper/electronet_single_import/services -Recurse -File | Select-Object -ExpandProperty FullName`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scrapper/electronet_single_import/services/prepare_service.py`
+- `Get-Content scrapper/electronet_single_import/services/render_service.py`
+- `Get-Content scrapper/electronet_single_import/services/run_service.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `rg -n "run_cli_input\\(|prepare_workflow\\(|render_workflow\\(|prepare_product\\(|render_product\\(|run_product\\(" scrapper/electronet_single_import -g "*.py"`
+- `Get-Content scrapper/electronet_single_import/services/__init__.py`
+- `Get-Content scrapper/electronet_single_import/services/errors.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_services.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `rg -n "def test_.*main|cli\\.main\\(|workflow\\.main\\(" scrapper/electronet_single_import/tests -g "*.py"`
+- `git status --short`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q electronet_single_import/tests/test_services.py electronet_single_import/tests/test_workflow.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_services.py electronet_single_import/tests/test_workflow.py` from `scrapper/` passed with `17 passed`
+- `python -m pytest -q` from `scrapper/` returned `87 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- no new unexpected failures were introduced by M19
+
+Risks:
+- the repo still carries the two pre-existing manufacturer enrichment failures
+- standalone CLI metadata emission still remains a CLI concern because the service layer intentionally does not emit `full.run.json`
+
+Deferred:
+- no provider-contract work was started; that remains M20
+- no dependency files, provider logic, README files, `AGENTS.md`, `RULES.md`, or `IMPLEMENT.md` were changed
+
+## M18 — add service layer models/errors/wrappers
+
+Goal:
+- add a thin internal service layer around the existing prepare/render workflow stages using the M15 contract and M16/M17 stage metadata, without rerouting CLI entrypoints, changing workflow semantics, or introducing new runtime artifact or metadata filenames
+
+Files created:
+- `scrapper/electronet_single_import/services/errors.py`
+- `scrapper/electronet_single_import/services/prepare_service.py`
+- `scrapper/electronet_single_import/services/render_service.py`
+- `scrapper/electronet_single_import/services/run_service.py`
+- `scrapper/electronet_single_import/tests/test_services.py`
+
+Files edited:
+- `scrapper/electronet_single_import/services/__init__.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Service entrypoints added:
+- `prepare_product(request: PrepareRequest) -> ServiceResult`
+- `render_product(request: RenderRequest) -> ServiceResult`
+- `run_product(request: FullRunRequest) -> ServiceResult`
+
+Changes:
+- added a small internal `ServiceError` wrapper with stable `code`, `message`, and optional `cause`
+- added `prepare_product()` as a thin wrapper over `workflow.prepare_workflow()` that converts the M15 request into `CLIInput`, reuses the existing prepare-stage metadata file, and returns a `ServiceResult` with scrape/prompt artifact paths
+- added `render_product()` as a thin wrapper over `workflow.render_workflow()` that reuses the existing render-stage metadata file and returns a `ServiceResult` with candidate and validation artifact paths
+- added `run_product()` as an internal composition layer over `prepare_product()` then `render_product()` and kept full-run aggregation inside `ServiceResult.details`
+- did not emit `full.run.json` from the new service layer
+- did not modify `cli.py`
+- did not modify `workflow.py`
+- kept runtime behavior unchanged by leaving CLI entrypoints, workflow semantics, output locations, provider logic, and metadata filenames untouched
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/services/__init__.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `Get-Content scrapper/electronet_single_import/services/metadata.py`
+- `Get-Content scrapper/electronet_single_import/models.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `rg -n "class CLIInput|@dataclass\\(.*CLIInput|CLIInput\\(" scrapper/electronet_single_import/models.py scrapper/electronet_single_import -g "*.py"`
+- `rg --files scrapper/electronet_single_import/tests`
+- `rg -n "class .*Error|ServiceError|error_code|run_status" scrapper/electronet_single_import -g "*.py"`
+- `Get-Content PLAN.md -TotalCount 90`
+- `Get-Content DOCUMENTATION.md -TotalCount 120`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q electronet_single_import/tests/test_services.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_services.py` from `scrapper/` passed with `6 passed`
+- `python -m pytest -q` from `scrapper/` returned `84 passed, 2 failed`
+- the only known failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- no new unexpected test failures were introduced by M18
+
+Risks:
+- the full suite still has the two pre-existing manufacturer enrichment failures
+- the service layer currently returns aggregated full-run metadata paths through `ServiceResult.details`, not a dedicated full-run metadata artifact, by design for M18
+
+Deferred:
+- routing CLI entrypoints through the service layer remains deferred to M19
+- no new runtime metadata file is emitted for `run_product()` in M18
+- no workflow or CLI refactor beyond the additive service wrapper layer was performed in M18
+
+## M17 — make CLI/workflow emit metadata
+
+Goal:
+- make the current CLI and workflow surfaces emit a structured run status and metadata file path without changing command names, flags, exit codes, workflow semantics, or existing artifact locations
+
+Files edited:
+- `scrapper/electronet_single_import/cli.py`
+- `scrapper/electronet_single_import/services/metadata.py`
+- `scrapper/electronet_single_import/workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- promoted the metadata write helper into `scrapper/electronet_single_import/services/metadata.py` so both CLI and workflow can reuse the same run-status and metadata serialization path
+- kept `prepare_workflow()` and `render_workflow()` additive-only by returning `run_status` alongside the existing result fields
+- updated `python -m electronet_single_import.workflow prepare` to print the completed run status and the emitted `prepare.run.json` path after the existing scrape/prompt artifact lines
+- updated `python -m electronet_single_import.workflow render` to print the completed run status and the emitted `render.run.json` path after the existing candidate/validation lines
+- added best-effort standalone CLI metadata emission as `full.run.json` in the current CLI output model directory and surfaced its run status plus metadata path in the CLI output
+- kept existing CLI flags, command names, exit-code behavior, workflow artifact locations, provider behavior, and validation semantics unchanged
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content scrapper/electronet_single_import/cli.py`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `Get-Content scrapper/electronet_single_import/services/metadata.py`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "metadata_path|RunStatus|prepare_workflow\\(|render_workflow\\(|Validation ok|LLM context:|Candidate CSV:" scrapper/electronet_single_import/tests scrapper/electronet_single_import`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `rg -n "M17|emit metadata|run status|metadata path" PLAN.md DOCUMENTATION.md scrapper/electronet_single_import -g "*.md" -g "*.py"`
+- `rg -n "electronet_single_import\\.cli|python -m electronet_single_import\\.cli|--out" README.md scrapper/README.md scrapper/electronet_single_import/tests -g "*.md" -g "*.py"`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q` from `scrapper/`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py` from `scrapper/` passed with `8 passed`
+- `python -m pytest -q` from `scrapper/` returned `78 passed, 2 failed`
+- unchanged accepted failing tests:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- `git status --short` showed only the expected M17 edits
+
+Risks:
+- no new test failures were introduced by M17
+- standalone CLI metadata now adds one new sidecar file, `full.run.json`, under the existing CLI output model directory; existing artifacts and paths remain unchanged
+
+Deferred:
+- no CLI UX redesign beyond the additive status and metadata-path lines
+- service-layer wrappers and CLI routing through that layer remain deferred to M18-M19
+- no test-file changes were made in M17; coverage for the new surface lines still relies on compile, existing workflow tests, and the unchanged full-suite baseline
+
+## M16 — write structured run metadata alongside current files
+
+Goal:
+- emit structured metadata sidecar files for the current prepare and render workflow stages without changing existing artifact contents or runtime semantics
+
+Files created:
+- `scrapper/electronet_single_import/services/metadata.py`
+
+Files edited:
+- `scrapper/electronet_single_import/workflow.py`
+- `scrapper/electronet_single_import/tests/test_workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Metadata files emitted by stage:
+- `work/{model}/prepare.run.json`
+- `work/{model}/render.run.json`
+
+Changes:
+- added metadata serialization and writing helpers in `scrapper/electronet_single_import/services/metadata.py`
+- used the M15 run contract models as the metadata source shape
+- wrote prepare metadata after prompt artifacts are emitted and render metadata after candidate artifacts are emitted
+- added best-effort failed-run metadata emission when prepare or render raise after the model work directory is known
+- kept existing workflow artifact filenames, locations, and CLI output formatting unchanged
+- updated `PLAN.md` to mark M16 complete and note metadata emission
+
+Commands run:
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/cli.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `python -m compileall scrapper/electronet_single_import`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py` from `scrapper/` passed
+- `python -m pytest -q` from `scrapper/` returned `78 passed, 2 failed`
+- unchanged failing tests:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- `git status --short` confirmed the expected M16 file changes
+
+Risks:
+- no new M16 failures were introduced; the only remaining failures are the pre-existing manufacturer enrichment tests
+- the full-suite pass count increased from `76` to `78` because M16 added two focused workflow metadata tests while keeping the same two known failing tests
+
+Deferred:
+- CLI-facing metadata output changes remain deferred to M17
+- service-layer wrappers and routing remain deferred to later milestones
+- no metadata is emitted for failures that occur before a model work directory can be determined
+  - this preserves current runtime behavior while keeping metadata writing best-effort
+
+## M15 — define run contract
+
+Goal:
+- add import-safe run contract models for future service, metadata, CLI, and API seams without changing current runtime behavior
+
+Files created:
+- `scrapper/electronet_single_import/services/__init__.py`
+- `scrapper/electronet_single_import/services/models.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Models added:
+- `RunType`
+- `RunStatus`
+- `PrepareRequest`
+- `RenderRequest`
+- `FullRunRequest`
+- `RunArtifacts`
+- `RunMetadata`
+- `ServiceResult`
+
+Changes:
+- created the new `scrapper/electronet_single_import/services/` package as import-safe package setup only
+- added contract-only dataclass and enum definitions in `scrapper/electronet_single_import/services/models.py`
+- included the planned `metadata_path` artifact field so M16 can emit metadata without reshaping the contract
+- kept metadata-facing warnings and error fields on `RunMetadata`
+- kept `ServiceResult` lean with only `run`, `artifacts`, and `details`
+- updated `PLAN.md` to mark M15 complete and note that the run contract exists but is not wired into runtime behavior
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q` from `scrapper/` did not match the requested baseline and finished at `69 passed, 9 failed`
+- failing tests:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+  - `test_skroutz_parser_and_deterministic_fields_cover_supported_families`
+  - `test_prepare_and_render_workflow_with_skroutz_fixtures`
+  - `test_143481_html_fixture_resolves_9_sections_in_stable_order`
+  - `test_placeholder_urls_are_rejected_for_resolved_section_images`
+  - `test_143481_rendered_description_preserves_locked_wrappers`
+  - `test_taxonomy_regression_fixture_resolves_expected_categories`
+  - `test_representative_taxonomy_html_fixtures_cover_supported_skroutz_combos`
+- `git status --short` confirmed only the expected milestone files changed, alongside the pre-existing untracked `.claude/worktrees/`
+
+Risks:
+- the current repo test baseline does not match the milestone's expected `75 passed, 2 failed` result
+- seven additional Skroutz fixture-path failures are present in `test_skroutz_integration.py`, `test_skroutz_sections.py`, and `test_skroutz_taxonomy.py`, all failing with `FileNotFoundError` against hardcoded absolute fixture paths outside the current workspace
+- the two existing manufacturer enrichment failures remain in `test_manufacturer_enrichment.py`
+
+Deferred:
+- metadata emission and file writing remain deferred to M16
+- runtime wiring for CLI and workflow remains deferred to later milestones
+- serializers, validators, helper methods, and service wrappers remain intentionally out of scope for M15
 
 ## Pre-M15 control-doc refresh
 
@@ -390,6 +1001,17 @@ Notes:
 - higher-risk cleanup remains deferred, including `workflow.py` output-root refactors, hardcoded absolute repo paths in some tests, and broader utility API reshaping
 
 ## Commands run
+- `rg -n "M15|Current milestone|Phase 2 milestones|M14 detail|Next active milestone" PLAN.md DOCUMENTATION.md`
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content IMPLEMENT.md`
+- `git status --short`
+- `Get-Content PLAN.md | Select-Object -First 90`
+- `Get-Content PLAN.md | Select-Object -Skip 180`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 60`
+- `Get-Content DOCUMENTATION.md | Select-Object -Skip 350`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q` from `scrapper/`
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
 - post-creation filesystem check for approved target paths, `.gitkeep` presence, and empty-directory state
@@ -506,3 +1128,63 @@ No cleanup follow-up is scheduled by default. If approved, open a narrowly scope
 - the live product still relies on the characteristics template for some unresolved spec fields; this is reported but not a blocking validation failure
 - no durable process-rule update was required in `IMPLEMENT.md`
 - no milestone-plan change was required in `PLAN.md`
+
+## 2026-03-28 - Portable test fixture path centralization
+
+## What changed
+- created `scrapper/electronet_single_import/tests/conftest.py` as the canonical test-layer path source of truth
+- added shared pytest fixtures for `tests_root`, `fixtures_root`, `skroutz_fixtures_root`, and `products_root`
+- removed machine-specific absolute path assumptions from the affected Skroutz tests and switched them to the shared fixtures
+- kept the change test-only; no runtime module outside `scrapper/electronet_single_import/tests/` was edited
+
+## Files edited
+- `scrapper/electronet_single_import/tests/conftest.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_integration.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_taxonomy.py`
+- `DOCUMENTATION.md`
+
+## Normalized path assumptions
+- `test_skroutz_integration.py`
+  - replaced hard-coded absolute `REPO_ROOT`
+  - replaced per-file `FIXTURES_ROOT` and `PRODUCTS_ROOT`
+  - switched fetcher and baseline-copy helpers to accept shared fixture paths
+- `test_skroutz_sections.py`
+  - replaced hard-coded absolute `REPO_ROOT`
+  - replaced per-file `FIXTURES_ROOT` and `PRODUCTS_ROOT`
+  - switched fixture fetcher helper and baseline CSV reads to shared fixture paths
+- `test_skroutz_taxonomy.py`
+  - replaced hard-coded absolute `REPO_ROOT`
+  - replaced derived `REGRESSION_FIXTURE` and `TAXONOMY_CASES_ROOT`
+  - switched taxonomy fixture reads to shared fixture paths
+
+## Commands run
+- `rg --files scrapper/electronet_single_import/tests`
+- `Get-Content scrapper/conftest.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_integration.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_taxonomy.py`
+- `rg -n "Users\\\\|VS_Projects|Product-Agent|__file__|parents\\[|parent.parent|fixtures|FIXTURES_ROOT|PRODUCTS_ROOT|REPO_ROOT" scrapper/electronet_single_import/tests`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_integration.py` from `scrapper/`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_sections.py` from `scrapper/`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_taxonomy.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `python -m compileall scrapper/electronet_single_import`
+- `git status --short`
+
+## Validation results
+- targeted tests after the path fix:
+  - `electronet_single_import/tests/test_skroutz_integration.py`: `7 passed`
+  - `electronet_single_import/tests/test_skroutz_sections.py`: `5 passed`
+  - `electronet_single_import/tests/test_skroutz_taxonomy.py`: `5 passed`
+- full suite after the path fix:
+  - `76 passed, 2 failed`
+  - remaining failures:
+    - `test_enrichment_framework_supports_pdf_candidates`
+    - `test_enrichment_framework_supports_html_candidates`
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `git status --short` showed only the expected test-layer edits and `DOCUMENTATION.md`
+
+## Risks, blockers, or skipped items
+- no runtime behavior risk is expected because the change is confined to test path resolution
+- no `PLAN.md` update was needed because this is a test-baseline stabilization task rather than a milestone-order change

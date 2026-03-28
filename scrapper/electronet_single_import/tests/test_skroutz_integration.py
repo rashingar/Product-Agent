@@ -12,9 +12,6 @@ from electronet_single_import.parser_product_skroutz import SkroutzProductParser
 from electronet_single_import.taxonomy import TaxonomyResolver
 from electronet_single_import.workflow import prepare_workflow, render_workflow
 
-REPO_ROOT = Path(r"c:\Users\user\Documents\VS_Projects\tranoulis\Product-Agent")
-FIXTURES_ROOT = REPO_ROOT / "scrapper" / "electronet_single_import" / "tests" / "fixtures" / "skroutz"
-PRODUCTS_ROOT = REPO_ROOT / "products"
 JPEG_BYTES = b"\xff\xd8\xff\xdb\x00C\x00" + (b"\x08" * 64) + b"\xff\xd9"
 
 SAMPLES = {
@@ -87,7 +84,7 @@ def build_llm_payload_from_baseline(path: Path) -> dict[str, object]:
     }
 
 
-def install_fixture_fetcher(monkeypatch) -> None:
+def install_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> None:
     from electronet_single_import import fetcher
 
     def fake_fetch_httpx(self, url: str):
@@ -95,7 +92,7 @@ def install_fixture_fetcher(monkeypatch) -> None:
 
     def fake_fetch_playwright(self, url: str):
         model = next(model for model, sample in SAMPLES.items() if sample["url"] == url)
-        html = (FIXTURES_ROOT / f"{model}.html").read_text(encoding="utf-8")
+        html = (skroutz_fixtures_root / f"{model}.html").read_text(encoding="utf-8")
         return FetchResult(url=url, final_url=url, html=html, status_code=200, method="playwright", fallback_used=True, response_headers={})
 
     def fake_fetch_binary(self, url: str):
@@ -103,7 +100,7 @@ def install_fixture_fetcher(monkeypatch) -> None:
 
     def fake_extract_skroutz_section_image_records(self, url: str):
         model = next(model for model, sample in SAMPLES.items() if sample["url"] == url)
-        path = FIXTURES_ROOT / f"{model}.rendered_sections.json"
+        path = skroutz_fixtures_root / f"{model}.rendered_sections.json"
         if not path.exists():
             return {"window": {}, "containers": [], "sections": []}
         return json.loads(path.read_text(encoding="utf-8"))
@@ -128,10 +125,10 @@ def make_cli(model: str) -> CLIInput:
     )
 
 
-def copy_baseline_products(tmp_products_root: Path) -> None:
+def copy_baseline_products(tmp_products_root: Path, products_root: Path) -> None:
     tmp_products_root.mkdir(parents=True, exist_ok=True)
     for model in SAMPLES:
-        (tmp_products_root / f"{model}.csv").write_text((PRODUCTS_ROOT / f"{model}.csv").read_text(encoding="utf-8-sig"), encoding="utf-8")
+        (tmp_products_root / f"{model}.csv").write_text((products_root / f"{model}.csv").read_text(encoding="utf-8-sig"), encoding="utf-8")
 
 
 def test_validate_input_accepts_skroutz_sections_for_v2() -> None:
@@ -196,7 +193,7 @@ def test_build_row_keeps_prompt_price_contract() -> None:
     assert row["price"] == "0"
 
 
-def test_skroutz_parser_and_deterministic_fields_cover_supported_families() -> None:
+def test_skroutz_parser_and_deterministic_fields_cover_supported_families(skroutz_fixtures_root: Path) -> None:
     parser = SkroutzProductParser()
     resolver = TaxonomyResolver()
 
@@ -219,7 +216,7 @@ def test_skroutz_parser_and_deterministic_fields_cover_supported_families() -> N
     }
 
     for model, sample in ((model, SAMPLES[model]) for model in expected):
-        parsed = parser.parse((FIXTURES_ROOT / f"{model}.html").read_text(encoding="utf-8"), sample["url"])
+        parsed = parser.parse((skroutz_fixtures_root / f"{model}.html").read_text(encoding="utf-8"), sample["url"])
         taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url or sample["url"], parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
         deterministic = build_row(
             cli=make_cli(model),
@@ -233,13 +230,18 @@ def test_skroutz_parser_and_deterministic_fields_cover_supported_families() -> N
         assert deterministic["seo_keyword"] == expected[model]["seo_keyword"]
 
 
-def test_prepare_and_render_workflow_with_skroutz_fixtures(tmp_path: Path, monkeypatch) -> None:
+def test_prepare_and_render_workflow_with_skroutz_fixtures(
+    tmp_path: Path,
+    monkeypatch,
+    skroutz_fixtures_root: Path,
+    products_root: Path,
+) -> None:
     from electronet_single_import import workflow
 
-    install_fixture_fetcher(monkeypatch)
+    install_fixture_fetcher(monkeypatch, skroutz_fixtures_root)
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
-    copy_baseline_products(tmp_path / "products")
+    copy_baseline_products(tmp_path / "products", products_root)
 
     expected_match_fields = {"mpn", "name", "meta_title", "seo_keyword", "price", "category"}
 
@@ -271,8 +273,8 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(tmp_path: Path, monke
             assert len(report["section_image_urls_resolved"]) == SAMPLES[model]["sections"]
 
         llm_output_path = prepare_result["model_root"] / "llm_output.json"
-        llm_output_path.write_text(json.dumps(build_llm_payload_from_baseline(PRODUCTS_ROOT / f"{model}.csv"), ensure_ascii=False, indent=2), encoding="utf-8")
-        baseline_row = read_csv_row(PRODUCTS_ROOT / f"{model}.csv")
+        llm_output_path.write_text(json.dumps(build_llm_payload_from_baseline(products_root / f"{model}.csv"), ensure_ascii=False, indent=2), encoding="utf-8")
+        baseline_row = read_csv_row(products_root / f"{model}.csv")
 
         render_result = render_workflow(model)
         candidate_row = read_csv_row(render_result["candidate_csv_path"])

@@ -53,14 +53,15 @@ Hard rule:
   - at least one non-primary provider works behind the provider contract
 
 Phase 2 milestones:
-- M15 — define run contract
-- M16 — write structured run metadata alongside current files
-- M17 — make CLI/workflow emit metadata
-- M18 — add service layer models/errors/wrappers
-- M19 — route CLI through the service layer
-- M20 — define provider contract and registry
-- M21 — extract the current primary source into a provider adapter
-- M22 — add provider selection and one second provider proof
+- M15 — define run contract (completed; import-safe run contract models added under `scrapper/electronet_single_import/services/` and not wired into runtime behavior)
+- M16 — write structured run metadata alongside current files (completed; `prepare.run.json` and `render.run.json` are now emitted under `work/{model}/`)
+- M17 — make CLI/workflow emit metadata (completed; standalone CLI now emits `full.run.json`, and workflow prepare/render now surface run status plus metadata path)
+- M18 — add service layer models/errors/wrappers (completed; thin internal prepare/render wrappers and full-run composition now live under `scrapper/electronet_single_import/services/` without rerouting CLI/workflow behavior or adding new runtime metadata files)
+- M19 — route CLI through the service layer (completed; standalone `cli.py` is now a thin adapter over the full-run service, workflow `prepare`/`render` entrypoints call the stage service wrappers, and a lower-layer full-run executor was extracted so services no longer depend on `cli.py`)
+- M19a — remove remaining cross-layer imports after service routing (completed; shared input validation now lives in a neutral module, `cli.py` no longer imports non-execution helpers from `full_run.py`, and `workflow.py` no longer imports from `cli.py` without changing runtime behavior)
+- M20 — define provider contract and registry (completed; standalone typed provider models, base contract, and registry now exist under `scrapper/electronet_single_import/providers/` without wiring runtime behavior or extracting current adapters)
+- M21 — extract the current primary source into a provider adapter (completed; the Electronet primary source path now runs through a concrete provider adapter while preserving the existing runtime outputs and leaving other sources on their current execution branches)
+- M22 — add provider selection and one second provider proof (completed; `full_run.py` now has a minimal private provider-selection seam, Electronet remains the only production-selected provider, and a fixture-backed `SkroutzProvider` is proven through test-injected routing without changing default Skroutz runtime behavior)
 
 ## Root policy
 ### Keep in root
