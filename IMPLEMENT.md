@@ -24,6 +24,7 @@ For milestone commits:
 3. Do not edit `AGENTS.md` or `RULES.md` during normal milestones unless runtime operating behavior or accepted runtime inputs actually change.
 4. Do not edit `README.md` unless user-facing setup or runtime usage actually changes.
 5. Preserve prior milestone history; append or minimally update instead of rewriting historical records.
+6. When active runtime paths or package names change, update current-state guidance to the new names and preserve older milestone/audit references only as labeled history.
 
 ## Binding repo constraints
 - Follow `AGENTS.md` and `RULES.md`.
@@ -84,10 +85,10 @@ For every milestone:
 
 ## Special rule for support-file moves
 Before moving any current source-of-truth support file:
-1. add or update `scrapper/electronet_single_import/repo_paths.py`
+1. add or update `scraper/pipeline/repo_paths.py`
 2. route all discovered callsites through it
 3. only then move the files
 4. rerun validation immediately
 
 ## Special rule for dependencies
-Do not change `requirements.txt` or `scrapper/requirements.txt` without an explicit audit result in `docs/audits/dependency_audit.md`.
+Do not change `requirements.txt` without an explicit audit result in `docs/audits/dependency_audit.md`.

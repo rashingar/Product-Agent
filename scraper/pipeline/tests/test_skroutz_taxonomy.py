@@ -2,8 +2,8 @@ import csv
 import json
 from pathlib import Path
 
-from electronet_single_import.parser_product_skroutz import SkroutzProductParser
-from electronet_single_import.taxonomy import TaxonomyResolver
+from pipeline.parser_product_skroutz import SkroutzProductParser
+from pipeline.taxonomy import TaxonomyResolver
 
 def read_taxonomy_rows(regression_fixture: Path) -> list[dict[str, str]]:
     with regression_fixture.open("r", encoding="utf-8-sig", newline="") as handle:
@@ -168,3 +168,4 @@ def test_ice_cream_maker_category_resolves_to_small_appliance_taxonomy() -> None
     assert taxonomy.parent_category == "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ"
     assert taxonomy.leaf_category == "Μικροί Μάγειρες"
     assert taxonomy.sub_category == "Παγωτομηχανές"
+

@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from electronet_single_import.csv_writer import write_csv_row
-from electronet_single_import.html_builders import build_characteristics_html, build_description_html, extract_presentation_blocks
-from electronet_single_import.models import SpecItem, SpecSection
+from pipeline.csv_writer import write_csv_row
+from pipeline.html_builders import build_characteristics_html, build_description_html, extract_presentation_blocks
+from pipeline.models import SpecItem, SpecSection
 
 
 
@@ -116,3 +116,4 @@ def test_presentation_blocks_extract_images_from_left_and_right_banner_layouts()
     assert blocks[0]["image_url"] == "https://www.electronet.gr/media/right.jpg"
     assert blocks[1]["title"] == "Section Two"
     assert blocks[1]["image_url"] == "https://www.electronet.gr/media/left.jpg"
+

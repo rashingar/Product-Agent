@@ -9,12 +9,13 @@ Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as h
 The active phase is Phase 2: architecture foundation. This phase introduces the run contract, metadata emission, service layer, provider abstraction, and one second-provider proof before any hybrid RAG work begins.
 
 ## Current repo facts
-- The active runnable code lives under `scrapper/electronet_single_import/`.
+- The active runnable code lives under `scraper/pipeline/`.
 - The repo also contains shared support assets, output CSVs, runtime work artifacts, helper tools, and docs.
 - Current runtime documentation treats several support files as source-of-truth inputs and now reads them from `resources/` through the centralized path layer.
 - `products/` and `work/` must remain stable during early cleanup.
 - `work/{model}/...` is reserved for runtime artifacts.
 - Legacy historical references exist and must be archived, not deleted casually.
+- Historical milestone evidence below may still mention `scrapper/` and `electronet_single_import` as pre-M23 names.
 
 ## Cleanup goals
 1. Reduce root clutter safely.
@@ -53,15 +54,16 @@ Hard rule:
   - at least one non-primary provider works behind the provider contract
 
 Phase 2 milestones:
-- M15 — define run contract (completed; import-safe run contract models added under `scrapper/electronet_single_import/services/` and not wired into runtime behavior)
+- M15 — define run contract (completed; import-safe run contract models added under `scraper/pipeline/services/` and not wired into runtime behavior)
 - M16 — write structured run metadata alongside current files (completed; `prepare.run.json` and `render.run.json` are now emitted under `work/{model}/`)
 - M17 — make CLI/workflow emit metadata (completed; standalone CLI now emits `full.run.json`, and workflow prepare/render now surface run status plus metadata path)
-- M18 — add service layer models/errors/wrappers (completed; thin internal prepare/render wrappers and full-run composition now live under `scrapper/electronet_single_import/services/` without rerouting CLI/workflow behavior or adding new runtime metadata files)
+- M18 — add service layer models/errors/wrappers (completed; thin internal prepare/render wrappers and full-run composition now live under `scraper/pipeline/services/` without rerouting CLI/workflow behavior or adding new runtime metadata files)
 - M19 — route CLI through the service layer (completed; standalone `cli.py` is now a thin adapter over the full-run service, workflow `prepare`/`render` entrypoints call the stage service wrappers, and a lower-layer full-run executor was extracted so services no longer depend on `cli.py`)
 - M19a — remove remaining cross-layer imports after service routing (completed; shared input validation now lives in a neutral module, `cli.py` no longer imports non-execution helpers from `full_run.py`, and `workflow.py` no longer imports from `cli.py` without changing runtime behavior)
-- M20 — define provider contract and registry (completed; standalone typed provider models, base contract, and registry now exist under `scrapper/electronet_single_import/providers/` without wiring runtime behavior or extracting current adapters)
+- M20 — define provider contract and registry (completed; standalone typed provider models, base contract, and registry now exist under `scraper/pipeline/providers/` without wiring runtime behavior or extracting current adapters)
 - M21 — extract the current primary source into a provider adapter (completed; the Electronet primary source path now runs through a concrete provider adapter while preserving the existing runtime outputs and leaving other sources on their current execution branches)
 - M22 — add provider selection and one second provider proof (completed; `full_run.py` now has a minimal private provider-selection seam, Electronet remains the only production-selected provider, and a fixture-backed `SkroutzProvider` is proven through test-injected routing without changing default Skroutz runtime behavior)
+- M23 — rename the active runtime package and directory layout (completed; the runtime now lives under `scraper/pipeline`, active invocation runs from `scraper/` via `python -m pipeline.workflow ...` and `python -m pipeline.cli ...`, and runtime behavior remains unchanged)
 
 ## Root policy
 ### Keep in root
@@ -76,7 +78,7 @@ Phase 2 milestones:
 - `requirements.txt`
 - `products/`
 - `work/`
-- `scrapper/`
+- `scraper/`
 - `tools/`
 - `resources/`
 

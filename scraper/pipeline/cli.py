@@ -14,7 +14,7 @@ from .utils import utcnow_iso
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="python -m electronet_single_import.cli")
+    parser = argparse.ArgumentParser(prog="python -m pipeline.cli")
     parser.add_argument("--model", required=True)
     parser.add_argument("--url", required=True)
     parser.add_argument("--photos", type=int, default=1)

@@ -3,8 +3,8 @@ from pathlib import Path
 
 from PIL import Image
 
-from electronet_single_import.fetcher import ElectronetFetcher
-from electronet_single_import.models import GalleryImage
+from pipeline.fetcher import ElectronetFetcher
+from pipeline.models import GalleryImage
 
 
 class StubFetcher(ElectronetFetcher):
@@ -103,3 +103,4 @@ def test_besco_non_jpg_images_are_converted_and_resized_to_jpg(tmp_path: Path) -
     assert warnings == []
     assert [item.local_filename for item in downloaded] == ["besco1.jpg"]
     assert downloaded[0].content_type == "image/jpeg"
+

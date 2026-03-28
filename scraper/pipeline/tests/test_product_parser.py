@@ -1,5 +1,5 @@
-from electronet_single_import.parser_product import ElectronetProductParser
-from electronet_single_import.schema_matcher import SchemaMatcher
+from pipeline.parser_product import ElectronetProductParser
+from pipeline.schema_matcher import SchemaMatcher
 
 HTML = """
 <html>
@@ -63,3 +63,4 @@ def test_product_parser_extracts_visible_code_and_specs() -> None:
     assert parsed.field_diagnostics["brand"].selector_trace
     assert parsed.field_diagnostics["spec_sections"].value_present is True
     assert parsed.field_diagnostics["spec_sections"].selector_trace
+

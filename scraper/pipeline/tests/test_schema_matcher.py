@@ -1,5 +1,5 @@
-from electronet_single_import.models import SpecItem, SpecSection
-from electronet_single_import.schema_matcher import SchemaMatcher
+from pipeline.models import SpecItem, SpecSection
+from pipeline.schema_matcher import SchemaMatcher
 
 
 def test_schema_matching_scores_overlap() -> None:
@@ -22,3 +22,4 @@ def test_schema_matching_scores_overlap() -> None:
     assert result.matched_schema_id is not None
     assert result.score > 0.2
     assert candidates[0]["score"] >= candidates[-1]["score"]
+

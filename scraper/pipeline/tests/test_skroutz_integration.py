@@ -5,12 +5,12 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from electronet_single_import.cli import validate_input
-from electronet_single_import.mapping import build_row, derive_seo_keyword
-from electronet_single_import.models import CLIInput, FetchResult, ParsedProduct, SchemaMatchResult, SourceProductData, TaxonomyResolution
-from electronet_single_import.parser_product_skroutz import SkroutzProductParser
-from electronet_single_import.taxonomy import TaxonomyResolver
-from electronet_single_import.workflow import prepare_workflow, render_workflow
+from pipeline.cli import validate_input
+from pipeline.mapping import build_row, derive_seo_keyword
+from pipeline.models import CLIInput, FetchResult, ParsedProduct, SchemaMatchResult, SourceProductData, TaxonomyResolution
+from pipeline.parser_product_skroutz import SkroutzProductParser
+from pipeline.taxonomy import TaxonomyResolver
+from pipeline.workflow import prepare_workflow, render_workflow
 
 JPEG_BYTES = b"\xff\xd8\xff\xdb\x00C\x00" + (b"\x08" * 64) + b"\xff\xd9"
 
@@ -85,7 +85,7 @@ def build_llm_payload_from_baseline(path: Path) -> dict[str, object]:
 
 
 def install_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> None:
-    from electronet_single_import import fetcher
+    from pipeline import fetcher
 
     def fake_fetch_httpx(self, url: str):
         raise fetcher.FetchError(f"httpx disabled for test: {url}")
@@ -236,7 +236,7 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
     skroutz_fixtures_root: Path,
     products_root: Path,
 ) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     install_fixture_fetcher(monkeypatch, skroutz_fixtures_root)
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
@@ -288,3 +288,4 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
         for field in expected_match_fields:
             assert candidate_row[field] == baseline_row[field]
             assert validation["field_health"][field]["status"] == "match"
+

@@ -33,10 +33,10 @@ Supported runtime URL scope is determined by the code-supported source-detection
 
 ## Default Flow
 
-1. Run `python -m electronet_single_import.workflow prepare ...` from `scrapper/`.
+1. Run `python -m pipeline.workflow prepare ...` from `scraper/`.
 2. Read `work/{model}/llm_context.json` and `work/{model}/prompt.txt`.
 3. Produce `work/{model}/llm_output.json` using the reduced response contract.
-4. Run `python -m electronet_single_import.workflow render --model {model}` from `scrapper/`.
+4. Run `python -m pipeline.workflow render --model {model}` from `scraper/`.
 5. Inspect `work/{model}/candidate/{model}.validation.json`.
 
 ## Source Of Truth

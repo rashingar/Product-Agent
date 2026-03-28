@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from electronet_single_import.csv_writer import write_csv_row
-from electronet_single_import.validator import validate_candidate_csv
+from pipeline.csv_writer import write_csv_row
+from pipeline.validator import validate_candidate_csv
 
 
 def make_mojibake(text: str) -> str:
@@ -57,3 +57,4 @@ def test_validator_compares_against_baseline(tmp_path: Path) -> None:
 
     assert report["field_health"]["model"]["status"] == "match"
     assert report["field_health"]["name"]["status"] == "different_but_valid"
+

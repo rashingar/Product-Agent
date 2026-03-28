@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from electronet_single_import import manufacturer_enrichment as enrichment_module
-from electronet_single_import.manufacturer_enrichment import (
+from pipeline import manufacturer_enrichment as enrichment_module
+from pipeline.manufacturer_enrichment import (
     EnrichmentResult,
     OfficialDocAdapter,
     OfficialDocumentCandidate,
@@ -9,8 +9,8 @@ from electronet_single_import.manufacturer_enrichment import (
     _parse_neff_specsheet,
     enrich_source_from_manufacturer_docs,
 )
-from electronet_single_import.models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
-from electronet_single_import.normalize import normalize_for_match
+from pipeline.models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.normalize import normalize_for_match
 
 
 BOSCH_SPECSHEET_SAMPLE = """
@@ -250,3 +250,4 @@ def test_enrichment_framework_gracefully_falls_back_when_no_provider_matches(tmp
     assert diagnostics["documents_discovered"] == 0
     assert source.manufacturer_spec_sections == []
     assert source.manufacturer_source_text == ""
+

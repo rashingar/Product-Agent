@@ -1,7 +1,80 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M22 completed. The provider abstraction is now proven with a minimal private selection seam plus a deterministic fixture-backed second provider, while default production Skroutz routing remains unchanged.
+M23 completed. The active runtime layout is now `scraper/pipeline`, active invocation runs from `scraper/` via `python -m pipeline...`, and runtime behavior remained unchanged.
+
+Historical note:
+- Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## M23 — rename `scrapper/electronet_single_import` to `scraper/pipeline`
+
+Goal:
+- rename the active runtime directory and package from `scrapper/electronet_single_import` to `scraper/pipeline` without changing runtime behavior, provider behavior, CLI flags, artifact roots, metadata filenames, or workflow semantics
+
+Directories moved:
+- `scrapper/` -> `scraper/`
+- `scraper/electronet_single_import/` -> `scraper/pipeline/`
+
+Files edited:
+- `README.md`
+- `AGENTS.md`
+- `RULES.md`
+- `IMPLEMENT.md`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `docs/runbooks/repo-layout.md`
+- `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md`
+- `docs/specs/2026-03-22-pipeline-optimization-design.md`
+- `scraper/README.md`
+- `scraper/pipeline/cli.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/tests/*.py`
+- `tools/capture_skroutz_fixture.py`
+
+Changes:
+- updated active runtime commands and current-state guidance from `scrapper/` plus `electronet_single_import` to `scraper/` plus `pipeline`
+- updated runtime `prog=` strings so the CLI/help surface now shows `python -m pipeline.cli` and `python -m pipeline.workflow`
+- updated tracked test imports and the active Skroutz fixture helper script to import from `pipeline`
+- updated `IMPLEMENT.md` current path rules to `scraper/pipeline/...` and removed the stale reference to the no-longer-present `scrapper/requirements.txt` from the active dependency guardrail
+- updated `PLAN.md` current repo facts, active phase summary paths, and root policy to the renamed layout and marked M23 completed
+- kept prior audit and milestone evidence intact; only added a short historical clarification where needed so remaining old-name references stay explicitly historical
+- added no compatibility shim because the renamed package executed cleanly with the narrow path/import updates
+
+Commands run:
+- `rg -n "scrapper/electronet_single_import|electronet_single_import|cd scrapper|python -m electronet_single_import|scrapper/" .`
+- `rg -n "from electronet_single_import|import electronet_single_import|prog=\"python -m electronet_single_import|prog='python -m electronet_single_import" .`
+- `rg -n "scrapper/|electronet_single_import|cd scrapper|python -m electronet_single_import" README.md AGENTS.md RULES.md PLAN.md IMPLEMENT.md DOCUMENTATION.md docs/ scraper/ scrapper/`
+- `git status --short`
+- directory rename command moving `scrapper/` to `scraper/` and `scraper/electronet_single_import/` to `scraper/pipeline/`
+- `cd scraper && python -m pipeline.workflow --help`
+- `cd scraper && python -m pipeline.cli --help`
+- `python -m compileall scraper/pipeline`
+- `cd scraper && python -m pytest -q`
+- post-rename `rg` sweeps for active and historical references
+- `git status --short`
+
+Validation:
+- `cd scraper && python -m pipeline.workflow --help`
+  - passed
+- `cd scraper && python -m pipeline.cli --help`
+  - passed
+- `python -m compileall scraper/pipeline`
+  - passed
+- `cd scraper && python -m pytest -q`
+  - passed at the accepted baseline: `92 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- post-rename sweeps confirmed active commands/docs now use `scraper/` and `pipeline`; remaining old-name hits are preserved historical references only
+- the active-surface sweep over `README.md`, `AGENTS.md`, `RULES.md`, `IMPLEMENT.md`, `docs/runbooks/repo-layout.md`, `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md`, `scraper/`, and `tools/capture_skroutz_fixture.py` returned no old-name matches
+- the remaining broad-sweep hits were limited to this M23 rename record, the top-level historical notes, older milestone logs, and already-labeled historical spec/audit material
+
+Risks:
+- historical docs and milestone logs still contain pre-M23 names by design; future sweeps should continue treating those sections as preserved evidence, not active guidance
+
+Deferred:
+- no compatibility shim was added
+- no provider, workflow, dependency, or output-semantics changes were made
 
 ## M22 — add provider selection and one second provider proof
 

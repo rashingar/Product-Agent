@@ -10,13 +10,13 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SCRAPPER_ROOT = REPO_ROOT / "scrapper"
-if str(SCRAPPER_ROOT) not in sys.path:
-    sys.path.insert(0, str(SCRAPPER_ROOT))
+SCRAPER_ROOT = REPO_ROOT / "scraper"
+if str(SCRAPER_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRAPER_ROOT))
 
-from electronet_single_import.fetcher import ElectronetFetcher
-from electronet_single_import.skroutz_sections import extract_skroutz_section_window
-from electronet_single_import.skroutz_taxonomy import normalize_category_href_slug
+from pipeline.fetcher import ElectronetFetcher
+from pipeline.skroutz_sections import extract_skroutz_section_window
+from pipeline.skroutz_taxonomy import normalize_category_href_slug
 
 
 def build_parser() -> argparse.ArgumentParser:

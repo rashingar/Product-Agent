@@ -1,4 +1,4 @@
-from electronet_single_import.repo_paths import (
+from pipeline.repo_paths import (
     CATALOG_TAXONOMY_PATH,
     CHARACTERISTICS_TEMPLATES_PATH,
     COMPACT_RESPONSE_SCHEMA_PATH,
@@ -51,3 +51,4 @@ def test_support_files_resolve_from_resources_layout() -> None:
     for actual_path, expected_path in expected_paths:
         assert actual_path == expected_path
         assert actual_path.exists()
+

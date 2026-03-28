@@ -26,7 +26,7 @@ PRODUCTS_ROOT = REPO_ROOT / "products"
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="python -m electronet_single_import.workflow")
+    parser = argparse.ArgumentParser(prog="python -m pipeline.workflow")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     prepare_parser = subparsers.add_parser("prepare")

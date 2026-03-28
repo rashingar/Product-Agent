@@ -1,5 +1,5 @@
-from electronet_single_import.parser_product_skroutz import SkroutzProductParser
-from electronet_single_import.taxonomy import TaxonomyResolver
+from pipeline.parser_product_skroutz import SkroutzProductParser
+from pipeline.taxonomy import TaxonomyResolver
 
 
 def test_robot_vacuum_category_resolves_to_vacuuming_taxonomy() -> None:
@@ -46,3 +46,4 @@ def test_robot_vacuum_category_resolves_to_vacuuming_taxonomy() -> None:
     assert taxonomy.parent_category == "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ"
     assert taxonomy.leaf_category == "Σκούπισμα"
     assert taxonomy.sub_category == "Σκούπες Ρομπότ"
+

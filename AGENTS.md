@@ -24,8 +24,8 @@ treat it as a request to run the full pipeline.
 
 1. Parse the template fields exactly as provided.
 2. If `url` is a currently supported product URL recognized by the runtime source-detection layer, run:
-   `python -m electronet_single_import.workflow prepare --model {model} --url "{url}" --photos {photos} --sections {sections} --skroutz-status {skroutz_status} --boxnow {boxnow} --price {price}`
-   Run from `scrapper/`.
+   `python -m pipeline.workflow prepare --model {model} --url "{url}" --photos {photos} --sections {sections} --skroutz-status {skroutz_status} --boxnow {boxnow} --price {price}`
+   Run from `scraper/`.
 3. Read:
    - `work/{model}/llm_context.json`
    - `work/{model}/prompt.txt`
@@ -53,8 +53,8 @@ treat it as a request to run the full pipeline.
    - characteristics HTML
    - final CSV structure
 8. After `llm_output.json` is written, run:
-   `python -m electronet_single_import.workflow render --model {model}`
-   Run from `scrapper/`.
+   `python -m pipeline.workflow render --model {model}`
+   Run from `scraper/`.
 9. Inspect:
    - `work/{model}/candidate/{model}.csv`
    - `work/{model}/candidate/{model}.validation.json`

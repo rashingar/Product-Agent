@@ -1,4 +1,4 @@
-from electronet_single_import.llm_contract import INTRO_MAX_WORDS, INTRO_MIN_WORDS, validate_llm_output
+from pipeline.llm_contract import INTRO_MAX_WORDS, INTRO_MIN_WORDS, validate_llm_output
 
 
 def build_intro(words: int = INTRO_MIN_WORDS) -> str:
@@ -78,3 +78,4 @@ def test_validate_llm_output_rejects_long_intro() -> None:
     _, errors = validate_llm_output(payload, sections_required=0)
 
     assert "llm_intro_word_count_invalid" in errors
+

@@ -1,5 +1,5 @@
-from electronet_single_import.normalize import clean_breadcrumbs, normalize_whitespace, nullify_dash_values, strip_nbsp
-from electronet_single_import.utils import build_additional_image_value
+from pipeline.normalize import clean_breadcrumbs, normalize_whitespace, nullify_dash_values, strip_nbsp
+from pipeline.utils import build_additional_image_value
 
 
 def test_nbsp_and_whitespace_normalization() -> None:
@@ -23,3 +23,4 @@ def test_clean_breadcrumbs_and_additional_images() -> None:
     assert build_additional_image_value("330825", 3) == (
         "catalog/01_main/330825/330825-2.jpg:::catalog/01_main/330825/330825-3.jpg"
     )
+

@@ -9,7 +9,7 @@
 - Generate `meta_title` deterministically from the final canonical name and business rules.
 - Keep `seo_keyword` deterministic from the final canonical name instead of the raw parsed title.
 - Reduce the LLM contract to unresolved fields only: structured description content, `meta_description`, and `meta_keywords`.
-- Add a repo-scoped orchestrator under `scrapper/` that accepts both CLI flags and the filled template input via stdin/file.
+- Add a repo-scoped orchestrator under `scraper/` that accepts both CLI flags and the filled template input via stdin/file.
 - Make the orchestrator run the scraper first for Electronet URLs and emit prompt artifacts under `work/{model}/`.
 - Add a post-LLM render step that consumes `work/{model}/llm_output.json` and writes candidate artifacts under `work/{model}/candidate/`.
 - Add a validator that checks required CSV fields, header/order, encoding integrity, and mojibake/character corruption.

@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from electronet_single_import.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, TaxonomyResolution
-from electronet_single_import.services import (
+from pipeline.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, TaxonomyResolution
+from pipeline.services import (
     FullRunRequest,
     PrepareRequest,
     RenderRequest,
@@ -20,7 +20,7 @@ from electronet_single_import.services import (
 
 
 def test_prepare_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
 
@@ -72,7 +72,7 @@ def test_prepare_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> No
 
 
 def test_prepare_product_wraps_workflow_errors(monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     def fake_prepare_workflow(_cli):
         raise RuntimeError("prepare exploded")
@@ -88,7 +88,7 @@ def test_prepare_product_wraps_workflow_errors(monkeypatch) -> None:
 
 
 def test_render_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     def fake_render_workflow(model: str):
         assert model == "233541"
@@ -120,7 +120,7 @@ def test_render_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> Non
 
 
 def test_render_product_wraps_workflow_errors(monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     def fake_render_workflow(_model: str):
         raise FileNotFoundError("Missing LLM output")
@@ -136,7 +136,7 @@ def test_render_product_wraps_workflow_errors(monkeypatch) -> None:
 
 
 def test_run_product_maps_cli_result(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import.services import run_service
+    from pipeline.services import run_service
 
     call_order: list[str] = []
     prepare_result = ServiceResult(
@@ -207,7 +207,7 @@ def test_run_product_maps_cli_result(tmp_path: Path, monkeypatch) -> None:
 
 
 def test_run_product_wraps_cli_errors(monkeypatch) -> None:
-    from electronet_single_import.services import run_service
+    from pipeline.services import run_service
 
     def fake_prepare(_request: PrepareRequest):
         raise RuntimeError("full run exploded")
@@ -219,3 +219,4 @@ def test_run_product_wraps_cli_errors(monkeypatch) -> None:
 
     assert excinfo.value.code == "RuntimeError"
     assert excinfo.value.message == "full run exploded"
+

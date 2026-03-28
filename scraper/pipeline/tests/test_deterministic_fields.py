@@ -1,6 +1,6 @@
-from electronet_single_import.deterministic_fields import build_deterministic_product_fields
-from electronet_single_import.mapping import derive_seo_keyword
-from electronet_single_import.models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.deterministic_fields import build_deterministic_product_fields
+from pipeline.mapping import derive_seo_keyword
+from pipeline.models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 
 
 def test_skroutz_fridge_freezer_uses_requested_name_schema() -> None:
@@ -181,3 +181,4 @@ def test_skroutz_name_prefers_manufacturer_evidence_when_specs_conflict() -> Non
     assert "60 cm" not in fields["name"]
     assert fields["meta_title"] == "Bosch KGN36NLEA Ψυγειοκαταψύκτης Total No Frost 305 lt | eTranoulis"
     assert fields["seo_keyword"] == "bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305-lt-inox-70-cm-e"
+

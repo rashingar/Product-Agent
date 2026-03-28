@@ -2,15 +2,15 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from electronet_single_import.characteristics_pipeline import (
+from pipeline.characteristics_pipeline import (
     CharacteristicsTemplateRegistry,
     _labels_related,
     build_characteristics_for_product,
 )
-from electronet_single_import.mapping import build_row
-from electronet_single_import.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
-from electronet_single_import.normalize import normalize_for_match
-from electronet_single_import.schema_matcher import SchemaMatcher
+from pipeline.mapping import build_row
+from pipeline.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.normalize import normalize_for_match
+from pipeline.schema_matcher import SchemaMatcher
 
 
 TV_TEMPLATE_SCHEMA_ID = "sha1:954c8413f2da941e78f3ddce65df522654336c8c"
@@ -741,3 +741,4 @@ def test_built_in_hob_characteristics_prefer_manufacturer_values_on_conflict() -
     assert values[normalize_for_match("Τεχνολογία Πλατώ Εστιών")] == "Υαλοκεραμική"
     assert values[normalize_for_match("Αριθμός Ζωνών")] == "4"
     assert values[normalize_for_match("Αριθμός Ζωνών")] != "2"
+

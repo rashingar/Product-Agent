@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from electronet_single_import import full_run as run_module
-from electronet_single_import.models import CLIInput, SchemaMatchResult, TaxonomyResolution
-from electronet_single_import.providers import ProviderInputIdentity
-from electronet_single_import.providers.models import ProviderKind, ProviderSnapshotKind
-from electronet_single_import.providers.skroutz_provider import SkroutzProvider
+from pipeline import full_run as run_module
+from pipeline.models import CLIInput, SchemaMatchResult, TaxonomyResolution
+from pipeline.providers import ProviderInputIdentity
+from pipeline.providers.models import ProviderKind, ProviderSnapshotKind
+from pipeline.providers.skroutz_provider import SkroutzProvider
 
 SAMPLE_MODEL = "341490"
 SAMPLE_URL = "https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html"
@@ -165,3 +165,4 @@ def test_execute_full_run_uses_test_injected_skroutz_provider(monkeypatch, tmp_p
     assert result["fetch"].method == "fixture"
     assert result["parsed"].source.source_name == "skroutz"
     assert result["source_json_path"].exists()
+

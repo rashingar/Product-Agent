@@ -1,6 +1,6 @@
-from electronet_single_import.deterministic_fields import build_deterministic_product_fields
-from electronet_single_import.mapping import derive_seo_keyword
-from electronet_single_import.models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.deterministic_fields import build_deterministic_product_fields
+from pipeline.mapping import derive_seo_keyword
+from pipeline.models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 
 
 def _make_ice_cream_taxonomy() -> TaxonomyResolution:
@@ -69,3 +69,4 @@ def test_manufacturer_tefal_ice_cream_maker_uses_family_deterministic_fields() -
     assert fields["category_phrase"] == "Παγωτομηχανή"
     assert fields["name"] == "Tefal IG602A – Παγωτομηχανή 1,4Lt 10 Προγραμμάτων 3 Δοχείων"
     assert fields["meta_title"] == "Tefal IG602A Παγωτομηχανή 1,4Lt 10 Προγραμμάτων | eTranoulis"
+

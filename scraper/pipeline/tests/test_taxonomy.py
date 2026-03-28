@@ -1,5 +1,5 @@
-from electronet_single_import.models import TaxonomyResolution
-from electronet_single_import.taxonomy import TaxonomyResolver
+from pipeline.models import TaxonomyResolution
+from pipeline.taxonomy import TaxonomyResolver
 
 
 def test_taxonomy_serialization() -> None:
@@ -58,3 +58,4 @@ def test_taxonomy_resolution_prefers_dryer_subcategory_for_singular_product_name
     assert resolution.sub_category == "Στεγνωτήρια Ρούχων"
     assert resolution.cta_url == "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/stegnwthria-rouxwn"
     assert candidates[0]["sub_category"] == "Στεγνωτήρια Ρούχων"
+

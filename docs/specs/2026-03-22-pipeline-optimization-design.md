@@ -3,6 +3,7 @@
 Historical note:
 - This spec was written before the later support-asset relocation milestones.
 - Asset names such as `catalog_taxonomy.json`, `master_prompt+.txt`, `compact_response.schema.json`, and `name_rules.json` refer to their pre-M6 naming/location context unless an updated implementation note says otherwise.
+- Paths such as `scrapper/` and package names such as `electronet_single_import` refer to the pre-M23 runtime layout.
 
 ## Context
 

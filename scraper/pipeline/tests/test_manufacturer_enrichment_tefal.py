@@ -1,5 +1,5 @@
-from electronet_single_import.manufacturer_enrichment import _parse_tefal_shop_product_html, _parse_tefal_shop_product_page
-from electronet_single_import.normalize import normalize_for_match
+from pipeline.manufacturer_enrichment import _parse_tefal_shop_product_html, _parse_tefal_shop_product_page
+from pipeline.normalize import normalize_for_match
 
 
 def test_parse_tefal_shop_product_html_extracts_spec_rows() -> None:
@@ -91,3 +91,4 @@ def test_parse_tefal_shop_product_page_extracts_intro_and_presentation_sections(
     assert result.presentation_source_html.count("<section>") == 4
     assert "https://shop.tefal.gr/cdn/card-1.jpg" in result.presentation_source_html
     assert "https://shop.tefal.gr/cdn/blog-2.jpg" in result.presentation_source_html
+

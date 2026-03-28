@@ -1,4 +1,4 @@
-# Electronet Single Product Import Scraper
+# Product Pipeline Runtime
 
 Canonical setup, workflow, layout, and test documentation now lives in the repo-root `README.md`.
 

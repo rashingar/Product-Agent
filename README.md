@@ -9,7 +9,7 @@ Repo-scoped Electronet and Skroutz product pipeline with shared support assets, 
   - `resources/schemas/` for schema libraries and response schemas
   - `resources/templates/` for CSV and HTML templates
   - `resources/prompts/` for prompt source files
-- `scrapper/` holds the runnable Electronet scraper pipeline and its tests
+- `scraper/` holds the runnable product pipeline and its tests
 - `work/{model}/` is reserved for runtime artifacts only
 - `products/` is the final deliverable/output area
 - `docs/` holds active project documentation, audits, specs, checkpoints, and runbooks
@@ -30,13 +30,13 @@ python -m playwright install chromium
 
 ## Current Scraper Workflow
 
-Run the current prepare/render workflow from `scrapper/`.
+Run the current prepare/render workflow from `scraper/`.
 
 Prepare:
 
 ```bash
-cd scrapper
-python -m electronet_single_import.workflow prepare \
+cd scraper
+python -m pipeline.workflow prepare \
   --model 234385 \
   --url "https://www.electronet.gr/..." \
   --photos 5 \
@@ -55,7 +55,7 @@ After `prepare`, inspect:
 Then run:
 
 ```bash
-python -m electronet_single_import.workflow render --model 234385
+python -m pipeline.workflow render --model 234385
 ```
 
 After `render`, inspect:
@@ -76,10 +76,10 @@ Final deliverable CSVs remain under `products/`.
 
 ## Tests
 
-Run the test suite from `scrapper/`:
+Run the test suite from `scraper/`:
 
 ```powershell
-cd scrapper
+cd scraper
 python -m pytest -q
 ```
 

@@ -1,5 +1,5 @@
-from electronet_single_import.characteristics_pipeline import CharacteristicsTemplateRegistry
-from electronet_single_import.models import SchemaMatchResult, SourceProductData, TaxonomyResolution
+from pipeline.characteristics_pipeline import CharacteristicsTemplateRegistry
+from pipeline.models import SchemaMatchResult, SourceProductData, TaxonomyResolution
 
 
 ROBOT_VACUUM_SCHEMA_ID = "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79"
@@ -27,3 +27,4 @@ def test_characteristics_registry_prefers_robot_vacuum_schema_for_skroutz() -> N
     assert template["preferred_schema_source_files"] == ["skoypes_rompot.json"]
     assert template["template_source"] == "schema_library_with_custom_overrides"
     assert template["custom_template_id"] == "skroutz_robot_vacuum_v1"
+

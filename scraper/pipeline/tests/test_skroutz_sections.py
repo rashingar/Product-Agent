@@ -6,11 +6,11 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from electronet_single_import.fetcher import ElectronetFetcher
-from electronet_single_import.full_run import _select_skroutz_image_backed_sections
-from electronet_single_import.models import CLIInput, FetchResult
-from electronet_single_import.skroutz_sections import extract_skroutz_section_window, is_placeholder_image_url, resolve_skroutz_section_image_url
-from electronet_single_import.workflow import prepare_workflow, render_workflow
+from pipeline.fetcher import ElectronetFetcher
+from pipeline.full_run import _select_skroutz_image_backed_sections
+from pipeline.models import CLIInput, FetchResult
+from pipeline.skroutz_sections import extract_skroutz_section_window, is_placeholder_image_url, resolve_skroutz_section_image_url
+from pipeline.workflow import prepare_workflow, render_workflow
 
 JPEG_BYTES = b"\xff\xd8\xff\xdb\x00C\x00" + (b"\x08" * 64) + b"\xff\xd9"
 SAMPLE = {
@@ -66,7 +66,7 @@ def build_llm_payload_from_baseline(path: Path) -> dict[str, object]:
 
 
 def install_143481_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> None:
-    from electronet_single_import import fetcher
+    from pipeline import fetcher
 
     def fake_fetch_httpx(self, url: str):
         raise fetcher.FetchError(f"httpx disabled for test: {url}")
@@ -298,7 +298,7 @@ def test_143481_rendered_description_preserves_locked_wrappers(
     skroutz_fixtures_root: Path,
     products_root: Path,
 ) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     install_143481_fixture_fetcher(monkeypatch, skroutz_fixtures_root)
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
@@ -347,3 +347,4 @@ def test_143481_rendered_description_preserves_locked_wrappers(
             assert image.get("style") == "display:block; margin-left:auto; margin-right:0;"
         else:
             assert image.get("style") is None
+

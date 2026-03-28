@@ -1,5 +1,5 @@
-from electronet_single_import.parser_product_manufacturer import ManufacturerProductParser
-from electronet_single_import.normalize import normalize_for_match
+from pipeline.parser_product_manufacturer import ManufacturerProductParser
+from pipeline.normalize import normalize_for_match
 
 
 def test_manufacturer_product_parser_extracts_tefal_product_data() -> None:
@@ -97,3 +97,4 @@ def test_manufacturer_product_parser_extracts_tefal_product_data() -> None:
     assert flattened[normalize_for_match("Διατροφικές Επιλογές")] == "Vegan"
     assert flattened[normalize_for_match("Τάση")] == "220-240 V"
     assert parsed.critical_missing == []
+

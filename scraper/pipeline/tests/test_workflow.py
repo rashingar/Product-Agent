@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from electronet_single_import.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
-from electronet_single_import.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
-from electronet_single_import.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
+from pipeline.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
+from pipeline.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
 
 def build_intro(words: int = 120) -> str:
@@ -39,7 +39,7 @@ def test_build_cli_input_from_template_file(tmp_path: Path, monkeypatch) -> None
 
 
 def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
 
@@ -101,9 +101,9 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
 
 
 def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
-    from electronet_single_import import full_run as run_module
-    from electronet_single_import.models import FetchResult
-    from electronet_single_import.providers.models import (
+    from pipeline import full_run as run_module
+    from pipeline.models import FetchResult
+    from pipeline.providers.models import (
         ProviderCapability,
         ProviderDefinition,
         ProviderInputIdentity,
@@ -229,8 +229,8 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
 
 
 def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_path: Path) -> None:
-    from electronet_single_import import full_run as run_module
-    from electronet_single_import.models import FetchResult
+    from pipeline import full_run as run_module
+    from pipeline.models import FetchResult
 
     cli = CLIInput(
         model="341490",
@@ -338,8 +338,8 @@ def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_p
 
 
 def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
-    from electronet_single_import import full_run as run_module
-    from electronet_single_import.models import FetchResult
+    from pipeline import full_run as run_module
+    from pipeline.models import FetchResult
 
     cli = CLIInput(
         model="344709",
@@ -444,7 +444,7 @@ def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch,
 
 
 def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
 
@@ -537,7 +537,7 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
 
 
 def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=1, sections=0, skroutz_status=0, boxnow=0, price="0", out=str(tmp_path))
@@ -562,7 +562,7 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
 
 
 def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
@@ -657,7 +657,7 @@ def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) ->
 
 
 def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
 
@@ -702,7 +702,7 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
 
 
 def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsys, tmp_path: Path) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     cli = CLIInput(
         model="233541",
@@ -743,7 +743,7 @@ def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsy
 
 
 def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys, tmp_path: Path) -> None:
-    from electronet_single_import import workflow
+    from pipeline import workflow
 
     def fake_resolve_model_for_render(_args) -> str:
         return "233541"
@@ -772,7 +772,7 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
 
 
 def test_run_cli_input_calls_service_layer(monkeypatch) -> None:
-    from electronet_single_import import cli as cli_module
+    from pipeline import cli as cli_module
 
     cli = CLIInput(
         model="233541",
@@ -799,3 +799,4 @@ def test_run_cli_input_calls_service_layer(monkeypatch) -> None:
     monkeypatch.setattr(cli_module, "run_product", fake_run_product)
 
     assert cli_module.run_cli_input(cli) is expected
+
