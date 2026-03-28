@@ -12,9 +12,6 @@ from electronet_single_import.models import CLIInput, FetchResult
 from electronet_single_import.skroutz_sections import extract_skroutz_section_window, is_placeholder_image_url, resolve_skroutz_section_image_url
 from electronet_single_import.workflow import prepare_workflow, render_workflow
 
-REPO_ROOT = Path(r"c:\Users\user\Documents\VS_Projects\tranoulis\Product-Agent")
-FIXTURES_ROOT = REPO_ROOT / "scrapper" / "electronet_single_import" / "tests" / "fixtures" / "skroutz"
-PRODUCTS_ROOT = REPO_ROOT / "products"
 JPEG_BYTES = b"\xff\xd8\xff\xdb\x00C\x00" + (b"\x08" * 64) + b"\xff\xd9"
 SAMPLE = {
     "model": "143481",
@@ -68,21 +65,21 @@ def build_llm_payload_from_baseline(path: Path) -> dict[str, object]:
     }
 
 
-def install_143481_fixture_fetcher(monkeypatch) -> None:
+def install_143481_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> None:
     from electronet_single_import import fetcher
 
     def fake_fetch_httpx(self, url: str):
         raise fetcher.FetchError(f"httpx disabled for test: {url}")
 
     def fake_fetch_playwright(self, url: str):
-        html = (FIXTURES_ROOT / "143481.html").read_text(encoding="utf-8")
+        html = (skroutz_fixtures_root / "143481.html").read_text(encoding="utf-8")
         return FetchResult(url=url, final_url=url, html=html, status_code=200, method="playwright", fallback_used=True, response_headers={})
 
     def fake_fetch_binary(self, url: str):
         return JPEG_BYTES, "image/jpeg"
 
     def fake_extract_skroutz_section_image_records(self, url: str):
-        return json.loads((FIXTURES_ROOT / "143481.rendered_sections.json").read_text(encoding="utf-8"))
+        return json.loads((skroutz_fixtures_root / "143481.rendered_sections.json").read_text(encoding="utf-8"))
 
     monkeypatch.setattr(fetcher.ElectronetFetcher, "fetch_httpx", fake_fetch_httpx)
     monkeypatch.setattr(fetcher.ElectronetFetcher, "fetch_playwright", fake_fetch_playwright)
@@ -90,8 +87,8 @@ def install_143481_fixture_fetcher(monkeypatch) -> None:
     monkeypatch.setattr(fetcher.ElectronetFetcher, "extract_skroutz_section_image_records", fake_extract_skroutz_section_image_records)
 
 
-def test_143481_html_fixture_resolves_9_sections_in_stable_order() -> None:
-    html = (FIXTURES_ROOT / "143481.html").read_text(encoding="utf-8")
+def test_143481_html_fixture_resolves_9_sections_in_stable_order(skroutz_fixtures_root: Path) -> None:
+    html = (skroutz_fixtures_root / "143481.html").read_text(encoding="utf-8")
     extracted = extract_skroutz_section_window(html, SAMPLE["url"])
 
     assert extracted["window"]["start_anchor"] == "Περιγραφή"
@@ -104,8 +101,8 @@ def test_143481_html_fixture_resolves_9_sections_in_stable_order() -> None:
     assert extracted["sections"][0]["image_candidates"][0].endswith("transparent.gif")
 
 
-def test_placeholder_urls_are_rejected_for_resolved_section_images() -> None:
-    rendered = json.loads((FIXTURES_ROOT / "143481.rendered_sections.json").read_text(encoding="utf-8"))
+def test_placeholder_urls_are_rejected_for_resolved_section_images(skroutz_fixtures_root: Path) -> None:
+    rendered = json.loads((skroutz_fixtures_root / "143481.rendered_sections.json").read_text(encoding="utf-8"))
     lazy_attr = rendered["sections"][0]["image_record"]["lazy_attrs"]["data-lazy-media-src-value"]
     record = {
         "currentSrc": "",
@@ -295,14 +292,19 @@ def test_rendered_section_extraction_skips_non_presentation_titles_and_tolerates
     assert rendered["sections"][0]["resolved_image_url"] == "https://b.scdn.gr/test-image.png"
 
 
-def test_143481_rendered_description_preserves_locked_wrappers(tmp_path: Path, monkeypatch) -> None:
+def test_143481_rendered_description_preserves_locked_wrappers(
+    tmp_path: Path,
+    monkeypatch,
+    skroutz_fixtures_root: Path,
+    products_root: Path,
+) -> None:
     from electronet_single_import import workflow
 
-    install_143481_fixture_fetcher(monkeypatch)
+    install_143481_fixture_fetcher(monkeypatch, skroutz_fixtures_root)
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
     (tmp_path / "products").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "products" / "143481.csv").write_text((PRODUCTS_ROOT / "143481.csv").read_text(encoding="utf-8-sig"), encoding="utf-8")
+    (tmp_path / "products" / "143481.csv").write_text((products_root / "143481.csv").read_text(encoding="utf-8-sig"), encoding="utf-8")
 
     cli = CLIInput(
         model=SAMPLE["model"],
@@ -317,7 +319,7 @@ def test_143481_rendered_description_preserves_locked_wrappers(tmp_path: Path, m
     prepare_result = prepare_workflow(cli)
     llm_output_path = prepare_result["model_root"] / "llm_output.json"
     llm_output_path.write_text(
-        json.dumps(build_llm_payload_from_baseline(PRODUCTS_ROOT / "143481.csv"), ensure_ascii=False, indent=2),
+        json.dumps(build_llm_payload_from_baseline(products_root / "143481.csv"), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 

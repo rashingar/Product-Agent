@@ -5,14 +5,8 @@ from pathlib import Path
 from electronet_single_import.parser_product_skroutz import SkroutzProductParser
 from electronet_single_import.taxonomy import TaxonomyResolver
 
-REPO_ROOT = Path(r"c:\Users\user\Documents\VS_Projects\tranoulis\Product-Agent")
-FIXTURES_ROOT = REPO_ROOT / "scrapper" / "electronet_single_import" / "tests" / "fixtures" / "skroutz"
-REGRESSION_FIXTURE = FIXTURES_ROOT / "skroutz_taxonomy_regression.csv"
-TAXONOMY_CASES_ROOT = FIXTURES_ROOT / "taxonomy_cases"
-
-
-def read_taxonomy_rows() -> list[dict[str, str]]:
-    with REGRESSION_FIXTURE.open("r", encoding="utf-8-sig", newline="") as handle:
+def read_taxonomy_rows(regression_fixture: Path) -> list[dict[str, str]]:
+    with regression_fixture.open("r", encoding="utf-8-sig", newline="") as handle:
         return list(csv.DictReader(handle))
 
 
@@ -54,10 +48,10 @@ def build_minimal_taxonomy_html(row: dict[str, str]) -> str:
     )
 
 
-def test_taxonomy_regression_fixture_resolves_expected_categories() -> None:
+def test_taxonomy_regression_fixture_resolves_expected_categories(skroutz_fixtures_root: Path) -> None:
     parser = SkroutzProductParser()
     resolver = TaxonomyResolver()
-    rows = read_taxonomy_rows()
+    rows = read_taxonomy_rows(skroutz_fixtures_root / "skroutz_taxonomy_regression.csv")
     skipped = [(row["model"], row["skip_reason"]) for row in rows if row.get("skip_reason")]
 
     assert skipped == [("231412", "mapping_conflict_live_page_45cm_freestanding_not_tabletop")]
@@ -81,18 +75,19 @@ def test_taxonomy_regression_fixture_resolves_expected_categories() -> None:
         assert parsed.source.taxonomy_match_type == row["expected_match_type"]
 
 
-def test_representative_taxonomy_html_fixtures_cover_supported_skroutz_combos() -> None:
+def test_representative_taxonomy_html_fixtures_cover_supported_skroutz_combos(skroutz_fixtures_root: Path) -> None:
     parser = SkroutzProductParser()
     resolver = TaxonomyResolver()
-    index = json.loads((TAXONOMY_CASES_ROOT / "index.json").read_text(encoding="utf-8"))
+    taxonomy_cases_root = skroutz_fixtures_root / "taxonomy_cases"
+    index = json.loads((taxonomy_cases_root / "index.json").read_text(encoding="utf-8"))
 
     assert len(index) == 29
     assert any(item["captured_live"] for item in index)
     assert any(not item["captured_live"] for item in index)
 
     for entry in index:
-        meta = json.loads((TAXONOMY_CASES_ROOT / entry["meta"]).read_text(encoding="utf-8"))
-        html = (TAXONOMY_CASES_ROOT / entry["html"]).read_text(encoding="utf-8")
+        meta = json.loads((taxonomy_cases_root / entry["meta"]).read_text(encoding="utf-8"))
+        html = (taxonomy_cases_root / entry["html"]).read_text(encoding="utf-8")
         parsed = parser.parse(html, meta["source_url"])
         taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url, parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
 

@@ -573,3 +573,63 @@ No cleanup follow-up is scheduled by default. If approved, open a narrowly scope
 - the live product still relies on the characteristics template for some unresolved spec fields; this is reported but not a blocking validation failure
 - no durable process-rule update was required in `IMPLEMENT.md`
 - no milestone-plan change was required in `PLAN.md`
+
+## 2026-03-28 - Portable test fixture path centralization
+
+## What changed
+- created `scrapper/electronet_single_import/tests/conftest.py` as the canonical test-layer path source of truth
+- added shared pytest fixtures for `tests_root`, `fixtures_root`, `skroutz_fixtures_root`, and `products_root`
+- removed machine-specific absolute path assumptions from the affected Skroutz tests and switched them to the shared fixtures
+- kept the change test-only; no runtime module outside `scrapper/electronet_single_import/tests/` was edited
+
+## Files edited
+- `scrapper/electronet_single_import/tests/conftest.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_integration.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_taxonomy.py`
+- `DOCUMENTATION.md`
+
+## Normalized path assumptions
+- `test_skroutz_integration.py`
+  - replaced hard-coded absolute `REPO_ROOT`
+  - replaced per-file `FIXTURES_ROOT` and `PRODUCTS_ROOT`
+  - switched fetcher and baseline-copy helpers to accept shared fixture paths
+- `test_skroutz_sections.py`
+  - replaced hard-coded absolute `REPO_ROOT`
+  - replaced per-file `FIXTURES_ROOT` and `PRODUCTS_ROOT`
+  - switched fixture fetcher helper and baseline CSV reads to shared fixture paths
+- `test_skroutz_taxonomy.py`
+  - replaced hard-coded absolute `REPO_ROOT`
+  - replaced derived `REGRESSION_FIXTURE` and `TAXONOMY_CASES_ROOT`
+  - switched taxonomy fixture reads to shared fixture paths
+
+## Commands run
+- `rg --files scrapper/electronet_single_import/tests`
+- `Get-Content scrapper/conftest.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_integration.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_taxonomy.py`
+- `rg -n "Users\\\\|VS_Projects|Product-Agent|__file__|parents\\[|parent.parent|fixtures|FIXTURES_ROOT|PRODUCTS_ROOT|REPO_ROOT" scrapper/electronet_single_import/tests`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_integration.py` from `scrapper/`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_sections.py` from `scrapper/`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_taxonomy.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `python -m compileall scrapper/electronet_single_import`
+- `git status --short`
+
+## Validation results
+- targeted tests after the path fix:
+  - `electronet_single_import/tests/test_skroutz_integration.py`: `7 passed`
+  - `electronet_single_import/tests/test_skroutz_sections.py`: `5 passed`
+  - `electronet_single_import/tests/test_skroutz_taxonomy.py`: `5 passed`
+- full suite after the path fix:
+  - `76 passed, 2 failed`
+  - remaining failures:
+    - `test_enrichment_framework_supports_pdf_candidates`
+    - `test_enrichment_framework_supports_html_candidates`
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `git status --short` showed only the expected test-layer edits and `DOCUMENTATION.md`
+
+## Risks, blockers, or skipped items
+- no runtime behavior risk is expected because the change is confined to test path resolution
+- no `PLAN.md` update was needed because this is a test-baseline stabilization task rather than a milestone-order change
