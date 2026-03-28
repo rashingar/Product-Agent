@@ -1,7 +1,11 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M12 completed. No further cleanup milestone is scheduled.
+M13 completed. No further cleanup milestone is scheduled.
+
+## Historical reference note
+- Completed milestone entries, audit summaries, and command logs below preserve prior-state file paths intentionally.
+- When older sections mention paths such as `docs/superpowers/specs/...`, `work/IMPLEMENTATION_CHECKPOINT.md`, root support-asset filenames, `RULES_legacy.md`, `master_prompt_legacy.txt`, or `scrapper/requirements.txt`, read them as historical pre-M4, pre-M5, pre-M6, or pre-M10 references unless the section explicitly states current guidance.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -306,6 +310,25 @@ Notes:
 - current guidance redundancy was reduced only where it was safe to do so, without rewriting historical material
 - scraper smoke validation was intentionally skipped because this was a docs-only milestone
 
+## M13 detail
+Goal:
+- normalize historical old-file and old-path references in audits, specs, logs, and archive material while preserving provenance
+
+Changes:
+- added short historical-context notes to the affected audit, spec, and archived legacy files so pre-move paths are now explicitly labeled as prior-state references
+- clarified in this engineering log that old file paths in completed milestone sections and command logs are intentional historical references rather than current guidance
+- updated `PLAN.md` to mark M13 completed with provenance-preserving historical normalization
+
+Validation:
+- `rg` across `docs/audits/`, `docs/specs/`, `archive/legacy/`, and `DOCUMENTATION.md` confirmed the known old paths now remain either explicitly labeled as historical or already sit inside clearly historical records
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- no runtime code, dependency files, or project structure changed
+- provenance was preserved by adding clarification notes instead of rewriting the underlying historical outcomes
+- scraper smoke validation was intentionally skipped because this was a docs-only milestone
+
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
@@ -360,6 +383,7 @@ Notes:
 - README inspection for root and scraper README ownership
 - `rg` for `scrapper/README.md` references after README consolidation
 - targeted `rg` for stale old-file references across current guidance docs
+- targeted `rg` for stale old-file references across `docs/audits/`, `docs/specs/`, `archive/legacy/`, and `DOCUMENTATION.md`
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules

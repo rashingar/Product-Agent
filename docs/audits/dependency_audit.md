@@ -1,5 +1,9 @@
 # Dependency Ownership Audit
 
+Historical note:
+- This audit records the M8 dependency-ownership state from before M10 consolidated to one canonical repo-root `requirements.txt`.
+- References below to `scrapper/requirements.txt` describe the pre-M10 layout and are preserved as prior-state evidence, not as current install guidance.
+
 ## Evidence Used
 - file inspection of `requirements.txt`
 - file inspection of `scrapper/requirements.txt`

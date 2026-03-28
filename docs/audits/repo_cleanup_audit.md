@@ -1,5 +1,10 @@
 # Repo Cleanup Audit
 
+Historical note:
+- This audit records the M2 classification snapshot from before the later M4, M5, M6, and M10 moves.
+- Old paths and filenames below are preserved as pre-move evidence, not as current guidance.
+- Read root-asset references such as `catalog_taxonomy.json`, `master_prompt+.txt`, and `schemas/compact_response.schema.json` as pre-M6 locations unless a later note says otherwise.
+
 ## Evidence Used
 - Root inventory from `Get-ChildItem -Force -File` at repo root
 - Candidate existence from `Get-ChildItem docs/audits` and `Get-ChildItem docs/superpowers/specs,work`

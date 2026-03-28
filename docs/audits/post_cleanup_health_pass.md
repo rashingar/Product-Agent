@@ -1,5 +1,9 @@
 # Post-Cleanup Health Pass
 
+Historical note:
+- This report records the M9 repo-health snapshot from before the later M10, M11, and M12 normalization milestones.
+- References below to `scrapper/requirements.txt` and other superseded paths describe the repo state at that time and are preserved as historical evidence.
+
 ## Current Repo-Health Summary
 - Milestones M1 through M8 were completed without changing the known pytest baseline.
 - Active repo guidance now reflects the post-M6 layout: shared support assets live under `resources/`, active docs live under `docs/`, legacy references live under `archive/`, and runtime artifacts remain under `work/`.

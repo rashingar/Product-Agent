@@ -1,5 +1,9 @@
 ## CSV EXPORT / IMPORT TEMPLATE RULES (CRITICAL)
 
+Historical note:
+- This archived rules file preserves the pre-M5 legacy workflow wording.
+- File references such as `product_import_template.csv`, `TEMPLATE_presentation.html`, and `catalog_taxonomy.json` are retained as pre-M6 root-asset references for provenance and should not be read as current runtime paths.
+
 After every successful product generation, also generate a downloadable `.csv` import file for OpenCart.
 
 ### SOURCE OF TRUTH

@@ -1,5 +1,9 @@
 # Pipeline Optimization Design Spec
 
+Historical note:
+- This spec was written before the later support-asset relocation milestones.
+- Asset names such as `catalog_taxonomy.json`, `master_prompt+.txt`, `compact_response.schema.json`, and `name_rules.json` refer to their pre-M6 naming/location context unless an updated implementation note says otherwise.
+
 ## Context
 
 The Product-Agent pipeline scrapes product pages from Electronet and Skroutz, enriches them via LLM, and outputs OpenCart-ready CSV files. While scraping works, the output quality doesn't match the live catalog standard (222-product sample). Key gaps: inconsistent product naming beyond 4 hardcoded Skroutz families, LLM-dependent CTA text with Greek gender errors, freeform meta_descriptions that miss the catalog's structured pattern, and no tool to measure quality gaps systematically.

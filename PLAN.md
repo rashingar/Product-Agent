@@ -143,6 +143,12 @@ Evidence:
 - Verified that stale old-file references now remain only in historical milestone logs, audits, specs, and archive material rather than active current guidance.
 - Reduced `scrapper/README.md` further so it acts only as a concise pointer to the canonical repo-root `README.md`.
 
+### M13 - Normalize historical references with provenance preserved
+Status: completed
+Evidence:
+- Added short historical-context notes to the affected audits, spec, archived legacy files, and `DOCUMENTATION.md` so pre-move paths are explicitly labeled as prior-state references.
+- Preserved the underlying milestone outcomes and archived text rather than rewriting history into current guidance.
+
 ## Validation rules
 After each milestone:
 1. run repo-appropriate tests
