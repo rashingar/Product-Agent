@@ -6,8 +6,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from .cli import FAIL_MESSAGE, run_cli_input, validate_input
+from .cli import FAIL_MESSAGE, validate_input
 from .csv_writer import write_csv_row
+from .full_run import execute_full_run
 from .llm_contract import build_llm_context, render_prompt, validate_llm_output
 from .mapping import build_row
 from .models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
@@ -218,7 +219,7 @@ def prepare_workflow(cli: CLIInput) -> dict[str, Any]:
     llm_output_path = model_root / "llm_output.json"
     scrape_cli = CLIInput(**{**cli.to_dict(), "out": str(scrape_dir)})
     try:
-        result = run_cli_input(scrape_cli)
+        result = execute_full_run(scrape_cli)
         generated_scrape_dir = Path(result.get("model_dir", scrape_dir))
         if generated_scrape_dir != scrape_dir:
             staged_items = list(generated_scrape_dir.iterdir())

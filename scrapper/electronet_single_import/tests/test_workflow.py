@@ -54,7 +54,7 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     )
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_run_cli_input(_cli):
+    def fake_execute_full_run(_cli):
         return {
             "normalized": {
                 "deterministic_product": {
@@ -76,7 +76,7 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
             "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
         }
 
-    monkeypatch.setattr(workflow, "run_cli_input", fake_run_cli_input)
+    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
 
     result = prepare_workflow(cli)
 
@@ -100,8 +100,8 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert metadata["details"]["source"] == ""
 
 
-def test_run_cli_input_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
-    from electronet_single_import import cli as cli_module
+def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
+    from electronet_single_import import full_run as run_module
     from electronet_single_import.models import FetchResult
 
     cli = CLIInput(
@@ -150,22 +150,22 @@ def test_run_cli_input_allows_electronet_product_code_mismatch(monkeypatch, tmp_
         def match(self, *_args, **_kwargs):
             return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
 
-    monkeypatch.setattr(cli_module, "detect_source", lambda _url: "electronet")
-    monkeypatch.setattr(cli_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
-    monkeypatch.setattr(cli_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(cli_module, "ElectronetProductParser", lambda known_section_titles=None: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
-    monkeypatch.setattr(cli_module, "SkroutzProductParser", lambda: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
-    monkeypatch.setattr(cli_module, "TaxonomyResolver", lambda: DummyResolver())
-    monkeypatch.setattr(cli_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(cli_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {})
+    monkeypatch.setattr(run_module, "detect_source", lambda _url: "electronet")
+    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
+    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
+    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
+    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
+    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {})
 
-    result = cli_module.run_cli_input(cli)
+    result = run_module.execute_full_run(cli)
 
     assert result["parsed"].warnings == ["source_product_code_mismatch:input=229957:page=235370"]
 
 
-def test_run_cli_input_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
-    from electronet_single_import import cli as cli_module
+def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
+    from electronet_single_import import full_run as run_module
     from electronet_single_import.models import FetchResult
 
     cli = CLIInput(
@@ -254,17 +254,17 @@ def test_run_cli_input_uses_manufacturer_parser_for_tefal_source(monkeypatch, tm
         def parse(self, *_args, **_kwargs):
             raise AssertionError("Unexpected parser used")
 
-    monkeypatch.setattr(cli_module, "detect_source", lambda _url: "manufacturer_tefal")
-    monkeypatch.setattr(cli_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
-    monkeypatch.setattr(cli_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(cli_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
-    monkeypatch.setattr(cli_module, "SkroutzProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(cli_module, "ManufacturerProductParser", lambda: DummyManufacturerParser())
-    monkeypatch.setattr(cli_module, "TaxonomyResolver", lambda: DummyResolver())
-    monkeypatch.setattr(cli_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(cli_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
+    monkeypatch.setattr(run_module, "detect_source", lambda _url: "manufacturer_tefal")
+    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
+    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
+    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
+    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: DummyManufacturerParser())
+    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
+    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
 
-    result = cli_module.run_cli_input(cli)
+    result = run_module.execute_full_run(cli)
 
     assert result["parsed"].source.source_name == "manufacturer_tefal"
     assert result["normalized"]["deterministic_product"]["mpn"] == "IG602A"
@@ -330,7 +330,7 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
     )
     cli = CLIInput(model=model, url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_run_cli_input(_cli):
+    def fake_execute_full_run(_cli):
         return {
             "normalized": normalized_payload,
             "parsed": parsed,
@@ -350,7 +350,7 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
             "csv_path": csv_path,
         }
 
-    monkeypatch.setattr(workflow, "run_cli_input", fake_run_cli_input)
+    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
 
     result = prepare_workflow(cli)
     scrape_dir = result["scrape_dir"]
@@ -369,10 +369,10 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=1, sections=0, skroutz_status=0, boxnow=0, price="0", out=str(tmp_path))
 
-    def fake_run_cli_input(_cli):
+    def fake_execute_full_run(_cli):
         raise RuntimeError("prepare exploded")
 
-    monkeypatch.setattr(workflow, "run_cli_input", fake_run_cli_input)
+    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
 
     try:
         prepare_workflow(cli)
@@ -596,3 +596,33 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
     assert exit_code == 0
     assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
     assert "Validation ok: True" in captured.out
+
+
+def test_run_cli_input_calls_service_layer(monkeypatch) -> None:
+    from electronet_single_import import cli as cli_module
+
+    cli = CLIInput(
+        model="233541",
+        url="https://www.electronet.gr/example",
+        photos=2,
+        sections=1,
+        skroutz_status=1,
+        boxnow=0,
+        price="2099",
+        out="out",
+    )
+    expected = ServiceResult(
+        run=RunMetadata(model="233541", run_type=RunType.FULL, status=RunStatus.COMPLETED),
+        artifacts=RunArtifacts(),
+        details={},
+    )
+
+    def fake_run_product(request):
+        assert request.model == cli.model
+        assert request.url == cli.url
+        assert request.out == cli.out
+        return expected
+
+    monkeypatch.setattr(cli_module, "run_product", fake_run_product)
+
+    assert cli_module.run_cli_input(cli) is expected

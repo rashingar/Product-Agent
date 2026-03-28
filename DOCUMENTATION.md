@@ -10,8 +10,7 @@ Goal:
 
 Files edited:
 - `scrapper/electronet_single_import/cli.py`
-- `scrapper/electronet_single_import/services/models.py`
-- `scrapper/electronet_single_import/services/prepare_service.py`
+- `scrapper/electronet_single_import/full_run.py`
 - `scrapper/electronet_single_import/services/run_service.py`
 - `scrapper/electronet_single_import/tests/test_services.py`
 - `scrapper/electronet_single_import/tests/test_workflow.py`
@@ -20,13 +19,13 @@ Files edited:
 - `DOCUMENTATION.md`
 
 Changes:
-- routed standalone `python -m electronet_single_import.cli` through `run_product()` in the service layer while preserving the existing `--out` behavior, full-run metadata sidecar emission, summary lines, and exit-code mapping
-- changed `run_product()` to wrap the existing standalone CLI orchestration (`run_cli_input()`) so the full-run service now reflects the real standalone runtime surface instead of re-composing workflow prepare/render stages
-- extended `FullRunRequest` with `out` so the service layer can preserve standalone CLI output roots without changing the CLI UX
-- enriched the prepare-stage service result details with product/taxonomy/schema summary fields so service consumers can print the same operator-facing summary without re-reading internal workflow structures
+- extracted the pre-existing standalone full-run implementation into the lower-layer module `scrapper/electronet_single_import/full_run.py`
+- changed `run_cli_input()` into a thin CLI adapter that builds `FullRunRequest` and calls `run_product()`
+- restored `run_product()` to orchestrate below the CLI layer through `prepare_product()` and `render_product()` rather than calling anything in `cli.py`
+- kept `FullRunRequest.out` so the CLI adapter can pass output-root intent into the service layer without inverting module dependencies
 - routed `python -m electronet_single_import.workflow prepare` through `prepare_product()` and `python -m electronet_single_import.workflow render` through `render_product()`
-- preserved the underlying `run_cli_input()`, `prepare_workflow()`, and `render_workflow()` implementations so file outputs, metadata contents, and internal orchestration behavior remain unchanged
-- added focused tests for the new service routing in `workflow.main()` and for full-run service mapping from standalone CLI results
+- updated `prepare_workflow()` to use the extracted lower-layer executor instead of importing standalone CLI orchestration
+- added focused tests that verify CLI-to-service routing and that the service layer composes stage services without importing `cli.py`
 
 Commands run:
 - `Get-Content AGENTS.md`
@@ -54,8 +53,8 @@ Commands run:
 
 Validation:
 - `python -m compileall scrapper/electronet_single_import` succeeded
-- `python -m pytest -q electronet_single_import/tests/test_services.py electronet_single_import/tests/test_workflow.py` from `scrapper/` passed with `16 passed`
-- `python -m pytest -q` from `scrapper/` returned `86 passed, 2 failed`
+- `python -m pytest -q electronet_single_import/tests/test_services.py electronet_single_import/tests/test_workflow.py` from `scrapper/` passed with `17 passed`
+- `python -m pytest -q` from `scrapper/` returned `87 passed, 2 failed`
 - the only accepted failing tests remained:
   - `test_enrichment_framework_supports_pdf_candidates`
   - `test_enrichment_framework_supports_html_candidates`
@@ -63,7 +62,7 @@ Validation:
 
 Risks:
 - the repo still carries the two pre-existing manufacturer enrichment failures
-- the service-layer full-run shape now models standalone CLI execution rather than workflow prepare/render composition; that is intentional for M19 because the standalone CLI must preserve its existing output root and metadata behavior
+- standalone CLI metadata emission still remains a CLI concern because the service layer intentionally does not emit `full.run.json`
 
 Deferred:
 - no provider-contract work was started; that remains M20
