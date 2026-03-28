@@ -32,6 +32,43 @@ SKROUTZ_V1_MPN_HINTS = {
 }
 
 
+def _select_skroutz_image_backed_sections(
+    all_sections: list[dict[str, Any]],
+    rendered_sections: list[dict[str, Any]],
+    requested_sections: int,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    if len(all_sections) < requested_sections:
+        raise RuntimeError(
+            f"Skroutz section extraction failed: expected {requested_sections} sections, found {len(all_sections)}"
+        )
+
+    if len(rendered_sections) < requested_sections:
+        raise RuntimeError(
+            f"Skroutz rendered section extraction failed: expected {requested_sections} image records, found {len(rendered_sections)}"
+        )
+
+    selected_blocks: list[dict[str, Any]] = []
+    selected_rendered_sections: list[dict[str, Any]] = []
+    for block, rendered_section in zip(all_sections, rendered_sections):
+        block_title = normalize_for_match(str(block.get("title", "")))
+        rendered_title = normalize_for_match(str(rendered_section.get("title", "")))
+        if block_title != rendered_title:
+            raise RuntimeError("Skroutz section title order mismatch between rendered DOM and parsed description")
+
+        resolved_image_url = str(rendered_section.get("resolved_image_url", "")).strip()
+        if not resolved_image_url:
+            continue
+
+        selected_blocks.append(block)
+        selected_rendered_sections.append(rendered_section)
+        if len(selected_blocks) == requested_sections:
+            return selected_blocks, selected_rendered_sections
+
+    raise RuntimeError(
+        f"Skroutz rendered section extraction failed: expected {requested_sections} image-backed sections, found {len(selected_blocks)}"
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m electronet_single_import.cli")
     parser.add_argument("--model", required=True)
@@ -184,19 +221,6 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
             section_warnings.extend(extracted_window.get("warnings", []))
             section_extraction_window = dict(extracted_window.get("window", section_extraction_window))
             all_sections = list(extracted_window.get("sections", []))
-            if len(all_sections) < cli.sections:
-                raise RuntimeError(
-                    f"Skroutz section extraction failed: expected {cli.sections} sections, found {len(all_sections)}"
-                )
-            selected_presentation_blocks = all_sections[: cli.sections]
-            section_image_candidates = [
-                {
-                    "position": index,
-                    "title": block["title"],
-                    "candidates": list(block.get("image_candidates", [])),
-                }
-                for index, block in enumerate(selected_presentation_blocks, start=1)
-            ]
             try:
                 rendered_section_data = fetcher.extract_skroutz_section_image_records(fetch.final_url)
             except FetchError as exc:
@@ -216,20 +240,23 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
                         int(rendered_window.get("duplicate_signatures_skipped", 0) or 0),
                     ),
                 }
-            if len(rendered_sections) < cli.sections:
-                raise RuntimeError(
-                    f"Skroutz rendered section extraction failed: expected {cli.sections} image records, found {len(rendered_sections)}"
-                )
-            expected_titles = [normalize_for_match(block["title"]) for block in selected_presentation_blocks]
-            rendered_titles = [normalize_for_match(str(section.get("title", ""))) for section in rendered_sections[: cli.sections]]
-            if expected_titles != rendered_titles:
-                raise RuntimeError("Skroutz section title order mismatch between rendered DOM and parsed description")
+            selected_presentation_blocks, rendered_sections = _select_skroutz_image_backed_sections(
+                all_sections=all_sections,
+                rendered_sections=rendered_sections,
+                requested_sections=cli.sections,
+            )
+            section_image_candidates = [
+                {
+                    "position": index,
+                    "title": block["title"],
+                    "candidates": list(block.get("image_candidates", [])),
+                }
+                for index, block in enumerate(selected_presentation_blocks, start=1)
+            ]
 
             for section_index, block in enumerate(selected_presentation_blocks, start=1):
                 rendered_section = rendered_sections[section_index - 1]
                 resolved_image_url = str(rendered_section.get("resolved_image_url", "")).strip()
-                if not resolved_image_url:
-                    raise RuntimeError(f"Skroutz section image could not be resolved for section {section_index}")
                 block["image_url"] = resolved_image_url
                 section_image_urls_resolved.append(
                     {
@@ -401,19 +428,6 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
             section_warnings.extend(extracted_window.get("warnings", []))
             section_extraction_window = dict(extracted_window.get("window", section_extraction_window))
             all_sections = list(extracted_window.get("sections", []))
-            if len(all_sections) < cli.sections:
-                raise RuntimeError(
-                    f"Skroutz section extraction failed: expected {cli.sections} sections, found {len(all_sections)}"
-                )
-            selected_presentation_blocks = all_sections[: cli.sections]
-            section_image_candidates = [
-                {
-                    "position": index,
-                    "title": block["title"],
-                    "candidates": list(block.get("image_candidates", [])),
-                }
-                for index, block in enumerate(selected_presentation_blocks, start=1)
-            ]
             try:
                 rendered_section_data = fetcher.extract_skroutz_section_image_records(fetch.final_url)
             except FetchError as exc:
@@ -433,21 +447,24 @@ def run_cli_input(cli: CLIInput) -> dict[str, Any]:
                         int(rendered_window.get("duplicate_signatures_skipped", 0) or 0),
                     ),
                 }
-            if len(rendered_sections) < cli.sections:
-                raise RuntimeError(
-                    f"Skroutz rendered section extraction failed: expected {cli.sections} image records, found {len(rendered_sections)}"
-                )
-            expected_titles = [normalize_for_match(block["title"]) for block in selected_presentation_blocks]
-            rendered_titles = [normalize_for_match(str(section.get("title", ""))) for section in rendered_sections[: cli.sections]]
-            if expected_titles != rendered_titles:
-                raise RuntimeError("Skroutz section title order mismatch between rendered DOM and parsed description")
+            selected_presentation_blocks, rendered_sections = _select_skroutz_image_backed_sections(
+                all_sections=all_sections,
+                rendered_sections=rendered_sections,
+                requested_sections=cli.sections,
+            )
+            section_image_candidates = [
+                {
+                    "position": index,
+                    "title": block["title"],
+                    "candidates": list(block.get("image_candidates", [])),
+                }
+                for index, block in enumerate(selected_presentation_blocks, start=1)
+            ]
 
             selected_besco_images = []
             for section_index, block in enumerate(selected_presentation_blocks, start=1):
                 rendered_section = rendered_sections[section_index - 1]
                 resolved_image_url = str(rendered_section.get("resolved_image_url", "")).strip()
-                if not resolved_image_url:
-                    raise RuntimeError(f"Skroutz section image could not be resolved for section {section_index}")
                 block["image_url"] = resolved_image_url
                 section_image_urls_resolved.append(
                     {

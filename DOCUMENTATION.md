@@ -430,3 +430,44 @@ Notes:
 
 ## Next approved action
 No cleanup follow-up is scheduled by default. If approved, open a narrowly scoped follow-up for deferred path assumptions, test path cleanup, or redundant `.gitkeep` removal.
+
+## 2026-03-28 - Skroutz mixed-section pipeline fix and live run for model 123456
+
+## What changed
+- fixed Skroutz section selection in `scrapper/electronet_single_import/cli.py` so prepare selects the first requested image-backed rich-description sections instead of blindly slicing the first parsed sections when text-only `one-column` blocks appear mid-stream
+- added a regression test in `scrapper/electronet_single_import/tests/test_skroutz_sections.py` covering the mixed image/text section ordering case
+- ran the live Product-Agent pipeline for model `123456` against the provided Skroutz product URL and authored `work/123456/llm_output.json` using the reduced LLM contract
+
+## Files and directories affected
+- `scrapper/electronet_single_import/cli.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `work/123456/`
+- `products/123456.csv`
+
+## Commands run
+- `Get-ChildItem -Force`
+- `git status --short`
+- `rg --files AGENTS.md PLAN.md IMPLEMENT.md DOCUMENTATION.md`
+- `python -m electronet_single_import.workflow prepare --model 123456 --url "https://www.skroutz.gr/s/60276903/tcl-smart-tileorasi-115-4k-uhd-mini-led-c7k-hdr-2025-115c7k.html" --photos 7 --sections 7 --skroutz-status 1 --boxnow 0 --price 9999` from `scrapper/`
+- `rg -n "Skroutz section image could not be resolved|section image could not be resolved|section_image|section image" scrapper`
+- `Get-Content` inspection for `scrapper/electronet_single_import/cli.py`, `fetcher.py`, `skroutz_sections.py`, `workflow.py`, `html_builders.py`, `work/123456/llm_context.json`, `work/123456/prompt.txt`, `work/123456/scrape/123456.source.json`, `work/123456/scrape/123456.report.json`, `resources/prompts/master_prompt+.txt`, `resources/schemas/compact_response.schema.json`, `resources/mappings/filter_map.json`, and `products/123456.csv`
+- `python -m pytest scrapper/electronet_single_import/tests/test_skroutz_sections.py -q`
+- `python -m pytest scrapper/electronet_single_import/tests/test_skroutz_integration.py -q`
+- `python -m electronet_single_import.workflow render --model 123456` from `scrapper/`
+
+## Validation results
+- initial live `prepare` failed with `Skroutz section image could not be resolved for section 6`
+- focused tests passed after the fix:
+  - `scrapper/electronet_single_import/tests/test_skroutz_sections.py`: 5 passed
+  - `scrapper/electronet_single_import/tests/test_skroutz_integration.py`: 7 passed
+- first live `render` failed validation with `llm_intro_word_count_invalid`
+- adjusted `work/123456/llm_output.json` intro length to satisfy the reduced contract
+- final live `render` passed with `Validation ok: True`
+- final validation warnings remained:
+  - `characteristics_template_used:schema:sha1:954c8413f2da941e78f3ddce65df522654336c8c`
+  - `characteristics_template_unresolved_fields:12`
+
+## Risks, blockers, or skipped items
+- the live product still relies on the characteristics template for some unresolved spec fields; this is reported but not a blocking validation failure
+- no durable process-rule update was required in `IMPLEMENT.md`
+- no milestone-plan change was required in `PLAN.md`

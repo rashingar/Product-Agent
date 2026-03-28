@@ -6,6 +6,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+from electronet_single_import.cli import _select_skroutz_image_backed_sections
 from electronet_single_import.fetcher import ElectronetFetcher
 from electronet_single_import.models import CLIInput, FetchResult
 from electronet_single_import.skroutz_sections import extract_skroutz_section_window, is_placeholder_image_url, resolve_skroutz_section_image_url
@@ -119,6 +120,34 @@ def test_placeholder_urls_are_rejected_for_resolved_section_images() -> None:
     assert is_placeholder_image_url(resolved) is False
     assert resolved.endswith(".png")
     assert all(is_placeholder_image_url(section["resolved_image_url"]) is False for section in rendered["sections"])
+
+
+def test_select_skroutz_image_backed_sections_skips_text_only_interludes() -> None:
+    all_sections = [
+        {"title": "Section 1", "paragraph": "Body 1", "image_candidates": []},
+        {"title": "Section 2", "paragraph": "Body 2", "image_candidates": []},
+        {"title": "Section 3", "paragraph": "Body 3", "image_candidates": []},
+        {"title": "Section 4", "paragraph": "Body 4", "image_candidates": []},
+    ]
+    rendered_sections = [
+        {"title": "Section 1", "resolved_image_url": "https://example.com/1.jpg"},
+        {"title": "Section 2", "resolved_image_url": ""},
+        {"title": "Section 3", "resolved_image_url": "https://example.com/3.jpg"},
+        {"title": "Section 4", "resolved_image_url": "https://example.com/4.jpg"},
+    ]
+
+    selected_blocks, selected_rendered_sections = _select_skroutz_image_backed_sections(
+        all_sections=all_sections,
+        rendered_sections=rendered_sections,
+        requested_sections=3,
+    )
+
+    assert [section["title"] for section in selected_blocks] == ["Section 1", "Section 3", "Section 4"]
+    assert [section["resolved_image_url"] for section in selected_rendered_sections] == [
+        "https://example.com/1.jpg",
+        "https://example.com/3.jpg",
+        "https://example.com/4.jpg",
+    ]
 
 
 def test_rendered_section_extraction_skips_non_presentation_titles_and_tolerates_networkidle_timeout(monkeypatch) -> None:
