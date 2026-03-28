@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M8 completed. M9 is the next planned milestone.
+M9 completed. No further cleanup milestone is scheduled.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -144,7 +144,7 @@ Status: completed
 Status: completed
 
 ### M9 — Final health pass
-Status: pending
+Status: completed
 
 ## M6 detail
 Goal:
@@ -218,6 +218,27 @@ Notes:
 - dependency ownership remains audit-only and no dependency file was modified
 - scraper smoke validation was intentionally skipped because this milestone did not change runtime behavior
 
+## M9 detail
+Goal:
+- record a final post-cleanup repo health pass without changing runtime behavior
+
+Changes:
+- created `docs/audits/post_cleanup_health_pass.md`
+- recorded the final repo-health summary, confirmed remaining issues, safe follow-up items, risky postponed items, and the recommended next action
+- updated `PLAN.md` to mark M9 completed with an audit-only result
+
+Validation:
+- targeted `rg` searches confirmed no active guidance drift for the approved M4, M5, and M6 path changes
+- targeted searches confirmed the main remaining issues are deferred items: dependency ownership, redundant `.gitkeep` files in non-empty `docs/` directories, `workflow.py` output-root assumptions, and hardcoded absolute repo paths in some tests
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- no files were moved or deleted in M9
+- no dependency files were changed
+- no runtime code was edited
+- scraper smoke validation was intentionally skipped because this was an audit-only milestone
+
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
@@ -259,6 +280,9 @@ Notes:
 - `Get-Content scrapper/requirements.txt`
 - `rg` over repo docs for dependency-file references and install/setup commands
 - live import scans for packages declared in either dependency file
+- root directory inventory
+- recursive search for remaining `.gitkeep` files
+- targeted `rg` for pre-M4, M5, and M6 paths and known deferred runtime/path issues
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
@@ -270,6 +294,7 @@ Notes:
 - some tests still use hardcoded absolute repo paths and were intentionally deferred
 - historical docs and archived legacy files intentionally retain some old support-asset basenames as prior-state evidence
 - dependency ownership remains mixed because current install guidance points to `scrapper/requirements.txt`, while Pillow-related imports still map only to root `requirements.txt`
+- redundant `.gitkeep` files remain in non-empty `docs/audits/`, `docs/checkpoints/`, `docs/runbooks/`, and `docs/specs/` directories
 
 ## Next approved action
-Run M9 only.
+No cleanup follow-up is scheduled by default. If approved, open a narrowly scoped dependency-ownership follow-up next.

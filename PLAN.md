@@ -120,7 +120,10 @@ Evidence:
 - Kept dependency ownership audit-only in M8 and deferred any merge, move, or modernization work pending explicit follow-up approval.
 
 ### M9 — Final health pass
-Create `docs/audits/post_cleanup_health_pass.md`.
+Status: completed
+Evidence:
+- Recorded `docs/audits/post_cleanup_health_pass.md` with the final repo-health summary, remaining issues, safe follow-up items, risky postponed items, and the recommended next action.
+- Kept M9 audit-only with no file moves, dependency changes, or runtime-code changes.
 
 ## Validation rules
 After each milestone:
