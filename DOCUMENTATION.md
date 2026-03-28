@@ -1,14 +1,14 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M5 completed. M6 is the next planned milestone.
+M6 completed. M7 is the next planned milestone.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
 - `products/` remains the final CSV/output area.
 - `work/{model}/...` remains the runtime artifact area.
 - Legacy files must be archived, not deleted casually.
-- Current support assets are sensitive until path lookup is centralized.
+- Shared support assets now live under `resources/` and remain centrally resolved through `scrapper/electronet_single_import/repo_paths.py`.
 
 ## Milestone log
 
@@ -135,7 +135,7 @@ Notes:
 - no additional files were archived in this milestone
 
 ### M6 — Support asset relocation into `resources/`
-Status: pending
+Status: completed
 
 ### M7 — Documentation normalization
 Status: pending
@@ -145,6 +145,36 @@ Status: pending
 
 ### M9 — Final health pass
 Status: pending
+
+## M6 detail
+Goal:
+- move the approved shared support assets into `resources/` without changing runtime behavior
+
+Changes:
+- moved `MANUFACTURER_SOURCE_MAP.json`, `catalog_taxonomy.json`, `filter_map.json`, `name_rules.json`, `differentiator_priority_map.csv`, and `taxonomy_mapping_template.csv` into `resources/mappings/`
+- moved `electronet_schema_library.json`, `schema_index.csv`, and `compact_response.schema.json` into `resources/schemas/`
+- moved `TEMPLATE_presentation.html`, `characteristics_templates.json`, and `product_import_template.csv` into `resources/templates/`
+- moved `master_prompt+.txt` into `resources/prompts/`
+- updated `scrapper/electronet_single_import/repo_paths.py` so the centralized support-asset constants resolve from `resources/`
+- updated `scrapper/electronet_single_import/tests/test_utils_support_paths.py` to validate the `resources/` layout
+- updated active path references in `README.md`, `RULES.md`, `AGENTS.md`, `scrapper/README.md`, `docs/audits/repo_cleanup_audit.md`, and `PLAN.md`
+- removed `.gitkeep` from `resources/mappings/`, `resources/schemas/`, `resources/templates/`, and `resources/prompts/` after those directories became non-empty
+- removed the old `schemas/` directory after `compact_response.schema.json` moved and the directory became empty
+
+Validation:
+- pre-move checks confirmed every approved source existed and every approved destination was absent
+- post-move checks confirmed the old source paths no longer contain the moved files and the new `resources/` paths do contain them
+- `rg` for the old asset paths confirmed active references were updated, with old basenames preserved only in historical records where intentionally retained
+- `rg` for the new `resources/` paths confirmed runtime and active guidance ownership moved to `resources/`
+- `python -m pytest -q electronet_single_import/tests/test_utils_support_paths.py` from `scrapper/` passed
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- no runtime code outside `scrapper/electronet_single_import/repo_paths.py` was changed
+- downstream runtime imports remained stable because existing constant names were preserved
+- scraper smoke validation was intentionally skipped because the targeted path test, full pytest run, and code inspection were sufficient for this relocation-only milestone
+- archived legacy files and historical command-log entries still contain old basenames intentionally and were not rewritten as part of M6
 
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
@@ -175,6 +205,11 @@ Status: pending
 - `Move-Item` for `master_prompt_legacy.txt` to `archive/legacy/master_prompt_legacy.txt`
 - `Remove-Item` for `archive/legacy/.gitkeep` after the archive directory became non-empty
 - `rg` for old and new M5 legacy paths before and after the move
+- pre-move source and destination existence checks for every approved M6 support asset
+- `rg` for old and new M6 support-asset paths before and after the move
+- `Move-Item` for the approved M6 support assets into `resources/mappings/`, `resources/schemas/`, `resources/templates/`, and `resources/prompts/`
+- `Remove-Item` for `.gitkeep` in `resources/mappings/`, `resources/schemas/`, `resources/templates/`, and `resources/prompts/` after those directories became non-empty
+- `Remove-Item` for the old `schemas/` directory after it became empty
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
@@ -184,6 +219,7 @@ Status: pending
 - `schema_index.csv` and `taxonomy_mapping_template.csv` have weaker direct runtime evidence than the hardcoded support assets
 - `workflow.py` still contains out-of-scope `REPO_ROOT` output-root assumptions for `work/` and `products/`
 - some tests still use hardcoded absolute repo paths and were intentionally deferred
+- historical docs and archived legacy files intentionally retain some old support-asset basenames as prior-state evidence
 
 ## Next approved action
-Run M6 only.
+Run M7 only.

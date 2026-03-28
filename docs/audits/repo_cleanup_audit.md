@@ -9,6 +9,10 @@
 
 No material contradiction was found between the requested classifications and the live repo evidence in this pass. If a later audit finds a meaningful mismatch, that item should be reclassified as `uncertain` until the contradiction is resolved.
 
+M6 update:
+- the approved shared support assets were moved into `resources/`
+- the classification table below remains the historical M2 pre-move snapshot, not a statement of current asset locations
+
 ## Root-Level File Classification
 | Root-level file | Classification | Evidence |
 | --- | --- | --- |
@@ -45,5 +49,5 @@ No material contradiction was found between the requested classifications and th
 ## Risks And Postponed Items
 - `requirements.txt` remains postponed to the dependency audit milestone because the current evidence does not establish whether the repo-root file or `scrapper/requirements.txt` is authoritative.
 - `schema_index.csv` and `taxonomy_mapping_template.csv` have weaker direct evidence than the hardcoded support assets; they should be rechecked during path centralization and dependency cleanup.
-- All `move later after path centralization` items must stay in place until a central path layer exists and all callsites are routed through it.
+- M6 executed the approved relocation for the shared support assets that were previously classified as `move later after path centralization`.
 - This audit is classification only. No files were moved, deleted, or rewritten outside the approved docs for M2.

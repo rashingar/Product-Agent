@@ -93,7 +93,7 @@ Generation failed, provide 6-digit model
 If the page contains sufficient presentation content, the program:
 - preserves the source claims
 - preserves section order
-- maps them into the locked `TEMPLATE_presentation.html` wrapper structure
+- maps them into the locked `resources/templates/TEMPLATE_presentation.html` wrapper structure
 - uses the required `bescoN` target image pattern in `.jpg` format
 
 ### Mode 2 – presentation unavailable or insufficient
@@ -124,7 +124,7 @@ Rules:
 
 ## Taxonomy resolution
 
-`catalog_taxonomy.json` is the primary source of truth.
+`resources/mappings/catalog_taxonomy.json` is the primary source of truth.
 
 Resolution signals:
 - breadcrumbs
@@ -137,7 +137,7 @@ If parent or leaf cannot be resolved confidently, CSV `category` is left empty.
 
 ## Schema matching
 
-`electronet_schema_library.json` is used to:
+`resources/schemas/electronet_schema_library.json` is used to:
 - compare section-title overlap
 - compare spec-label overlap
 - detect likely incomplete spec extraction
@@ -149,7 +149,7 @@ A weak schema match does **not** stop CSV generation.
 
 Header order is read at runtime from:
 
-- the repo-root `product_import_template.csv`
+- `resources/templates/product_import_template.csv`
 
 The template header order always wins.
 

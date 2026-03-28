@@ -30,7 +30,7 @@ treat it as a request to run the full pipeline.
    - `work/{model}/scrape/{model}.source.json`
    - `work/{model}/scrape/{model}.report.json`
 4. The assistant is the LLM stage in this workflow.
-5. Using the reduced contract from `master_prompt+.txt` and `schemas/compact_response.schema.json`, author:
+5. Using the reduced contract from `resources/prompts/master_prompt+.txt` and `resources/schemas/compact_response.schema.json`, author:
    - `work/{model}/llm_output.json`
 6. The assistant must write only the LLM-owned fields:
    - `product.meta_description`
@@ -87,10 +87,10 @@ After the pipeline completes successfully, reply in chat with this fixed complet
 
 Rules for the completion message:
 
-- The `Category Filters` section must list only the category filters defined by `filter_map.json` for the resolved taxonomy path.
+- The `Category Filters` section must list only the category filters defined by `resources/mappings/filter_map.json` for the resolved taxonomy path.
 - Do not dump the full characteristics table in place of category filters.
 - Resolve each category filter value from the scraped source/spec data when possible.
-- If a category filter exists in `filter_map.json` but no source value exists, show it as `-`.
+- If a category filter exists in `resources/mappings/filter_map.json` but no source value exists, show it as `-`.
 - The fixed completion template must always appear first in the final chat response for template-triggered pipeline runs.
 
 ## Source Scope

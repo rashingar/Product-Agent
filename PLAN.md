@@ -6,7 +6,7 @@ This file is the source of truth for the staged cleanup and reorganization of th
 ## Current repo facts
 - The active runnable code lives under `scrapper/electronet_single_import/`.
 - The repo also contains shared support assets, output CSVs, runtime work artifacts, helper tools, and docs.
-- Current runtime documentation says several support files are treated as source-of-truth inputs and are currently read from repo root.
+- Current runtime documentation treats several support files as source-of-truth inputs and now reads them from `resources/` through the centralized path layer.
 - `products/` and `work/` must remain stable during early cleanup.
 - `work/{model}/...` is reserved for runtime artifacts.
 - Legacy historical references exist and must be archived, not deleted casually.
@@ -43,21 +43,16 @@ This file is the source of truth for the staged cleanup and reorganization of th
 - `work/`
 - `scrapper/`
 - `tools/`
+- `resources/`
 
 ### Move later after path centralization
-- `MANUFACTURER_SOURCE_MAP.json`
-- `catalog_taxonomy.json`
-- `filter_map.json`
-- `name_rules.json`
-- `differentiator_priority_map.csv`
-- `taxonomy_mapping_template.csv`
-- `electronet_schema_library.json`
-- `schema_index.csv`
-- `schemas/compact_response.schema.json`
-- `TEMPLATE_presentation.html`
-- `characteristics_templates.json`
-- `product_import_template.csv`
-- `master_prompt+.txt`
+- none; M6 moved the approved shared support assets into `resources/`
+
+### Shared support assets under `resources/`
+- `resources/mappings/`: `MANUFACTURER_SOURCE_MAP.json`, `catalog_taxonomy.json`, `filter_map.json`, `name_rules.json`, `differentiator_priority_map.csv`, `taxonomy_mapping_template.csv`
+- `resources/schemas/`: `electronet_schema_library.json`, `schema_index.csv`, `compact_response.schema.json`
+- `resources/templates/`: `TEMPLATE_presentation.html`, `characteristics_templates.json`, `product_import_template.csv`
+- `resources/prompts/`: `master_prompt+.txt`
 
 ### Move now
 - none; M4 completed the two previously approved safe documentation/planning moves
@@ -107,7 +102,10 @@ Evidence:
 - Moved `master_prompt_legacy.txt` to `archive/legacy/master_prompt_legacy.txt`.
 
 ### M6 — Move shared support assets into `resources/`
-Move support files only after M3 is complete.
+Status: completed
+Evidence:
+- Moved the approved shared support assets into `resources/mappings/`, `resources/schemas/`, `resources/templates/`, and `resources/prompts/`.
+- Updated `scrapper/electronet_single_import/repo_paths.py` so centralized runtime path resolution now targets the new `resources/` locations without changing loader semantics.
 
 ### M7 — Normalize documentation
 Update:
