@@ -11,11 +11,14 @@ from .html_builders import extract_presentation_blocks
 from .input_validation import FAIL_MESSAGE
 from .mapping import build_row
 from .manufacturer_enrichment import enrich_source_from_manufacturer_docs
-from .models import CLIInput, GalleryImage
+from .models import CLIInput, FetchResult, GalleryImage, ParsedProduct
 from .normalize import normalize_for_match
 from .parser_product_electronet import ElectronetProductParser
 from .parser_product_manufacturer import ManufacturerProductParser
 from .parser_product_skroutz import SkroutzProductParser
+from .providers.base import ProviderError
+from .providers.electronet_provider import ElectronetProvider
+from .providers.models import ProviderInputIdentity, ProviderResult
 from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .skroutz_taxonomy import serialize_source_category
@@ -66,6 +69,30 @@ def _select_skroutz_image_backed_sections(
     )
 
 
+def _provider_result_to_fetch(provider_result: ProviderResult) -> FetchResult:
+    snapshot = provider_result.snapshot
+    return FetchResult(
+        url=snapshot.requested_url or provider_result.identity.url,
+        final_url=snapshot.final_url or snapshot.requested_url or provider_result.identity.url,
+        html=snapshot.body_text,
+        status_code=int(snapshot.status_code or 0),
+        method=str(snapshot.metadata.get("fetch_method", "")),
+        fallback_used=bool(snapshot.metadata.get("fallback_used", False)),
+        response_headers=dict(snapshot.headers),
+    )
+
+
+def _provider_result_to_parsed(provider_result: ProviderResult) -> ParsedProduct:
+    return ParsedProduct(
+        source=provider_result.product,
+        provenance=dict(provider_result.provenance),
+        field_diagnostics=dict(provider_result.field_diagnostics),
+        missing_fields=list(provider_result.missing_fields),
+        warnings=list(provider_result.warnings),
+        critical_missing=list(provider_result.critical_missing),
+    )
+
+
 def execute_full_run(cli: CLIInput) -> dict[str, Any]:
     source = detect_source(cli.url)
     schema_matcher = SchemaMatcher(str(SCHEMA_LIBRARY_PATH))
@@ -74,7 +101,16 @@ def execute_full_run(cli: CLIInput) -> dict[str, Any]:
     manufacturer_parser = ManufacturerProductParser()
     fetcher = ElectronetFetcher()
 
-    if source == "skroutz":
+    if source == "electronet":
+        provider = ElectronetProvider(fetcher=fetcher, parser=electronet_parser)
+        identity = ProviderInputIdentity(model=cli.model, url=cli.url)
+        try:
+            provider_result = provider.normalize(provider.fetch_snapshot(identity), identity)
+        except ProviderError as exc:
+            raise RuntimeError(str(exc)) from exc
+        fetch = _provider_result_to_fetch(provider_result)
+        parsed = _provider_result_to_parsed(provider_result)
+    elif source == "skroutz":
         try:
             fetch = fetcher.fetch_playwright(cli.url)
         except FetchError as exc:
@@ -82,6 +118,7 @@ def execute_full_run(cli: CLIInput) -> dict[str, Any]:
                 fetch = fetcher.fetch_httpx(cli.url)
             except FetchError as nested_exc:
                 raise RuntimeError(str(nested_exc)) from nested_exc
+        parsed = skroutz_parser.parse(fetch.html, fetch.final_url, fallback_used=fetch.fallback_used)
     else:
         try:
             fetch = fetcher.fetch_httpx(cli.url)
@@ -91,26 +128,15 @@ def execute_full_run(cli: CLIInput) -> dict[str, Any]:
             except FetchError as exc:
                 raise RuntimeError(str(exc)) from exc
 
-    if source == "manufacturer_tefal":
-        parsed = manufacturer_parser.parse(
-            fetch.html,
-            fetch.final_url,
-            source_name=source,
-            fallback_used=fetch.fallback_used,
-        )
-    else:
-        product_parser = electronet_parser if source == "electronet" else skroutz_parser
-        parsed = product_parser.parse(fetch.html, fetch.final_url, fallback_used=fetch.fallback_used)
-
-    if source == "electronet" and parsed.critical_missing:
-        try:
-            fallback = fetcher.fetch_playwright(cli.url)
-            reparsed = electronet_parser.parse(fallback.html, fallback.final_url, fallback_used=True)
-            if len(reparsed.critical_missing) < len(parsed.critical_missing):
-                fetch = fallback
-                parsed = reparsed
-        except FetchError:
-            pass
+        if source == "manufacturer_tefal":
+            parsed = manufacturer_parser.parse(
+                fetch.html,
+                fetch.final_url,
+                source_name=source,
+                fallback_used=fetch.fallback_used,
+            )
+        else:
+            parsed = skroutz_parser.parse(fetch.html, fetch.final_url, fallback_used=fetch.fallback_used)
 
     final_source, final_scope_ok, final_scope_reason = validate_url_scope(fetch.final_url)
     if final_source != source or not final_scope_ok:

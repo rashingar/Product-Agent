@@ -1,7 +1,103 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M20 completed. Next active milestone: M21 — extract the current primary source into a provider adapter.
+M21 completed. Next active milestone: M22 — add provider selection and one second provider proof.
+
+## M21 — extract the current primary source into a provider adapter
+
+Goal:
+- extract exactly one current primary source flow behind the M20 provider contract by routing the Electronet primary path through a concrete provider adapter without changing runtime inputs, workflow/CLI behavior, artifact locations, validation semantics, or non-Electronet execution paths
+
+Files created:
+- `scrapper/electronet_single_import/providers/electronet_provider.py`
+
+Files edited:
+- `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/tests/test_workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Primary source extracted:
+- `electronet`
+
+Integration points changed:
+- `scrapper/electronet_single_import/full_run.py` now routes only the Electronet source branch through `ElectronetProvider`
+- `scrapper/electronet_single_import/full_run.py` converts the provider result back into the existing `FetchResult` and `ParsedProduct` runtime shapes before the rest of the pipeline continues
+- non-Electronet branches in `full_run.py` continue using the existing Skroutz and manufacturer fetch/parse logic
+- `scrapper/electronet_single_import/tests/test_workflow.py` now verifies the Electronet path uses the provider adapter while preserving the existing mismatch-warning and downstream report behavior
+
+Changes:
+- added `ElectronetProvider` as the single concrete M21 adapter, with provider metadata aligned to the M20 contract:
+  - provider id `electronet`
+  - source name `electronet`
+  - provider kind `vendor_site`
+  - capabilities `url_input`, `live_fetch`, `html_snapshot`, and `normalized_product`
+- moved the existing Electronet-only fetch/normalize seam into the provider without widening the M20 contract
+- preserved the current Electronet fetch order inside the provider:
+  - try HTTPX first
+  - fall back to Playwright on fetch failure
+- preserved the current Electronet critical-missing recovery inside the provider:
+  - if the initial parse still has `critical_missing`, rerun a Playwright fetch and reparse
+  - only replace the first parse when the fallback reduces the critical-missing count
+- stored fetch-only details not modeled directly by `ProviderSnapshot` in `snapshot.metadata`, specifically `fetch_method` and `fallback_used`
+- kept the downstream runtime behavior unchanged by translating the provider result back into the existing local execution models before taxonomy resolution, schema matching, artifact writing, and validation
+- left source detection, URL-scope validation, workflow entrypoints, CLI/service entrypoints, Skroutz extraction, and manufacturer enrichment behavior unchanged
+- did not add provider selection, registry-driven runtime routing, or a second provider
+
+Commands run:
+- `Get-ChildItem -Force`
+- `rg --files AGENTS.md RULES.md IMPLEMENT.md PLAN.md DOCUMENTATION.md scrapper/electronet_single_import`
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content IMPLEMENT.md`
+- `rg -n "M20|M21|provider" PLAN.md DOCUMENTATION.md scrapper/electronet_single_import/providers scrapper/electronet_single_import/full_run.py scrapper/electronet_single_import/services/run_service.py scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/providers/models.py`
+- `Get-Content scrapper/electronet_single_import/providers/base.py`
+- `Get-Content scrapper/electronet_single_import/providers/registry.py`
+- `Get-Content scrapper/electronet_single_import/providers/__init__.py`
+- `Get-Content scrapper/electronet_single_import/full_run.py`
+- `Get-Content scrapper/electronet_single_import/source_detection.py`
+- `Get-Content scrapper/electronet_single_import/services/run_service.py`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_electronet.py`
+- `Get-Content scrapper/electronet_single_import/fetcher.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_skroutz.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_manufacturer.py`
+- `rg -n "execute_full_run|detect_source\(|manufacturer_tefal" scrapper/electronet_single_import`
+- `rg -n "electronet" scrapper/electronet_single_import/tests`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_services.py`
+- `Get-Content PLAN.md | Select-Object -First 120`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 120`
+- `git status --short`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q scrapper/electronet_single_import/tests/test_workflow.py`
+- `python -m pytest -q` from `scrapper/`
+- `python -m pytest -q scrapper/electronet_single_import/tests/test_workflow.py scrapper/electronet_single_import/tests/test_skroutz_integration.py scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded before and after the final fix
+- targeted validation succeeded:
+  - `python -m pytest -q scrapper/electronet_single_import/tests/test_workflow.py` returned `11 passed`
+  - `python -m pytest -q scrapper/electronet_single_import/tests/test_workflow.py scrapper/electronet_single_import/tests/test_skroutz_integration.py scrapper/electronet_single_import/tests/test_skroutz_sections.py` returned `23 passed`
+- `python -m pytest -q` from `scrapper/` returned `87 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- one intermediate M21 regression in the Skroutz branch was introduced during extraction and then fixed in `full_run.py`; no new failures remained after the fix
+
+Risks:
+- the provider seam is still only proven for the Electronet primary source; runtime provider selection and secondary-provider support remain unimplemented until M22
+- the repo still carries the two pre-existing manufacturer enrichment failures
+
+Deferred:
+- provider selection and registry-driven runtime routing remain M22 work
+- adding a second concrete provider remains M22 work
+- expanding provider-based routing beyond the Electronet branch remains deferred
+- no changes were made to `cli.py`, `input_validation.py`, `source_detection.py`, dependency files, README files, `AGENTS.md`, `RULES.md`, or `IMPLEMENT.md`
 
 ## M20 — define provider contract and registry
 

@@ -103,6 +103,15 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
 def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
     from electronet_single_import import full_run as run_module
     from electronet_single_import.models import FetchResult
+    from electronet_single_import.providers.models import (
+        ProviderCapability,
+        ProviderDefinition,
+        ProviderInputIdentity,
+        ProviderKind,
+        ProviderResult,
+        ProviderSnapshot,
+        ProviderSnapshotKind,
+    )
 
     cli = CLIInput(
         model="229957",
@@ -150,10 +159,62 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
         def match(self, *_args, **_kwargs):
             return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
 
+    provider_calls: list[ProviderInputIdentity] = []
+
+    class UnexpectedParser:
+        def parse(self, *_args, **_kwargs):
+            raise AssertionError("Electronet parser should not be called directly")
+
+    class DummyElectronetProvider:
+        def __init__(self, *, fetcher, parser):
+            assert isinstance(fetcher, DummyFetcher)
+            assert isinstance(parser, UnexpectedParser)
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="electronet",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "httpx", "fallback_used": False},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=ProviderDefinition(
+                    provider_id="electronet",
+                    source_name="electronet",
+                    kind=ProviderKind.VENDOR_SITE,
+                    capabilities=frozenset(
+                        {
+                            ProviderCapability.URL_INPUT,
+                            ProviderCapability.LIVE_FETCH,
+                            ProviderCapability.HTML_SNAPSHOT,
+                            ProviderCapability.NORMALIZED_PRODUCT,
+                        }
+                    ),
+                ),
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
+
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "electronet")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
+    monkeypatch.setattr(run_module, "ElectronetProvider", DummyElectronetProvider)
+    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
     monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
@@ -161,7 +222,10 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
 
     result = run_module.execute_full_run(cli)
 
+    assert provider_calls == [ProviderInputIdentity(model="229957", url="https://www.electronet.gr/example")]
     assert result["parsed"].warnings == ["source_product_code_mismatch:input=229957:page=235370"]
+    assert result["report"]["source"] == "electronet"
+    assert result["report"]["identity_checks"]["source"] == "electronet"
 
 
 def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
