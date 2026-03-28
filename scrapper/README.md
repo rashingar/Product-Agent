@@ -1,9 +1,5 @@
 # Electronet Single Product Import Scraper
 
-Canonical setup and workflow documentation now lives in the repo-root `README.md`.
+Canonical setup, workflow, layout, and test documentation now lives in the repo-root `README.md`.
 
-Use `../README.md` for:
-- installation from the canonical repo-root `requirements.txt`
-- current scraper workflow commands
-- repo layout and runtime/output locations
-- test instructions
+Use `../README.md` as the single current README entrypoint for this repo.

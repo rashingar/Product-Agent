@@ -137,6 +137,12 @@ Evidence:
 - Merged the still-useful scraper setup and workflow guidance into the repo-root `README.md`.
 - Reduced `scrapper/README.md` to a minimal pointer so the root README is the single canonical README entrypoint.
 
+### M12 - Purge stale references from active guidance
+Status: completed
+Evidence:
+- Verified that stale old-file references now remain only in historical milestone logs, audits, specs, and archive material rather than active current guidance.
+- Reduced `scrapper/README.md` further so it acts only as a concise pointer to the canonical repo-root `README.md`.
+
 ## Validation rules
 After each milestone:
 1. run repo-appropriate tests

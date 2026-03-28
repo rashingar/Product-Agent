@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M11 completed. No further cleanup milestone is scheduled.
+M12 completed. No further cleanup milestone is scheduled.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -286,6 +286,26 @@ Notes:
 - no runtime code, dependency files, or project structure changed
 - scraper smoke validation was intentionally skipped because this was a docs-only milestone
 
+## M12 detail
+Goal:
+- remove stale old-file and old-path references from active guidance only without changing runtime behavior
+
+Changes:
+- inspected the active guidance set for stale references to pre-M4, M5, M6, and M10 file paths
+- confirmed that the remaining old-file references are confined to historical milestone logs, audits, specs, and archive material
+- reduced `scrapper/README.md` further so it acts only as a concise pointer to the canonical repo-root `README.md`
+- updated `PLAN.md` to mark M12 completed with an active-guidance-only normalization result
+
+Validation:
+- `rg` across active guidance confirmed no stale old-file references remain in current guidance, aside from clearly historical mentions in control-doc history sections
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- no runtime code, dependency files, or project structure changed
+- current guidance redundancy was reduced only where it was safe to do so, without rewriting historical material
+- scraper smoke validation was intentionally skipped because this was a docs-only milestone
+
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
@@ -339,6 +359,7 @@ Notes:
 - temporary verification-environment removal
 - README inspection for root and scraper README ownership
 - `rg` for `scrapper/README.md` references after README consolidation
+- targeted `rg` for stale old-file references across current guidance docs
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
