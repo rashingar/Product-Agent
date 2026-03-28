@@ -1,17 +1,29 @@
 # Product-Agent Implementation Rules
 
 ## Source of truth
-`PLAN.md` is the source of truth for milestone order and scope.
 
-## Required operating behavior for Codex
+`PLAN.md` is the source of truth for milestone order, active phase scope, and milestone completion state.
+
+`DOCUMENTATION.md` is the execution log for what changed, what was validated, and what was deferred.
+
+## Active implementation policy
 1. Work on exactly one milestone per commit.
-2. Do not expand scope.
-3. Preserve behavior unless the milestone explicitly changes structure.
+2. Do not mix phases.
+3. Preserve current outputs and runtime behavior unless the milestone explicitly changes an internal seam.
 4. Do not perform opportunistic refactors.
-5. Do not delete uncertain files.
-6. Prefer archive over deletion.
-7. Prefer path centralization before file movement.
-8. Update docs continuously.
+5. Do not redesign CLI UX unless the milestone explicitly calls for it.
+6. Do not introduce hybrid RAG, API, queue, or database concerns before the relevant planned milestone.
+7. Prefer explicit seams and typed contracts over broad rewrites.
+8. If a seam is not cleanly extractable, document the seam and stop instead of improvising a larger refactor.
+9. Update docs continuously.
+
+## Execution docs policy
+For milestone commits:
+1. Update `DOCUMENTATION.md` on every milestone.
+2. Update `PLAN.md` only to mark milestone status and note the newly completed capability.
+3. Do not edit `AGENTS.md` or `RULES.md` during normal milestones unless runtime operating behavior or accepted runtime inputs actually change.
+4. Do not edit `README.md` unless user-facing setup or runtime usage actually changes.
+5. Preserve prior milestone history; append or minimally update instead of rewriting historical records.
 
 ## Binding repo constraints
 - Follow `AGENTS.md` and `RULES.md`.
@@ -37,6 +49,13 @@
 - no database introduction
 - no API layer introduction
 - no changing output semantics without explicit milestone approval
+
+## Phase gate for hybrid RAG
+
+Hybrid RAG is out of scope until:
+- M15-M19 are complete
+- M20-M22 are complete
+- at least one non-primary provider works behind the provider contract
 
 ## Required pre-edit step
 Before editing:

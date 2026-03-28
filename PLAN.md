@@ -1,7 +1,12 @@
-# Product-Agent Cleanup Plan
+# Product-Agent Plan
 
 ## Purpose
-This file is the source of truth for the staged cleanup and reorganization of the current Product-Agent repository.
+
+This file is the source of truth for staged repository changes.
+
+Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
+
+The active phase is Phase 2: architecture foundation. This phase introduces the run contract, metadata emission, service layer, provider abstraction, and one second-provider proof before any hybrid RAG work begins.
 
 ## Current repo facts
 - The active runnable code lives under `scrapper/electronet_single_import/`.
@@ -27,6 +32,35 @@ This file is the source of truth for the staged cleanup and reorganization of th
 - No Postgres/pgvector migration.
 - No broad business-logic rewrite.
 - No pyproject migration unless explicitly scheduled later.
+
+## Active phase
+
+### Phase 2 — Architecture foundation
+
+Status: active
+
+Goals:
+1. Define a stable run contract for CLI, workflow, future API, and future job execution.
+2. Emit structured metadata alongside current artifacts without changing current outputs.
+3. Introduce a thin internal service layer around the current workflow.
+4. Define and prove a provider abstraction with one second provider.
+5. Preserve current runtime behavior while creating clean internal seams for later expansion.
+
+Hard rule:
+- Do not start hybrid RAG before:
+  - M15-M19 are complete
+  - M20-M22 are complete
+  - at least one non-primary provider works behind the provider contract
+
+Phase 2 milestones:
+- M15 — define run contract
+- M16 — write structured run metadata alongside current files
+- M17 — make CLI/workflow emit metadata
+- M18 — add service layer models/errors/wrappers
+- M19 — route CLI through the service layer
+- M20 — define provider contract and registry
+- M21 — extract the current primary source into a provider adapter
+- M22 — add provider selection and one second provider proof
 
 ## Root policy
 ### Keep in root
@@ -61,6 +95,7 @@ This file is the source of truth for the staged cleanup and reorganization of th
 - none; M5 archived the two approved legacy files under `archive/legacy/`
 
 ## Planned milestones
+## Phase 1 — Cleanup history
 ### M1 — Create control files and cleanup directories
 Status: completed
 Evidence:
@@ -125,7 +160,7 @@ Evidence:
 - Recorded `docs/audits/post_cleanup_health_pass.md` with the final repo-health summary, remaining issues, safe follow-up items, risky postponed items, and the recommended next action.
 - Kept M9 audit-only with no file moves, dependency changes, or runtime-code changes.
 
-### M10 β€” Consolidate canonical root requirements
+### M10 — Consolidate canonical root requirements
 Status: completed
 Evidence:
 - Promoted repo-root `requirements.txt` to the canonical dependency file using the verified live-needed union of root and scraper dependencies.
@@ -154,6 +189,12 @@ Status: completed
 Evidence:
 - Moved the confirmed support-asset path consumers to direct imports from `scrapper/electronet_single_import/repo_paths.py`, removing the remaining `utils.py` compatibility-reexport seam.
 - Removed the dead `RULES_PATH` constant and the one-callsite `build_model_output_dir()` wrapper without changing the known pytest baseline.
+
+## Phase transition note
+
+Cleanup is complete through M14.
+
+New architecture work starts at M15 and must follow the active Phase 2 rules above. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
 
 ## Validation rules
 After each milestone:

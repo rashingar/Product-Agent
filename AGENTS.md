@@ -1,6 +1,8 @@
-# Product-Agent Instructions
+# Product-Agent Runtime Instructions
 
-This repository contains a repo-scoped Electronet and Skroutz product pipeline.
+This file governs runtime and operator-facing execution behavior for the current product pipeline.
+
+Milestone sequencing, implementation policy, and architecture rollout belong to `PLAN.md` and `IMPLEMENT.md`, not this file.
 
 ## Trigger
 
@@ -21,7 +23,7 @@ treat it as a request to run the full pipeline.
 ## End-To-End Flow
 
 1. Parse the template fields exactly as provided.
-2. If `url` is an Electronet or Skroutz product URL, run:
+2. If `url` is a currently supported product URL recognized by the runtime source-detection layer, run:
    `python -m electronet_single_import.workflow prepare --model {model} --url "{url}" --photos {photos} --sections {sections} --skroutz-status {skroutz_status} --boxnow {boxnow} --price {price}`
    Run from `scrapper/`.
 3. Read:
@@ -95,8 +97,13 @@ Rules for the completion message:
 
 ## Source Scope
 
-- This workflow is intended for Electronet and Skroutz product URLs.
-- If the URL is neither an Electronet nor a Skroutz product URL, fail clearly instead of improvising a partial run.
+- The current runtime accepts product URLs supported by the repository's source-detection layer.
+- At the time of this control-doc refresh, that includes:
+  - Electronet product URLs
+  - Skroutz product URLs
+  - supported manufacturer product URLs already implemented in the codebase
+- Do not invent unsupported provider behavior.
+- Future provider expansion must follow the milestones in `PLAN.md`.
 
 ## Working Rules
 
@@ -156,3 +163,8 @@ If unsure, prefer updating `DOCUMENTATION.md` instead of changing `PLAN.md` or `
 Do not create duplicate versions of these files.
 Do not overwrite them wholesale.
 Make targeted edits only.
+
+## Scope boundary
+This file defines how to operate the current runtime.
+
+It does not define milestone order, future provider rollout order, service-layer design, or RAG sequencing.

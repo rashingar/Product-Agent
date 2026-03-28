@@ -1,6 +1,8 @@
-# Product-Agent Runtime Rules
+# Product-Agent Runtime Input Rules
 
-This file documents the current repo-scoped Electronet workflow.
+This file defines runtime input validation rules for the template-triggered workflow.
+
+It is not the architecture roadmap and should not be used to constrain planned provider expansion beyond current runtime support.
 
 ## Trigger
 
@@ -18,14 +20,16 @@ price:
 
 Rules:
 - `model` must be a confirmed 6-digit code.
-- `url` must be an Electronet product URL.
+- `url` must be a currently supported product URL recognized by the runtime source-detection layer.
 - `photos` defaults to `1`.
 - `sections` defaults to `0`.
-- `skroutz_status` and `boxnow` must be `0` or `1`.
+- `skroutz_status` and `boxnow` boolean rule, defaults to `0`.
 - `price` defaults to `0`.
 
 If `model` is missing or not exactly 6 digits, fail with:
 `Generation failed, provide 6-digit model`
+
+Supported runtime URL scope is determined by the code-supported source-detection layer, not by a hardcoded single-source assumption in this file.
 
 ## Default Flow
 

@@ -1,7 +1,42 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M14 completed. No further cleanup milestone is scheduled.
+Pre-M15 control-doc refresh completed. Next active milestone: M15 — define run contract.
+
+## Pre-M15 control-doc refresh
+
+Goal:
+- align repository control documents with the post-cleanup architecture phase
+- remove cleanup-only ambiguity before M15-M22
+- separate milestone governance from runtime execution guidance
+
+Files edited:
+- `PLAN.md`
+- `IMPLEMENT.md`
+- `DOCUMENTATION.md`
+- `AGENTS.md`
+- `RULES.md`
+
+Changes:
+- promoted `PLAN.md` from cleanup-only framing to full active roadmap framing
+- added the Phase 2 architecture milestones M15-M22
+- added explicit hybrid-RAG gating
+- updated `IMPLEMENT.md` to govern milestone execution for the new phase
+- updated `AGENTS.md` and `RULES.md` so runtime input scope matches the actual code-supported source scope
+- marked M15 as the next active milestone
+
+Validation:
+- docs-only review
+- no runtime files changed
+- no dependency files changed
+
+Risks:
+- none for runtime behavior; this commit changes guidance only
+
+Deferred:
+- `README.md` refresh
+- any user-facing architecture overview
+- milestone-specific implementation entries starting at M15
 
 ## Historical reference note
 - Completed milestone entries, audit summaries, and command logs below preserve prior-state file paths intentionally.
