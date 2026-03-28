@@ -1,7 +1,76 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M17 completed. Next active milestone: M18 — add service layer models/errors/wrappers.
+M18 completed. Next active milestone: M19 — route CLI through the service layer.
+
+## M18 — add service layer models/errors/wrappers
+
+Goal:
+- add a thin internal service layer around the existing prepare/render workflow stages using the M15 contract and M16/M17 stage metadata, without rerouting CLI entrypoints, changing workflow semantics, or introducing new runtime artifact or metadata filenames
+
+Files created:
+- `scrapper/electronet_single_import/services/errors.py`
+- `scrapper/electronet_single_import/services/prepare_service.py`
+- `scrapper/electronet_single_import/services/render_service.py`
+- `scrapper/electronet_single_import/services/run_service.py`
+- `scrapper/electronet_single_import/tests/test_services.py`
+
+Files edited:
+- `scrapper/electronet_single_import/services/__init__.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Service entrypoints added:
+- `prepare_product(request: PrepareRequest) -> ServiceResult`
+- `render_product(request: RenderRequest) -> ServiceResult`
+- `run_product(request: FullRunRequest) -> ServiceResult`
+
+Changes:
+- added a small internal `ServiceError` wrapper with stable `code`, `message`, and optional `cause`
+- added `prepare_product()` as a thin wrapper over `workflow.prepare_workflow()` that converts the M15 request into `CLIInput`, reuses the existing prepare-stage metadata file, and returns a `ServiceResult` with scrape/prompt artifact paths
+- added `render_product()` as a thin wrapper over `workflow.render_workflow()` that reuses the existing render-stage metadata file and returns a `ServiceResult` with candidate and validation artifact paths
+- added `run_product()` as an internal composition layer over `prepare_product()` then `render_product()` and kept full-run aggregation inside `ServiceResult.details`
+- did not emit `full.run.json` from the new service layer
+- did not modify `cli.py`
+- did not modify `workflow.py`
+- kept runtime behavior unchanged by leaving CLI entrypoints, workflow semantics, output locations, provider logic, and metadata filenames untouched
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/services/__init__.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `Get-Content scrapper/electronet_single_import/services/metadata.py`
+- `Get-Content scrapper/electronet_single_import/models.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `rg -n "class CLIInput|@dataclass\\(.*CLIInput|CLIInput\\(" scrapper/electronet_single_import/models.py scrapper/electronet_single_import -g "*.py"`
+- `rg --files scrapper/electronet_single_import/tests`
+- `rg -n "class .*Error|ServiceError|error_code|run_status" scrapper/electronet_single_import -g "*.py"`
+- `Get-Content PLAN.md -TotalCount 90`
+- `Get-Content DOCUMENTATION.md -TotalCount 120`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q electronet_single_import/tests/test_services.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_services.py` from `scrapper/` passed with `6 passed`
+- `python -m pytest -q` from `scrapper/` returned `84 passed, 2 failed`
+- the only known failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- no new unexpected test failures were introduced by M18
+
+Risks:
+- the full suite still has the two pre-existing manufacturer enrichment failures
+- the service layer currently returns aggregated full-run metadata paths through `ServiceResult.details`, not a dedicated full-run metadata artifact, by design for M18
+
+Deferred:
+- routing CLI entrypoints through the service layer remains deferred to M19
+- no new runtime metadata file is emitted for `run_product()` in M18
+- no workflow or CLI refactor beyond the additive service wrapper layer was performed in M18
 
 ## M17 — make CLI/workflow emit metadata
 

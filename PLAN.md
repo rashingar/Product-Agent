@@ -56,7 +56,7 @@ Phase 2 milestones:
 - M15 — define run contract (completed; import-safe run contract models added under `scrapper/electronet_single_import/services/` and not wired into runtime behavior)
 - M16 — write structured run metadata alongside current files (completed; `prepare.run.json` and `render.run.json` are now emitted under `work/{model}/`)
 - M17 — make CLI/workflow emit metadata (completed; standalone CLI now emits `full.run.json`, and workflow prepare/render now surface run status plus metadata path)
-- M18 — add service layer models/errors/wrappers
+- M18 — add service layer models/errors/wrappers (completed; thin internal prepare/render wrappers and full-run composition now live under `scrapper/electronet_single_import/services/` without rerouting CLI/workflow behavior or adding new runtime metadata files)
 - M19 — route CLI through the service layer
 - M20 — define provider contract and registry
 - M21 — extract the current primary source into a provider adapter
