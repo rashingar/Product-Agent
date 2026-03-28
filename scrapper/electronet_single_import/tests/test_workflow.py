@@ -2,7 +2,10 @@ import argparse
 import json
 from pathlib import Path
 
+import pytest
+
 from electronet_single_import.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from electronet_single_import.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 from electronet_single_import.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
 
@@ -523,3 +526,73 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     assert metadata["run"]["status"] == "failed"
     assert metadata["run"]["error_code"] == "FileNotFoundError"
     assert "Missing LLM output" in metadata["run"]["error_detail"]
+
+
+def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsys, tmp_path: Path) -> None:
+    from electronet_single_import import workflow
+
+    cli = CLIInput(
+        model="233541",
+        url="https://www.electronet.gr/example",
+        photos=2,
+        sections=1,
+        skroutz_status=1,
+        boxnow=0,
+        price="2099",
+        out=str(tmp_path),
+    )
+
+    def fake_build_cli_input_from_args(_args):
+        return cli
+
+    def fake_prepare_product(request: PrepareRequest) -> ServiceResult:
+        assert request.model == cli.model
+        assert request.url == cli.url
+        return ServiceResult(
+            run=RunMetadata(model=cli.model, run_type=RunType.PREPARE, status=RunStatus.COMPLETED),
+            artifacts=RunArtifacts(
+                scrape_dir=tmp_path / "work" / cli.model / "scrape",
+                llm_context_path=tmp_path / "work" / cli.model / "llm_context.json",
+                prompt_path=tmp_path / "work" / cli.model / "prompt.txt",
+                metadata_path=tmp_path / "work" / cli.model / "prepare.run.json",
+            ),
+        )
+
+    monkeypatch.setattr(workflow, "build_cli_input_from_args", fake_build_cli_input_from_args)
+    monkeypatch.setattr(workflow, "prepare_product", fake_prepare_product)
+
+    exit_code = workflow.main(["prepare"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert f"Scrape artifacts: {tmp_path / 'work' / cli.model / 'scrape'}" in captured.out
+    assert f"Metadata path: {tmp_path / 'work' / cli.model / 'prepare.run.json'}" in captured.out
+
+
+def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys, tmp_path: Path) -> None:
+    from electronet_single_import import workflow
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        assert request.model == "233541"
+        return ServiceResult(
+            run=RunMetadata(model="233541", run_type=RunType.RENDER, status=RunStatus.COMPLETED),
+            artifacts=RunArtifacts(
+                candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+                validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+                metadata_path=tmp_path / "work" / "233541" / "render.run.json",
+            ),
+            details={"validation_ok": True},
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
+    assert "Validation ok: True" in captured.out

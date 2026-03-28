@@ -1,7 +1,73 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M18 completed. Next active milestone: M19 — route CLI through the service layer.
+M19 completed. Next active milestone: M20 — define provider contract and registry.
+
+## M19 — route CLI through the service layer
+
+Goal:
+- refactor the CLI-facing entrypoints to call the M18 service layer instead of duplicating orchestration logic, while preserving command names, flags, exit semantics, artifact locations, metadata filenames, and provider behavior
+
+Files edited:
+- `scrapper/electronet_single_import/cli.py`
+- `scrapper/electronet_single_import/services/models.py`
+- `scrapper/electronet_single_import/services/prepare_service.py`
+- `scrapper/electronet_single_import/services/run_service.py`
+- `scrapper/electronet_single_import/tests/test_services.py`
+- `scrapper/electronet_single_import/tests/test_workflow.py`
+- `scrapper/electronet_single_import/workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- routed standalone `python -m electronet_single_import.cli` through `run_product()` in the service layer while preserving the existing `--out` behavior, full-run metadata sidecar emission, summary lines, and exit-code mapping
+- changed `run_product()` to wrap the existing standalone CLI orchestration (`run_cli_input()`) so the full-run service now reflects the real standalone runtime surface instead of re-composing workflow prepare/render stages
+- extended `FullRunRequest` with `out` so the service layer can preserve standalone CLI output roots without changing the CLI UX
+- enriched the prepare-stage service result details with product/taxonomy/schema summary fields so service consumers can print the same operator-facing summary without re-reading internal workflow structures
+- routed `python -m electronet_single_import.workflow prepare` through `prepare_product()` and `python -m electronet_single_import.workflow render` through `render_product()`
+- preserved the underlying `run_cli_input()`, `prepare_workflow()`, and `render_workflow()` implementations so file outputs, metadata contents, and internal orchestration behavior remain unchanged
+- added focused tests for the new service routing in `workflow.main()` and for full-run service mapping from standalone CLI results
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content scrapper/electronet_single_import/cli.py`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-ChildItem scrapper/electronet_single_import/services -Recurse -File | Select-Object -ExpandProperty FullName`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scrapper/electronet_single_import/services/prepare_service.py`
+- `Get-Content scrapper/electronet_single_import/services/render_service.py`
+- `Get-Content scrapper/electronet_single_import/services/run_service.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `rg -n "run_cli_input\\(|prepare_workflow\\(|render_workflow\\(|prepare_product\\(|render_product\\(|run_product\\(" scrapper/electronet_single_import -g "*.py"`
+- `Get-Content scrapper/electronet_single_import/services/__init__.py`
+- `Get-Content scrapper/electronet_single_import/services/errors.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_services.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `rg -n "def test_.*main|cli\\.main\\(|workflow\\.main\\(" scrapper/electronet_single_import/tests -g "*.py"`
+- `git status --short`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q electronet_single_import/tests/test_services.py electronet_single_import/tests/test_workflow.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_services.py electronet_single_import/tests/test_workflow.py` from `scrapper/` passed with `16 passed`
+- `python -m pytest -q` from `scrapper/` returned `86 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- no new unexpected failures were introduced by M19
+
+Risks:
+- the repo still carries the two pre-existing manufacturer enrichment failures
+- the service-layer full-run shape now models standalone CLI execution rather than workflow prepare/render composition; that is intentional for M19 because the standalone CLI must preserve its existing output root and metadata behavior
+
+Deferred:
+- no provider-contract work was started; that remains M20
+- no dependency files, provider logic, README files, `AGENTS.md`, `RULES.md`, or `IMPLEMENT.md` were changed
 
 ## M18 — add service layer models/errors/wrappers
 

@@ -50,6 +50,12 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
         ),
         details={
             "source": str(result.get("scrape_result", {}).get("source", "")),
+            "product_name": str(getattr(result.get("parsed", None), "source", None).name if result.get("parsed", None) else ""),
+            "product_code": str(getattr(result.get("parsed", None), "source", None).product_code if result.get("parsed", None) else ""),
+            "brand": str(getattr(result.get("parsed", None), "source", None).brand if result.get("parsed", None) else ""),
+            "taxonomy_path": str(getattr(result.get("taxonomy", None), "taxonomy_path", "") or ""),
+            "matched_schema_id": str(getattr(result.get("schema_match", None), "matched_schema_id", "") or ""),
+            "schema_score": float(getattr(result.get("schema_match", None), "score", 0.0) or 0.0),
+            "warnings_count": len(warnings),
         },
     )
-

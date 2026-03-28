@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from electronet_single_import.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, TaxonomyResolution
 from electronet_single_import.services import (
     FullRunRequest,
     PrepareRequest,
@@ -13,8 +14,8 @@ from electronet_single_import.services import (
     ServiceError,
     ServiceResult,
     prepare_product,
-    render_product,
     run_product,
+    render_product,
 )
 
 
@@ -134,88 +135,69 @@ def test_render_product_wraps_workflow_errors(monkeypatch) -> None:
     assert isinstance(excinfo.value.cause, FileNotFoundError)
 
 
-def test_run_product_composes_stage_services_and_aggregates_metadata_paths(tmp_path: Path, monkeypatch) -> None:
-    from electronet_single_import.services import run_service
+def test_run_product_maps_cli_result(tmp_path: Path, monkeypatch) -> None:
+    from electronet_single_import import cli as cli_module
 
-    call_order: list[str] = []
-    prepare_result = ServiceResult(
-        run=RunMetadata(model="233541", run_type=RunType.PREPARE, status=RunStatus.COMPLETED, warnings=["prepare warning"]),
-        artifacts=RunArtifacts(
-            model_root=tmp_path / "work" / "233541",
-            scrape_dir=tmp_path / "work" / "233541" / "scrape",
-            raw_html_path=tmp_path / "work" / "233541" / "scrape" / "233541.raw.html",
-            source_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.source.json",
-            scrape_normalized_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.normalized.json",
-            source_report_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.report.json",
-            llm_context_path=tmp_path / "work" / "233541" / "llm_context.json",
-            prompt_path=tmp_path / "work" / "233541" / "prompt.txt",
-            llm_output_path=tmp_path / "work" / "233541" / "llm_output.json",
-            metadata_path=tmp_path / "work" / "233541" / "prepare.run.json",
-        ),
-        details={"source": "electronet"},
+    source = SourceProductData(
+        source_name="electronet",
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code="233541",
+        brand="LG",
+        name="LG Example",
     )
-    render_result = ServiceResult(
-        run=RunMetadata(model="233541", run_type=RunType.RENDER, status=RunStatus.COMPLETED, warnings=["render warning"]),
-        artifacts=RunArtifacts(
-            model_root=tmp_path / "work" / "233541",
-            scrape_dir=tmp_path / "work" / "233541" / "scrape",
-            candidate_dir=tmp_path / "work" / "233541" / "candidate",
-            candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
-            published_csv_path=tmp_path / "products" / "233541.csv",
-            candidate_normalized_json_path=tmp_path / "work" / "233541" / "candidate" / "233541.normalized.json",
-            validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
-            description_html_path=tmp_path / "work" / "233541" / "candidate" / "description.html",
-            characteristics_html_path=tmp_path / "work" / "233541" / "candidate" / "characteristics.html",
-            metadata_path=tmp_path / "work" / "233541" / "render.run.json",
-        ),
-        details={"validation_ok": True},
+    parsed = ParsedProduct(source=source)
+    taxonomy = TaxonomyResolution(
+        parent_category="A",
+        leaf_category="B",
+        sub_category="C",
+        taxonomy_path="A > B > C",
     )
+    schema_match = SchemaMatchResult(matched_schema_id="schema-1", score=0.9)
 
-    def fake_prepare(request: PrepareRequest) -> ServiceResult:
-        call_order.append("prepare")
-        assert request.model == "233541"
-        return prepare_result
+    def fake_run_cli_input(cli: CLIInput):
+        assert cli.model == "233541"
+        assert cli.url == "https://www.electronet.gr/example"
+        assert cli.out == "out"
+        return {
+            "source": "electronet",
+            "parsed": parsed,
+            "taxonomy": taxonomy,
+            "schema_match": schema_match,
+            "report": {"warnings": ["full warning"]},
+            "model_dir": tmp_path / "out" / "233541",
+            "raw_html_path": tmp_path / "out" / "233541" / "233541.raw.html",
+            "source_json_path": tmp_path / "out" / "233541" / "233541.source.json",
+            "normalized_json_path": tmp_path / "out" / "233541" / "233541.normalized.json",
+            "report_json_path": tmp_path / "out" / "233541" / "233541.report.json",
+            "csv_path": tmp_path / "out" / "233541" / "233541.csv",
+        }
 
-    def fake_render(request: RenderRequest) -> ServiceResult:
-        call_order.append("render")
-        assert request.model == "233541"
-        return render_result
-
-    monkeypatch.setattr(run_service, "prepare_product", fake_prepare)
-    monkeypatch.setattr(run_service, "render_product", fake_render)
+    monkeypatch.setattr(cli_module, "run_cli_input", fake_run_cli_input)
 
     result = run_product(FullRunRequest(model="233541", url="https://www.electronet.gr/example"))
 
-    assert call_order == ["prepare", "render"]
     assert result.run.run_type == RunType.FULL
     assert result.run.status == RunStatus.COMPLETED
-    assert result.run.warnings == ["prepare warning", "render warning"]
-    assert result.artifacts.metadata_path is None
-    assert result.artifacts.candidate_csv_path == tmp_path / "work" / "233541" / "candidate" / "233541.csv"
-    assert result.details["prepare_metadata_path"] == str(tmp_path / "work" / "233541" / "prepare.run.json")
-    assert result.details["render_metadata_path"] == str(tmp_path / "work" / "233541" / "render.run.json")
-    assert result.details["validation_ok"] is True
+    assert result.run.warnings == ["full warning"]
+    assert result.artifacts.model_root == tmp_path / "out" / "233541"
+    assert result.artifacts.source_report_json_path == tmp_path / "out" / "233541" / "233541.report.json"
+    assert result.details["csv_path"] == str(tmp_path / "out" / "233541" / "233541.csv")
+    assert result.details["taxonomy_path"] == "A > B > C"
+    assert result.details["matched_schema_id"] == "schema-1"
+    assert result.details["warnings_count"] == 1
 
 
-def test_run_product_stops_when_prepare_fails(monkeypatch) -> None:
-    from electronet_single_import.services import run_service
+def test_run_product_wraps_cli_errors(monkeypatch) -> None:
+    from electronet_single_import import cli as cli_module
 
-    render_calls: list[str] = []
+    def fake_run_cli_input(_cli: CLIInput):
+        raise RuntimeError("full run exploded")
 
-    def fake_prepare(_request: PrepareRequest) -> ServiceResult:
-        raise ServiceError("RuntimeError", "prepare exploded")
-
-    def fake_render(_request: RenderRequest) -> ServiceResult:
-        render_calls.append("render")
-        raise AssertionError("render should not run")
-
-    monkeypatch.setattr(run_service, "prepare_product", fake_prepare)
-    monkeypatch.setattr(run_service, "render_product", fake_render)
+    monkeypatch.setattr(cli_module, "run_cli_input", fake_run_cli_input)
 
     with pytest.raises(ServiceError) as excinfo:
         run_product(FullRunRequest(model="233541", url="https://www.electronet.gr/example"))
 
     assert excinfo.value.code == "RuntimeError"
-    assert excinfo.value.message == "prepare exploded"
-    assert render_calls == []
-
+    assert excinfo.value.message == "full run exploded"

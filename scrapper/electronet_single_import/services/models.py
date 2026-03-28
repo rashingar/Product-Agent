@@ -43,6 +43,7 @@ class FullRunRequest:
     skroutz_status: int = 0
     boxnow: int = 0
     price: str | float | int = 0
+    out: str = "out"
 
 
 @dataclass(slots=True)

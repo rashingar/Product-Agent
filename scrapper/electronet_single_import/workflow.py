@@ -12,8 +12,11 @@ from .llm_contract import build_llm_context, render_prompt, validate_llm_output
 from .mapping import build_row
 from .models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .repo_paths import MASTER_PROMPT_PATH, REPO_ROOT
+from .services.errors import ServiceError
 from .services.metadata import maybe_write_run_metadata
-from .services.models import RunArtifacts, RunStatus, RunType
+from .services.models import PrepareRequest, RenderRequest, RunArtifacts, RunStatus, RunType
+from .services.prepare_service import prepare_product
+from .services.render_service import render_product
 from .utils import ensure_directory, read_json, utcnow_iso, write_json, write_text
 from .validator import validate_candidate_csv, write_validation_report
 
@@ -57,32 +60,39 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "prepare":
             cli = build_cli_input_from_args(args)
-            result = prepare_workflow(cli)
-            print(f"Scrape artifacts: {result['scrape_dir']}")
-            print(f"LLM context: {result['llm_context_path']}")
-            print(f"Prompt: {result['prompt_path']}")
-            print(f"Run status: {result['run_status']}")
-            print(f"Metadata path: {result['metadata_path']}")
+            result = prepare_product(
+                PrepareRequest(
+                    model=cli.model,
+                    url=cli.url,
+                    photos=cli.photos,
+                    sections=cli.sections,
+                    skroutz_status=cli.skroutz_status,
+                    boxnow=cli.boxnow,
+                    price=cli.price,
+                )
+            )
+            print(f"Scrape artifacts: {result.artifacts.scrape_dir}")
+            print(f"LLM context: {result.artifacts.llm_context_path}")
+            print(f"Prompt: {result.artifacts.prompt_path}")
+            print(f"Run status: {result.run.status.value}")
+            print(f"Metadata path: {result.artifacts.metadata_path}")
             return 0
 
         model = resolve_model_for_render(args)
-        result = render_workflow(model)
-        print(f"Candidate CSV: {result['candidate_csv_path']}")
-        print(f"Validation report: {result['validation_report_path']}")
-        print(f"Validation ok: {result['validation_report']['ok']}")
-        print(f"Run status: {result['run_status']}")
-        print(f"Metadata path: {result['metadata_path']}")
-        return 0 if result["validation_report"]["ok"] else 5
+        result = render_product(RenderRequest(model=model))
+        print(f"Candidate CSV: {result.artifacts.candidate_csv_path}")
+        print(f"Validation report: {result.artifacts.validation_report_path}")
+        print(f"Validation ok: {bool(result.details.get('validation_ok', False))}")
+        print(f"Run status: {result.run.status.value}")
+        print(f"Metadata path: {result.artifacts.metadata_path}")
+        return 0 if bool(result.details.get("validation_ok", False)) else 5
     except ValueError as exc:
         message = str(exc)
         print(message)
         return 1 if message == FAIL_MESSAGE else 2
-    except FileNotFoundError as exc:
-        print(str(exc), file=sys.stderr)
-        return 3
-    except RuntimeError as exc:
-        print(str(exc), file=sys.stderr)
-        return 4
+    except ServiceError as exc:
+        print(exc.message, file=sys.stderr)
+        return 3 if exc.code == "FileNotFoundError" else 4
 
 
 def build_cli_input_from_args(args: argparse.Namespace) -> CLIInput:

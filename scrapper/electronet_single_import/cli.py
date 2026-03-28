@@ -20,7 +20,9 @@ from .parser_product_manufacturer import ManufacturerProductParser
 from .parser_product_skroutz import SkroutzProductParser
 from .schema_matcher import SchemaMatcher
 from .services.metadata import maybe_write_run_metadata
-from .services.models import RunArtifacts, RunStatus, RunType
+from .services.models import FullRunRequest, RunArtifacts, RunStatus, RunType
+from .services.errors import ServiceError
+from .services.run_service import run_product
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .skroutz_taxonomy import serialize_source_category
 from .source_detection import detect_source, validate_url_scope
@@ -715,33 +717,44 @@ def main(argv: list[str] | None = None) -> int:
     try:
         cli = validate_input(args)
         requested_at = utcnow_iso()
-        result = run_cli_input(cli)
+        service_result = run_product(
+            FullRunRequest(
+                model=cli.model,
+                url=cli.url,
+                photos=cli.photos,
+                sections=cli.sections,
+                skroutz_status=cli.skroutz_status,
+                boxnow=cli.boxnow,
+                price=cli.price,
+                out=cli.out,
+            )
+        )
         metadata_path = maybe_write_run_metadata(
             model=cli.model,
             run_type=RunType.FULL,
             status=RunStatus.COMPLETED,
-            model_root=result["model_dir"],
+            model_root=service_result.artifacts.model_root,
             artifacts=RunArtifacts(
-                model_root=result["model_dir"],
-                raw_html_path=result["raw_html_path"],
-                source_json_path=result["source_json_path"],
-                scrape_normalized_json_path=result["normalized_json_path"],
-                source_report_json_path=result["report_json_path"],
+                model_root=service_result.artifacts.model_root,
+                raw_html_path=service_result.artifacts.raw_html_path,
+                source_json_path=service_result.artifacts.source_json_path,
+                scrape_normalized_json_path=service_result.artifacts.scrape_normalized_json_path,
+                source_report_json_path=service_result.artifacts.source_report_json_path,
             ),
             requested_at=requested_at,
             started_at=requested_at,
             finished_at=utcnow_iso(),
-            warnings=list(result["report"]["warnings"]),
+            warnings=list(service_result.run.warnings),
             details={
-                "source": str(result["source"]),
-                "csv_path": str(result["csv_path"]),
+                "source": str(service_result.details.get("source", "")),
+                "csv_path": str(service_result.details.get("csv_path", "")),
             },
         )
     except ValueError as exc:
         message = str(exc)
         print(message)
         return 1 if message == FAIL_MESSAGE else 2
-    except RuntimeError as exc:
+    except ServiceError as exc:
         if cli is not None and requested_at is not None:
             model_root = Path(cli.out) / cli.model
             metadata_path = maybe_write_run_metadata(
@@ -759,28 +772,26 @@ def main(argv: list[str] | None = None) -> int:
                 requested_at=requested_at,
                 started_at=requested_at,
                 finished_at=utcnow_iso(),
-                error_code=type(exc).__name__,
-                error_detail=str(exc),
+                error_code=exc.code,
+                error_detail=exc.message,
             )
             print(f"Run status: {RunStatus.FAILED.value}")
             print(f"Metadata path: {metadata_path}")
-        message = str(exc)
+        message = exc.message
         print(message, file=sys.stderr if message != FAIL_MESSAGE else sys.stdout)
         return 3 if "failed" in message.lower() else 4
 
-    taxonomy = result["taxonomy"]
-    schema_match = result["schema_match"]
-    report = result["report"]
-    csv_path = result["csv_path"]
-    parsed = result["parsed"]
-    resolved_path = taxonomy.taxonomy_path or ""
-    print(f"product name: {parsed.source.name}")
-    print(f"product code: {parsed.source.product_code}")
-    print(f"brand: {parsed.source.brand}")
+    resolved_path = str(service_result.details.get("taxonomy_path", "") or "")
+    print(f"product name: {service_result.details.get('product_name', '')}")
+    print(f"product code: {service_result.details.get('product_code', '')}")
+    print(f"brand: {service_result.details.get('brand', '')}")
     print(f"resolved taxonomy path: {resolved_path}")
-    print(f"schema match id / score: {schema_match.matched_schema_id} / {schema_match.score:.4f}")
-    print(f"CSV written path: {csv_path}")
-    print(f"warnings count: {len(report['warnings'])}")
+    print(
+        "schema match id / score: "
+        f"{service_result.details.get('matched_schema_id', '')} / {float(service_result.details.get('schema_score', 0.0)):.4f}"
+    )
+    print(f"CSV written path: {service_result.details.get('csv_path', '')}")
+    print(f"warnings count: {int(service_result.details.get('warnings_count', 0))}")
     print(f"Run status: {RunStatus.COMPLETED.value}")
     print(f"Metadata path: {metadata_path}")
     return 0
