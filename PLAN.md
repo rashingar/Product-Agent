@@ -54,7 +54,7 @@ Hard rule:
 
 Phase 2 milestones:
 - M15 — define run contract (completed; import-safe run contract models added under `scrapper/electronet_single_import/services/` and not wired into runtime behavior)
-- M16 — write structured run metadata alongside current files
+- M16 — write structured run metadata alongside current files (completed; `prepare.run.json` and `render.run.json` are now emitted under `work/{model}/`)
 - M17 — make CLI/workflow emit metadata
 - M18 — add service layer models/errors/wrappers
 - M19 — route CLI through the service layer

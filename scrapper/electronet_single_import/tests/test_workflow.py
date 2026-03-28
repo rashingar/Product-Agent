@@ -79,11 +79,22 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
 
     assert result["llm_context_path"].exists()
     assert result["prompt_path"].exists()
+    assert result["metadata_path"].exists()
     llm_context = json.loads(result["llm_context_path"].read_text(encoding="utf-8"))
+    metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
     prompt_text = result["prompt_path"].read_text(encoding="utf-8")
     assert llm_context["writer_rules"]["intro_html_rule"] == "120-180 Greek words in one intro paragraph."
     assert "between 120 and 180 Greek words" in prompt_text
     assert "120-180 Greek words" in prompt_text
+    assert result["metadata_path"].name == "prepare.run.json"
+    assert metadata["run"]["model"] == "233541"
+    assert metadata["run"]["run_type"] == "prepare"
+    assert metadata["run"]["status"] == "completed"
+    assert metadata["artifacts"]["llm_context_path"] == str(result["llm_context_path"])
+    assert metadata["artifacts"]["prompt_path"] == str(result["prompt_path"])
+    assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
+    assert metadata["artifacts"]["llm_output_path"] == str(result["model_root"] / "llm_output.json")
+    assert metadata["details"]["source"] == ""
 
 
 def test_run_cli_input_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
@@ -349,6 +360,31 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
     assert rewritten_source["gallery_images"][0]["local_path"] == str(scrape_dir / "gallery" / f"{model}-1.jpg")
 
 
+def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkeypatch) -> None:
+    from electronet_single_import import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=1, sections=0, skroutz_status=0, boxnow=0, price="0", out=str(tmp_path))
+
+    def fake_run_cli_input(_cli):
+        raise RuntimeError("prepare exploded")
+
+    monkeypatch.setattr(workflow, "run_cli_input", fake_run_cli_input)
+
+    try:
+        prepare_workflow(cli)
+    except RuntimeError as exc:
+        assert str(exc) == "prepare exploded"
+    else:
+        raise AssertionError("Expected RuntimeError")
+
+    metadata_path = tmp_path / "work" / "233541" / "prepare.run.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    assert metadata["run"]["status"] == "failed"
+    assert metadata["run"]["error_code"] == "RuntimeError"
+    assert metadata["run"]["error_detail"] == "prepare exploded"
+
+
 def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) -> None:
     from electronet_single_import import workflow
 
@@ -430,4 +466,60 @@ def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) ->
     assert result["published_csv_path"] == products_dir / f"{model}.csv"
     assert result["published_csv_path"].read_text(encoding="utf-8-sig") == result["candidate_csv_path"].read_text(encoding="utf-8-sig")
     assert result["validation_report_path"].exists()
+    assert result["metadata_path"].exists()
     assert "field_health" in result["validation_report"]
+    metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
+    assert result["metadata_path"].name == "render.run.json"
+    assert metadata["run"]["model"] == model
+    assert metadata["run"]["run_type"] == "render"
+    assert metadata["run"]["status"] == "completed"
+    assert metadata["artifacts"]["candidate_csv_path"] == str(result["candidate_csv_path"])
+    assert metadata["artifacts"]["published_csv_path"] == str(result["published_csv_path"])
+    assert metadata["artifacts"]["validation_report_path"] == str(result["validation_report_path"])
+    assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
+    assert metadata["details"]["validation_ok"] == result["validation_report"]["ok"]
+
+
+def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from electronet_single_import import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+    source = SourceProductData(url="https://www.electronet.gr/example", canonical_url="https://www.electronet.gr/example", product_code=model, brand="LG", name="LG Example")
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {
+                    "model": model,
+                    "url": "https://www.electronet.gr/example",
+                    "photos": 1,
+                    "sections": 0,
+                    "skroutz_status": 0,
+                    "boxnow": 0,
+                    "price": "0",
+                },
+                "taxonomy": {},
+                "schema_match": {},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        render_workflow(model)
+    except FileNotFoundError as exc:
+        assert str(exc) == f"Missing LLM output: {tmp_path / 'work' / model / 'llm_output.json'}"
+    else:
+        raise AssertionError("Expected FileNotFoundError")
+
+    metadata_path = tmp_path / "work" / model / "render.run.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    assert metadata["run"]["status"] == "failed"
+    assert metadata["run"]["error_code"] == "FileNotFoundError"
+    assert "Missing LLM output" in metadata["run"]["error_detail"]

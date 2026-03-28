@@ -1,7 +1,62 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M15 completed. Next active milestone: M16 — write structured run metadata alongside current files.
+M16 completed. Next active milestone: M17 — make CLI/workflow emit metadata.
+
+## M16 — write structured run metadata alongside current files
+
+Goal:
+- emit structured metadata sidecar files for the current prepare and render workflow stages without changing existing artifact contents or runtime semantics
+
+Files created:
+- `scrapper/electronet_single_import/services/metadata.py`
+
+Files edited:
+- `scrapper/electronet_single_import/workflow.py`
+- `scrapper/electronet_single_import/tests/test_workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Metadata files emitted by stage:
+- `work/{model}/prepare.run.json`
+- `work/{model}/render.run.json`
+
+Changes:
+- added metadata serialization and writing helpers in `scrapper/electronet_single_import/services/metadata.py`
+- used the M15 run contract models as the metadata source shape
+- wrote prepare metadata after prompt artifacts are emitted and render metadata after candidate artifacts are emitted
+- added best-effort failed-run metadata emission when prepare or render raise after the model work directory is known
+- kept existing workflow artifact filenames, locations, and CLI output formatting unchanged
+- updated `PLAN.md` to mark M16 complete and note metadata emission
+
+Commands run:
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/cli.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `python -m compileall scrapper/electronet_single_import`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py` from `scrapper/` passed
+- `python -m pytest -q` from `scrapper/` returned `78 passed, 2 failed`
+- unchanged failing tests:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- `git status --short` confirmed the expected M16 file changes
+
+Risks:
+- no new M16 failures were introduced; the only remaining failures are the pre-existing manufacturer enrichment tests
+- the full-suite pass count increased from `76` to `78` because M16 added two focused workflow metadata tests while keeping the same two known failing tests
+
+Deferred:
+- CLI-facing metadata output changes remain deferred to M17
+- service-layer wrappers and routing remain deferred to later milestones
+- no metadata is emitted for failures that occur before a model work directory can be determined
+  - this preserves current runtime behavior while keeping metadata writing best-effort
 
 ## M15 — define run contract
 
