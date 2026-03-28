@@ -3,15 +3,13 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from urllib.parse import urlparse
 
-from .full_run import FAIL_MESSAGE, _select_skroutz_image_backed_sections
+from .input_validation import FAIL_MESSAGE, validate_input
 from .models import CLIInput
 from .services.metadata import maybe_write_run_metadata
 from .services.models import FullRunRequest, RunArtifacts, RunStatus, RunType
 from .services.errors import ServiceError
 from .services.run_service import run_product
-from .source_detection import validate_url_scope
 from .utils import utcnow_iso
 
 
@@ -26,29 +24,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--price", default=0)
     parser.add_argument("--out", default="out")
     return parser
-
-
-def validate_input(args: argparse.Namespace) -> CLIInput:
-    model = str(args.model).strip()
-    if not model.isdigit() or len(model) != 6:
-        raise ValueError(FAIL_MESSAGE)
-    parsed = urlparse(args.url)
-    if parsed.scheme not in {"http", "https"}:
-        raise ValueError("Input URL must be an Electronet, Skroutz, or supported manufacturer product URL")
-    source, scope_ok, _scope_reason = validate_url_scope(args.url)
-    if not scope_ok:
-        raise ValueError("Input URL must be an Electronet product URL, a Skroutz product URL, or a supported manufacturer product URL")
-    return CLIInput(
-        model=model,
-        url=args.url.strip(),
-        photos=max(int(args.photos), 1),
-        sections=max(int(args.sections), 0),
-        skroutz_status=int(args.skroutz_status),
-        boxnow=int(args.boxnow),
-        price=args.price,
-        out=args.out,
-    )
-
 
 def run_cli_input(cli: CLIInput):
     return run_product(

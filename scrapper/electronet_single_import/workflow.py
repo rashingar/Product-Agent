@@ -6,9 +6,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from .cli import FAIL_MESSAGE, validate_input
 from .csv_writer import write_csv_row
 from .full_run import execute_full_run
+from .input_validation import FAIL_MESSAGE, validate_input
 from .llm_contract import build_llm_context, render_prompt, validate_llm_output
 from .mapping import build_row
 from .models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution

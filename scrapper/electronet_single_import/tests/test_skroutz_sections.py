@@ -6,8 +6,8 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from electronet_single_import.cli import _select_skroutz_image_backed_sections
 from electronet_single_import.fetcher import ElectronetFetcher
+from electronet_single_import.full_run import _select_skroutz_image_backed_sections
 from electronet_single_import.models import CLIInput, FetchResult
 from electronet_single_import.skroutz_sections import extract_skroutz_section_window, is_placeholder_image_url, resolve_skroutz_section_image_url
 from electronet_single_import.workflow import prepare_workflow, render_workflow

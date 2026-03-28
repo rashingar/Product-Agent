@@ -8,6 +8,7 @@ from .deterministic_fields import effective_spec_sections as build_effective_spe
 from .csv_writer import write_csv_row
 from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
+from .input_validation import FAIL_MESSAGE
 from .mapping import build_row
 from .manufacturer_enrichment import enrich_source_from_manufacturer_docs
 from .models import CLIInput, GalleryImage
@@ -23,7 +24,6 @@ from .taxonomy import TaxonomyResolver
 from .repo_paths import SCHEMA_LIBRARY_PATH
 from .utils import ensure_directory, write_json, write_text
 
-FAIL_MESSAGE = "Generation failed, provide 6-digit model"
 SKROUTZ_V1_MPN_HINTS = {
     "344317": "CM5S1DE0",
 }

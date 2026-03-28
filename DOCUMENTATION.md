@@ -1,7 +1,77 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M19 completed. Next active milestone: M20 — define provider contract and registry.
+M19a completed. Next active milestone: M20 — define provider contract and registry.
+
+## M19a — remove remaining cross-layer imports after service routing
+
+Goal:
+- remove the remaining cross-layer imports between `cli.py`, `workflow.py`, and `full_run.py` without changing commands, flags, validation behavior, artifact paths, metadata filenames, or exit semantics
+
+Files created:
+- `scrapper/electronet_single_import/input_validation.py`
+
+Files edited:
+- `scrapper/electronet_single_import/cli.py`
+- `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `scrapper/electronet_single_import/workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- moved shared `FAIL_MESSAGE` and `validate_input(...)` into the neutral module `scrapper/electronet_single_import/input_validation.py`
+- updated `cli.py` to import validation from the neutral module and removed its unused import of `_select_skroutz_image_backed_sections` from `full_run.py`
+- updated `workflow.py` to import `FAIL_MESSAGE` and `validate_input(...)` from the neutral module instead of from `cli.py`
+- updated `full_run.py` to import `FAIL_MESSAGE` from the neutral module so it remains an execution module rather than a shared constants bucket
+- updated `test_skroutz_sections.py` to import `_select_skroutz_image_backed_sections` from its actual lower-layer owner, `full_run.py`
+- kept `execute_full_run(...)` in `full_run.py` and left service-layer contracts unchanged
+
+Cross-layer imports removed:
+- `scrapper/electronet_single_import/cli.py` no longer imports `FAIL_MESSAGE` or `_select_skroutz_image_backed_sections` from `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/workflow.py` no longer imports `FAIL_MESSAGE` or `validate_input(...)` from `scrapper/electronet_single_import/cli.py`
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content scrapper/electronet_single_import/cli.py`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/full_run.py`
+- `Get-Content scrapper/electronet_single_import/services/run_service.py`
+- `Get-Content scrapper/electronet_single_import/models.py`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "FAIL_MESSAGE|validate_input|_select_skroutz_image_backed_sections|execute_full_run|from \\.cli|from \\.full_run" scrapper/electronet_single_import -g "*.py"`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_services.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_sections.py`
+- `Get-Content scrapper/electronet_single_import/tests/test_skroutz_integration.py`
+- `rg -n "from electronet_single_import\\.cli import _select_skroutz_image_backed_sections|from \\.full_run import FAIL_MESSAGE|from \\.cli import FAIL_MESSAGE, validate_input" scrapper/electronet_single_import/tests scrapper/electronet_single_import -g "*.py"`
+- `rg -n "Current milestone|M19 —|M20|M19a" PLAN.md DOCUMENTATION.md`
+- `Get-Content PLAN.md -TotalCount 80`
+- `Get-Content DOCUMENTATION.md -TotalCount 120`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py electronet_single_import/tests/test_services.py electronet_single_import/tests/test_skroutz_integration.py electronet_single_import/tests/test_skroutz_sections.py` from `scrapper/`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py electronet_single_import/tests/test_services.py electronet_single_import/tests/test_skroutz_integration.py electronet_single_import/tests/test_skroutz_sections.py` from `scrapper/` passed with `29 passed`
+- `python -m pytest -q` from `scrapper/` returned `87 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- `git status --short` showed only the expected M19a edits plus the new neutral helper module
+
+Risks:
+- the repo still carries the two pre-existing manufacturer enrichment failures
+- `cli.py` still re-exports `validate_input(...)` by import for backward-compatible test and caller access, but the implementation now lives in the neutral module rather than in the CLI layer
+
+Deferred:
+- no service-layer files were changed because the boundary cleanup did not require contract adjustments
+- no provider abstraction work was started; that remains M20
 
 ## M19 — route CLI through the service layer
 
