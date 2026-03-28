@@ -228,6 +228,115 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
     assert result["report"]["identity_checks"]["source"] == "electronet"
 
 
+def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_path: Path) -> None:
+    from electronet_single_import import full_run as run_module
+    from electronet_single_import.models import FetchResult
+
+    cli = CLIInput(
+        model="341490",
+        url="https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html",
+        photos=2,
+        sections=0,
+        skroutz_status=0,
+        boxnow=1,
+        price="19",
+        out=str(tmp_path),
+    )
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            source_name="skroutz",
+            page_type="product",
+            url=cli.url,
+            canonical_url=cli.url,
+            product_code=cli.model,
+            brand="Estia",
+            mpn="06-24567",
+            name="Estia 06-24567",
+            breadcrumbs=["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Συσκευές Κουζίνας", "Βραστήρες"],
+            taxonomy_source_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::Συσκευές Κουζίνας///Βραστήρες",
+            taxonomy_match_type="exact_category",
+            taxonomy_rule_id="family:kettle",
+            price_text="19,00 €",
+            price_value=19.0,
+            key_specs=[SpecItem(label="Ισχύς", value="2200 W")],
+            spec_sections=[SpecSection(section="Χαρακτηριστικά", items=[SpecItem(label="Ισχύς", value="2200 W")])],
+        ),
+    )
+    calls = {"playwright": 0, "parser": 0}
+
+    class DummyFetcher:
+        def fetch_httpx(self, _url):
+            raise AssertionError("Default Skroutz flow should not fall back to httpx when playwright succeeds")
+
+        def fetch_playwright(self, _url):
+            calls["playwright"] += 1
+            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
+
+        def download_gallery_images(self, **_kwargs):
+            return [], [], []
+
+        def download_besco_images(self, **_kwargs):
+            return [], [], []
+
+    class DummyResolver:
+        def resolve(self, **_kwargs):
+            return TaxonomyResolution(parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", leaf_category="Συσκευές Κουζίνας", sub_category="Βραστήρες"), []
+
+    class DummySchemaMatcher:
+        known_section_titles = set()
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def match(self, *_args, **_kwargs):
+            return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
+
+    class DummySkroutzParser:
+        def parse(self, _html, _url, fallback_used=False):
+            assert fallback_used is True
+            calls["parser"] += 1
+            return parsed
+
+    class UnexpectedElectronetProvider:
+        def __init__(self, **_kwargs):
+            raise AssertionError("Electronet provider should not be selected for Skroutz by default")
+
+    monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
+    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("skroutz", True, "skroutz_product_path"))
+    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
+    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: DummySkroutzParser())
+    monkeypatch.setattr(run_module, "ElectronetProvider", UnexpectedElectronetProvider)
+    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
+    monkeypatch.setattr(
+        run_module,
+        "enrich_source_from_manufacturer_docs",
+        lambda **_kwargs: {
+            "applied": False,
+            "provider": "",
+            "providers_considered": [],
+            "matched_providers": [],
+            "documents": [],
+            "documents_discovered": 0,
+            "documents_parsed": 0,
+            "warnings": [],
+            "section_count": 0,
+            "field_count": 0,
+            "hero_summary_applied": False,
+            "presentation_applied": False,
+            "presentation_block_count": 0,
+            "fallback_reason": "test_stub",
+        },
+    )
+
+    result = run_module.execute_full_run(cli)
+
+    assert calls == {"playwright": 1, "parser": 1}
+    assert result["report"]["source"] == "skroutz"
+    assert result["report"]["fetch_mode"] == "playwright"
+    assert result["fetch"].method == "playwright"
+
+
 def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
     from electronet_single_import import full_run as run_module
     from electronet_single_import.models import FetchResult

@@ -16,7 +16,7 @@ from .normalize import normalize_for_match
 from .parser_product_electronet import ElectronetProductParser
 from .parser_product_manufacturer import ManufacturerProductParser
 from .parser_product_skroutz import SkroutzProductParser
-from .providers.base import ProviderError
+from .providers.base import ProductProvider, ProviderError
 from .providers.electronet_provider import ElectronetProvider
 from .providers.models import ProviderInputIdentity, ProviderResult
 from .schema_matcher import SchemaMatcher
@@ -93,6 +93,19 @@ def _provider_result_to_parsed(provider_result: ProviderResult) -> ParsedProduct
     )
 
 
+def _resolve_provider_for_source(
+    *,
+    source: str,
+    cli: CLIInput,
+    fetcher: ElectronetFetcher,
+    electronet_parser: ElectronetProductParser,
+) -> ProductProvider | None:
+    del cli
+    if source == "electronet":
+        return ElectronetProvider(fetcher=fetcher, parser=electronet_parser)
+    return None
+
+
 def execute_full_run(cli: CLIInput) -> dict[str, Any]:
     source = detect_source(cli.url)
     schema_matcher = SchemaMatcher(str(SCHEMA_LIBRARY_PATH))
@@ -100,9 +113,14 @@ def execute_full_run(cli: CLIInput) -> dict[str, Any]:
     skroutz_parser = SkroutzProductParser()
     manufacturer_parser = ManufacturerProductParser()
     fetcher = ElectronetFetcher()
+    provider = _resolve_provider_for_source(
+        source=source,
+        cli=cli,
+        fetcher=fetcher,
+        electronet_parser=electronet_parser,
+    )
 
-    if source == "electronet":
-        provider = ElectronetProvider(fetcher=fetcher, parser=electronet_parser)
+    if provider is not None:
         identity = ProviderInputIdentity(model=cli.model, url=cli.url)
         try:
             provider_result = provider.normalize(provider.fetch_snapshot(identity), identity)

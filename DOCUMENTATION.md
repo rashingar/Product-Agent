@@ -1,7 +1,70 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M21 completed. Next active milestone: M22 — add provider selection and one second provider proof.
+M22 completed. The provider abstraction is now proven with a minimal private selection seam plus a deterministic fixture-backed second provider, while default production Skroutz routing remains unchanged.
+
+## M22 — add provider selection and one second provider proof
+
+Goal:
+- add the smallest private provider-selection seam needed to prove a second provider behind the M20 contract without changing CLI/workflow behavior, source detection, default production Skroutz routing, artifact locations, or validation semantics
+- keep Electronet as the only production-selected provider and prove `SkroutzProvider` only through deterministic test injection
+
+Files created:
+- `scrapper/electronet_single_import/providers/skroutz_provider.py`
+- `scrapper/electronet_single_import/tests/test_provider_selection.py`
+
+Files edited:
+- `scrapper/electronet_single_import/full_run.py`
+- `scrapper/electronet_single_import/providers/__init__.py`
+- `scrapper/electronet_single_import/tests/test_workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- added `SkroutzProvider` as a fixture-only provider adapter with constructor-injected fixture HTML paths only:
+  - no built-in production fixture URL map
+  - no live HTTP fetching
+  - no Playwright fetching
+- added a private `_resolve_provider_for_source(...)` helper in `scrapper/electronet_single_import/full_run.py`
+- kept default production routing unchanged:
+  - `electronet` resolves to `ElectronetProvider`
+  - `skroutz` resolves to no provider by default and continues through the legacy Skroutz branch
+  - manufacturer handling remains on the existing non-provider branch
+- generalized the existing provider execution block in `full_run.py` so any resolved provider still converts back into the current `FetchResult` and `ParsedProduct` runtime shapes before downstream processing
+- exported `SkroutzProvider` from `scrapper/electronet_single_import/providers/__init__.py`
+- added focused provider tests that cover:
+  - default resolver behavior selecting Electronet only
+  - `SkroutzProvider.fetch_snapshot()` reading deterministic fixture HTML
+  - `SkroutzProvider.normalize()` returning the expected provider/runtime shapes
+  - test-only injection of `SkroutzProvider` through the private resolver seam
+- added a workflow regression test proving Skroutz still uses the legacy runtime path by default when no override is applied
+- did not change `cli.py`, `workflow.py`, `source_detection.py`, `providers/registry.py`, `providers/base.py`, `providers/models.py`, dependency files, README files, `AGENTS.md`, `RULES.md`, or `IMPLEMENT.md`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import`
+  - passed
+- `python -m pytest -q electronet_single_import/tests/test_provider_selection.py`
+  - passed, `4 passed`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py`
+  - passed, `12 passed`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_integration.py`
+  - passed, `7 passed`
+- `python -m pytest -q electronet_single_import/tests/test_skroutz_sections.py`
+  - passed, `5 passed`
+- `python -m pytest -q`
+  - expected baseline only, `92 passed` and `2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+
+Risks:
+- the second-provider proof is intentionally test-only for Skroutz routing; production Skroutz execution still depends on the legacy branch until a later milestone adds a live provider path
+- the repo still carries the two pre-existing manufacturer enrichment failures
+
+Deferred:
+- production Skroutz provider routing remains deferred
+- broader provider routing for manufacturer sources remains deferred
+- registry-driven runtime routing remains deferred
 
 ## M21 — extract the current primary source into a provider adapter
 

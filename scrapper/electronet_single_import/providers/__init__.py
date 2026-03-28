@@ -11,6 +11,7 @@ from .models import (
     ProviderSnapshotKind,
     ProviderStage,
 )
+from .skroutz_provider import SkroutzProvider
 from .registry import ProviderRegistry
 
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "ProviderResult",
     "ProviderSnapshot",
     "ProviderSnapshotKind",
+    "SkroutzProvider",
     "ProviderStage",
 ]
