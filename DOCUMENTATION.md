@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M1 completed. M2 is the next planned milestone.
+M2 completed. M3 is the next planned milestone.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -37,18 +37,29 @@ Notes:
 - empty directories alone would not appear in Git status without `.gitkeep`
 
 ### M2 — Repo cleanup audit
-Status: pending
+Status: completed
 Goal:
 - classify root files and cleanup candidates
 
 Changes:
-- none yet
+- created `docs/audits/repo_cleanup_audit.md`
+- classified every current root-level file into `keep in root`, `move later after path centralization`, `archive as legacy`, or `uncertain`
+- explicitly classified `schemas/compact_response.schema.json` as `move later after path centralization`
+- explicitly classified `docs/superpowers/specs/2026-03-22-pipeline-optimization-design.md` and `work/IMPLEMENTATION_CHECKPOINT.md` as safe `move now` candidates
+- documented evidence for non-obvious classifications from runtime path callsites and current repo docs
+- updated `PLAN.md` to mark M2 complete
 
 Validation:
-- not run
+- root inventory and candidate existence checks completed
+- `rg` evidence sweep completed for every explicitly named file or candidate
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
 
 Notes:
-- none
+- no requested classification was downgraded to `uncertain` due to contradictory live evidence in this pass
+- `requirements.txt` remains `uncertain` and is intentionally postponed to the dependency audit milestone
+- scraper smoke validation was intentionally skipped because pathing and runtime behavior were unchanged
+- no files were moved or deleted in this milestone
 
 ### M3 — Path centralization
 Status: pending
@@ -88,12 +99,22 @@ Status: pending
 - post-creation filesystem check for approved target paths, `.gitkeep` presence, and empty-directory state
 - `python -m pytest -q` from `scrapper/`
 - `git status --short`
+- `Get-ChildItem -Force -File` at repo root
+- `Get-ChildItem docs/audits`
+- `Get-ChildItem docs/superpowers/specs,work`
+- `rg` sweep for each explicitly named file or candidate to capture runtime code references, docs or planning references, or absence of references
+- `Get-Content scrapper/electronet_single_import/utils.py`
+- `Get-Content RULES.md`
+- `Get-Content AGENTS.md`
+- `Get-Content README.md`
+- `Get-Content scrapper/README.md`
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
 - dependency file ownership is currently unclear
 - docs may drift during file moves if not updated in the same commit
 - baseline pytest failures remain in `electronet_single_import/tests/test_manufacturer_enrichment.py`
+- `schema_index.csv` and `taxonomy_mapping_template.csv` have weaker direct runtime evidence than the hardcoded support assets
 
 ## Next approved action
-Run M2 only.
+Run M3 only.

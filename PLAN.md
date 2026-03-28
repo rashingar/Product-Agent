@@ -85,7 +85,10 @@ Created:
 - `resources/templates/`
 
 ### M2 — Audit current layout
-Create `docs/audits/repo_cleanup_audit.md` and classify all root files.
+Status: completed
+Evidence:
+- Created `docs/audits/repo_cleanup_audit.md` with one-row-per-root-file classifications and explicit non-root cleanup candidates.
+- Left `requirements.txt` as `uncertain` pending the later dependency audit because live evidence does not yet prove repo-root ownership.
 
 ### M3 — Centralize support-file lookup
 Add `scrapper/electronet_single_import/repo_paths.py` and route all support-file access through it.
