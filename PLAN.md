@@ -59,7 +59,7 @@ Phase 2 milestones:
 - M18 — add service layer models/errors/wrappers (completed; thin internal prepare/render wrappers and full-run composition now live under `scrapper/electronet_single_import/services/` without rerouting CLI/workflow behavior or adding new runtime metadata files)
 - M19 — route CLI through the service layer (completed; standalone `cli.py` is now a thin adapter over the full-run service, workflow `prepare`/`render` entrypoints call the stage service wrappers, and a lower-layer full-run executor was extracted so services no longer depend on `cli.py`)
 - M19a — remove remaining cross-layer imports after service routing (completed; shared input validation now lives in a neutral module, `cli.py` no longer imports non-execution helpers from `full_run.py`, and `workflow.py` no longer imports from `cli.py` without changing runtime behavior)
-- M20 — define provider contract and registry
+- M20 — define provider contract and registry (completed; standalone typed provider models, base contract, and registry now exist under `scrapper/electronet_single_import/providers/` without wiring runtime behavior or extracting current adapters)
 - M21 — extract the current primary source into a provider adapter
 - M22 — add provider selection and one second provider proof
 

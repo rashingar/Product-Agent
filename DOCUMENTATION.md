@@ -1,7 +1,88 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M19a completed. Next active milestone: M20 — define provider contract and registry.
+M20 completed. Next active milestone: M21 — extract the current primary source into a provider adapter.
+
+## M20 — define provider contract and registry
+
+Goal:
+- define a narrow internal provider abstraction and registration seam for future manufacturer, vendor-site, and fixture-backed adapters without changing current runtime behavior, source detection, workflow wiring, or CLI entrypoints
+
+Files created:
+- `scrapper/electronet_single_import/providers/__init__.py`
+- `scrapper/electronet_single_import/providers/base.py`
+- `scrapper/electronet_single_import/providers/models.py`
+- `scrapper/electronet_single_import/providers/registry.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Contract elements added:
+- `ProviderDefinition` with provider identifier, emitted `source_name`, provider kind, and capability declaration
+- `ProviderInputIdentity` with typed optional identity fields for `model`, `url`, `sku`, `brand`, `vendor_code`, `mpn`, and extensible extras
+- `ProviderSnapshot` with fetch/snapshot fields for requested and final URL, snapshot kind, content type, status, headers, and text/byte payloads
+- `ProviderResult` with normalized product output anchored to current `SourceProductData` plus provenance, field diagnostics, missing-field tracking, warnings, and overall confidence
+- `ProviderErrorInfo` and `ProviderError` with structured provider error code, stage, retryability, and details
+- `ProductProvider` abstract base contract with `fetch_snapshot(...)` and `normalize(...)`
+- `ProviderRegistry` with explicit provider registration, lookup, required lookup, and definition listing
+
+Changes:
+- added a new standalone `scrapper/electronet_single_import/providers/` package so the provider seam exists without touching current execution modules
+- kept the normalized provider output aligned to the current parser/runtime shape by reusing `SourceProductData` and `FieldDiagnostic` instead of inventing a second normalization model
+- separated provider type from runtime source naming via `ProviderKind` and `ProviderDefinition.source_name`
+- made the contract broad enough for future vendor-site, manufacturer-site, and fixture-backed adapters through explicit kind, capability, identity, and snapshot enums
+- added structured provider error metadata for identity, fetch, normalize, and registry stages
+- added a simple in-memory registry for provider registration and lookup only
+- did not add any concrete provider adapters
+- did not route source detection, `full_run.py`, CLI entrypoints, workflow entrypoints, or the service layer through the new provider package
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scrapper/electronet_single_import/source_detection.py`
+- `Get-Content scrapper/electronet_single_import/full_run.py`
+- `Get-Content scrapper/electronet_single_import/input_validation.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `Get-Content scrapper/electronet_single_import/services/errors.py`
+- `Get-Content scrapper/electronet_single_import/services/run_service.py`
+- `Get-ChildItem scrapper/electronet_single_import -File | Select-Object -ExpandProperty Name`
+- `rg -n "class Parsed|class .*Source|@dataclass|provenance|confidence|page_type|source_name|critical_missing|field_diagnostics|spec_sections|gallery_images|presentation_source_html|manufacturer_enrichment" scrapper/electronet_single_import -g "*.py"`
+- `Get-Content scrapper/electronet_single_import/models.py`
+- `Get-Content scrapper/electronet_single_import/manufacturer_enrichment.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_electronet.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_skroutz.py`
+- `Get-Content scrapper/electronet_single_import/parser_product_manufacturer.py`
+- `Get-Content scrapper/electronet_single_import/providers/models.py`
+- `Get-Content scrapper/electronet_single_import/providers/base.py`
+- `Get-Content scrapper/electronet_single_import/providers/registry.py`
+- `Get-Content scrapper/electronet_single_import/providers/__init__.py`
+- `rg -n "Current milestone|M20|Phase 2 milestones" PLAN.md DOCUMENTATION.md`
+- `Get-Content PLAN.md | Select-Object -First 90`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 80`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q` from `scrapper/` returned `87 passed, 2 failed`
+- the only accepted failing tests remained:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- no new failures were introduced by M20
+
+Risks:
+- the new provider contract is intentionally unwired, so it still depends on later milestones to prove adapter extraction and runtime selection
+- the repo still carries the two pre-existing manufacturer enrichment failures
+
+Deferred:
+- extracting the current Electronet/Skroutz/manufacturer logic into concrete provider adapters remains M21+
+- wiring provider selection into runtime behavior remains M22
+- provider-contract tests were intentionally deferred in M20 to keep the milestone inside the approved file scope and because the package is currently import-safe and unused by runtime code
 
 ## M19a — remove remaining cross-layer imports after service routing
 
