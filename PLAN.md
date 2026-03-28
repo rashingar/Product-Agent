@@ -114,7 +114,10 @@ Evidence:
 - Created `docs/runbooks/repo-layout.md` as the repo-specific layout guide for future operators and Codex runs.
 
 ### M8 — Audit dependency strategy
-Inspect root vs scraper requirements before any dependency-file move.
+Status: completed
+Evidence:
+- Recorded `docs/audits/dependency_audit.md` with a side-by-side comparison of `requirements.txt` and `scrapper/requirements.txt`.
+- Kept dependency ownership audit-only in M8 and deferred any merge, move, or modernization work pending explicit follow-up approval.
 
 ### M9 — Final health pass
 Create `docs/audits/post_cleanup_health_pass.md`.

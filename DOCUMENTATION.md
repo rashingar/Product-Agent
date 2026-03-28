@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M7 completed. M8 is the next planned milestone.
+M8 completed. M9 is the next planned milestone.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -141,7 +141,7 @@ Status: completed
 Status: completed
 
 ### M8 — Dependency audit
-Status: pending
+Status: completed
 
 ### M9 — Final health pass
 Status: pending
@@ -196,6 +196,28 @@ Notes:
 - `AGENTS.md`, `RULES.md`, and runtime Python files were intentionally left unchanged because no broken active layout reference was found in them during M7
 - scraper smoke validation was intentionally skipped because this was a docs-only milestone
 
+## M8 detail
+Goal:
+- audit dependency ownership for `requirements.txt` and `scrapper/requirements.txt` without changing dependency files or runtime behavior
+
+Changes:
+- created `docs/audits/dependency_audit.md`
+- recorded a side-by-side comparison of the two dependency files
+- documented current live usage evidence from install instructions, control docs, and import scans
+- updated `PLAN.md` to mark M8 completed with an audit-only result
+
+Validation:
+- file inspection completed for `requirements.txt` and `scrapper/requirements.txt`
+- `rg` captured current references to dependency files and install commands across repo docs
+- live import scans confirmed scraper/runtime imports for `httpx`, `playwright`, `beautifulsoup4`, `pypdf`, `PIL`, and `pillow_avif`, while no live `requests` import was found
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- the audit concludes that `scrapper/requirements.txt` is the only currently documented install target, but not yet the only file that appears required by live evidence
+- dependency ownership remains audit-only and no dependency file was modified
+- scraper smoke validation was intentionally skipped because this milestone did not change runtime behavior
+
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
@@ -233,6 +255,10 @@ Notes:
 - `Get-Content README.md`
 - existence check for `docs/runbooks/repo-layout.md`
 - `rg` over repo docs for pre-M6 support-asset paths and post-M4 moved doc paths
+- `Get-Content requirements.txt`
+- `Get-Content scrapper/requirements.txt`
+- `rg` over repo docs for dependency-file references and install/setup commands
+- live import scans for packages declared in either dependency file
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
@@ -243,6 +269,7 @@ Notes:
 - `workflow.py` still contains out-of-scope `REPO_ROOT` output-root assumptions for `work/` and `products/`
 - some tests still use hardcoded absolute repo paths and were intentionally deferred
 - historical docs and archived legacy files intentionally retain some old support-asset basenames as prior-state evidence
+- dependency ownership remains mixed because current install guidance points to `scrapper/requirements.txt`, while Pillow-related imports still map only to root `requirements.txt`
 
 ## Next approved action
-Run M8 only.
+Run M9 only.
