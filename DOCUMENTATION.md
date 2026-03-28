@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M9 completed. No further cleanup milestone is scheduled.
+M10 completed. No further cleanup milestone is scheduled.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -239,6 +239,33 @@ Notes:
 - no runtime code was edited
 - scraper smoke validation was intentionally skipped because this was an audit-only milestone
 
+## M10 detail
+Goal:
+- consolidate dependency ownership to one canonical repo-root `requirements.txt` without changing runtime behavior
+
+Changes:
+- updated repo-root `requirements.txt` to the verified canonical dependency union:
+  - kept the scraper pins for `httpx`, `beautifulsoup4`, `lxml`, `playwright`, `pytest`, and `pypdf`
+  - retained `pillow` and `pillow-avif-plugin` because live scraper imports still require them
+  - removed `requests` because no live import evidence remained and clean-environment verification succeeded without it
+- removed `scrapper/requirements.txt` after clean-environment verification succeeded
+- updated `scrapper/README.md` so dependency installation now points to the canonical repo-root `requirements.txt`
+- updated `PLAN.md` to mark M10 completed
+
+Validation:
+- captured the pre-edit dependency overlap between root and scraper files
+- created a clean temporary virtual environment outside the repo
+- installed dependencies from repo-root `requirements.txt` only
+- import checks passed for `httpx`, `playwright`, `bs4`, `pypdf`, `PIL`, and `pillow_avif`
+- full `python -m pytest -q` from `scrapper/` under the clean environment remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+- active install guidance no longer depends on `scrapper/requirements.txt`
+
+Notes:
+- runtime behavior remained unchanged because no runtime code was modified
+- remaining `scrapper/requirements.txt` mentions are preserved in audit/history docs as prior-state evidence
+- the temporary verification environment was created outside the repo and removed after validation
+
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
@@ -283,18 +310,23 @@ Notes:
 - root directory inventory
 - recursive search for remaining `.gitkeep` files
 - targeted `rg` for pre-M4, M5, and M6 paths and known deferred runtime/path issues
+- dependency overlap comparison between root and scraper requirement files
+- clean temporary virtual environment creation outside the repo
+- dependency install from canonical repo-root `requirements.txt`
+- clean-environment import validation for `httpx`, `playwright`, `bs4`, `pypdf`, `PIL`, and `pillow_avif`
+- full `python -m pytest -q` from `scrapper/` under the clean environment
+- `rg` for `scrapper/requirements.txt` after consolidation
+- temporary verification-environment removal
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
-- dependency file ownership is currently unclear
 - docs may drift during file moves if not updated in the same commit
 - baseline pytest failures remain in `electronet_single_import/tests/test_manufacturer_enrichment.py`
 - `schema_index.csv` and `taxonomy_mapping_template.csv` have weaker direct runtime evidence than the hardcoded support assets
 - `workflow.py` still contains out-of-scope `REPO_ROOT` output-root assumptions for `work/` and `products/`
 - some tests still use hardcoded absolute repo paths and were intentionally deferred
 - historical docs and archived legacy files intentionally retain some old support-asset basenames as prior-state evidence
-- dependency ownership remains mixed because current install guidance points to `scrapper/requirements.txt`, while Pillow-related imports still map only to root `requirements.txt`
 - redundant `.gitkeep` files remain in non-empty `docs/audits/`, `docs/checkpoints/`, `docs/runbooks/`, and `docs/specs/` directories
 
 ## Next approved action
-No cleanup follow-up is scheduled by default. If approved, open a narrowly scoped dependency-ownership follow-up next.
+No cleanup follow-up is scheduled by default. If approved, open a narrowly scoped follow-up for deferred path assumptions, test path cleanup, or redundant `.gitkeep` removal.

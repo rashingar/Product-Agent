@@ -38,7 +38,7 @@ This file is the source of truth for the staged cleanup and reorganization of th
 - `PLAN.md`
 - `IMPLEMENT.md`
 - `DOCUMENTATION.md`
-- `requirements.txt` (until audited)
+- `requirements.txt`
 - `products/`
 - `work/`
 - `scrapper/`
@@ -124,6 +124,12 @@ Status: completed
 Evidence:
 - Recorded `docs/audits/post_cleanup_health_pass.md` with the final repo-health summary, remaining issues, safe follow-up items, risky postponed items, and the recommended next action.
 - Kept M9 audit-only with no file moves, dependency changes, or runtime-code changes.
+
+### M10 β€” Consolidate canonical root requirements
+Status: completed
+Evidence:
+- Promoted repo-root `requirements.txt` to the canonical dependency file using the verified live-needed union of root and scraper dependencies.
+- Removed `scrapper/requirements.txt` only after clean-environment install, import checks, and full pytest validation succeeded against the canonical root file.
 
 ## Validation rules
 After each milestone:

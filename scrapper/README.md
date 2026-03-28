@@ -51,10 +51,12 @@ When truthful source presentation cannot be built safely, `description` is left 
 ## Install
 
 ```bash
+cd ..
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python -m playwright install chromium
+cd scrapper
 ```
 
 ## CLI
