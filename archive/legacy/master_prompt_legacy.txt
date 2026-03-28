@@ -26,7 +26,7 @@ SOURCE WIRING / RESOLUTION (MANDATORY)
   - sentinel completeness check
 - Use `schema_index.csv` only as a helper index to locate the likely schema entry faster.
   - Never use `schema_index.csv` as the schema source of truth.
-- Use `RULES_legacy.md` + `product_import_template.csv` as the source of truth for:
+- Use `archive/legacy/RULES_legacy.md` + `product_import_template.csv` as the source of truth for:
   - CSV field mapping
   - exact header order
   - defaults
@@ -70,9 +70,9 @@ CSV EXPORT RULES (MANDATORY)
 - After every successful generation, also generate `{model}.csv`
 - Constraint: it must be a local repo file path under `products/`
 - Use `product_import_template.csv` as the exact header source and order
-- All CSV defaults are defined only in `RULES_legacy.md`
+- All CSV defaults are defined only in `archive/legacy/RULES_legacy.md`
 - Follow the detailed CSV mapping/spec from the attached CSV rules `.md` source
-- The CSV `category` field must follow the exact serialized OpenCart format defined in `RULES_legacy.md`.
+- The CSV `category` field must follow the exact serialized OpenCart format defined in `archive/legacy/RULES_legacy.md`.
 - If `boxnow=1`, append `:::Μικροσυσκευές` to the final serialized CSV `category` field after canonical category serialization.
 
 CSV PRE-FINAL VALIDATION (MANDATORY)
@@ -370,7 +370,7 @@ TECHNICAL SPECS SCHEMA NOTE
    - Do NOT output partial category paths.
    - Output formatting for Section 9 is defined only by the `RENDERING FORMAT RULES (Sections 0–9)` block below.
    - This section controls only the visible category output in the final response.
-   - CSV category serialization for import is governed separately by `RULES_legacy.md`.
+   - CSV category serialization for import is governed separately by `archive/legacy/RULES_legacy.md`.
 
 10) 🔹 **Πηγές**
    - Output plain source URLs only

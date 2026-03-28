@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M4 completed. M5 is the next planned milestone.
+M5 completed. M6 is the next planned milestone.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -111,7 +111,28 @@ Notes:
 - the remaining old-path mentions are intentionally preserved in the command log as historical execution records
 
 ### M5 — Legacy archive move
-Status: pending
+Status: completed
+Goal:
+- archive the two approved historical reference files without changing runtime behavior
+
+Changes:
+- moved `RULES_legacy.md` to `archive/legacy/RULES_legacy.md`
+- moved `master_prompt_legacy.txt` to `archive/legacy/master_prompt_legacy.txt`
+- removed `archive/legacy/.gitkeep` because the archive directory now contains real files
+- updated path references in `PLAN.md`, `DOCUMENTATION.md`, `RULES.md`, `docs/audits/repo_cleanup_audit.md`, and `archive/legacy/master_prompt_legacy.txt`
+
+Validation:
+- pre-move checks confirmed both source files existed and both archive destinations were absent
+- post-move checks confirmed the old source files no longer exist and the new archive paths do exist
+- `rg` for the old paths returned no remaining references outside intentional historical command-log mentions
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- no runtime code was edited
+- no active support assets were moved
+- scraper smoke validation was intentionally skipped because no runtime pathing or behavior changed
+- no additional files were archived in this milestone
 
 ### M6 — Support asset relocation into `resources/`
 Status: pending
@@ -149,6 +170,11 @@ Status: pending
 - `Move-Item` for `docs/superpowers/specs/2026-03-22-pipeline-optimization-design.md` to `docs/specs/2026-03-22-pipeline-optimization-design.md`
 - `Move-Item` for `work/IMPLEMENTATION_CHECKPOINT.md` to `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md`
 - `rg` for old and new M4 paths before and after the move
+- source/destination existence checks for `RULES_legacy.md` and `master_prompt_legacy.txt`
+- `Move-Item` for `RULES_legacy.md` to `archive/legacy/RULES_legacy.md`
+- `Move-Item` for `master_prompt_legacy.txt` to `archive/legacy/master_prompt_legacy.txt`
+- `Remove-Item` for `archive/legacy/.gitkeep` after the archive directory became non-empty
+- `rg` for old and new M5 legacy paths before and after the move
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
@@ -160,4 +186,4 @@ Status: pending
 - some tests still use hardcoded absolute repo paths and were intentionally deferred
 
 ## Next approved action
-Run M5 only.
+Run M6 only.

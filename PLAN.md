@@ -63,8 +63,7 @@ This file is the source of truth for the staged cleanup and reorganization of th
 - none; M4 completed the two previously approved safe documentation/planning moves
 
 ### Archive
-- `RULES_legacy.md`
-- `master_prompt_legacy.txt`
+- none; M5 archived the two approved legacy files under `archive/legacy/`
 
 ## Planned milestones
 ### M1 — Create control files and cleanup directories
@@ -102,9 +101,10 @@ Evidence:
 - Moved the implementation checkpoint into `docs/checkpoints/IMPLEMENTATION_CHECKPOINT.md`.
 
 ### M5 — Archive legacy files
-Move:
-- `RULES_legacy.md`
-- `master_prompt_legacy.txt`
+Status: completed
+Evidence:
+- Moved `RULES_legacy.md` to `archive/legacy/RULES_legacy.md`.
+- Moved `master_prompt_legacy.txt` to `archive/legacy/master_prompt_legacy.txt`.
 
 ### M6 — Move shared support assets into `resources/`
 Move support files only after M3 is complete.

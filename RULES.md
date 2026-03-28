@@ -96,5 +96,5 @@ Render stage writes:
 ## Legacy Workflow
 
 The old script-driven flow is preserved only as historical reference:
-- `master_prompt_legacy.txt`
-- `RULES_legacy.md`
+- `archive/legacy/master_prompt_legacy.txt`
+- `archive/legacy/RULES_legacy.md`

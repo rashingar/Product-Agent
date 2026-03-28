@@ -23,14 +23,14 @@ No material contradiction was found between the requested classifications and th
 | `IMPLEMENT.md` | keep in root | Repo control doc for standing execution rules. |
 | `MANUFACTURER_SOURCE_MAP.json` | move later after path centralization | Loaded from repo root in `scrapper/electronet_single_import/utils.py`; shared enrichment mapping. |
 | `master_prompt+.txt` | move later after path centralization | Named in `AGENTS.md`, `RULES.md`, and `README.md`; loaded from repo root in `scrapper/electronet_single_import/utils.py`. |
-| `master_prompt_legacy.txt` | archive as legacy | `RULES.md` marks the old script-driven workflow as historical only. |
+| `archive/legacy/master_prompt_legacy.txt` | archive as legacy | `RULES.md` marks the old script-driven workflow as historical only. |
 | `name_rules.json` | move later after path centralization | Loaded from repo root in `scrapper/electronet_single_import/utils.py`; shared naming-rules asset. |
 | `PLAN.md` | keep in root | Repo control doc and milestone source of truth. |
 | `product_import_template.csv` | move later after path centralization | Named in `RULES.md`, `README.md`, and `scrapper/README.md`; loaded from repo root in `scrapper/electronet_single_import/utils.py`. |
 | `README.md` | keep in root | Repo-level entry documentation for the current layout. |
 | `requirements.txt` | uncertain | Current evidence does not prove root ownership; `scrapper/README.md` installs from `scrapper/requirements.txt`, and dependency ownership is deferred to a later audit. |
 | `RULES.md` | keep in root | Repo-scoped runtime rules document. |
-| `RULES_legacy.md` | archive as legacy | `RULES.md` marks the old script-driven workflow as historical only. |
+| `archive/legacy/RULES_legacy.md` | archive as legacy | `RULES.md` marks the old script-driven workflow as historical only. |
 | `schema_index.csv` | move later after path centralization | Only docs or legacy references were found, but it is a shared schema support asset, so this stays conservative pending path centralization. |
 | `taxonomy_mapping_template.csv` | move later after path centralization | No live runtime references were found; classified conservatively as a shared mapping template rather than a safe move-now control doc. |
 | `TEMPLATE_presentation.html` | move later after path centralization | Named in `RULES.md`, `README.md`, and `scrapper/README.md`; loaded from repo root in `scrapper/electronet_single_import/utils.py`. |
