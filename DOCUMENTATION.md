@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M10 completed. No further cleanup milestone is scheduled.
+M11 completed. No further cleanup milestone is scheduled.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -266,6 +266,26 @@ Notes:
 - remaining `scrapper/requirements.txt` mentions are preserved in audit/history docs as prior-state evidence
 - the temporary verification environment was created outside the repo and removed after validation
 
+## M11 detail
+Goal:
+- consolidate README ownership to one canonical repo-root `README.md` without changing runtime behavior
+
+Changes:
+- updated repo-root `README.md` so it now includes the current project summary, repo layout, canonical install from root `requirements.txt`, current scraper workflow commands, runtime artifact locations, output locations, and test instructions
+- reduced `scrapper/README.md` to a minimal pointer to the repo-root `README.md`
+- updated `PLAN.md` to mark M11 completed
+
+Validation:
+- inspected both README files and merged the still-useful scraper setup and workflow content into root `README.md`
+- `rg` confirmed there is no active conflicting setup guidance between the root README and the reduced `scrapper/README.md`
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
+
+Notes:
+- `scrapper/README.md` was reduced to a pointer instead of being removed so existing historical or cross-doc references do not break
+- no runtime code, dependency files, or project structure changed
+- scraper smoke validation was intentionally skipped because this was a docs-only milestone
+
 ## Commands run
 - pre-creation filesystem check for `docs/audits/`, `docs/runbooks/`, `docs/checkpoints/`, `docs/specs/`, `archive/legacy/`, `resources/mappings/`, `resources/prompts/`, `resources/schemas/`, and `resources/templates/`
 - directory creation for the same approved target paths only when absent
@@ -317,6 +337,8 @@ Notes:
 - full `python -m pytest -q` from `scrapper/` under the clean environment
 - `rg` for `scrapper/requirements.txt` after consolidation
 - temporary verification-environment removal
+- README inspection for root and scraper README ownership
+- `rg` for `scrapper/README.md` references after README consolidation
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules

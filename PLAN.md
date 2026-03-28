@@ -131,6 +131,12 @@ Evidence:
 - Promoted repo-root `requirements.txt` to the canonical dependency file using the verified live-needed union of root and scraper dependencies.
 - Removed `scrapper/requirements.txt` only after clean-environment install, import checks, and full pytest validation succeeded against the canonical root file.
 
+### M11 - Consolidate canonical root README
+Status: completed
+Evidence:
+- Merged the still-useful scraper setup and workflow guidance into the repo-root `README.md`.
+- Reduced `scrapper/README.md` to a minimal pointer so the root README is the single canonical README entrypoint.
+
 ## Validation rules
 After each milestone:
 1. run repo-appropriate tests
