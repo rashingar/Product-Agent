@@ -67,6 +67,15 @@ SKROUTZ_FAMILIES: dict[str, dict[str, Any]] = {
         "spec_mode": "custom",
         "taxonomy_mode": "family",
     },
+    "ice_cream_maker": {
+        "category_labels": {"Παγωτομηχανές"},
+        "category_href_tokens": {"pagotomichanes"},
+        "title_tokens": {"pagotomichan"},
+        "breadcrumbs": ["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Μικροί Μάγειρες", "Παγωτομηχανές"],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "family",
+    },
     "television": {
         "category_labels": {"Τηλεοράσεις"},
         "category_href_tokens": {"tileoraseis", "television"},

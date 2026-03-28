@@ -182,7 +182,11 @@ def build_skroutz_deterministic_fields(
     model: str,
     seo_keyword_builder,
 ) -> dict[str, object] | None:
-    if normalize_for_match(source.source_name) != "skroutz":
+    normalized_source_name = normalize_for_match(source.source_name)
+    if normalized_source_name not in {
+        normalize_for_match("skroutz"),
+        normalize_for_match("manufacturer_tefal"),
+    }:
         return None
 
     family = resolve_skroutz_family(taxonomy)
@@ -271,6 +275,28 @@ def build_skroutz_deterministic_fields(
         )
         return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
 
+    if family == "ice_cream_maker":
+        category_phrase = "Παγωτομηχανή"
+        capacity = format_liters(spec_lookup, ["Χωρητικότητα"])
+        programs = format_program_count(spec_lookup, ["Αριθμός Προγραμμάτων"])
+        bowls = format_count_differentiator(spec_lookup, ["Αριθμός Δοχείων"], singular="Δοχείου", plural="Δοχείων")
+        color = normalize_value(spec_lookup, ["Χρώμα"])
+        differentiators = [item for item in [capacity, programs, bowls or color] if item]
+        name = compose_name(brand, mpn, category_phrase, differentiators)
+        meta_title = compose_meta_title(
+            name=name,
+            brand=brand,
+            mpn=mpn,
+            category_phrase=category_phrase,
+            differentiators=[item for item in [capacity, programs] if item],
+            preserve_title=False,
+        )
+        seo_keyword = seo_keyword_builder(
+            normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, capacity, programs, bowls, color] if part)),
+            model,
+        )
+        return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
     category_phrase = "Επιτραπέζια Εστία"
     burner_phrase = derive_hob_burner_phrase(spec_lookup, raw_title)
     power = format_power(spec_lookup, ["Ισχύς"])
@@ -331,6 +357,8 @@ def resolve_skroutz_family(taxonomy: TaxonomyResolution) -> str | None:
         return "coffee_filter"
     if sub == normalize_for_match("Βραστήρες"):
         return "kettle"
+    if sub == normalize_for_match("Παγωτομηχανές") and leaf == normalize_for_match("Μικροί Μάγειρες"):
+        return "ice_cream_maker"
     if sub == normalize_for_match("Εστίες") and leaf == normalize_for_match("Μικροί Μάγειρες"):
         return "tabletop_hob"
     return None
@@ -655,6 +683,23 @@ def format_liters(spec_lookup: dict[str, str], labels: list[str]) -> str:
     raw = normalize_value(spec_lookup, labels)
     numeric = extract_numeric(raw)
     return f"{numeric}Lt" if numeric else ""
+
+
+def format_program_count(spec_lookup: dict[str, str], labels: list[str]) -> str:
+    raw = normalize_value(spec_lookup, labels)
+    numeric = extract_numeric(raw)
+    if not numeric:
+        return ""
+    return f"{numeric} Προγράμματος" if numeric == "1" else f"{numeric} Προγραμμάτων"
+
+
+def format_count_differentiator(spec_lookup: dict[str, str], labels: list[str], singular: str, plural: str) -> str:
+    raw = normalize_value(spec_lookup, labels)
+    numeric = extract_numeric(raw)
+    if not numeric:
+        return ""
+    suffix = singular if numeric == "1" else plural
+    return f"{numeric} {suffix}"
 
 
 def format_cups(spec_lookup: dict[str, str]) -> str:

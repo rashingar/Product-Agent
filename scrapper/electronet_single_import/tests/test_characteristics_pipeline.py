@@ -17,6 +17,7 @@ TV_TEMPLATE_SCHEMA_ID = "sha1:954c8413f2da941e78f3ddce65df522654336c8c"
 HOOD_SCHEMA_ID = "sha1:0afca19ffd5ea62d89eedacca3c889e8d0e67b37"
 BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
 FRIDGE_FREEZER_SCHEMA_ID = "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b"
+ICE_CREAM_MAKER_SCHEMA_ID = "sha1:fb24efeacf0495fc3359e8528122e32ba3f7ec00"
 
 
 def test_skroutz_fridge_freezer_characteristics_keep_electronet_shape() -> None:
@@ -462,6 +463,122 @@ def test_characteristics_registry_prefers_soundbar_schema_for_skroutz() -> None:
     assert template["preferred_schema_source_files"] == ["sound_bars.json"]
     assert template["template_source"] == "schema_library_with_custom_overrides"
     assert template["custom_template_id"] == "skroutz_soundbar_v1"
+
+
+def test_characteristics_pipeline_uses_raw_sections_for_skroutz_ice_cream_makers() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="Tefal",
+        mpn="IG602A",
+        name="Tefal Dolci Παγωτομηχανή 3x1.4lt Καφέ",
+        spec_sections=[
+            SpecSection(
+                section="Παραγωγή & Δυνατότητες",
+                items=[
+                    SpecItem(label="Χωρητικότητα", value="1.4 lt"),
+                    SpecItem(label="Αριθμός Δοχείων", value="3"),
+                    SpecItem(label="Αριθμός Προγραμμάτων", value="10"),
+                ],
+            ),
+            SpecSection(
+                section="Σχεδιασμός & Εμφάνιση",
+                items=[SpecItem(label="Χρώμα", value="Καφέ")],
+            ),
+        ],
+        manufacturer_spec_sections=[
+            SpecSection(
+                section="Χαρακτηριστικά Κατασκευαστή",
+                items=[
+                    SpecItem(label="Τάση", value="220-240 V"),
+                    SpecItem(label="Συχνότητα", value="50-60 Hz"),
+                ],
+            )
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        leaf_category="Μικροί Μάγειρες",
+        sub_category="Παγωτομηχανές",
+    )
+
+    html, diagnostics, warnings = build_characteristics_for_product(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=ICE_CREAM_MAKER_SCHEMA_ID, score=0.91),
+    )
+
+    soup = BeautifulSoup(html, "lxml")
+    section_titles = [normalize_for_match(node.get_text(" ", strip=True)) for node in soup.select("thead strong")]
+    labels = [normalize_for_match(node.get_text(" ", strip=True)) for node in soup.select("tbody tr td:first-child")]
+    values = [node.get_text(" ", strip=True) for node in soup.select("tbody tr td strong")]
+
+    assert diagnostics["mode"] == "raw_spec_sections"
+    assert diagnostics["template_id"] == "skroutz_ice_cream_maker_v1"
+    assert diagnostics["selection_reason"] == "taxonomy_template_raw_spec_sections"
+    assert diagnostics["preferred_schema_source_files"] == ["pagotomixanes.json"]
+    assert warnings == []
+    assert normalize_for_match("Χαρακτηριστικά Κατασκευαστή") in section_titles
+    assert normalize_for_match("Παραγωγή & Δυνατότητες") in section_titles
+    assert normalize_for_match("Τάση") in labels
+    assert normalize_for_match("Αριθμός Προγραμμάτων") in labels
+    assert "220-240 V" in values
+    assert "10" in values
+
+
+def test_characteristics_pipeline_uses_raw_sections_for_manufacturer_tefal_ice_cream_makers() -> None:
+    source = SourceProductData(
+        source_name="manufacturer_tefal",
+        brand="Tefal",
+        mpn="IG602A",
+        name="Tefal Dolci Παγωτομηχανή IG602A",
+        spec_sections=[
+            SpecSection(
+                section="Παραγωγή & Δυνατότητες",
+                items=[
+                    SpecItem(label="Χωρητικότητα", value="1.4 lt"),
+                    SpecItem(label="Αριθμός Δοχείων", value="3"),
+                    SpecItem(label="Αριθμός Προγραμμάτων", value="10"),
+                ],
+            )
+        ],
+        manufacturer_spec_sections=[
+            SpecSection(
+                section="Χαρακτηριστικά Κατασκευαστή",
+                items=[
+                    SpecItem(label="Τάση", value="220-240 V"),
+                    SpecItem(label="Συχνότητα", value="50-60 Hz"),
+                ],
+            )
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        leaf_category="Μικροί Μάγειρες",
+        sub_category="Παγωτομηχανές",
+    )
+
+    html, diagnostics, warnings = build_characteristics_for_product(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=ICE_CREAM_MAKER_SCHEMA_ID, score=0.91),
+    )
+
+    soup = BeautifulSoup(html, "lxml")
+    section_titles = [normalize_for_match(node.get_text(" ", strip=True)) for node in soup.select("thead strong")]
+    labels = [normalize_for_match(node.get_text(" ", strip=True)) for node in soup.select("tbody tr td:first-child")]
+    values = [node.get_text(" ", strip=True) for node in soup.select("tbody tr td strong")]
+
+    assert diagnostics["mode"] == "raw_spec_sections"
+    assert diagnostics["template_id"] == "manufacturer_tefal_ice_cream_maker_v1"
+    assert diagnostics["selection_reason"] == "taxonomy_template_raw_spec_sections"
+    assert diagnostics["preferred_schema_source_files"] == ["pagotomixanes.json"]
+    assert warnings == []
+    assert normalize_for_match("Χαρακτηριστικά Κατασκευαστή") in section_titles
+    assert normalize_for_match("Παραγωγή & Δυνατότητες") in section_titles
+    assert normalize_for_match("Τάση") in labels
+    assert normalize_for_match("Αριθμός Προγραμμάτων") in labels
+    assert "220-240 V" in values
+    assert "10" in values
 
 
 def test_built_in_hob_characteristics_use_source_and_manufacturer_evidence() -> None:

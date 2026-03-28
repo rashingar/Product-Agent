@@ -322,6 +322,54 @@
       "sections": []
     },
     {
+      "template_id": "skroutz_ice_cream_maker_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_sub": "Παγωτομηχανές"
+      },
+      "preferred_schema_source_files": [
+        "pagotomixanes.json"
+      ],
+      "render_mode": "raw_spec_sections",
+      "sections": []
+    },
+    {
+      "template_id": "manufacturer_tefal_ice_cream_maker_v1",
+      "match": {
+        "source_name": "manufacturer_tefal",
+        "taxonomy_sub": "Παγωτομηχανές"
+      },
+      "preferred_schema_source_files": [
+        "pagotomixanes.json"
+      ],
+      "render_mode": "raw_spec_sections",
+      "sections": []
+    },
+    {
+      "template_id": "manufacturer_tefal_coffee_filter_v1",
+      "match": {
+        "source_name": "manufacturer_tefal",
+        "taxonomy_sub": "Καφετιέρες Φίλτρου"
+      },
+      "preferred_schema_source_files": [
+        "kafetieres_filtroy.json"
+      ],
+      "render_mode": "raw_spec_sections",
+      "sections": []
+    },
+    {
+      "template_id": "manufacturer_tefal_kettle_v1",
+      "match": {
+        "source_name": "manufacturer_tefal",
+        "taxonomy_sub": "Βραστήρες"
+      },
+      "preferred_schema_source_files": [
+        "vrastires.json"
+      ],
+      "render_mode": "raw_spec_sections",
+      "sections": []
+    },
+    {
       "template_id": "skroutz_robot_vacuum_v1",
       "match": {
         "source_name": "skroutz",
