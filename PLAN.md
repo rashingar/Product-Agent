@@ -91,7 +91,10 @@ Evidence:
 - Left `requirements.txt` as `uncertain` pending the later dependency audit because live evidence does not yet prove repo-root ownership.
 
 ### M3 — Centralize support-file lookup
-Add `scrapper/electronet_single_import/repo_paths.py` and route all support-file access through it.
+Status: completed
+Evidence:
+- Added `scrapper/electronet_single_import/repo_paths.py` to centralize approved support-asset locations without moving any assets.
+- Routed the existing support-asset path hub in `scrapper/electronet_single_import/utils.py` through the new module while preserving downstream imports.
 
 ### M4 — Move safe docs/checkpoint files
 Move:

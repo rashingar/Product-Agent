@@ -1,7 +1,7 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M2 completed. M3 is the next planned milestone.
+M3 completed. M4 is the next planned milestone.
 
 ## Repo invariants
 - Active runnable code lives under `scrapper/electronet_single_import/`.
@@ -62,18 +62,29 @@ Notes:
 - no files were moved or deleted in this milestone
 
 ### M3 — Path centralization
-Status: pending
+Status: completed
 Goal:
 - add `repo_paths.py` and remove scattered support-file path assumptions
 
 Changes:
-- none yet
+- created `scrapper/electronet_single_import/repo_paths.py`
+- replaced these approved direct support-asset path constructions in `scrapper/electronet_single_import/utils.py`: `PRODUCT_TEMPLATE_PATH`, `PRESENTATION_TEMPLATE_PATH`, `CATALOG_TAXONOMY_PATH`, `SCHEMA_LIBRARY_PATH`, `CHARACTERISTICS_TEMPLATES_PATH`, `FILTER_MAP_PATH`, `NAME_RULES_PATH`, `DIFFERENTIATOR_PRIORITY_MAP_PATH`, `MASTER_PROMPT_PATH`, `COMPACT_RESPONSE_SCHEMA_PATH`, and `MANUFACTURER_SOURCE_MAP_PATH`
+- kept the existing path constant names available from `utils.py` so downstream modules did not need churn
+- updated `scrapper/electronet_single_import/tests/test_utils_support_paths.py` to validate centralized path resolution from `repo_paths.py`
+- updated `PLAN.md` to mark M3 complete without changing the asset locations
 
 Validation:
-- not run
+- pre-edit `rg` confirmed the approved direct support-asset callsites were in `scrapper/electronet_single_import/utils.py`
+- post-edit `rg` confirmed the approved support-asset filename literals are now owned by `scrapper/electronet_single_import/repo_paths.py`
+- `python -m pytest -q electronet_single_import/tests/test_utils_support_paths.py` from `scrapper/` passed
+- `python -m pytest -q` from `scrapper/` remained at the expected baseline: `75 passed, 2 failed`
+- unchanged failing tests: `test_enrichment_framework_supports_pdf_candidates`, `test_enrichment_framework_supports_html_candidates`
 
 Notes:
-- none
+- unresolved out-of-scope direct path assumptions remain in `scrapper/electronet_single_import/workflow.py` for `work/` and `products/`
+- hardcoded absolute repo paths remain in some tests and were intentionally left out of scope for this milestone
+- scraper smoke validation was intentionally skipped because pytest plus code inspection was sufficient for this path-only change
+- no support assets were moved or renamed
 
 ### M4 — Safe docs/checkpoint moves
 Status: pending
@@ -108,6 +119,11 @@ Status: pending
 - `Get-Content AGENTS.md`
 - `Get-Content README.md`
 - `Get-Content scrapper/README.md`
+- pre-edit `rg` over `scrapper/electronet_single_import/` for approved support-asset filenames
+- `Get-Content scrapper/electronet_single_import/tests/test_utils_support_paths.py`
+- `Get-Content scrapper/electronet_single_import/repo_paths.py`
+- post-edit `rg` over `scrapper/electronet_single_import/*.py` for approved support-asset filenames
+- `python -m pytest -q electronet_single_import/tests/test_utils_support_paths.py` from `scrapper/`
 
 ## Open risks
 - direct path assumptions may exist in multiple scraper modules
@@ -115,6 +131,8 @@ Status: pending
 - docs may drift during file moves if not updated in the same commit
 - baseline pytest failures remain in `electronet_single_import/tests/test_manufacturer_enrichment.py`
 - `schema_index.csv` and `taxonomy_mapping_template.csv` have weaker direct runtime evidence than the hardcoded support assets
+- `workflow.py` still contains out-of-scope `REPO_ROOT` output-root assumptions for `work/` and `products/`
+- some tests still use hardcoded absolute repo paths and were intentionally deferred
 
 ## Next approved action
-Run M3 only.
+Run M4 only.
