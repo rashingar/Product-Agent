@@ -19,12 +19,14 @@ from .parser_product_electronet import ElectronetProductParser
 from .parser_product_manufacturer import ManufacturerProductParser
 from .parser_product_skroutz import SkroutzProductParser
 from .schema_matcher import SchemaMatcher
+from .services.metadata import maybe_write_run_metadata
+from .services.models import RunArtifacts, RunStatus, RunType
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .skroutz_taxonomy import serialize_source_category
 from .source_detection import detect_source, validate_url_scope
 from .taxonomy import TaxonomyResolver
 from .repo_paths import SCHEMA_LIBRARY_PATH
-from .utils import ensure_directory, write_json, write_text
+from .utils import ensure_directory, utcnow_iso, write_json, write_text
 
 FAIL_MESSAGE = "Generation failed, provide 6-digit model"
 SKROUTZ_V1_MPN_HINTS = {
@@ -708,14 +710,60 @@ def build_identity_checks(cli: CLIInput, parsed, source: str) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    cli: CLIInput | None = None
+    requested_at: str | None = None
     try:
         cli = validate_input(args)
+        requested_at = utcnow_iso()
         result = run_cli_input(cli)
+        metadata_path = maybe_write_run_metadata(
+            model=cli.model,
+            run_type=RunType.FULL,
+            status=RunStatus.COMPLETED,
+            model_root=result["model_dir"],
+            artifacts=RunArtifacts(
+                model_root=result["model_dir"],
+                raw_html_path=result["raw_html_path"],
+                source_json_path=result["source_json_path"],
+                scrape_normalized_json_path=result["normalized_json_path"],
+                source_report_json_path=result["report_json_path"],
+            ),
+            requested_at=requested_at,
+            started_at=requested_at,
+            finished_at=utcnow_iso(),
+            warnings=list(result["report"]["warnings"]),
+            details={
+                "source": str(result["source"]),
+                "csv_path": str(result["csv_path"]),
+            },
+        )
     except ValueError as exc:
         message = str(exc)
         print(message)
         return 1 if message == FAIL_MESSAGE else 2
     except RuntimeError as exc:
+        if cli is not None and requested_at is not None:
+            model_root = Path(cli.out) / cli.model
+            metadata_path = maybe_write_run_metadata(
+                model=cli.model,
+                run_type=RunType.FULL,
+                status=RunStatus.FAILED,
+                model_root=model_root,
+                artifacts=RunArtifacts(
+                    model_root=model_root,
+                    raw_html_path=model_root / f"{cli.model}.raw.html",
+                    source_json_path=model_root / f"{cli.model}.source.json",
+                    scrape_normalized_json_path=model_root / f"{cli.model}.normalized.json",
+                    source_report_json_path=model_root / f"{cli.model}.report.json",
+                ),
+                requested_at=requested_at,
+                started_at=requested_at,
+                finished_at=utcnow_iso(),
+                error_code=type(exc).__name__,
+                error_detail=str(exc),
+            )
+            print(f"Run status: {RunStatus.FAILED.value}")
+            print(f"Metadata path: {metadata_path}")
         message = str(exc)
         print(message, file=sys.stderr if message != FAIL_MESSAGE else sys.stdout)
         return 3 if "failed" in message.lower() else 4
@@ -733,6 +781,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"schema match id / score: {schema_match.matched_schema_id} / {schema_match.score:.4f}")
     print(f"CSV written path: {csv_path}")
     print(f"warnings count: {len(report['warnings'])}")
+    print(f"Run status: {RunStatus.COMPLETED.value}")
+    print(f"Metadata path: {metadata_path}")
     return 0
 
 

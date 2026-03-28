@@ -1,7 +1,63 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M16 completed. Next active milestone: M17 — make CLI/workflow emit metadata.
+M17 completed. Next active milestone: M18 — add service layer models/errors/wrappers.
+
+## M17 — make CLI/workflow emit metadata
+
+Goal:
+- make the current CLI and workflow surfaces emit a structured run status and metadata file path without changing command names, flags, exit codes, workflow semantics, or existing artifact locations
+
+Files edited:
+- `scrapper/electronet_single_import/cli.py`
+- `scrapper/electronet_single_import/services/metadata.py`
+- `scrapper/electronet_single_import/workflow.py`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- promoted the metadata write helper into `scrapper/electronet_single_import/services/metadata.py` so both CLI and workflow can reuse the same run-status and metadata serialization path
+- kept `prepare_workflow()` and `render_workflow()` additive-only by returning `run_status` alongside the existing result fields
+- updated `python -m electronet_single_import.workflow prepare` to print the completed run status and the emitted `prepare.run.json` path after the existing scrape/prompt artifact lines
+- updated `python -m electronet_single_import.workflow render` to print the completed run status and the emitted `render.run.json` path after the existing candidate/validation lines
+- added best-effort standalone CLI metadata emission as `full.run.json` in the current CLI output model directory and surfaced its run status plus metadata path in the CLI output
+- kept existing CLI flags, command names, exit-code behavior, workflow artifact locations, provider behavior, and validation semantics unchanged
+
+Commands run:
+- `Get-Content AGENTS.md`
+- `Get-Content RULES.md`
+- `Get-Content scrapper/electronet_single_import/cli.py`
+- `Get-Content scrapper/electronet_single_import/workflow.py`
+- `Get-Content scrapper/electronet_single_import/services/models.py`
+- `Get-Content scrapper/electronet_single_import/services/metadata.py`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "metadata_path|RunStatus|prepare_workflow\\(|render_workflow\\(|Validation ok|LLM context:|Candidate CSV:" scrapper/electronet_single_import/tests scrapper/electronet_single_import`
+- `Get-Content scrapper/electronet_single_import/tests/test_workflow.py`
+- `rg -n "M17|emit metadata|run status|metadata path" PLAN.md DOCUMENTATION.md scrapper/electronet_single_import -g "*.md" -g "*.py"`
+- `rg -n "electronet_single_import\\.cli|python -m electronet_single_import\\.cli|--out" README.md scrapper/README.md scrapper/electronet_single_import/tests -g "*.md" -g "*.py"`
+- `python -m compileall scrapper/electronet_single_import`
+- `python -m pytest -q` from `scrapper/`
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py` from `scrapper/`
+- `git status --short`
+
+Validation:
+- `python -m compileall scrapper/electronet_single_import` succeeded
+- `python -m pytest -q electronet_single_import/tests/test_workflow.py` from `scrapper/` passed with `8 passed`
+- `python -m pytest -q` from `scrapper/` returned `78 passed, 2 failed`
+- unchanged accepted failing tests:
+  - `test_enrichment_framework_supports_pdf_candidates`
+  - `test_enrichment_framework_supports_html_candidates`
+- `git status --short` showed only the expected M17 edits
+
+Risks:
+- no new test failures were introduced by M17
+- standalone CLI metadata now adds one new sidecar file, `full.run.json`, under the existing CLI output model directory; existing artifacts and paths remain unchanged
+
+Deferred:
+- no CLI UX redesign beyond the additive status and metadata-path lines
+- service-layer wrappers and CLI routing through that layer remain deferred to M18-M19
+- no test-file changes were made in M17; coverage for the new surface lines still relies on compile, existing workflow tests, and the unchanged full-suite baseline
 
 ## M16 — write structured run metadata alongside current files
 

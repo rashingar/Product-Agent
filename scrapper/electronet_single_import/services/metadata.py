@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from ..utils import write_json
-from .models import RunType, ServiceResult
+from .models import RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 
 _METADATA_FILENAMES = {
     RunType.PREPARE: "prepare.run.json",
@@ -38,4 +38,43 @@ def write_run_metadata(result: ServiceResult) -> Path:
     if metadata_path is None:
         raise ValueError("Run metadata path is required")
     write_json(metadata_path, _serialize(result))
+    return metadata_path
+
+
+def maybe_write_run_metadata(
+    *,
+    model: str,
+    run_type: RunType,
+    status: RunStatus,
+    model_root: Path,
+    artifacts: RunArtifacts,
+    requested_at: str,
+    started_at: str,
+    finished_at: str,
+    warnings: list[str] | None = None,
+    error_code: str | None = None,
+    error_detail: str | None = None,
+    details: dict[str, str | int | float | bool | None] | None = None,
+) -> Path:
+    metadata_path = metadata_path_for(model_root, run_type)
+    artifacts.metadata_path = metadata_path
+    payload = ServiceResult(
+        run=RunMetadata(
+            model=model,
+            run_type=run_type,
+            status=status,
+            requested_at=requested_at,
+            started_at=started_at,
+            finished_at=finished_at,
+            warnings=list(warnings or []),
+            error_code=error_code,
+            error_detail=error_detail,
+        ),
+        artifacts=artifacts,
+        details=details or {},
+    )
+    try:
+        write_run_metadata(payload)
+    except Exception:
+        pass
     return metadata_path

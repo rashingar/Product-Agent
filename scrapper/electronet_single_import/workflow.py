@@ -12,8 +12,8 @@ from .llm_contract import build_llm_context, render_prompt, validate_llm_output
 from .mapping import build_row
 from .models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .repo_paths import MASTER_PROMPT_PATH, REPO_ROOT
-from .services.metadata import metadata_path_for, write_run_metadata
-from .services.models import RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
+from .services.metadata import maybe_write_run_metadata
+from .services.models import RunArtifacts, RunStatus, RunType
 from .utils import ensure_directory, read_json, utcnow_iso, write_json, write_text
 from .validator import validate_candidate_csv, write_validation_report
 
@@ -61,6 +61,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Scrape artifacts: {result['scrape_dir']}")
             print(f"LLM context: {result['llm_context_path']}")
             print(f"Prompt: {result['prompt_path']}")
+            print(f"Run status: {result['run_status']}")
+            print(f"Metadata path: {result['metadata_path']}")
             return 0
 
         model = resolve_model_for_render(args)
@@ -68,6 +70,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Candidate CSV: {result['candidate_csv_path']}")
         print(f"Validation report: {result['validation_report_path']}")
         print(f"Validation ok: {result['validation_report']['ok']}")
+        print(f"Run status: {result['run_status']}")
+        print(f"Metadata path: {result['metadata_path']}")
         return 0 if result["validation_report"]["ok"] else 5
     except ValueError as exc:
         message = str(exc)
@@ -194,51 +198,11 @@ def _path_or_none(value: str | Path | None) -> Path | None:
     return Path(value)
 
 
-def _maybe_write_run_metadata(
-    *,
-    model: str,
-    run_type: RunType,
-    status: RunStatus,
-    model_root: Path,
-    artifacts: RunArtifacts,
-    requested_at: str,
-    started_at: str,
-    finished_at: str,
-    warnings: list[str] | None = None,
-    error_code: str | None = None,
-    error_detail: str | None = None,
-    details: dict[str, str | int | float | bool | None] | None = None,
-) -> Path:
-    metadata_path = metadata_path_for(model_root, run_type)
-    artifacts.metadata_path = metadata_path
-    payload = ServiceResult(
-        run=RunMetadata(
-            model=model,
-            run_type=run_type,
-            status=status,
-            requested_at=requested_at,
-            started_at=started_at,
-            finished_at=finished_at,
-            warnings=list(warnings or []),
-            error_code=error_code,
-            error_detail=error_detail,
-        ),
-        artifacts=artifacts,
-        details=details or {},
-    )
-    try:
-        write_run_metadata(payload)
-    except Exception:
-        pass
-    return metadata_path
-
-
 def prepare_workflow(cli: CLIInput) -> dict[str, Any]:
     requested_at = utcnow_iso()
     started_at = requested_at
     model_root = ensure_directory(WORK_ROOT / cli.model)
     scrape_dir = ensure_directory(model_root / "scrape")
-    metadata_path = metadata_path_for(model_root, RunType.PREPARE)
     llm_context_path = model_root / "llm_context.json"
     prompt_path = model_root / "prompt.txt"
     llm_output_path = model_root / "llm_output.json"
@@ -279,7 +243,7 @@ def prepare_workflow(cli: CLIInput) -> dict[str, Any]:
         write_json(llm_context_path, llm_context)
         write_text(prompt_path, prompt_text)
         finished_at = utcnow_iso()
-        _maybe_write_run_metadata(
+        metadata_path = maybe_write_run_metadata(
             model=cli.model,
             run_type=RunType.PREPARE,
             status=RunStatus.COMPLETED,
@@ -306,12 +270,13 @@ def prepare_workflow(cli: CLIInput) -> dict[str, Any]:
             "scrape_dir": scrape_dir,
             "llm_context_path": llm_context_path,
             "prompt_path": prompt_path,
+            "run_status": RunStatus.COMPLETED.value,
             "metadata_path": metadata_path,
             "scrape_result": result,
         }
     except Exception as exc:
         finished_at = utcnow_iso()
-        _maybe_write_run_metadata(
+        maybe_write_run_metadata(
             model=cli.model,
             run_type=RunType.PREPARE,
             status=RunStatus.FAILED,
@@ -348,7 +313,6 @@ def resolve_model_for_render(args: argparse.Namespace) -> str:
 
 def render_workflow(model: str) -> dict[str, Any]:
     model_root = WORK_ROOT / model
-    metadata_path = metadata_path_for(model_root, RunType.RENDER)
     scrape_dir = model_root / "scrape"
     source_json = scrape_dir / f"{model}.source.json"
     normalized_json = scrape_dir / f"{model}.normalized.json"
@@ -426,7 +390,7 @@ def render_workflow(model: str) -> dict[str, Any]:
         ensure_directory(PRODUCTS_ROOT)
         shutil.copyfile(candidate_csv_path, published_csv_path)
         finished_at = utcnow_iso()
-        _maybe_write_run_metadata(
+        metadata_path = maybe_write_run_metadata(
             model=model,
             run_type=RunType.RENDER,
             status=RunStatus.COMPLETED,
@@ -459,13 +423,14 @@ def render_workflow(model: str) -> dict[str, Any]:
             "description_path": description_path,
             "characteristics_path": characteristics_path,
             "validation_report_path": validation_report_path,
+            "run_status": RunStatus.COMPLETED.value,
             "metadata_path": metadata_path,
             "validation_report": validation_report,
         }
     except Exception as exc:
         finished_at = utcnow_iso()
         if model_root.exists():
-            _maybe_write_run_metadata(
+            maybe_write_run_metadata(
                 model=model,
                 run_type=RunType.RENDER,
                 status=RunStatus.FAILED,
