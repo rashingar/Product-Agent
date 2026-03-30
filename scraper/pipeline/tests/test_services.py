@@ -47,6 +47,14 @@ def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> N
         return {
             "model_root": tmp_path / "work" / "233541",
             "scrape_dir": tmp_path / "work" / "233541" / "scrape",
+            "llm_dir": tmp_path / "work" / "233541" / "llm",
+            "task_manifest_path": tmp_path / "work" / "233541" / "llm" / "task_manifest.json",
+            "intro_text_context_path": tmp_path / "work" / "233541" / "llm" / "intro_text.context.json",
+            "intro_text_prompt_path": tmp_path / "work" / "233541" / "llm" / "intro_text.prompt.txt",
+            "intro_text_output_path": tmp_path / "work" / "233541" / "llm" / "intro_text.output.txt",
+            "seo_meta_context_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json",
+            "seo_meta_prompt_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.prompt.txt",
+            "seo_meta_output_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.output.json",
             "llm_context_path": tmp_path / "work" / "233541" / "llm_context.json",
             "prompt_path": tmp_path / "work" / "233541" / "prompt.txt",
             "run_status": "completed",
@@ -75,11 +83,16 @@ def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> N
     assert result.run.run_type == RunType.PREPARE
     assert result.run.status == RunStatus.COMPLETED
     assert result.run.warnings == ["prepare warning"]
+    assert result.artifacts.llm_dir == tmp_path / "work" / "233541" / "llm"
+    assert result.artifacts.llm_task_manifest_path == tmp_path / "work" / "233541" / "llm" / "task_manifest.json"
+    assert result.artifacts.intro_text_context_path == tmp_path / "work" / "233541" / "llm" / "intro_text.context.json"
+    assert result.artifacts.seo_meta_context_path == tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json"
     assert result.artifacts.scrape_dir == tmp_path / "work" / "233541" / "scrape"
     assert result.artifacts.source_json_path == tmp_path / "work" / "233541" / "scrape" / "233541.source.json"
     assert result.artifacts.llm_output_path == tmp_path / "work" / "233541" / "llm_output.json"
     assert result.artifacts.metadata_path == tmp_path / "work" / "233541" / "prepare.run.json"
     assert result.details["source"] == "electronet"
+    assert result.details["llm_prepare_mode"] == "split_tasks_with_legacy_compatibility"
 
 
 def test_prepare_product_wraps_execution_errors(monkeypatch) -> None:
@@ -155,10 +168,18 @@ def test_execute_run_workflow_composes_prepare_and_render_results(tmp_path: Path
         artifacts=RunArtifacts(
             model_root=tmp_path / "work" / "233541",
             scrape_dir=tmp_path / "work" / "233541" / "scrape",
+            llm_dir=tmp_path / "work" / "233541" / "llm",
             raw_html_path=tmp_path / "work" / "233541" / "scrape" / "233541.raw.html",
             source_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.source.json",
             scrape_normalized_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.normalized.json",
             source_report_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.report.json",
+            llm_task_manifest_path=tmp_path / "work" / "233541" / "llm" / "task_manifest.json",
+            intro_text_context_path=tmp_path / "work" / "233541" / "llm" / "intro_text.context.json",
+            intro_text_prompt_path=tmp_path / "work" / "233541" / "llm" / "intro_text.prompt.txt",
+            intro_text_output_path=tmp_path / "work" / "233541" / "llm" / "intro_text.output.txt",
+            seo_meta_context_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json",
+            seo_meta_prompt_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.prompt.txt",
+            seo_meta_output_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.output.json",
             llm_context_path=tmp_path / "work" / "233541" / "llm_context.json",
             prompt_path=tmp_path / "work" / "233541" / "prompt.txt",
             llm_output_path=tmp_path / "work" / "233541" / "llm_output.json",
@@ -210,6 +231,8 @@ def test_execute_run_workflow_composes_prepare_and_render_results(tmp_path: Path
     assert result.run.run_type == RunType.FULL
     assert result.run.status == RunStatus.COMPLETED
     assert result.run.warnings == ["prepare warning", "render warning"]
+    assert result.artifacts.llm_dir == tmp_path / "work" / "233541" / "llm"
+    assert result.artifacts.llm_task_manifest_path == tmp_path / "work" / "233541" / "llm" / "task_manifest.json"
     assert result.artifacts.candidate_csv_path == tmp_path / "work" / "233541" / "candidate" / "233541.csv"
     assert result.details["prepare_metadata_path"] == str(tmp_path / "work" / "233541" / "prepare.run.json")
     assert result.details["render_metadata_path"] == str(tmp_path / "work" / "233541" / "render.run.json")

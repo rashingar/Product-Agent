@@ -101,12 +101,37 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
 
     result = prepare_workflow(cli)
 
+    assert result["llm_dir"].exists()
+    assert result["task_manifest_path"].exists()
+    assert result["intro_text_context_path"].exists()
+    assert result["intro_text_prompt_path"].exists()
+    assert result["seo_meta_context_path"].exists()
+    assert result["seo_meta_prompt_path"].exists()
     assert result["llm_context_path"].exists()
     assert result["prompt_path"].exists()
     assert result["metadata_path"].exists()
+    task_manifest = json.loads(result["task_manifest_path"].read_text(encoding="utf-8"))
+    intro_text_context = json.loads(result["intro_text_context_path"].read_text(encoding="utf-8"))
+    seo_meta_context = json.loads(result["seo_meta_context_path"].read_text(encoding="utf-8"))
+    intro_text_prompt = result["intro_text_prompt_path"].read_text(encoding="utf-8")
+    seo_meta_prompt = result["seo_meta_prompt_path"].read_text(encoding="utf-8")
     llm_context = json.loads(result["llm_context_path"].read_text(encoding="utf-8"))
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
     prompt_text = result["prompt_path"].read_text(encoding="utf-8")
+    assert task_manifest["prepare_mode"] == "split_tasks_with_legacy_compatibility"
+    assert task_manifest["primary_outputs"]["tasks"]["intro_text"]["context_path"] == str(result["intro_text_context_path"])
+    assert task_manifest["primary_outputs"]["tasks"]["seo_meta"]["prompt_path"] == str(result["seo_meta_prompt_path"])
+    assert task_manifest["compatibility"]["legacy_llm_context_path"] == str(result["llm_context_path"])
+    assert intro_text_context["task"] == "intro_text"
+    assert intro_text_context["writer_rules"]["plain_text_only"] is True
+    assert intro_text_context["writer_rules"]["llm_owned_fields"] == ["intro_text"]
+    assert "presentation_source_sections" not in intro_text_context
+    assert "Do not use HTML." in intro_text_prompt
+    assert "Do not use CTA language" in intro_text_prompt
+    assert seo_meta_context["task"] == "seo_meta"
+    assert seo_meta_context["writer_rules"]["required_keywords"] == ["LG", "GSGV80PYLL"]
+    assert seo_meta_context["product"]["meta_title"] == "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt | eTranoulis"
+    assert "always include the provided brand and mpn/model values" in seo_meta_prompt
     assert llm_context["writer_rules"]["intro_html_rule"] == "120-180 Greek words in one intro paragraph."
     assert len(llm_context["presentation_source_sections"]) == 2
     assert llm_context["presentation_source_sections"][0]["source_index"] == 1
@@ -121,10 +146,15 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert metadata["run"]["model"] == "233541"
     assert metadata["run"]["run_type"] == "prepare"
     assert metadata["run"]["status"] == "completed"
+    assert metadata["artifacts"]["llm_dir"] == str(result["llm_dir"])
+    assert metadata["artifacts"]["llm_task_manifest_path"] == str(result["task_manifest_path"])
+    assert metadata["artifacts"]["intro_text_context_path"] == str(result["intro_text_context_path"])
+    assert metadata["artifacts"]["seo_meta_context_path"] == str(result["seo_meta_context_path"])
     assert metadata["artifacts"]["llm_context_path"] == str(result["llm_context_path"])
     assert metadata["artifacts"]["prompt_path"] == str(result["prompt_path"])
     assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
     assert metadata["artifacts"]["llm_output_path"] == str(result["model_root"] / "llm_output.json")
+    assert metadata["details"]["llm_prepare_mode"] == "split_tasks_with_legacy_compatibility"
     assert metadata["details"]["source"] == ""
 
 

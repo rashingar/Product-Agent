@@ -73,7 +73,7 @@ Phase 2 milestones:
 
 ### Phase 3 — Split-LLM `intro_text` and deterministic presentation refactor
 
-Status: pending
+Status: in progress
 
 Goals:
 1. Replace the current single-prompt LLM handoff with two task-specific LLM tasks: `intro_text` and `seo_meta`.
@@ -89,7 +89,7 @@ Hard rules:
 - Do not remove legacy combined-output render support until the compatibility phase lands and regression coverage proves both the split-output and legacy-output paths.
 
 Phase 3 milestones:
-- M30 — split the LLM contract and prepare artifacts (pending; acceptance criteria: `prepare` writes task-specific `intro_text` and `seo_meta` context/prompt artifacts, the LLM-owned field list drops presentation section title/body generation, `intro_text` is defined as plain text only in one paragraph at 120-180 words, and `seo_meta` is defined as `meta_description` plus `meta_keywords` only)
+- M30 — split the LLM contract and prepare artifacts (completed; `prepare` now writes task-specific artifacts under `work/{model}/llm/` for `intro_text` and `seo_meta`, emits `task_manifest.json` as the primary handoff index, constrains `intro_text` to plain-text one-paragraph output, defines `seo_meta` as `meta_description` plus structured `meta_keywords`, and preserves legacy combined `llm_context.json` plus `prompt.txt` only as compatibility artifacts while render still depends on `llm_output.json`)
 - M31 — add render compatibility for split outputs and legacy combined output (pending; acceptance criteria: `render` reads task-specific `intro_text` and `seo_meta` outputs when present, still falls back to legacy `work/{model}/llm_output.json`, and regression coverage proves both paths during the compatibility phase)
 - M32 — build deterministic presentation sections and section-quality policy (pending; acceptance criteria: `presentation_source_sections` are classified as `usable`, `weak`, or `missing`; missing source sections hard fail; weak sections or exactly one missing requested section warn and continue with fewer sections; source wording is preserved apart from cleaning/sanitization; and source titles are retained when present)
 - M33 — render final description HTML and SEO normalization in code (pending; acceptance criteria: description HTML is assembled in code from plain-text `intro_text`, deterministic CTA data, and cleaned deterministic source sections; wrappers/classes/styles remain code-owned; and keyword normalization in code enforces brand/model presence while collapsing duplicates and singular/plural variants)

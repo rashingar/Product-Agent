@@ -1,10 +1,117 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M29 completed. Full-run orchestration ownership now lives in a service-owned execution module, `run_service.py` is a thin service wrapper over that seam, and CLI/workflow behavior remains unchanged. This commit is docs-only and defines the pending Phase 3 split-LLM `intro_text` and deterministic presentation branch scope before runtime changes begin.
+M30 completed. Prepare now emits split LLM task artifacts for `intro_text` and `seo_meta` under `work/{model}/llm/`, while legacy combined prompt/context files remain as compatibility outputs until render migration lands.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## 2026-03-30 - Split prepare into `intro_text` and `seo_meta` task artifacts
+
+Goal:
+- make split task-specific LLM handoff artifacts the primary prepare outputs
+- keep the branch mergeable by preserving the legacy combined prepare files and legacy render input path during the transition
+- remove section title/body generation from the new task ownership model without changing render to consume the new task outputs yet
+
+Files added:
+- `resources/prompts/intro_text_prompt.txt`
+- `resources/prompts/seo_meta_prompt.txt`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/repo_paths.py`
+- `scraper/pipeline/llm_contract.py`
+- `scraper/pipeline/services/models.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/run_execution.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/tests/test_llm_contract.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_utils_support_paths.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- added two task-specific prompt resources under `resources/prompts/`:
+  - `intro_text_prompt.txt`
+  - `seo_meta_prompt.txt`
+- added new prompt path constants in `scraper/pipeline/repo_paths.py`
+- extended `scraper/pipeline/llm_contract.py` with split-task builders:
+  - `build_intro_text_context(...)`
+  - `build_seo_meta_context(...)`
+  - `build_task_manifest(...)`
+- kept the existing combined `build_llm_context(...)` and legacy prompt rendering path in place strictly for compatibility
+- updated `scraper/pipeline/services/prepare_execution.py` so prepare now writes these primary artifacts:
+  - `work/{model}/llm/intro_text.context.json`
+  - `work/{model}/llm/intro_text.prompt.txt`
+  - `work/{model}/llm/seo_meta.context.json`
+  - `work/{model}/llm/seo_meta.prompt.txt`
+  - `work/{model}/llm/task_manifest.json`
+- reserved expected task output targets in the manifest for the later render migration:
+  - `work/{model}/llm/intro_text.output.txt`
+  - `work/{model}/llm/seo_meta.output.json`
+- preserved these compatibility artifacts intentionally:
+  - `work/{model}/llm_context.json`
+  - `work/{model}/prompt.txt`
+  - `work/{model}/llm_output.json`
+- updated prepare metadata and service-layer artifact models so run metadata now records:
+  - `llm_dir`
+  - `llm_task_manifest_path`
+  - `intro_text_*` paths
+  - `seo_meta_*` paths
+- updated workflow prepare CLI output to print the new primary task artifact paths plus the legacy compatibility paths
+
+Task ownership changes:
+- `intro_text` now owns only the intro paragraph prompt/output contract:
+  - plain text only
+  - one paragraph
+  - Greek
+  - 120-180 words
+  - no HTML
+  - no bullets
+  - no CTA language
+- `seo_meta` now owns only:
+  - `product.meta_description`
+  - `product.meta_keywords`
+- the new task contexts do not include section title/body generation instructions
+- deterministic `presentation_source_sections` remain outside the split task contexts and stay in deterministic artifacts instead of being passed as a required `intro_text` writing input
+
+Compatibility behavior intentionally preserved:
+- prepare still writes the legacy combined context and prompt files because render has not been migrated yet
+- render still reads legacy `work/{model}/llm_output.json` in this commit
+- the task manifest explicitly marks the prepare mode as `split_tasks_with_legacy_compatibility`
+
+Commands run:
+- `Get-Content scraper/pipeline/repo_paths.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `rg -n "llm_context_path|prompt_path|llm_output_path|MASTER_PROMPT_PATH|prompt.txt|llm_context.json|task_manifest|intro_text|seo_meta" scraper/pipeline scraper/pipeline/tests resources -S`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/metadata.py`
+- `Get-Content scraper/pipeline/workflow.py`
+- `rg -n "meta_description_draft|differentiator|key_specs|deterministic_product" scraper/pipeline/deterministic_fields.py scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_skroutz_integration.py -S`
+- `Get-Content scraper/pipeline/deterministic_fields.py`
+- `Get-Content scraper/pipeline/tests/test_utils_support_paths.py`
+- `Get-Content scraper/pipeline/services/run_execution.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -First 170`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 900 -First 60`
+- `Get-Content scraper/pipeline/tests/test_services.py | Select-Object -First 240`
+- `Get-Content scraper/pipeline/tests/test_llm_contract.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_utils_support_paths.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_utils_support_paths.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_integration.py` from `scraper/`
+
+Validation:
+- targeted prepare-facing subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_utils_support_paths.py` from `scraper/`
+  - passed, `30 passed`
+- broader affected tests:
+  - `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_utils_support_paths.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_integration.py` from `scraper/`
+  - passed, `52 passed`
+
+Deferred:
+- render was not changed to consume `intro_text` or `seo_meta` outputs in this commit
+- legacy combined `llm_context.json`, `prompt.txt`, and `llm_output.json` remain intentionally present for the transition
+- section title/body generation is still part of the legacy combined compatibility prompt only; the new split task artifacts do not assign that work to the LLM
 
 ## 2026-03-30 - Deterministic presentation section cleaning and quality classification foundation
 
