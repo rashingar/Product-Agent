@@ -18,6 +18,7 @@ from .parser_product_manufacturer import ManufacturerProductParser
 from .parser_product_skroutz import SkroutzProductParser
 from .providers.base import ProductProvider, ProviderError
 from .providers.electronet_provider import ElectronetProvider
+from .providers.skroutz_provider import SkroutzProvider
 from .providers.models import ProviderInputIdentity, ProviderResult
 from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
@@ -99,10 +100,13 @@ def _resolve_provider_for_source(
     cli: CLIInput,
     fetcher: ElectronetFetcher,
     electronet_parser: ElectronetProductParser,
+    skroutz_parser: SkroutzProductParser,
 ) -> ProductProvider | None:
     del cli
     if source == "electronet":
         return ElectronetProvider(fetcher=fetcher, parser=electronet_parser)
+    if source == "skroutz":
+        return SkroutzProvider(fetcher=fetcher, parser=skroutz_parser)
     return None
 
 
@@ -118,6 +122,7 @@ def execute_full_run(cli: CLIInput) -> dict[str, Any]:
         cli=cli,
         fetcher=fetcher,
         electronet_parser=electronet_parser,
+        skroutz_parser=skroutz_parser,
     )
 
     if provider is not None:

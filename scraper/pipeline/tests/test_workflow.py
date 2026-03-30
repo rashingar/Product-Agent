@@ -228,9 +228,17 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
     assert result["report"]["identity_checks"]["source"] == "electronet"
 
 
-def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_path: Path) -> None:
+def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch, tmp_path: Path) -> None:
     from pipeline import full_run as run_module
-    from pipeline.models import FetchResult
+    from pipeline.providers.models import (
+        ProviderCapability,
+        ProviderDefinition,
+        ProviderInputIdentity,
+        ProviderKind,
+        ProviderResult,
+        ProviderSnapshot,
+        ProviderSnapshotKind,
+    )
 
     cli = CLIInput(
         model="341490",
@@ -262,16 +270,9 @@ def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_p
             spec_sections=[SpecSection(section="Χαρακτηριστικά", items=[SpecItem(label="Ισχύς", value="2200 W")])],
         ),
     )
-    calls = {"playwright": 0, "parser": 0}
+    provider_calls: list[ProviderInputIdentity] = []
 
     class DummyFetcher:
-        def fetch_httpx(self, _url):
-            raise AssertionError("Default Skroutz flow should not fall back to httpx when playwright succeeds")
-
-        def fetch_playwright(self, _url):
-            calls["playwright"] += 1
-            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
-
         def download_gallery_images(self, **_kwargs):
             return [], [], []
 
@@ -291,21 +292,65 @@ def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_p
         def match(self, *_args, **_kwargs):
             return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
 
-    class DummySkroutzParser:
-        def parse(self, _html, _url, fallback_used=False):
-            assert fallback_used is True
-            calls["parser"] += 1
-            return parsed
+    class UnexpectedParser:
+        def parse(self, *_args, **_kwargs):
+            raise AssertionError("Skroutz parser should not be called directly outside the provider seam")
 
     class UnexpectedElectronetProvider:
         def __init__(self, **_kwargs):
             raise AssertionError("Electronet provider should not be selected for Skroutz by default")
 
+    class DummySkroutzProvider:
+        def __init__(self, *, fetcher, parser):
+            assert isinstance(fetcher, DummyFetcher)
+            assert isinstance(parser, UnexpectedParser)
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="skroutz",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "playwright", "fallback_used": True},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=ProviderDefinition(
+                    provider_id="skroutz",
+                    source_name="skroutz",
+                    kind=ProviderKind.VENDOR_SITE,
+                    capabilities=frozenset(
+                        {
+                            ProviderCapability.URL_INPUT,
+                            ProviderCapability.LIVE_FETCH,
+                            ProviderCapability.HTML_SNAPSHOT,
+                            ProviderCapability.NORMALIZED_PRODUCT,
+                        }
+                    ),
+                ),
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
+
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("skroutz", True, "skroutz_product_path"))
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: DummySkroutzParser())
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
+    monkeypatch.setattr(run_module, "SkroutzProvider", DummySkroutzProvider)
     monkeypatch.setattr(run_module, "ElectronetProvider", UnexpectedElectronetProvider)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(
@@ -331,7 +376,7 @@ def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_p
 
     result = run_module.execute_full_run(cli)
 
-    assert calls == {"playwright": 1, "parser": 1}
+    assert provider_calls == [ProviderInputIdentity(model="341490", url=cli.url)]
     assert result["report"]["source"] == "skroutz"
     assert result["report"]["fetch_mode"] == "playwright"
     assert result["fetch"].method == "playwright"

@@ -71,7 +71,7 @@ def build_provider(skroutz_fixtures_root: Path) -> SkroutzProvider:
     return SkroutzProvider(fixture_html_by_url={SAMPLE_URL: skroutz_fixtures_root / "html" / f"{SAMPLE_MODEL}.html"})
 
 
-def test_resolve_provider_for_source_defaults_to_electronet_only() -> None:
+def test_resolve_provider_for_source_selects_electronet_and_skroutz() -> None:
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example")
 
     electronet_provider = run_module._resolve_provider_for_source(
@@ -79,23 +79,27 @@ def test_resolve_provider_for_source_defaults_to_electronet_only() -> None:
         cli=cli,
         fetcher=object(),
         electronet_parser=object(),
+        skroutz_parser=object(),
     )
     skroutz_provider = run_module._resolve_provider_for_source(
         source="skroutz",
         cli=cli,
         fetcher=object(),
         electronet_parser=object(),
+        skroutz_parser=object(),
     )
     manufacturer_provider = run_module._resolve_provider_for_source(
         source="manufacturer_tefal",
         cli=cli,
         fetcher=object(),
         electronet_parser=object(),
+        skroutz_parser=object(),
     )
 
     assert electronet_provider is not None
     assert electronet_provider.provider_id == "electronet"
-    assert skroutz_provider is None
+    assert skroutz_provider is not None
+    assert skroutz_provider.provider_id == "skroutz"
     assert manufacturer_provider is None
 
 
@@ -123,7 +127,7 @@ def test_skroutz_provider_normalize_returns_provider_result(skroutz_fixtures_roo
     result = provider.normalize(snapshot, identity)
 
     assert result.provider.provider_id == "skroutz"
-    assert result.provider.kind == ProviderKind.FIXTURE
+    assert result.provider.kind == ProviderKind.VENDOR_SITE
     assert result.snapshot is snapshot
     assert result.product.source_name == "skroutz"
     assert result.product.page_type == "product"
@@ -131,6 +135,42 @@ def test_skroutz_provider_normalize_returns_provider_result(skroutz_fixtures_roo
     assert result.metadata["fetch_method"] == "fixture"
     assert "name" in result.provenance
     assert "name" in result.field_diagnostics
+
+
+def test_skroutz_provider_fetch_snapshot_uses_live_fetcher_when_no_fixture_override() -> None:
+    identity = ProviderInputIdentity(model=SAMPLE_MODEL, url=SAMPLE_URL)
+    calls = {"playwright": 0, "httpx": 0}
+
+    class LiveFetcher:
+        def fetch_playwright(self, url: str):
+            calls["playwright"] += 1
+            return type(
+                "Fetch",
+                (),
+                {
+                    "url": url,
+                    "final_url": url,
+                    "html": "<html></html>",
+                    "status_code": 200,
+                    "method": "playwright",
+                    "fallback_used": True,
+                    "response_headers": {"content-type": "text/html"},
+                },
+            )()
+
+        def fetch_httpx(self, _url: str):
+            calls["httpx"] += 1
+            raise AssertionError("HTTPX should not be used when Skroutz Playwright succeeds")
+
+    provider = SkroutzProvider(fetcher=LiveFetcher())
+
+    snapshot = provider.fetch_snapshot(identity)
+
+    assert calls == {"playwright": 1, "httpx": 0}
+    assert snapshot.requested_url == SAMPLE_URL
+    assert snapshot.final_url == SAMPLE_URL
+    assert snapshot.metadata["fetch_method"] == "playwright"
+    assert snapshot.metadata["fallback_used"] is True
 
 
 def test_execute_full_run_uses_test_injected_skroutz_provider(monkeypatch, tmp_path: Path, skroutz_fixtures_root: Path) -> None:

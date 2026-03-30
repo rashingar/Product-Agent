@@ -1,10 +1,87 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M24 completed. The post-workdir test baseline is now fixture-owned under `scraper/pipeline/tests/fixtures/...`, the touched workflow tests match the live render contract, and runtime behavior remained unchanged.
+M25 completed. Supported Skroutz product URLs now route through `SkroutzProvider` in production, the existing prepare/render contract remains unchanged, and the pytest baseline is now `93 passed, 2 failed`.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## M25 — route Skroutz through the provider seam in production
+
+Goal:
+- promote Skroutz from the M22 test-injected provider proof to normal runtime provider selection without changing CLI/workflow inputs, artifact locations, metadata filenames, or validation semantics
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/providers/skroutz_provider.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- updated `scraper/pipeline/full_run.py` so `_resolve_provider_for_source(...)` now selects `SkroutzProvider` for supported Skroutz product URLs in normal production flow while leaving Electronet and manufacturer routing unchanged
+- extended `scraper/pipeline/providers/skroutz_provider.py` from a fixture-only proof into a production-capable provider adapter:
+  - live fetch path uses the existing Skroutz runtime order of Playwright first, then HTTPX fallback
+  - fixture HTML overrides remain supported for deterministic tests
+  - provider metadata now reports live fetch capability while preserving the same downstream `FetchResult` and `ParsedProduct` conversion contract
+- updated provider-selection tests to assert that:
+  - Electronet and Skroutz both resolve through the provider seam
+  - manufacturer sources still do not
+  - `SkroutzProvider` can still normalize fixture-backed snapshots
+  - `SkroutzProvider` uses the live fetcher path when no fixture override is configured
+- updated the default workflow regression in `scraper/pipeline/tests/test_workflow.py` so Skroutz now proves provider-seam execution by default instead of the legacy branch
+- updated `scraper/pipeline/tests/test_skroutz_integration.py` to assert prepare/render parity still holds for fixture-backed Skroutz workflow runs with `playwright` fetch mode preserved in the emitted report
+- left `scraper/pipeline/tests/test_skroutz_sections.py` and `scraper/pipeline/tests/test_skroutz_taxonomy.py` unchanged because they already cover downstream section extraction and taxonomy behavior; they were rerun as targeted regression validation for this milestone
+
+Commands run:
+- `Get-Content PLAN.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "M25|Skroutz|provider seam|_resolve_provider_for_source|SkroutzProvider|provider selection" PLAN.md IMPLEMENT.md DOCUMENTATION.md scraper -S`
+- `Get-Content scraper/pipeline/full_run.py`
+- `Get-Content scraper/pipeline/providers/skroutz_provider.py`
+- `Get-Content scraper/pipeline/providers/__init__.py`
+- `Get-Content scraper/pipeline/tests/test_provider_selection.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_sections.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_taxonomy.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content scraper/pipeline/providers/base.py`
+- `Get-Content scraper/pipeline/providers/models.py`
+- `Get-Content scraper/pipeline/providers/electronet_provider.py`
+- `rg -n "provider_id|ProviderKind|FIXTURE|VENDOR_SITE|supports_identity|fetch_snapshot\\(|normalize\\(" scraper/pipeline/providers -S`
+- `rg -n "_resolve_provider_for_source|legacy Skroutz|by default|skroutz provider|fetch_mode" scraper/pipeline/tests -S`
+- `git status --short`
+- `rg -n "_resolve_provider_for_source\\(" scraper/pipeline -S`
+- `python -m compileall scraper/pipeline`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_taxonomy.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+- `git status --short`
+
+Validation:
+- compile validation:
+  - `python -m compileall scraper/pipeline`
+  - passed
+- targeted provider and Skroutz validation:
+  - `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_taxonomy.py` from `scraper/`
+  - passed, `34 passed`
+- full suite validation:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - returned the accepted baseline for this milestone: `93 passed, 2 failed`
+  - unchanged accepted failures:
+    - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_pdf_candidates`
+    - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_html_candidates`
+
+Risks:
+- `SkroutzProvider` now owns both live and fixture-backed fetch paths; future provider migrations should keep fixture overrides narrow so production routing changes stay observable in runtime tests
+- the repo still carries the two pre-existing manufacturer-enrichment failures outside M25 scope
+
+Deferred:
+- no manufacturer provider migration was attempted
+- no provider-contract redesign, registry-driven runtime rewrite, CLI change, publish-semantics change, or opportunistic cleanup was performed
+- `AGENTS.md`, `IMPLEMENT.md`, `RULES.md`, and `README.md` were left unchanged because operator-facing behavior and accepted runtime I/O did not change
 
 ## M24 — stabilize the post-workdir test baseline
 

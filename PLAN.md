@@ -65,6 +65,7 @@ Phase 2 milestones:
 - M22 — add provider selection and one second provider proof (completed; `full_run.py` now has a minimal private provider-selection seam, Electronet remains the only production-selected provider, and a fixture-backed `SkroutzProvider` is proven through test-injected routing without changing default Skroutz runtime behavior)
 - M23 — rename the active runtime package and directory layout (completed; the runtime now lives under `scraper/pipeline`, active invocation runs from `scraper/` via `python -m pipeline.workflow ...` and `python -m pipeline.cli ...`, and runtime behavior remains unchanged)
 - M24 — stabilize the post-workdir test baseline (completed; touched workflow and Skroutz tests now read committed golden CSV baselines from `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/` and assert the live render contract where candidate bundles can exist while publish is skipped on failed validation)
+- M25 — route Skroutz through the provider seam in production (completed; supported Skroutz product URLs now select `SkroutzProvider` through `_resolve_provider_for_source(...)`, the provider supports live fetch plus fixture overrides, and prepare/render artifact shapes plus validation semantics remain unchanged)
 
 ## Root policy
 ### Keep in root
