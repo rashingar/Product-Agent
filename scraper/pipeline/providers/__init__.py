@@ -1,4 +1,5 @@
 from .base import ProductProvider, ProviderError
+from .manufacturer_tefal_provider import ManufacturerTefalProvider
 from .models import (
     ProviderCapability,
     ProviderDefinition,
@@ -16,6 +17,7 @@ from .registry import ProviderRegistry
 
 __all__ = [
     "ProductProvider",
+    "ManufacturerTefalProvider",
     "ProviderCapability",
     "ProviderDefinition",
     "ProviderError",

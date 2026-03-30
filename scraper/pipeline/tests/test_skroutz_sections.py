@@ -296,7 +296,7 @@ def test_143481_rendered_description_preserves_locked_wrappers(
     tmp_path: Path,
     monkeypatch,
     skroutz_fixtures_root: Path,
-    products_root: Path,
+    skroutz_golden_outputs_root: Path,
 ) -> None:
     from pipeline import workflow
 
@@ -304,7 +304,10 @@ def test_143481_rendered_description_preserves_locked_wrappers(
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
     (tmp_path / "products").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "products" / "143481.csv").write_text((products_root / "143481.csv").read_text(encoding="utf-8-sig"), encoding="utf-8")
+    (tmp_path / "products" / "143481.csv").write_text(
+        (skroutz_golden_outputs_root / "143481.csv").read_text(encoding="utf-8-sig"),
+        encoding="utf-8",
+    )
 
     cli = CLIInput(
         model=SAMPLE["model"],
@@ -319,7 +322,7 @@ def test_143481_rendered_description_preserves_locked_wrappers(
     prepare_result = prepare_workflow(cli)
     llm_output_path = prepare_result["model_root"] / "llm_output.json"
     llm_output_path.write_text(
-        json.dumps(build_llm_payload_from_baseline(products_root / "143481.csv"), ensure_ascii=False, indent=2),
+        json.dumps(build_llm_payload_from_baseline(skroutz_golden_outputs_root / "143481.csv"), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 

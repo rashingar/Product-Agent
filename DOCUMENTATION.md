@@ -1,10 +1,468 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M23 completed. The active runtime layout is now `scraper/pipeline`, active invocation runs from `scraper/` via `python -m pipeline...`, and runtime behavior remained unchanged.
+M29 completed. Full-run orchestration ownership now lives in a service-owned execution module, `run_service.py` is a thin service wrapper over that seam, and CLI/workflow behavior remains unchanged.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## M29 — make run_service the true owner of full-run orchestration
+
+Goal:
+- move the real full-run orchestration body out of `scraper/pipeline/services/run_service.py` into a service-owned execution module
+- keep CLI commands, workflow adapter behavior, artifact paths, validation semantics, publish gating, output semantics, and provider behavior unchanged
+- finish the full-run ownership inversion without widening scope into workflow or provider redesign
+
+Files added:
+- `scraper/pipeline/services/run_execution.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/run_service.py`
+- `scraper/pipeline/tests/test_services.py`
+
+Changes:
+- extracted the full-run composition body from `scraper/pipeline/services/run_service.py::run_product(...)` into `scraper/pipeline/services/run_execution.py::execute_run_workflow(...)`
+- kept the full-run composition service-owned by having the new executor compose `prepare_product(...)` and `render_product(...)` and return the same aggregated `ServiceResult` shape as before
+- reduced `scraper/pipeline/services/run_service.py` to a thin service wrapper that directly calls the new service-owned full-run executor and preserves the existing exception-wrapping behavior
+- updated `scraper/pipeline/tests/test_services.py` to prove:
+  - service-owned modules involved in prepare/render/full-run execution do not import `workflow.py`
+  - the new full-run executor still composes prepare/render results in order with unchanged aggregation semantics
+  - `run_product(...)` now delegates to the service-owned full-run executor and still wraps executor errors
+
+Commands run:
+- `Get-ChildItem -Force`
+- `rg -n "run_product|FullRunRequest|prepare_product|render_product|run_execution|workflow" scraper/pipeline -S`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scraper/pipeline/services/run_service.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/cli.py`
+- `Get-Content scraper/pipeline/services/__init__.py`
+- `rg -n "run_product\\(|prepare_product\\(|render_product\\(" scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_services.py scraper/pipeline/cli.py -S`
+- `git status --short`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/render_service.py`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `rg -n "Current milestone|M28|M29|Phase 2 milestones" PLAN.md DOCUMENTATION.md -S`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 940 -First 40`
+- `python -m compileall pipeline` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+Validation:
+- compile validation:
+  - `python -m compileall pipeline` from `scraper/`
+  - passed
+- exact requested pytest commands:
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+  - passed
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+  - passed
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed
+
+Risks:
+- `run_product(...)` remains the stable service entrypoint while the real full-run composition now lives one layer lower in `run_execution.py`; this is intentional and keeps the service contract unchanged
+- `cli.py` still owns standalone full-run metadata emission, while M29 only moves service-layer orchestration ownership
+
+Deferred:
+- no provider migration, CLI redesign, workflow redesign, artifact-path change, validation-contract change, or publish-gating change was attempted
+- `scraper/pipeline/tests/test_workflow.py` did not require edits because the workflow layer remains an unchanged adapter for prepare/render-only commands
+- `IMPLEMENT.md`, `AGENTS.md`, `README.md`, and `RULES.md` were left unchanged because M29 did not add a new durable operator rule or change the accepted runtime interface
+
+## M28 — make services the true owner of prepare/render orchestration
+
+Goal:
+- move the real prepare/render orchestration bodies out of `scraper/pipeline/workflow.py` and into service-owned execution modules
+- keep CLI/workflow commands, artifact paths, validation semantics, publish gating, and provider behavior unchanged
+- finish the prepare/render ownership inversion without widening scope into provider changes or full-run redesign
+
+Files added:
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/render_execution.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- extracted the prepare orchestration body from `workflow.prepare_workflow(...)` into `scraper/pipeline/services/prepare_execution.py::execute_prepare_workflow(...)`, including scrape artifact normalization, prompt/context generation, and prepare metadata writes
+- extracted the render orchestration body from `workflow.render_workflow(...)` into `scraper/pipeline/services/render_execution.py::execute_render_workflow(...)`, including LLM output loading, candidate generation, validation, publish gating, and render metadata writes
+- updated `scraper/pipeline/services/prepare_service.py` so `prepare_product(...)` now calls the service-owned prepare executor directly and no longer imports `workflow.py`
+- updated `scraper/pipeline/services/render_service.py` so `render_product(...)` now calls the service-owned render executor directly and no longer imports `workflow.py`
+- reduced `scraper/pipeline/workflow.py` to thin prepare/render adapters that inject the existing `WORK_ROOT`, `PRODUCTS_ROOT`, and `execute_full_run(...)` dependencies while keeping the CLI entrypoint behavior unchanged
+- updated `scraper/pipeline/tests/test_services.py` to assert the services no longer import `workflow.py` and to mock the new service-owned executors instead of workflow-owned orchestration
+- updated `scraper/pipeline/tests/test_workflow.py` with focused adapter-delegation coverage while preserving the existing prepare/render behavior tests at the current baseline
+
+Commands run:
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/render_service.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "prepare_workflow|render_workflow|prepare_product\\(|render_product\\(" scraper/pipeline -S`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/services/__init__.py`
+- `git status --short`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py -TotalCount 40`
+- `Get-Content scraper/pipeline/tests/test_skroutz_sections.py -TotalCount 40`
+- `Get-Content scraper/pipeline/workflow.py | Select-Object -First 220`
+- `Get-Content scraper/pipeline/workflow.py | Select-Object -Skip 220`
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -First 140`
+- `python -m compileall pipeline` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+- `python -m pytest -q` from `scraper/`
+- `py -0p`
+- `where.exe python`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+Validation:
+- compile validation:
+  - `python -m compileall pipeline` from `scraper/`
+  - passed
+- exact requested pytest commands:
+  - `python -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+  - `python -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+  - `python -m pytest -q` from `scraper/`
+  - all three failed before test discovery because the active `python` resolved to `C:\Users\Rashingar\AppData\Local\Programs\Python\Python310\python.exe`, which does not have `pytest` installed
+- executed pytest validation on the installed interpreter:
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+  - passed, `7 passed`
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+  - passed, `15 passed`
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed, `103 passed`
+
+Risks:
+- `workflow.prepare_workflow(...)` and `workflow.render_workflow(...)` remain as compatibility adapters for existing tests and callers; M28 intentionally changes ownership, not the public callable surface
+- service-layer path constants still exist in both workflow adapters and service-owned executors by design so the workflow layer can continue injecting the current roots without changing runtime semantics
+
+Deferred:
+- no provider changes, full-run service redesign, CLI UX changes, artifact-path changes, or validation-contract changes were attempted
+- `IMPLEMENT.md`, `AGENTS.md`, `README.md`, and `RULES.md` were left unchanged because M28 did not introduce a new durable operator rule or change the accepted runtime interface
+
+## M27 — retire legacy runtime source branches and close the migration phase
+
+Goal:
+- remove the now-obsolete legacy source-routing fallback branches left behind after provider parity was proven
+- keep provider-backed execution as the single active internal seam for all currently supported runtime sources
+- preserve CLI/workflow commands, accepted inputs, outputs, artifact paths, and validation semantics while closing Phase 2 cleanly
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Files moved:
+- none
+
+Before/after summary:
+- before:
+  - all supported sources already had provider adapters, but `scraper/pipeline/full_run.py` still carried direct fetch/parser fallback branches that could bypass the provider seam if provider selection returned `None`
+  - `full_run.py` also still contained one dead pre-migration section-routing branch under `if cli.sections > 0 and source != "skroutz":` that could never execute
+- after:
+  - `execute_full_run(...)` now fails fast with `No provider configured for supported source: ...` instead of falling back to legacy per-source fetch/parser logic
+  - the dead non-provider section-routing branch was removed, leaving the live non-Skroutz section extraction path and the existing Skroutz-specific post-enrichment path intact
+  - tests now lock both the supported provider map and the fail-fast no-provider behavior so the migration boundary does not regress silently
+
+Changes:
+- updated `scraper/pipeline/full_run.py` to remove the legacy direct fetch/parse branches for supported sources and require provider selection before normalization proceeds
+- removed the unreachable dead source-branch duplication in the non-Skroutz section extraction block of `scraper/pipeline/full_run.py`
+- added `test_resolve_provider_for_source_returns_none_for_unsupported_source` in `scraper/pipeline/tests/test_provider_selection.py` so the supported-provider map stays explicit
+- added `test_execute_full_run_fails_fast_when_supported_source_has_no_provider` in `scraper/pipeline/tests/test_workflow.py` so a missing provider can no longer silently reactivate legacy runtime routing
+- updated `PLAN.md` to mark M27 completed, mark Phase 2 completed, and add the Phase 3 handoff header without starting new implementation work
+
+Commands run:
+- `Get-ChildItem`
+- `Get-Content PLAN.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scraper\\pipeline\\full_run.py`
+- `Get-Content scraper\\pipeline\\tests\\test_workflow.py`
+- `Get-Content scraper\\pipeline\\tests\\test_provider_selection.py`
+- `rg -n '_resolve_provider_for_source|provider is not None|provider seam|provider-backed|legacy branch|legacy routing|source == "skroutz"|source == "manufacturer_tefal"|return None' scraper\\pipeline PLAN.md README.md IMPLEMENT.md -S`
+- `rg -n 'fetch_httpx\\(|fetch_playwright\\(|ManufacturerProductParser\\(|SkroutzProductParser\\(|ElectronetProductParser\\(' scraper\\pipeline\\full_run.py scraper\\pipeline\\providers scraper\\pipeline\\tests -S`
+- `Get-Content scraper\\pipeline\\source_detection.py`
+- `Get-Content scraper\\pipeline\\tests\\conftest.py`
+- `Get-Content scraper\\pipeline\\providers\\registry.py`
+- `Get-Content scraper\\pipeline\\providers\\electronet_provider.py`
+- `Get-Content scraper\\pipeline\\providers\\skroutz_provider.py`
+- `Get-Content scraper\\pipeline\\providers\\manufacturer_tefal_provider.py`
+- `git diff -- scraper/pipeline/full_run.py scraper/pipeline/tests/test_provider_selection.py scraper/pipeline/tests/test_workflow.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+Validation:
+- targeted migration-closure validation:
+  - `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py` from `scraper/`
+  - passed, `21 passed`
+- full suite validation:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed, `100 passed`
+
+Risks:
+- provider resolution still uses the existing private helper `_resolve_provider_for_source(...)`; M27 intentionally closes the migration by removing fallback routing rather than redesigning provider registration or widening the contract
+
+Deferred:
+- no provider-registry runtime rewrite, hybrid RAG work, service-layer redesign, CLI UX change, README change, or source-scope expansion was attempted
+- `IMPLEMENT.md`, `README.md`, `AGENTS.md`, and `RULES.md` were left unchanged because no durable process rule or user-facing runtime behavior changed
+
+## M26 — migrate supported manufacturer flows behind provider adapters
+
+Goal:
+- route the currently supported manufacturer runtime flow behind the existing provider seam without changing CLI/workflow inputs, artifact locations, metadata filenames, service contracts, or validation semantics
+- address the current manufacturer enrichment weak spot reflected in the failing test baseline
+
+Files added:
+- `scraper/pipeline/providers/manufacturer_tefal_provider.py`
+- `scraper/pipeline/tests/fixtures/providers/manufacturer_tefal/344709/product.html`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/manufacturer_enrichment.py`
+- `scraper/pipeline/providers/__init__.py`
+- `scraper/pipeline/tests/test_manufacturer_enrichment.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- added `ManufacturerTefalProvider` under `scraper/pipeline/providers/` as the production adapter for the currently supported manufacturer source:
+  - preserves the existing live fetch order of HTTPX first, then Playwright fallback
+  - reuses the existing `ManufacturerProductParser`
+  - supports optional fixture HTML overrides for deterministic provider tests
+- updated `scraper/pipeline/full_run.py` so `_resolve_provider_for_source(...)` now selects `ManufacturerTefalProvider` for `manufacturer_tefal` while leaving the rest of the prepare/render pipeline unchanged
+- exported `ManufacturerTefalProvider` from `scraper/pipeline/providers/__init__.py`
+- added a committed manufacturer provider fixture at `scraper/pipeline/tests/fixtures/providers/manufacturer_tefal/344709/product.html` so provider normalization can be tested against a stable Tefal product page sample
+- updated `scraper/pipeline/tests/test_provider_selection.py` to prove:
+  - Electronet, Skroutz, and the supported manufacturer source all resolve through the production provider seam
+  - `ManufacturerTefalProvider.fetch_snapshot()` reads the committed fixture
+  - `ManufacturerTefalProvider.normalize()` returns the expected provider/runtime result shape
+- updated `scraper/pipeline/tests/test_workflow.py` so the manufacturer default-flow regression now proves provider-backed execution in production instead of the legacy direct parser branch
+- made one narrow compatibility fix in `scraper/pipeline/manufacturer_enrichment.py`:
+  - enrichment now tolerates official-doc adapters whose `discover(...)` implementation does not accept the optional `fetcher` keyword
+  - this preserves the current enrichment contract while resolving the previously failing manufacturer framework tests
+- updated `scraper/pipeline/tests/test_manufacturer_enrichment.py` to keep the manufacturer regression explicit, including the no-`fetcher` discover-signature compatibility path
+- left `scraper/pipeline/parser_product_manufacturer.py`, workflow metadata, CLI/service entrypoints, output locations, and validation semantics unchanged
+
+Commands run:
+- `Get-Content PLAN.md | Select-Object -First 90`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 180`
+- `rg -n "manufacturer_tefal|ManufacturerProductParser|enrich_source_from_manufacturer_docs|provider|supported manufacturer|adapter" scraper/pipeline PLAN.md DOCUMENTATION.md -S`
+- `git status --short`
+- `Get-Content scraper/pipeline/full_run.py`
+- `Get-Content scraper/pipeline/manufacturer_enrichment.py`
+- `Get-Content scraper/pipeline/parser_product_manufacturer.py`
+- `Get-Content scraper/pipeline/source_detection.py`
+- `Get-Content scraper/pipeline/tests/test_manufacturer_enrichment.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 380 -First 140`
+- `Get-Content scraper/pipeline/tests/conftest.py`
+- `Get-ChildItem -Recurse scraper/pipeline/tests/fixtures/providers/manufacturer_tefal`
+- `Get-Content scraper/pipeline/providers/__init__.py`
+- `Get-Content scraper/pipeline/tests/test_manufacturer_enrichment_tefal.py`
+- `Get-Content scraper/pipeline/tests/test_provider_selection.py`
+- `Get-Content scraper/pipeline/models.py | Select-String -Pattern "class FetchResult|class ParsedProduct|class SourceProductData" -Context 0,60`
+- `rg -n "_resolve_provider_for_source\\(" scraper/pipeline/tests scraper/pipeline -S`
+- `python -m compileall scraper/pipeline`
+- `py -3.12 -m pytest -q pipeline/tests/test_manufacturer_enrichment.py pipeline/tests/test_manufacturer_enrichment_tefal.py pipeline/tests/test_parser_product_manufacturer.py pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py::test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+- `git status --short`
+- `git diff --stat`
+
+Validation:
+- compile validation:
+  - `python -m compileall scraper/pipeline`
+  - passed
+- targeted manufacturer validation:
+  - `py -3.12 -m pytest -q pipeline/tests/test_manufacturer_enrichment.py pipeline/tests/test_manufacturer_enrichment_tefal.py pipeline/tests/test_parser_product_manufacturer.py pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py::test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default` from `scraper/`
+  - passed, `17 passed`
+- full suite validation:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed, `98 passed`
+
+Risks:
+- only the currently supported manufacturer runtime source is provider-backed in M26; broader manufacturer-provider expansion remains future work
+- the manufacturer fixture coverage is intentionally narrow and focused on the committed Tefal regression sample, so future manufacturer providers should add their own fixture roots rather than overloading this one
+
+Deferred:
+- no service-layer redesign, workflow metadata redesign, CLI change, README change, or source-scope expansion was attempted
+- no legacy manufacturer code was removed beyond the smallest runtime-routing change needed for this milestone
+- `IMPLEMENT.md`, `AGENTS.md`, `RULES.md`, and `README.md` were left unchanged because no new durable process rule or accepted runtime I/O change was introduced
+
+## M25 — route Skroutz through the provider seam in production
+
+Goal:
+- promote Skroutz from the M22 test-injected provider proof to normal runtime provider selection without changing CLI/workflow inputs, artifact locations, metadata filenames, or validation semantics
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/providers/skroutz_provider.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- updated `scraper/pipeline/full_run.py` so `_resolve_provider_for_source(...)` now selects `SkroutzProvider` for supported Skroutz product URLs in normal production flow while leaving Electronet and manufacturer routing unchanged
+- extended `scraper/pipeline/providers/skroutz_provider.py` from a fixture-only proof into a production-capable provider adapter:
+  - live fetch path uses the existing Skroutz runtime order of Playwright first, then HTTPX fallback
+  - fixture HTML overrides remain supported for deterministic tests
+  - provider metadata now reports live fetch capability while preserving the same downstream `FetchResult` and `ParsedProduct` conversion contract
+- updated provider-selection tests to assert that:
+  - Electronet and Skroutz both resolve through the provider seam
+  - manufacturer sources still do not
+  - `SkroutzProvider` can still normalize fixture-backed snapshots
+  - `SkroutzProvider` uses the live fetcher path when no fixture override is configured
+- updated the default workflow regression in `scraper/pipeline/tests/test_workflow.py` so Skroutz now proves provider-seam execution by default instead of the legacy branch
+- updated `scraper/pipeline/tests/test_skroutz_integration.py` to assert prepare/render parity still holds for fixture-backed Skroutz workflow runs with `playwright` fetch mode preserved in the emitted report
+- left `scraper/pipeline/tests/test_skroutz_sections.py` and `scraper/pipeline/tests/test_skroutz_taxonomy.py` unchanged because they already cover downstream section extraction and taxonomy behavior; they were rerun as targeted regression validation for this milestone
+
+Commands run:
+- `Get-Content PLAN.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "M25|Skroutz|provider seam|_resolve_provider_for_source|SkroutzProvider|provider selection" PLAN.md IMPLEMENT.md DOCUMENTATION.md scraper -S`
+- `Get-Content scraper/pipeline/full_run.py`
+- `Get-Content scraper/pipeline/providers/skroutz_provider.py`
+- `Get-Content scraper/pipeline/providers/__init__.py`
+- `Get-Content scraper/pipeline/tests/test_provider_selection.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_sections.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_taxonomy.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content scraper/pipeline/providers/base.py`
+- `Get-Content scraper/pipeline/providers/models.py`
+- `Get-Content scraper/pipeline/providers/electronet_provider.py`
+- `rg -n "provider_id|ProviderKind|FIXTURE|VENDOR_SITE|supports_identity|fetch_snapshot\\(|normalize\\(" scraper/pipeline/providers -S`
+- `rg -n "_resolve_provider_for_source|legacy Skroutz|by default|skroutz provider|fetch_mode" scraper/pipeline/tests -S`
+- `git status --short`
+- `rg -n "_resolve_provider_for_source\\(" scraper/pipeline -S`
+- `python -m compileall scraper/pipeline`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_taxonomy.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+- `git status --short`
+
+Validation:
+- compile validation:
+  - `python -m compileall scraper/pipeline`
+  - passed
+- targeted provider and Skroutz validation:
+  - `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_taxonomy.py` from `scraper/`
+  - passed, `34 passed`
+- full suite validation:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - returned the accepted baseline for this milestone: `93 passed, 2 failed`
+  - unchanged accepted failures:
+    - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_pdf_candidates`
+    - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_html_candidates`
+
+Risks:
+- `SkroutzProvider` now owns both live and fixture-backed fetch paths; future provider migrations should keep fixture overrides narrow so production routing changes stay observable in runtime tests
+- the repo still carries the two pre-existing manufacturer-enrichment failures outside M25 scope
+
+Deferred:
+- no manufacturer provider migration was attempted
+- no provider-contract redesign, registry-driven runtime rewrite, CLI change, publish-semantics change, or opportunistic cleanup was performed
+- `AGENTS.md`, `IMPLEMENT.md`, `RULES.md`, and `README.md` were left unchanged because operator-facing behavior and accepted runtime I/O did not change
+
+## M24 — stabilize the post-workdir test baseline
+
+Goal:
+- stabilize the post-M23 pytest baseline without changing runtime behavior by moving touched test baselines under `scraper/pipeline/tests/fixtures/...` and aligning workflow assertions with the live render contract
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/conftest.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Files added:
+- `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/143481.csv`
+- `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/307497.csv`
+- `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/341490.csv`
+- `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/344317.csv`
+
+Changes:
+- added `skroutz_golden_outputs_root` as the shared pytest fixture root for committed Skroutz golden CSV baselines
+- removed the touched test-layer dependency on repo-level `products/*.csv` by copying the four committed Skroutz baseline CSVs into `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/`
+- updated `test_skroutz_integration.py` to seed temporary publish baselines from fixture-owned golden outputs only and to assert the live render contract:
+  - candidate CSV still exists when validation fails
+  - `published_csv_path` is `None` when validation is not ok
+  - publish-skip warnings are surfaced in the validation report
+- updated `test_skroutz_sections.py` to build its LLM payload and temporary baseline only from fixture-owned golden outputs
+- updated `test_workflow.py` to assert that render still writes the full candidate bundle even when validation fails and publish is skipped
+- left runtime modules unchanged because the failing behavior was test-expectation drift, not a proven workflow bug
+
+Commands run:
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content IMPLEMENT.md`
+- `rg --files scraper/pipeline/tests`
+- `Get-Content scraper/pipeline/tests/conftest.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py`
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content scraper/pipeline/services/run_service.py`
+- `git ls-files products work scraper/work`
+- `rg -n "products_root|products/.*csv|golden_outputs/skroutz" scraper/pipeline/tests`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py::test_render_workflow_writes_candidate_bundle pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures pipeline/tests/test_skroutz_sections.py::test_143481_rendered_description_preserves_locked_wrappers` from `scraper/`
+- `Get-Content` for the generated `233541.validation.json`, `143481.validation.json`, and matching `render.run.json` files under the temporary pytest workdirs
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+- `git status --short`
+
+Validation:
+- focused failing-contract reproduction before the test updates:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py::test_render_workflow_writes_candidate_bundle pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures pipeline/tests/test_skroutz_sections.py::test_143481_rendered_description_preserves_locked_wrappers` from `scraper/`
+  - result: `2 failed, 1 passed`
+  - failures:
+    - `pipeline/tests/test_workflow.py::test_render_workflow_writes_candidate_bundle`
+    - `pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures`
+  - both failures were stale publish expectations against a real `published_csv_path is None` contract when validation was not ok
+- targeted touched-test validation after the fix:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+  - passed, `24 passed`
+- full suite validation after the fix:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - returned the accepted baseline: `92 passed, 2 failed`
+  - unchanged accepted failures:
+    - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_pdf_candidates`
+    - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_html_candidates`
+
+Risks:
+- the committed deliverable CSVs under `products/` still exist in the repo by design; M24 only removed the touched tests' baseline dependency on them
+- the full-suite baseline still includes the two long-standing manufacturer-enrichment failures outside M24 scope
+
+Deferred:
+- no runtime-code, workflow-contract, provider-routing, or CLI changes were made
+- no additional fixture migration beyond the touched baseline CSVs was attempted in this milestone
 
 ## M23 — rename `scrapper/electronet_single_import` to `scraper/pipeline`
 

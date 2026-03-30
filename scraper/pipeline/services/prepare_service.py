@@ -4,12 +4,11 @@ from pathlib import Path
 
 from ..models import CLIInput
 from .errors import ServiceError
+from .prepare_execution import WORK_ROOT, execute_prepare_workflow
 from .models import PrepareRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 
 
 def prepare_product(request: PrepareRequest) -> ServiceResult:
-    from .. import workflow
-
     cli = CLIInput(
         model=request.model,
         url=request.url,
@@ -18,10 +17,10 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
         skroutz_status=request.skroutz_status,
         boxnow=request.boxnow,
         price=request.price,
-        out=str(workflow.WORK_ROOT / request.model / "scrape"),
+        out=str(WORK_ROOT / request.model / "scrape"),
     )
     try:
-        result = workflow.prepare_workflow(cli)
+        result = execute_prepare_workflow(cli, work_root=WORK_ROOT)
     except Exception as exc:
         raise ServiceError(type(exc).__name__, str(exc), cause=exc) from exc
 

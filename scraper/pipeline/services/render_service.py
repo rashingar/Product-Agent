@@ -3,14 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 
 from .errors import ServiceError
+from .render_execution import execute_render_workflow
 from .models import RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 
 
 def render_product(request: RenderRequest) -> ServiceResult:
-    from .. import workflow
-
     try:
-        result = workflow.render_workflow(request.model)
+        result = execute_render_workflow(request.model)
     except Exception as exc:
         raise ServiceError(type(exc).__name__, str(exc), cause=exc) from exc
 

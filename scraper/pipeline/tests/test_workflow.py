@@ -38,6 +38,27 @@ def test_build_cli_input_from_template_file(tmp_path: Path, monkeypatch) -> None
     assert str(cli.price) == "2099"
 
 
+def test_prepare_workflow_delegates_to_service_execution(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
+
+    def fake_execute_full_run(_cli):
+        return {"unused": True}
+
+    def fake_execute_prepare_workflow(cli_arg, *, work_root, execute_full_run_fn):
+        assert cli_arg is cli
+        assert work_root == tmp_path / "work"
+        assert execute_full_run_fn is fake_execute_full_run
+        return {"delegated": True}
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_workflow", fake_execute_prepare_workflow)
+
+    assert workflow.prepare_workflow(cli) == {"delegated": True}
+
+
 def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
 
@@ -98,6 +119,22 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
     assert metadata["artifacts"]["llm_output_path"] == str(result["model_root"] / "llm_output.json")
     assert metadata["details"]["source"] == ""
+
+
+def test_render_workflow_delegates_to_service_execution(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    def fake_execute_render_workflow(model, *, work_root, products_root):
+        assert model == "233541"
+        assert work_root == tmp_path / "work"
+        assert products_root == tmp_path / "products"
+        return {"delegated": True}
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+    monkeypatch.setattr(workflow, "execute_render_workflow", fake_execute_render_workflow)
+
+    assert workflow.render_workflow("233541") == {"delegated": True}
 
 
 def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
@@ -228,9 +265,17 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
     assert result["report"]["identity_checks"]["source"] == "electronet"
 
 
-def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_path: Path) -> None:
+def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch, tmp_path: Path) -> None:
     from pipeline import full_run as run_module
-    from pipeline.models import FetchResult
+    from pipeline.providers.models import (
+        ProviderCapability,
+        ProviderDefinition,
+        ProviderInputIdentity,
+        ProviderKind,
+        ProviderResult,
+        ProviderSnapshot,
+        ProviderSnapshotKind,
+    )
 
     cli = CLIInput(
         model="341490",
@@ -262,16 +307,9 @@ def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_p
             spec_sections=[SpecSection(section="Χαρακτηριστικά", items=[SpecItem(label="Ισχύς", value="2200 W")])],
         ),
     )
-    calls = {"playwright": 0, "parser": 0}
+    provider_calls: list[ProviderInputIdentity] = []
 
     class DummyFetcher:
-        def fetch_httpx(self, _url):
-            raise AssertionError("Default Skroutz flow should not fall back to httpx when playwright succeeds")
-
-        def fetch_playwright(self, _url):
-            calls["playwright"] += 1
-            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
-
         def download_gallery_images(self, **_kwargs):
             return [], [], []
 
@@ -291,21 +329,65 @@ def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_p
         def match(self, *_args, **_kwargs):
             return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
 
-    class DummySkroutzParser:
-        def parse(self, _html, _url, fallback_used=False):
-            assert fallback_used is True
-            calls["parser"] += 1
-            return parsed
+    class UnexpectedParser:
+        def parse(self, *_args, **_kwargs):
+            raise AssertionError("Skroutz parser should not be called directly outside the provider seam")
 
     class UnexpectedElectronetProvider:
         def __init__(self, **_kwargs):
             raise AssertionError("Electronet provider should not be selected for Skroutz by default")
 
+    class DummySkroutzProvider:
+        def __init__(self, *, fetcher, parser):
+            assert isinstance(fetcher, DummyFetcher)
+            assert isinstance(parser, UnexpectedParser)
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="skroutz",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "playwright", "fallback_used": True},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=ProviderDefinition(
+                    provider_id="skroutz",
+                    source_name="skroutz",
+                    kind=ProviderKind.VENDOR_SITE,
+                    capabilities=frozenset(
+                        {
+                            ProviderCapability.URL_INPUT,
+                            ProviderCapability.LIVE_FETCH,
+                            ProviderCapability.HTML_SNAPSHOT,
+                            ProviderCapability.NORMALIZED_PRODUCT,
+                        }
+                    ),
+                ),
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
+
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("skroutz", True, "skroutz_product_path"))
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: DummySkroutzParser())
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
+    monkeypatch.setattr(run_module, "SkroutzProvider", DummySkroutzProvider)
     monkeypatch.setattr(run_module, "ElectronetProvider", UnexpectedElectronetProvider)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(
@@ -331,15 +413,23 @@ def test_execute_full_run_uses_legacy_skroutz_path_by_default(monkeypatch, tmp_p
 
     result = run_module.execute_full_run(cli)
 
-    assert calls == {"playwright": 1, "parser": 1}
+    assert provider_calls == [ProviderInputIdentity(model="341490", url=cli.url)]
     assert result["report"]["source"] == "skroutz"
     assert result["report"]["fetch_mode"] == "playwright"
     assert result["fetch"].method == "playwright"
 
 
-def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
+def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(monkeypatch, tmp_path: Path) -> None:
     from pipeline import full_run as run_module
-    from pipeline.models import FetchResult
+    from pipeline.providers.models import (
+        ProviderCapability,
+        ProviderDefinition,
+        ProviderInputIdentity,
+        ProviderKind,
+        ProviderResult,
+        ProviderSnapshot,
+        ProviderSnapshotKind,
+    )
 
     cli = CLIInput(
         model="344709",
@@ -390,14 +480,9 @@ def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch,
             ],
         ),
     )
+    provider_calls: list[ProviderInputIdentity] = []
 
     class DummyFetcher:
-        def fetch_httpx(self, _url):
-            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="httpx", fallback_used=False, response_headers={})
-
-        def fetch_playwright(self, _url):
-            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
-
         def download_gallery_images(self, **_kwargs):
             return [], [], []
 
@@ -417,30 +502,105 @@ def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch,
         def match(self, *_args, **_kwargs):
             return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
 
-    class DummyManufacturerParser:
-        def parse(self, _html, _url, *, source_name, fallback_used=False):
-            assert source_name == "manufacturer_tefal"
-            assert fallback_used is False
-            return parsed
-
     class UnexpectedParser:
         def parse(self, *_args, **_kwargs):
-            raise AssertionError("Unexpected parser used")
+            raise AssertionError("Manufacturer parser should not be called directly outside the provider seam")
+
+    class DummyManufacturerTefalProvider:
+        def __init__(self, *, fetcher, parser):
+            assert isinstance(fetcher, DummyFetcher)
+            assert isinstance(parser, UnexpectedParser)
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="manufacturer_tefal",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "httpx", "fallback_used": False},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=ProviderDefinition(
+                    provider_id="manufacturer_tefal",
+                    source_name="manufacturer_tefal",
+                    kind=ProviderKind.MANUFACTURER_SITE,
+                    capabilities=frozenset(
+                        {
+                            ProviderCapability.URL_INPUT,
+                            ProviderCapability.LIVE_FETCH,
+                            ProviderCapability.HTML_SNAPSHOT,
+                            ProviderCapability.NORMALIZED_PRODUCT,
+                        }
+                    ),
+                ),
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
 
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "manufacturer_tefal")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
     monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
     monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: DummyManufacturerParser())
+    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: UnexpectedParser())
+    monkeypatch.setattr(run_module, "ManufacturerTefalProvider", DummyManufacturerTefalProvider)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
 
     result = run_module.execute_full_run(cli)
 
+    assert provider_calls == [ProviderInputIdentity(model="344709", url=cli.url)]
     assert result["parsed"].source.source_name == "manufacturer_tefal"
+    assert result["report"]["fetch_mode"] == "httpx"
+    assert result["fetch"].method == "httpx"
     assert result["normalized"]["deterministic_product"]["mpn"] == "IG602A"
+
+
+def test_execute_full_run_fails_fast_when_supported_source_has_no_provider(monkeypatch, tmp_path: Path) -> None:
+    from pipeline import full_run as run_module
+
+    cli = CLIInput(
+        model="341490",
+        url="https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html",
+        photos=2,
+        sections=0,
+        skroutz_status=0,
+        boxnow=1,
+        price="19",
+        out=str(tmp_path),
+    )
+
+    class DummySchemaMatcher:
+        known_section_titles = set()
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+    monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
+    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: object())
+    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: object())
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: object())
+    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: object())
+    monkeypatch.setattr(run_module, "_resolve_provider_for_source", lambda **_kwargs: None)
+
+    with pytest.raises(RuntimeError, match="No provider configured for supported source: skroutz"):
+        run_module.execute_full_run(cli)
 
 
 def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monkeypatch) -> None:
@@ -561,7 +721,7 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
     assert metadata["run"]["error_detail"] == "prepare exploded"
 
 
-def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) -> None:
+def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
@@ -638,22 +798,25 @@ def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) ->
     result = render_workflow(model)
 
     assert result["candidate_csv_path"].exists()
-    assert result["published_csv_path"].exists()
-    assert result["published_csv_path"] == products_dir / f"{model}.csv"
-    assert result["published_csv_path"].read_text(encoding="utf-8-sig") == result["candidate_csv_path"].read_text(encoding="utf-8-sig")
+    assert result["published_csv_path"] is None
     assert result["validation_report_path"].exists()
     assert result["metadata_path"].exists()
+    assert result["run_status"] == "failed"
+    assert result["validation_report"]["ok"] is False
     assert "field_health" in result["validation_report"]
+    assert result["validation_report"]["errors"] == ["llm_presentation_shape_invalid"]
+    assert "Candidate failed validation; skipping publish to products/." in result["validation_report"]["warnings"]
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
     assert result["metadata_path"].name == "render.run.json"
     assert metadata["run"]["model"] == model
     assert metadata["run"]["run_type"] == "render"
-    assert metadata["run"]["status"] == "completed"
+    assert metadata["run"]["status"] == "failed"
     assert metadata["artifacts"]["candidate_csv_path"] == str(result["candidate_csv_path"])
-    assert metadata["artifacts"]["published_csv_path"] == str(result["published_csv_path"])
+    assert metadata["artifacts"]["published_csv_path"] is None
     assert metadata["artifacts"]["validation_report_path"] == str(result["validation_report_path"])
     assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
-    assert metadata["details"]["validation_ok"] == result["validation_report"]["ok"]
+    assert metadata["details"]["validation_ok"] is False
+    assert metadata["details"]["published"] is False
 
 
 def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_path: Path, monkeypatch) -> None:

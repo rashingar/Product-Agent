@@ -234,6 +234,22 @@ def test_enrichment_framework_supports_html_candidates(monkeypatch, tmp_path: Pa
     assert Path(source.manufacturer_documents[0]["local_path"]).suffix == ".html"
 
 
+def test_enrichment_framework_supports_adapters_without_fetcher_parameter(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(enrichment_module, "get_official_doc_adapters", lambda: [_FakeHtmlAdapter()])
+    source = SourceProductData(source_name="skroutz", brand="HtmlBrand", mpn="HTML-1", name="HtmlBrand HTML-1")
+    taxonomy = TaxonomyResolution(parent_category="A", leaf_category="B", sub_category="C")
+
+    diagnostics = enrich_source_from_manufacturer_docs(
+        source=source,
+        taxonomy=taxonomy,
+        fetcher=_DummyFetcher(html="<html><body><dl><dt>Χρώμα</dt><dd>Μαύρο</dd></dl></body></html>"),
+        output_dir=tmp_path,
+    )
+
+    assert diagnostics["applied"] is True
+    assert diagnostics["provider"] == "fakehtml"
+
+
 def test_enrichment_framework_gracefully_falls_back_when_no_provider_matches(tmp_path: Path) -> None:
     source = SourceProductData(source_name="skroutz", brand="UnknownBrand", mpn="ABC123", name="UnknownBrand ABC123")
     taxonomy = TaxonomyResolution(parent_category="A", leaf_category="B", sub_category="C")

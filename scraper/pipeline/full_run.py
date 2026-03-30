@@ -18,6 +18,8 @@ from .parser_product_manufacturer import ManufacturerProductParser
 from .parser_product_skroutz import SkroutzProductParser
 from .providers.base import ProductProvider, ProviderError
 from .providers.electronet_provider import ElectronetProvider
+from .providers.manufacturer_tefal_provider import ManufacturerTefalProvider
+from .providers.skroutz_provider import SkroutzProvider
 from .providers.models import ProviderInputIdentity, ProviderResult
 from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
@@ -99,10 +101,16 @@ def _resolve_provider_for_source(
     cli: CLIInput,
     fetcher: ElectronetFetcher,
     electronet_parser: ElectronetProductParser,
+    skroutz_parser: SkroutzProductParser,
+    manufacturer_parser: ManufacturerProductParser,
 ) -> ProductProvider | None:
     del cli
     if source == "electronet":
         return ElectronetProvider(fetcher=fetcher, parser=electronet_parser)
+    if source == "skroutz":
+        return SkroutzProvider(fetcher=fetcher, parser=skroutz_parser)
+    if source == "manufacturer_tefal":
+        return ManufacturerTefalProvider(fetcher=fetcher, parser=manufacturer_parser)
     return None
 
 
@@ -118,43 +126,19 @@ def execute_full_run(cli: CLIInput) -> dict[str, Any]:
         cli=cli,
         fetcher=fetcher,
         electronet_parser=electronet_parser,
+        skroutz_parser=skroutz_parser,
+        manufacturer_parser=manufacturer_parser,
     )
+    if provider is None:
+        raise RuntimeError(f"No provider configured for supported source: {source}")
 
-    if provider is not None:
-        identity = ProviderInputIdentity(model=cli.model, url=cli.url)
-        try:
-            provider_result = provider.normalize(provider.fetch_snapshot(identity), identity)
-        except ProviderError as exc:
-            raise RuntimeError(str(exc)) from exc
-        fetch = _provider_result_to_fetch(provider_result)
-        parsed = _provider_result_to_parsed(provider_result)
-    elif source == "skroutz":
-        try:
-            fetch = fetcher.fetch_playwright(cli.url)
-        except FetchError as exc:
-            try:
-                fetch = fetcher.fetch_httpx(cli.url)
-            except FetchError as nested_exc:
-                raise RuntimeError(str(nested_exc)) from nested_exc
-        parsed = skroutz_parser.parse(fetch.html, fetch.final_url, fallback_used=fetch.fallback_used)
-    else:
-        try:
-            fetch = fetcher.fetch_httpx(cli.url)
-        except FetchError:
-            try:
-                fetch = fetcher.fetch_playwright(cli.url)
-            except FetchError as exc:
-                raise RuntimeError(str(exc)) from exc
-
-        if source == "manufacturer_tefal":
-            parsed = manufacturer_parser.parse(
-                fetch.html,
-                fetch.final_url,
-                source_name=source,
-                fallback_used=fetch.fallback_used,
-            )
-        else:
-            parsed = skroutz_parser.parse(fetch.html, fetch.final_url, fallback_used=fetch.fallback_used)
+    identity = ProviderInputIdentity(model=cli.model, url=cli.url)
+    try:
+        provider_result = provider.normalize(provider.fetch_snapshot(identity), identity)
+    except ProviderError as exc:
+        raise RuntimeError(str(exc)) from exc
+    fetch = _provider_result_to_fetch(provider_result)
+    parsed = _provider_result_to_parsed(provider_result)
 
     final_source, final_scope_ok, final_scope_reason = validate_url_scope(fetch.final_url)
     if final_source != source or not final_scope_ok:
@@ -219,91 +203,16 @@ def execute_full_run(cli: CLIInput) -> dict[str, Any]:
     if sections_artifact_path.exists():
         sections_artifact_path.unlink()
     if cli.sections > 0 and source != "skroutz":
-        if source == "skroutz":
-            extracted_window = extract_skroutz_section_window(
-                fetch.html,
-                base_url=parsed.source.canonical_url or parsed.source.url,
-            )
-            section_warnings.extend(extracted_window.get("warnings", []))
-            section_extraction_window = dict(extracted_window.get("window", section_extraction_window))
-            all_sections = list(extracted_window.get("sections", []))
-            try:
-                rendered_section_data = fetcher.extract_skroutz_section_image_records(fetch.final_url)
-            except FetchError as exc:
-                raise RuntimeError(f"Skroutz rendered section extraction failed: {exc}") from exc
-            rendered_sections = list(rendered_section_data.get("sections", []))
-            rendered_window = rendered_section_data.get("window", {})
-            if rendered_window:
-                section_extraction_window = {
-                    **section_extraction_window,
-                    **rendered_window,
-                    "candidate_count": max(
-                        int(section_extraction_window.get("candidate_count", 0) or 0),
-                        int(rendered_window.get("candidate_count", 0) or 0),
-                    ),
-                    "duplicate_signatures_skipped": max(
-                        int(section_extraction_window.get("duplicate_signatures_skipped", 0) or 0),
-                        int(rendered_window.get("duplicate_signatures_skipped", 0) or 0),
-                    ),
-                }
-            selected_presentation_blocks, rendered_sections = _select_skroutz_image_backed_sections(
-                all_sections=all_sections,
-                rendered_sections=rendered_sections,
-                requested_sections=cli.sections,
-            )
-            section_image_candidates = [
-                {
-                    "position": index,
-                    "title": block["title"],
-                    "candidates": list(block.get("image_candidates", [])),
-                }
-                for index, block in enumerate(selected_presentation_blocks, start=1)
-            ]
-
-            for section_index, block in enumerate(selected_presentation_blocks, start=1):
-                rendered_section = rendered_sections[section_index - 1]
-                resolved_image_url = str(rendered_section.get("resolved_image_url", "")).strip()
-                block["image_url"] = resolved_image_url
-                section_image_urls_resolved.append(
-                    {
-                        "position": section_index,
-                        "title": block["title"],
-                        "url": resolved_image_url,
-                    }
-                )
-                selected_besco_images.append(GalleryImage(url=resolved_image_url, alt=block["title"], position=section_index))
-
-            parsed.source.presentation_source_html = build_skroutz_presentation_source_html(selected_presentation_blocks)
-            write_json(
-                sections_artifact_path,
-                {
-                    "source": "skroutz",
-                    "requested_sections": cli.sections,
-                    "window": section_extraction_window,
-                    "sections": [
-                        {
-                            "position": index,
-                            "title": block["title"],
-                            "body": block["paragraph"],
-                            "image_candidates": list(block.get("image_candidates", [])),
-                            "resolved_image_url": block.get("image_url", ""),
-                            "target_filename": f"besco{index}.jpg",
-                        }
-                        for index, block in enumerate(selected_presentation_blocks, start=1)
-                    ],
-                },
-            )
-        else:
-            selected_presentation_blocks = extract_presentation_blocks(
-                parsed.source.presentation_source_html,
-                parsed.source.presentation_source_text,
-                base_url=parsed.source.canonical_url or parsed.source.url,
-            )[: cli.sections]
-            selected_besco_images = [
-                GalleryImage(url=block["image_url"], alt=block["title"], position=section_index)
-                for section_index, block in enumerate(selected_presentation_blocks, start=1)
-                if block.get("image_url")
-            ]
+        selected_presentation_blocks = extract_presentation_blocks(
+            parsed.source.presentation_source_html,
+            parsed.source.presentation_source_text,
+            base_url=parsed.source.canonical_url or parsed.source.url,
+        )[: cli.sections]
+        selected_besco_images = [
+            GalleryImage(url=block["image_url"], alt=block["title"], position=section_index)
+            for section_index, block in enumerate(selected_presentation_blocks, start=1)
+            if block.get("image_url")
+        ]
     parsed.source.besco_images = selected_besco_images
 
     besco_warnings: list[str] = []

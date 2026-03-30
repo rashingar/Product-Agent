@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-The active phase is Phase 2: architecture foundation. This phase introduces the run contract, metadata emission, service layer, provider abstraction, and one second-provider proof before any hybrid RAG work begins.
+Phase 2: architecture foundation is complete through M29. The next active phase is Phase 3: hybrid RAG foundation; this plan records the handoff boundary, but M29 does not start that work.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -38,7 +38,7 @@ The active phase is Phase 2: architecture foundation. This phase introduces the 
 
 ### Phase 2 — Architecture foundation
 
-Status: active
+Status: completed
 
 Goals:
 1. Define a stable run contract for CLI, workflow, future API, and future job execution.
@@ -64,6 +64,21 @@ Phase 2 milestones:
 - M21 — extract the current primary source into a provider adapter (completed; the Electronet primary source path now runs through a concrete provider adapter while preserving the existing runtime outputs and leaving other sources on their current execution branches)
 - M22 — add provider selection and one second provider proof (completed; `full_run.py` now has a minimal private provider-selection seam, Electronet remains the only production-selected provider, and a fixture-backed `SkroutzProvider` is proven through test-injected routing without changing default Skroutz runtime behavior)
 - M23 — rename the active runtime package and directory layout (completed; the runtime now lives under `scraper/pipeline`, active invocation runs from `scraper/` via `python -m pipeline.workflow ...` and `python -m pipeline.cli ...`, and runtime behavior remains unchanged)
+- M24 — stabilize the post-workdir test baseline (completed; touched workflow and Skroutz tests now read committed golden CSV baselines from `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/` and assert the live render contract where candidate bundles can exist while publish is skipped on failed validation)
+- M25 — route Skroutz through the provider seam in production (completed; supported Skroutz product URLs now select `SkroutzProvider` through `_resolve_provider_for_source(...)`, the provider supports live fetch plus fixture overrides, and prepare/render artifact shapes plus validation semantics remain unchanged)
+- M26 — migrate supported manufacturer flows behind provider adapters (completed; the current supported manufacturer runtime flow now selects `ManufacturerTefalProvider` through `_resolve_provider_for_source(...)`, the provider preserves the existing HTTPX-then-Playwright fetch order plus optional fixtures, and prepare/render contracts remain unchanged while manufacturer enrichment regressions are resolved)
+- M27 — retire legacy runtime source branches and close the migration phase (completed; `execute_full_run(...)` now fails fast when a supported source lacks a provider instead of falling back to legacy fetch/parser branches, the remaining dead pre-migration source-routing duplication in `full_run.py` was removed, and runtime tests now lock provider-based execution as the single active internal seam for supported sources)
+- M28 — make services the true owner of prepare/render orchestration (completed; the real prepare/render orchestration now lives under `scraper/pipeline/services/prepare_execution.py` and `scraper/pipeline/services/render_execution.py`, `prepare_service.py` and `render_service.py` call those service-owned executors directly without importing `workflow.py`, and `workflow.py` remains a thin CLI/adapter layer with unchanged runtime behavior)
+- M29 — make `run_service` the true owner of full-run orchestration (completed; the real full-run composition now lives under `scraper/pipeline/services/run_execution.py`, `run_service.py` calls that service-owned executor directly, and CLI/workflow adapter behavior plus runtime outputs remain unchanged)
+
+### Phase 3 — Hybrid RAG foundation
+
+Status: pending
+
+Entry handoff:
+1. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
+2. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
+3. Do not reintroduce source-specific routing below the provider boundary.
 
 ## Root policy
 ### Keep in root
