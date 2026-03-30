@@ -1,7 +1,54 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M36 completed. The repo now uses stable semantic service error codes at the service boundary, workflow exit handling is driven by an explicit error-code matrix, prepare/render/full-run metadata persist stable `error_code` values instead of raw exception type names, and the earlier M35 scrape-only prepare seam plus registry-driven provider resolution remain in place.
+M36 completed, and the repo now also has a minimal GitHub Actions workflow that installs dependencies from `requirements.txt`, installs Playwright Chromium, and runs `python -m pytest -q` from `scraper/` on push and pull request events without changing runtime code.
+
+## 2026-03-30 - Add minimal GitHub Actions scraper test workflow
+
+Goal:
+- add the smallest GitHub Actions workflow that matches the documented scraper test path
+- keep CI setup aligned with the root README install and test commands
+- avoid any runtime-code changes in the same commit
+
+Files edited:
+- `.github/workflows/tests.yml`
+- `DOCUMENTATION.md`
+
+Changes:
+- added `.github/workflows/tests.yml`
+- configured the workflow to trigger on:
+  - `push`
+  - `pull_request`
+- configured a single `ubuntu-latest` job
+- configured Python setup through `actions/setup-python@v5` with Python `3.11`
+- installed dependencies from repo-root `requirements.txt`
+- installed Playwright Chromium with `python -m playwright install chromium`
+- ran the test suite from `scraper/` with `python -m pytest -q`
+- kept the workflow minimal and aligned with the README command sequence as closely as possible
+
+Assumptions:
+- GitHub-hosted Ubuntu runners provide the system libraries Playwright Chromium needs for this repo's current test suite
+- the repo-root `requirements.txt` remains the canonical dependency file for CI, matching the current README guidance
+
+Commands run:
+- `Get-Content README.md`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 120`
+- `rg -n "CI|GitHub Actions|workflow|tests.yml|Phase 4|pending" PLAN.md IMPLEMENT.md DOCUMENTATION.md README.md -S`
+- `Get-Content .github/workflows/tests.yml`
+- `py -3.12 -m pip install PyYAML --target %TEMP%\\product-agent-yamlcheck`
+- temporary Python validation of `.github/workflows/tests.yml` via `yaml.safe_load(...)`
+- temporary removal of `%TEMP%\\product-agent-yamlcheck`
+- `git diff --check`
+
+Validation:
+- workflow YAML syntax parsed successfully via a temporary isolated `PyYAML` install and `yaml.safe_load(...)`
+- quoted the top-level `"on"` key so the workflow remains GitHub-valid and also parses cleanly under generic YAML tooling
+- validation in this commit was limited to workflow syntax and control-doc accuracy because no runtime code changed
+
+Deferred:
+- no runtime code changes were made
+- no test files were changed
+- no expansion into broader CI features such as caching, matrix builds, or artifact uploads
 
 ## 2026-03-30 - Add stable service error taxonomy and workflow exit mapping
 
