@@ -13,6 +13,7 @@ from .presentation_sections import normalize_presentation_sections
 INTRO_MIN_WORDS = 120
 INTRO_MAX_WORDS = 180
 HTML_TAG_RE = re.compile(r"<[^>]+>")
+HTML_DETECT_RE = re.compile(r"<[^>]+>")
 INTRO_TEXT_TASK = "intro_text"
 SEO_META_TASK = "seo_meta"
 MAX_TASK_KEY_SPECS = 6
@@ -285,6 +286,100 @@ def validate_llm_output(
         },
     }
     return normalized, errors
+
+
+def validate_intro_text_output(
+    payload: str | dict[str, Any],
+    *,
+    intro_word_min: int = INTRO_MIN_WORDS,
+    intro_word_max: int = INTRO_MAX_WORDS,
+) -> tuple[str, list[str]]:
+    errors: list[str] = []
+    value = payload.get("intro_text", "") if isinstance(payload, dict) else payload
+    if not isinstance(value, str):
+        return "", ["llm_intro_text_invalid"]
+    normalized = normalize_whitespace(value)
+    if HTML_DETECT_RE.search(value):
+        errors.append("llm_intro_text_html_invalid")
+    word_count = count_plain_text_words(normalized)
+    if word_count < intro_word_min or word_count > intro_word_max:
+        errors.append("llm_intro_text_word_count_invalid")
+    return normalized, errors
+
+
+def validate_seo_meta_output(payload: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
+    errors: list[str] = []
+    if not isinstance(payload, dict):
+        return {}, ["llm_seo_meta_not_object"]
+    product = payload.get("product")
+    if not isinstance(product, dict):
+        return {}, ["llm_seo_meta_product_invalid"]
+    product_keys = set(product)
+    if product_keys not in ({"meta_description", "meta_keywords"}, {"meta_description", "meta_keywords", "name_tail_polished"}):
+        errors.append("llm_seo_meta_shape_invalid")
+    meta_description = product.get("meta_description", "")
+    meta_keywords = product.get("meta_keywords", [])
+    if not isinstance(meta_description, str):
+        errors.append("llm_seo_meta_description_invalid")
+    if not isinstance(meta_keywords, list) or any(not isinstance(item, str) for item in meta_keywords):
+        errors.append("llm_seo_meta_keywords_invalid")
+    return {
+        "product": {
+            "meta_description": normalize_whitespace(meta_description),
+            "meta_keywords": [normalize_whitespace(item) for item in meta_keywords if normalize_whitespace(item)],
+            "meta_keyword_csv": serialize_meta_keywords(meta_keywords),
+        }
+    }, errors
+
+
+def validate_legacy_render_payload(
+    payload: dict[str, Any],
+    *,
+    intro_word_min: int = INTRO_MIN_WORDS,
+    intro_word_max: int = INTRO_MAX_WORDS,
+) -> tuple[dict[str, Any], list[str]]:
+    errors: list[str] = []
+    if not isinstance(payload, dict):
+        return {}, ["llm_output_not_object"]
+
+    product = payload.get("product")
+    presentation = payload.get("presentation")
+    if not isinstance(product, dict):
+        errors.append("llm_product_invalid")
+        product = {}
+    if not isinstance(presentation, dict):
+        errors.append("llm_presentation_invalid")
+        presentation = {}
+
+    meta_description = product.get("meta_description", "")
+    meta_keywords = product.get("meta_keywords", [])
+    if not isinstance(meta_description, str):
+        errors.append("llm_meta_description_invalid")
+    if not isinstance(meta_keywords, list) or any(not isinstance(item, str) for item in meta_keywords):
+        errors.append("llm_meta_keywords_invalid")
+
+    intro_html = presentation.get("intro_html", "")
+    if not isinstance(intro_html, str):
+        errors.append("llm_intro_html_invalid")
+        intro_html = ""
+    intro_text = normalize_whitespace(HTML_TAG_RE.sub(" ", intro_html))
+    word_count = count_plain_text_words(intro_text)
+    if word_count < intro_word_min or word_count > intro_word_max:
+        errors.append("llm_intro_text_word_count_invalid")
+
+    return {
+        "product": {
+            "meta_description": normalize_whitespace(meta_description),
+            "meta_keywords": [normalize_whitespace(item) for item in meta_keywords if normalize_whitespace(item)],
+            "meta_keyword_csv": serialize_meta_keywords(meta_keywords),
+        },
+        "intro_text": intro_text,
+    }, errors
+
+
+def count_plain_text_words(value: str) -> int:
+    text = normalize_whitespace(value)
+    return len([token for token in text.split(" ") if token])
 
 
 def _compact_key_specs(items: list[Any]) -> list[dict[str, str]]:

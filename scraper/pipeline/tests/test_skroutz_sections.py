@@ -331,21 +331,25 @@ def test_143481_rendered_description_preserves_locked_wrappers(
     soup = BeautifulSoup(description, "lxml")
     section_nodes = soup.select("div.etr-sec, div.etr-sec.rev")
     besco_dir = prepare_result["scrape_dir"] / "bescos"
+    rendered_besco_indexes = [1, 2, 5, 6, 7, 8, 9]
 
-    assert description.count('class="etr-sec"') == 5
-    assert description.count('class="etr-sec rev"') == 4
-    assert description.count("<!-- SECTION ") == 9
-    assert len(section_nodes) == 9
+    assert render_result["run_status"] == "completed"
+    assert "presentation_sections_weak:2" in render_result["validation_report"]["warnings"]
+    assert "requested_sections_reduced:7" in render_result["validation_report"]["warnings"]
+    assert description.count('class="etr-sec"') == 4
+    assert description.count('class="etr-sec rev"') == 3
+    assert description.count("<!-- SECTION ") == 7
+    assert len(section_nodes) == 7
     assert sorted(path.name for path in besco_dir.glob("*.jpg")) == [f"besco{index}.jpg" for index in range(1, 10)]
 
-    for index, section in enumerate(section_nodes, start=1):
+    for index, (section, source_index) in enumerate(zip(section_nodes, rendered_besco_indexes, strict=True), start=1):
         expected_class = ["etr-sec", "rev"] if index % 2 == 0 else ["etr-sec"]
         assert section.get("class") == expected_class
         direct_children = [child for child in section.find_all(recursive=False)]
         assert [child.get("class") for child in direct_children] == [["etr-text"], ["etr-img"]]
         image = section.select_one(".etr-img img")
         assert image is not None
-        assert image.get("src", "").endswith(f"/143481/besco{index}.jpg")
+        assert image.get("src", "").endswith(f"/143481/besco{source_index}.jpg")
         if index % 2 == 0:
             assert image.get("style") == "display:block; margin-left:auto; margin-right:0;"
         else:

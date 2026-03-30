@@ -3,6 +3,8 @@ from pipeline.llm_contract import (
     INTRO_MIN_WORDS,
     build_intro_text_context,
     build_seo_meta_context,
+    validate_intro_text_output,
+    validate_seo_meta_output,
     validate_llm_output,
 )
 from pipeline.models import CLIInput, ParsedProduct, SourceProductData, SpecItem, TaxonomyResolution
@@ -148,4 +150,25 @@ def test_build_seo_meta_context_includes_required_keyword_evidence() -> None:
     assert context["writer_rules"]["required_keywords"] == ["LG", "GSGV80PYLL"]
     assert context["product"]["meta_title"] == "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt | eTranoulis"
     assert context["evidence"]["meta_description_draft"] == "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με 635Lt."
+
+
+def test_validate_intro_text_output_accepts_plain_text_only() -> None:
+    normalized, errors = validate_intro_text_output(" ".join(["λέξη"] * 120))
+
+    assert errors == []
+    assert normalized.startswith("λέξη")
+
+
+def test_validate_seo_meta_output_accepts_product_meta_only_shape() -> None:
+    normalized, errors = validate_seo_meta_output(
+        {
+            "product": {
+                "meta_description": "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με πρακτική καθημερινή χρήση.",
+                "meta_keywords": ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα"],
+            }
+        }
+    )
+
+    assert errors == []
+    assert normalized["product"]["meta_keywords"] == ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα"]
 

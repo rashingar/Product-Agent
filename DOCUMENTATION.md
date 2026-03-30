@@ -1,10 +1,104 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M30 completed. Prepare now emits split LLM task artifacts for `intro_text` and `seo_meta` under `work/{model}/llm/`, while legacy combined prompt/context files remain as compatibility outputs until render migration lands.
+M33 completed. Render now prefers split `intro_text` and `seo_meta` outputs, assembles description HTML in code from deterministic sections and CTA data, keeps legacy `llm_output.json` as a compatibility fallback, and leaves only M34 final cleanup pending in Phase 3.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## 2026-03-30 - Assemble description HTML from `intro_text` and deterministic sections
+
+Goal:
+- migrate render to the split-task outputs introduced in M30
+- make final description HTML code-owned and assembled from plain-text `intro_text`, deterministic CTA data, and deterministic cleaned presentation sections
+- keep the compatibility phase active by accepting legacy combined `llm_output.json` until final cleanup
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/html_builders.py`
+- `scraper/pipeline/llm_contract.py`
+- `scraper/pipeline/mapping.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/tests/test_llm_contract.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- updated `scraper/pipeline/services/render_execution.py` so render now prefers split-task outputs from `work/{model}/llm/`:
+  - `intro_text.output.txt`
+  - `seo_meta.output.json`
+- kept compatibility with legacy `work/{model}/llm_output.json`:
+  - legacy `product.meta_description` and `product.meta_keywords` are still accepted
+  - legacy `presentation.intro_html` is reduced to plain text for the active render path
+  - legacy section title/body content is no longer required or used for final description assembly
+- replaced the active render-time LLM validation path in `scraper/pipeline/llm_contract.py`:
+  - added split validators for `intro_text` and `seo_meta`
+  - removed render-time dependence on LLM-owned section title/body validation
+  - kept the old combined validator available only as legacy compatibility support for older tests and artifacts
+- added `build_description_html_from_intro_and_sections(...)` in `scraper/pipeline/html_builders.py`
+- updated `scraper/pipeline/mapping.py` so final description HTML is now assembled in code from:
+  - plain-text `intro_text`
+  - deterministic CTA text
+  - deterministic cleaned presentation sections
+- kept wrappers, classes, styles, and CTA/link rendering code-owned
+- enforced deterministic section failure policy during render:
+  - hard fail when source sections are missing entirely and sections were requested
+  - hard fail when usable section count is `0` and sections were requested
+  - hard fail when more than one requested section is classified `missing`
+  - warn and continue when sections are `weak`
+  - warn and continue when exactly one requested section is `missing`
+- passed only `usable` deterministic sections into the final HTML renderer
+- preserved source titles and sanitized source wording for section bodies; no section rewriting or LLM section generation remains in the active path
+- normalized SEO keywords in `scraper/pipeline/mapping.py` so render now:
+  - guarantees brand and model/MPN are present
+  - collapses duplicate keywords
+  - collapses singular/plural variants in code before CSV serialization
+- preserved section-image wiring by original `source_index` so skipped weak sections do not shift later Besco image assignments
+- wrote split/legacy mode details into render normalized artifacts and run metadata:
+  - `llm_mode`
+  - `llm_artifact_paths`
+  - `presentation_sections`
+
+Behavior changes:
+- final `description` HTML is no longer sourced from LLM HTML sections in the active render path
+- the intro paragraph now comes from plain-text LLM `intro_text` and is escaped into the existing wrapper structure in code
+- deterministic section warnings now surface in render validation reports, including reduced-section cases during the compatibility phase
+- legacy combined LLM outputs remain accepted intentionally, but only for intro/meta compatibility; section rendering is deterministic even when legacy artifacts are present
+- compatibility fixture coverage now expects legacy render inputs to succeed when the active split-compatible validation rules are satisfied
+
+Commands run:
+- `rg -n "validate_llm_output|meta_keywords|build_description_html_from_llm|build_description_html|extract_presentation_blocks" scraper/pipeline -S`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/html_builders.py`
+- `Get-Content scraper/pipeline/mapping.py`
+- `Get-Content scraper/pipeline/llm_contract.py`
+- `Get-Content scraper/pipeline/presentation_sections.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_sections.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_skroutz_sections.py::test_143481_rendered_description_preserves_locked_wrappers pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_presentation_sections.py` from `scraper/`
+
+Validation:
+- render-focused subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py` from `scraper/`
+  - passed, `27 passed`
+- targeted compatibility regressions after the image-mapping fix:
+  - `py -3.12 -m pytest -q pipeline/tests/test_skroutz_sections.py::test_143481_rendered_description_preserves_locked_wrappers pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures` from `scraper/`
+  - passed, `2 passed`
+- broader affected suite:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_presentation_sections.py` from `scraper/`
+  - passed, `57 passed`
+
+Deferred:
+- final cleanup is still pending:
+  - legacy `work/{model}/llm_output.json` is still accepted
+  - legacy `work/{model}/llm_context.json` and `work/{model}/prompt.txt` still exist as compatibility artifacts from prepare
+  - `README.md` has not been updated to the final steady-state split-output flow yet
+- no LLM prompt split changes were made in this commit beyond consuming the split outputs already introduced in prepare
 
 ## 2026-03-30 - Split prepare into `intro_text` and `seo_meta` task artifacts
 

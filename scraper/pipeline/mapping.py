@@ -5,9 +5,9 @@ from typing import Any
 
 from .characteristics_pipeline import build_characteristics_for_product
 from .deterministic_fields import build_deterministic_product_fields
-from .html_builders import build_description_html, build_description_html_from_llm, build_deterministic_cta
+from .html_builders import build_description_html, build_description_html_from_intro_and_sections, build_description_html_from_llm, build_deterministic_cta
 from .models import CLIInput, ParsedProduct, SchemaMatchResult, TaxonomyResolution
-from .normalize import slugify_greek_for_seo
+from .normalize import normalize_for_match, normalize_whitespace, slugify_greek_for_seo
 from .utils import as_decimal_string, build_additional_image_value
 
 
@@ -41,6 +41,39 @@ def serialize_meta_keywords(value: list[str] | str | None) -> str:
     return ", ".join(out)
 
 
+def normalize_meta_keywords(
+    value: list[str] | str | None,
+    *,
+    brand: str = "",
+    mpn: str = "",
+) -> list[str]:
+    raw_values: list[str]
+    if value is None:
+        raw_values = []
+    elif isinstance(value, str):
+        raw_values = [item.strip() for item in value.split(",") if item.strip()]
+    else:
+        raw_values = [str(item).strip() for item in value if str(item).strip()]
+
+    normalized_brand = normalize_whitespace(brand)
+    normalized_mpn = normalize_whitespace(mpn)
+    ordered_candidates = [item for item in [normalized_brand, normalized_mpn] if item]
+    ordered_candidates.extend(raw_values)
+
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in ordered_candidates:
+        keyword = normalize_whitespace(item)
+        if not keyword:
+            continue
+        variant_key = _meta_keyword_variant_key(keyword)
+        if variant_key in seen:
+            continue
+        seen.add(variant_key)
+        out.append(keyword)
+    return out
+
+
 def build_row(
     cli: CLIInput,
     parsed: ParsedProduct,
@@ -49,6 +82,8 @@ def build_row(
     downloaded_image_count: int | None = None,
     besco_filenames_by_section: dict[int, str] | None = None,
     llm_product: dict[str, Any] | None = None,
+    llm_intro_text: str | None = None,
+    deterministic_presentation_sections: list[dict[str, Any]] | None = None,
     llm_presentation: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], list[str]]:
     warnings: list[str] = []
@@ -67,6 +102,12 @@ def build_row(
     manufacturer = str(deterministic["manufacturer"])
     seo_keyword = str(deterministic["seo_keyword"])
 
+    normalized_meta_keywords = normalize_meta_keywords(
+        llm_product.get("meta_keywords") if llm_product else "",
+        brand=str(deterministic["brand"]),
+        mpn=canonical_mpn,
+    )
+
     if llm_presentation:
         description_html, desc_warnings = build_description_html_from_llm(
             product_name=canonical_name,
@@ -76,6 +117,16 @@ def build_row(
             intro_html=str(llm_presentation.get("intro_html", "")),
             cta_text=cta_text,
             sections=list(llm_presentation.get("sections", [])),
+            besco_filenames_by_section=besco_filenames_by_section,
+        )
+    elif llm_intro_text is not None or deterministic_presentation_sections is not None:
+        description_html, desc_warnings = build_description_html_from_intro_and_sections(
+            product_name=canonical_name,
+            model=cli.model,
+            cta_url=taxonomy.cta_url,
+            cta_text=cta_text,
+            intro_text=str(llm_intro_text or ""),
+            sections=list(deterministic_presentation_sections or []),
             besco_filenames_by_section=besco_filenames_by_section,
         )
     else:
@@ -134,7 +185,7 @@ def build_row(
         "subtract": "1",
         "stock_status": "Έως 30 ημέρες",
         "status": "0",
-        "meta_keyword": serialize_meta_keywords(llm_product.get("meta_keywords") if llm_product else ""),
+        "meta_keyword": serialize_meta_keywords(normalized_meta_keywords),
         "meta_title": meta_title,
         "meta_description": str(llm_product.get("meta_description", "")).strip() if llm_product else "",
         "seo_keyword": seo_keyword,
@@ -154,8 +205,39 @@ def build_row(
         "characteristics_diagnostics": characteristics_diagnostics,
         "downloaded_gallery_count": downloaded_image_count or 0,
         "downloaded_besco_count": len(besco_filenames_by_section or {}),
-        "llm_product": llm_product or {},
+        "llm_product": {**(llm_product or {}), "meta_keywords": normalized_meta_keywords},
+        "llm_intro_text": str(llm_intro_text or ""),
+        "deterministic_presentation_sections": deterministic_presentation_sections or [],
         "llm_presentation": llm_presentation or {},
         "csv_row": row,
     }
     return row, normalized, warnings
+
+
+def _meta_keyword_variant_key(keyword: str) -> str:
+    normalized = normalize_for_match(keyword)
+    if not normalized:
+        return ""
+    tokens = []
+    for token in normalized.split():
+        singular = _singularize_token(token)
+        tokens.append(singular or token)
+    return " ".join(tokens)
+
+
+def _singularize_token(token: str) -> str:
+    if len(token) <= 3:
+        return token
+    # Align common Greek neuter singular/plural pairs such as
+    # "ψυγείο" / "ψυγεία" onto the same comparison stem.
+    if token.endswith("εια") and len(token) > 5:
+        return token[:-1]
+    if token.endswith("ειο") and len(token) > 5:
+        return token[:-1]
+    endings = ["ους", "ες", "οι", "ια", "ος", "ας", "ης", "α", "ο", "η", "ς", "s"]
+    for ending in endings:
+        if token.endswith(ending) and len(token) > len(ending) + 2:
+            return token[: -len(ending)]
+    if token.endswith("es") and len(token) > 4:
+        return token[:-2]
+    return token

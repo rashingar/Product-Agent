@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M29. The next active phase is Phase 3: split-LLM `intro_text` and deterministic presentation refactor. Hybrid RAG shifts to Phase 4 and remains blocked until the split-LLM branch reaches final cleanup.
+Phase 2: architecture foundation is complete through M29. Phase 3 now has M30-M33 completed, and the next active milestone is M34 final cleanup. Hybrid RAG shifts to Phase 4 and remains blocked until the split-LLM branch reaches final cleanup.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -90,9 +90,9 @@ Hard rules:
 
 Phase 3 milestones:
 - M30 — split the LLM contract and prepare artifacts (completed; `prepare` now writes task-specific artifacts under `work/{model}/llm/` for `intro_text` and `seo_meta`, emits `task_manifest.json` as the primary handoff index, constrains `intro_text` to plain-text one-paragraph output, defines `seo_meta` as `meta_description` plus structured `meta_keywords`, and preserves legacy combined `llm_context.json` plus `prompt.txt` only as compatibility artifacts while render still depends on `llm_output.json`)
-- M31 — add render compatibility for split outputs and legacy combined output (pending; acceptance criteria: `render` reads task-specific `intro_text` and `seo_meta` outputs when present, still falls back to legacy `work/{model}/llm_output.json`, and regression coverage proves both paths during the compatibility phase)
-- M32 — build deterministic presentation sections and section-quality policy (pending; acceptance criteria: `presentation_source_sections` are classified as `usable`, `weak`, or `missing`; missing source sections hard fail; weak sections or exactly one missing requested section warn and continue with fewer sections; source wording is preserved apart from cleaning/sanitization; and source titles are retained when present)
-- M33 — render final description HTML and SEO normalization in code (pending; acceptance criteria: description HTML is assembled in code from plain-text `intro_text`, deterministic CTA data, and cleaned deterministic source sections; wrappers/classes/styles remain code-owned; and keyword normalization in code enforces brand/model presence while collapsing duplicates and singular/plural variants)
+- M31 — add render compatibility for split outputs and legacy combined output (completed; `render` now prefers split `intro_text` and `seo_meta` outputs under `work/{model}/llm/`, still falls back to legacy `work/{model}/llm_output.json`, and regression coverage proves both paths during the compatibility phase)
+- M32 — build deterministic presentation sections and section-quality policy (completed; `presentation_source_sections` are now classified as `usable`, `weak`, or `missing`; missing source sections hard fail; weak sections or exactly one missing requested section warn and continue with fewer sections; source wording is preserved apart from cleaning/sanitization; and source titles are retained when present)
+- M33 — render final description HTML and SEO normalization in code (completed; description HTML is now assembled in code from plain-text `intro_text`, deterministic CTA data, and cleaned deterministic source sections; wrappers/classes/styles remain code-owned; keyword normalization in code enforces brand/model presence while collapsing duplicates and singular/plural variants; and section-image mapping stays tied to original source order when weak sections are skipped)
 - M34 — final cleanup of legacy combined artifacts and docs (pending; acceptance criteria: the legacy single-prompt artifact contract is removed from steady-state prepare/render expectations, `render` no longer depends on combined `llm_output.json`, and user-facing/runtime docs are updated to the final steady-state artifact contract)
 
 ### Phase 4 — Hybrid RAG foundation
@@ -102,7 +102,7 @@ Status: pending
 Entry handoff:
 1. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
 2. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
-3. Complete M30-M34, including compatibility-phase cleanup, before starting retrieval-layer work.
+3. Complete M34, including compatibility-phase cleanup, before starting retrieval-layer work.
 4. Do not reintroduce source-specific routing below the provider boundary.
 
 ## Root policy

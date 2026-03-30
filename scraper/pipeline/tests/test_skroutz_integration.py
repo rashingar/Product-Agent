@@ -289,11 +289,10 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
         validation = render_result["validation_report"]
 
         assert render_result["candidate_csv_path"].exists()
-        assert render_result["published_csv_path"] is None
-        assert render_result["run_status"] == "failed"
-        assert validation["ok"] is False
-        assert set(validation["errors"]) <= {"llm_product_shape_invalid", "llm_presentation_shape_invalid"}
-        assert "Candidate failed validation; skipping publish to products/." in validation["warnings"]
+        assert render_result["published_csv_path"] == tmp_path / "products" / f"{model}.csv"
+        assert render_result["run_status"] == "completed"
+        assert validation["ok"] is True
+        assert validation["errors"] == []
         assert validation["summary"]["missing"] == 0
         assert validation["summary"]["empty"] == 0
         for field in expected_match_fields:

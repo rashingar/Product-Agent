@@ -13,6 +13,25 @@ def build_intro(words: int = 120) -> str:
     return " ".join(["λέξη"] * words)
 
 
+def write_split_llm_outputs(model_root: Path, *, intro_text: str, meta_description: str, meta_keywords: list[str]) -> None:
+    llm_dir = model_root / "llm"
+    llm_dir.mkdir(parents=True, exist_ok=True)
+    (llm_dir / "intro_text.output.txt").write_text(intro_text, encoding="utf-8")
+    (llm_dir / "seo_meta.output.json").write_text(
+        json.dumps(
+            {
+                "product": {
+                    "meta_description": meta_description,
+                    "meta_keywords": meta_keywords,
+                }
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_build_cli_input_from_template_file(tmp_path: Path, monkeypatch) -> None:
     template = tmp_path / "input.txt"
     template.write_text(
@@ -786,6 +805,13 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
             SpecItem(label="Τεχνολογία Ψύξης", value="Total No Frost"),
             SpecItem(label="Συνδεσιμότητα", value="WiFi"),
         ],
+        presentation_source_html="""
+        <section>
+          <h3>NatureFRESH για καθημερινή φρεσκάδα</h3>
+          <p>Το NatureFRESH βοηθά στη σωστή συντήρηση και υποστηρίζει σταθερή ψύξη σε όλη τη διάρκεια της ημέρας
+          με καθαρή οργάνωση, πρακτική χρήση και άνετη πρόσβαση στα τρόφιμα για όλη την οικογένεια.</p>
+        </section>
+        """,
         spec_sections=[
             SpecSection(section="Επισκόπηση Προϊόντος", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")]),
         ],
@@ -814,23 +840,12 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
     }
     (scrape_dir / f"{model}.normalized.json").write_text(__import__("json").dumps(normalized_payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    llm_output = {
-        "product": {
-            "meta_description": "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost και WiFi για άνεση κάθε μέρα.",
-            "meta_keywords": ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα", "Total No Frost"],
-        },
-        "presentation": {
-            "intro_html": build_intro(),
-            "cta_text": "Δείτε περισσότερα ψυγεία ντουλάπες εδώ",
-            "sections": [
-                {
-                    "title": "NatureFRESH για καθημερινή φρεσκάδα",
-                    "body_html": "Το <strong>NatureFRESH</strong> βοηθά στη σωστή συντήρηση.",
-                }
-            ],
-        },
-    }
-    (tmp_path / "work" / model / "llm_output.json").write_text(__import__("json").dumps(llm_output, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text="Σύντομο κείμενο.",
+        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost και WiFi για άνεση κάθε μέρα.",
+        meta_keywords=["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα", "Total No Frost"],
+    )
 
     result = render_workflow(model)
 
@@ -841,7 +856,7 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
     assert result["run_status"] == "failed"
     assert result["validation_report"]["ok"] is False
     assert "field_health" in result["validation_report"]
-    assert result["validation_report"]["errors"] == ["llm_presentation_shape_invalid"]
+    assert result["validation_report"]["errors"] == ["llm_intro_text_word_count_invalid"]
     assert "Candidate failed validation; skipping publish to products/." in result["validation_report"]["warnings"]
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
     assert result["metadata_path"].name == "render.run.json"
@@ -890,7 +905,7 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     try:
         render_workflow(model)
     except FileNotFoundError as exc:
-        assert str(exc) == f"Missing LLM output: {tmp_path / 'work' / model / 'llm_output.json'}"
+        assert str(exc) == f"Missing split or legacy LLM outputs in {tmp_path / 'work' / model}"
     else:
         raise AssertionError("Expected FileNotFoundError")
 
@@ -898,7 +913,269 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
     assert metadata["run"]["error_code"] == "FileNotFoundError"
-    assert "Missing LLM output" in metadata["run"]["error_detail"]
+    assert "Missing split or legacy LLM outputs" in metadata["run"]["error_detail"]
+
+
+def test_render_workflow_builds_description_from_split_outputs_and_deterministic_sections(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        mpn="GSGV80PYLL",
+        name="Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E",
+        hero_summary="Το LG GSGV80PYLL προσφέρει μεγάλη χωρητικότητα.",
+        price_text="2.099,00 €",
+        price_value=2099.0,
+        gallery_images=[GalleryImage(url="https://example.com/233541-1.jpg", position=1, local_filename="233541-1.jpg", downloaded=True)],
+        besco_images=[
+            GalleryImage(url="https://example.com/besco1.jpg", position=1, local_filename="besco1.jpg", downloaded=True),
+            GalleryImage(url="https://example.com/besco2.jpg", position=2, local_filename="besco2.jpg", downloaded=True),
+        ],
+        key_specs=[
+            SpecItem(label="Συνολική Καθαρή Χωρητικότητα", value="635"),
+            SpecItem(label="Τεχνολογία Ψύξης", value="Total No Frost"),
+            SpecItem(label="Συνδεσιμότητα", value="WiFi"),
+        ],
+        spec_sections=[SpecSection(section="Βασικά Χαρακτηριστικά", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")])],
+        presentation_source_html="""
+        <section>
+          <h3>NatureFRESH για καθημερινή φρεσκάδα</h3>
+          <p>Το NatureFRESH βοηθά στη σωστή συντήρηση και διατηρεί σταθερή ψύξη σε όλο τον θάλαμο,
+          προσφέροντας πρακτική οργάνωση και εύκολη καθημερινή πρόσβαση στα τρόφιμα με σταθερή απόδοση και άνεση.</p>
+        </section>
+        <section>
+          <h3>DoorCooling+ για ομοιόμορφη ψύξη</h3>
+          <p>Η λειτουργία DoorCooling+ ενισχύει την ομοιόμορφη κατανομή του αέρα και υποστηρίζει σταθερή ψύξη,
+          ώστε τα τρόφιμα να παραμένουν οργανωμένα και προσβάσιμα με καθαρή και πρακτική καθημερινή χρήση.</p>
+        </section>
+        """,
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {
+                    "model": model,
+                    "url": "https://www.electronet.gr/example",
+                    "photos": 1,
+                    "sections": 2,
+                    "skroutz_status": 1,
+                    "boxnow": 0,
+                    "price": "2099",
+                },
+                "taxonomy": TaxonomyResolution(
+                    parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+                    leaf_category="Ψυγεία & Καταψύκτες",
+                    sub_category="Ψυγεία Ντουλάπες",
+                    cta_url="https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+                ).to_dict(),
+                "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9).to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text=build_intro(),
+        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost και WiFi για άνεση κάθε μέρα.",
+        meta_keywords=["Ψυγεία Ντουλάπες", "Ψυγείο Ντουλάπα", "Total No Frost"],
+    )
+
+    result = render_workflow(model)
+    description = result["description_path"].read_text(encoding="utf-8")
+    candidate_row = next(__import__("csv").DictReader(result["candidate_csv_path"].open("r", encoding="utf-8-sig", newline="")))
+
+    assert result["run_status"] == "completed"
+    assert result["published_csv_path"] == tmp_path / "products" / f"{model}.csv"
+    assert "NatureFRESH για καθημερινή φρεσκάδα" in description
+    assert "DoorCooling+ για ομοιόμορφη ψύξη" in description
+    assert "λέξη λέξη λέξη" in description
+    assert candidate_row["meta_keyword"].startswith("LG, GSGV80PYLL")
+    assert candidate_row["meta_keyword"].count("Ψυγ") == 1
+
+
+def test_render_workflow_uses_legacy_combined_output_as_compatibility_fallback(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        mpn="GSGV80PYLL",
+        name="Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E",
+        hero_summary="Το LG GSGV80PYLL προσφέρει μεγάλη χωρητικότητα.",
+        spec_sections=[SpecSection(section="Βασικά Χαρακτηριστικά", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")])],
+        presentation_source_html="""
+        <section>
+          <h3>NatureFRESH για καθημερινή φρεσκάδα</h3>
+          <p>Το NatureFRESH βοηθά στη σωστή συντήρηση και διατηρεί σταθερή ψύξη σε όλο τον θάλαμο,
+          προσφέροντας πρακτική οργάνωση και εύκολη καθημερινή πρόσβαση στα τρόφιμα με σταθερή απόδοση και άνεση.</p>
+        </section>
+        """,
+        besco_images=[GalleryImage(url="https://example.com/besco1.jpg", position=1, local_filename="besco1.jpg", downloaded=True)],
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {"model": model, "url": source.url, "photos": 1, "sections": 1, "skroutz_status": 1, "boxnow": 0, "price": "2099"},
+                "taxonomy": TaxonomyResolution(
+                    parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+                    leaf_category="Ψυγεία & Καταψύκτες",
+                    sub_category="Ψυγεία Ντουλάπες",
+                    cta_url="https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+                ).to_dict(),
+                "schema_match": SchemaMatchResult().to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "work" / model / "llm_output.json").write_text(
+        json.dumps(
+            {
+                "product": {
+                    "meta_description": "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με άνετη καθημερινή χρήση.",
+                    "meta_keywords": ["Ψυγείο Ντουλάπα"],
+                },
+                "presentation": {
+                    "intro_html": build_intro(),
+                    "cta_text": "Δείτε περισσότερα εδώ",
+                    "sections": [{"title": "Παλιός τίτλος", "body_html": "Παλιό σώμα"}],
+                },
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    result = render_workflow(model)
+    description = result["description_path"].read_text(encoding="utf-8")
+
+    assert result["run_status"] == "completed"
+    assert "NatureFRESH για καθημερινή φρεσκάδα" in description
+    assert "Παλιός τίτλος" not in description
+
+
+def test_render_workflow_fails_when_source_sections_are_missing_entirely(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        mpn="GSGV80PYLL",
+        name="LG Example",
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {"model": model, "url": source.url, "photos": 1, "sections": 1, "skroutz_status": 0, "boxnow": 0, "price": "0"},
+                "taxonomy": TaxonomyResolution(cta_url="https://example.com", leaf_category="Ψυγεία & Καταψύκτες").to_dict(),
+                "schema_match": SchemaMatchResult().to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text=build_intro(),
+        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με άνετη καθημερινή χρήση.",
+        meta_keywords=["LG", "GSGV80PYLL"],
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        render_workflow(model)
+
+    assert str(excinfo.value) == "Missing presentation source sections for requested render sections"
+
+
+def test_render_workflow_warns_and_continues_when_one_requested_section_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        mpn="GSGV80PYLL",
+        name="LG Example",
+        spec_sections=[SpecSection(section="Βασικά Χαρακτηριστικά", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")])],
+        presentation_source_html="""
+        <section>
+          <h3>Κανονική ενότητα</h3>
+          <p>Η συγκεκριμένη ενότητα περιγράφει καθαρά τη λειτουργία της συσκευής με αρκετές λέξεις και
+          σταθερό περιεχόμενο ώστε να θεωρείται χρήσιμη για τελική προβολή στη σελίδα προϊόντος.</p>
+        </section>
+        <section>
+          <h3>Εικόνα μόνο</h3>
+          <img src="https://example.com/image.jpg" />
+        </section>
+        """,
+        besco_images=[GalleryImage(url="https://example.com/besco1.jpg", position=1, local_filename="besco1.jpg", downloaded=True)],
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {"model": model, "url": source.url, "photos": 1, "sections": 2, "skroutz_status": 0, "boxnow": 0, "price": "0"},
+                "taxonomy": TaxonomyResolution(parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ", cta_url="https://example.com", leaf_category="Ψυγεία & Καταψύκτες").to_dict(),
+                "schema_match": SchemaMatchResult().to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text=build_intro(),
+        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με άνετη καθημερινή χρήση.",
+        meta_keywords=["Ψυγείο Ντουλάπες", "Ψυγείο Ντουλάπα"],
+    )
+
+    result = render_workflow(model)
+    description = result["description_path"].read_text(encoding="utf-8")
+
+    assert result["run_status"] == "completed"
+    assert "Κανονική ενότητα" in description
+    assert result["validation_report"]["ok"] is True
+    assert "presentation_sections_missing:1" in result["validation_report"]["warnings"]
+    assert "requested_sections_reduced:1" in result["validation_report"]["warnings"]
 
 
 def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsys, tmp_path: Path) -> None:

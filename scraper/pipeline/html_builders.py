@@ -227,6 +227,73 @@ def build_description_html_from_llm(
     return "\n".join(out), warnings
 
 
+def build_description_html_from_intro_and_sections(
+    product_name: str,
+    model: str,
+    cta_url: str,
+    cta_text: str,
+    intro_text: str,
+    sections: list[dict[str, str]],
+    besco_filenames_by_section: dict[int, str] | None = None,
+) -> tuple[str, list[str]]:
+    warnings: list[str] = []
+    if not product_name:
+        return "", ["description_not_built_from_split"]
+    if not cta_url:
+        return "", ["description_not_built_from_split", "cta_url_unresolved"]
+    if not normalize_whitespace(intro_text):
+        return "", ["description_not_built_from_split", "llm_intro_missing"]
+
+    use_besco_asset_map = besco_filenames_by_section is not None
+    besco_filenames_by_section = besco_filenames_by_section or {}
+    out = ['<div class="etr-desc">']
+    out.append(f'<h2 style="text-align:center"><span style="font-size:36px"><strong>{escape(product_name)}</strong></span></h2>')
+    out.append("")
+    out.append('<p style="margin-left:auto; margin-right:auto; text-align:left"><span style="font-size:24px">')
+    out.append(escape(normalize_whitespace(intro_text)))
+    out.append("</span></p>")
+    out.append("")
+    out.append('<div style="margin-bottom:20px; margin-left:auto; margin-right:auto; margin-top:20px; text-align:center">')
+    out.append(
+        f'<a href="{escape(cta_url, quote=True)}" style="font-size: 20px; padding: 12px 28px; background-color: #03BABE; color: #F7FCFC; border-radius: 12px; text-decoration: none;">{escape(cta_text)}</a>'
+    )
+    out.append("</div>")
+    out.append("")
+    out.append("<hr />")
+    out.append('<div class="etr-desc">')
+    out.append("")
+
+    for idx, block in enumerate(sections, start=1):
+        title = normalize_whitespace(block.get("title", ""))
+        body_text = normalize_whitespace(block.get("body_text", ""))
+        if not title or not body_text:
+            warnings.append(f"deterministic_section_incomplete:{idx}")
+            continue
+        cls = 'etr-sec rev' if idx % 2 == 0 else 'etr-sec'
+        out.append(f'  <!-- SECTION {idx} -->')
+        out.append(f'  <div class="{cls}">')
+        out.append('    <div class="etr-text">')
+        out.append(f'      <h2><span style="font-size:24px"><strong>{escape(title)}</strong></span></h2>')
+        out.append(f'      <p><span style="font-size:22px">{escape(body_text)}</span></p>')
+        out.append('    </div>')
+        source_index = int(block.get("source_index") or idx)
+        default_besco_filename = f"besco{source_index}.jpg"
+        besco_filename = besco_filenames_by_section.get(source_index, "" if use_besco_asset_map else default_besco_filename)
+        if besco_filename:
+            out.append('    <div class="etr-img">')
+            img_style = ' style="display:block; margin-left:auto; margin-right:0;"' if idx % 2 == 0 else ''
+            out.append(
+                f'      <img alt="{escape(title, quote=True)}" src="https://www.etranoulis.gr/image/catalog/01_bescos/{escape(model, quote=True)}/{escape(besco_filename, quote=True)}"{img_style} />'
+            )
+            out.append("    </div>")
+        out.append("  </div>")
+        out.append("")
+
+    out.append("</div>")
+    out.append("</div>")
+    return "\n".join(out), warnings
+
+
 def extract_presentation_blocks(
     presentation_source_html: str,
     presentation_source_text: str,
