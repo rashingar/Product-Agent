@@ -38,6 +38,27 @@ def test_build_cli_input_from_template_file(tmp_path: Path, monkeypatch) -> None
     assert str(cli.price) == "2099"
 
 
+def test_prepare_workflow_delegates_to_service_execution(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
+
+    def fake_execute_full_run(_cli):
+        return {"unused": True}
+
+    def fake_execute_prepare_workflow(cli_arg, *, work_root, execute_full_run_fn):
+        assert cli_arg is cli
+        assert work_root == tmp_path / "work"
+        assert execute_full_run_fn is fake_execute_full_run
+        return {"delegated": True}
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_workflow", fake_execute_prepare_workflow)
+
+    assert workflow.prepare_workflow(cli) == {"delegated": True}
+
+
 def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
 
@@ -98,6 +119,22 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
     assert metadata["artifacts"]["llm_output_path"] == str(result["model_root"] / "llm_output.json")
     assert metadata["details"]["source"] == ""
+
+
+def test_render_workflow_delegates_to_service_execution(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    def fake_execute_render_workflow(model, *, work_root, products_root):
+        assert model == "233541"
+        assert work_root == tmp_path / "work"
+        assert products_root == tmp_path / "products"
+        return {"delegated": True}
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+    monkeypatch.setattr(workflow, "execute_render_workflow", fake_execute_render_workflow)
+
+    assert workflow.render_workflow("233541") == {"delegated": True}
 
 
 def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:

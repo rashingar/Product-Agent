@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path
 
 import pytest
@@ -19,12 +20,19 @@ from pipeline.services import (
 )
 
 
-def test_prepare_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> None:
-    from pipeline import workflow
+def test_service_modules_do_not_import_workflow() -> None:
+    from pipeline.services import prepare_service, render_service
 
-    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    assert "from .. import workflow" not in inspect.getsource(prepare_service)
+    assert "from .. import workflow" not in inspect.getsource(render_service)
 
-    def fake_prepare_workflow(cli):
+
+def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import prepare_service
+
+    monkeypatch.setattr(prepare_service, "WORK_ROOT", tmp_path / "work")
+
+    def fake_execute_prepare_workflow(cli, *, work_root):
         assert cli.model == "233541"
         assert cli.url == "https://www.electronet.gr/example"
         assert cli.photos == 6
@@ -33,6 +41,7 @@ def test_prepare_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> No
         assert cli.boxnow == 0
         assert str(cli.price) == "2099"
         assert cli.out == str(tmp_path / "work" / "233541" / "scrape")
+        assert work_root == tmp_path / "work"
         return {
             "model_root": tmp_path / "work" / "233541",
             "scrape_dir": tmp_path / "work" / "233541" / "scrape",
@@ -46,7 +55,7 @@ def test_prepare_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> No
             },
         }
 
-    monkeypatch.setattr(workflow, "prepare_workflow", fake_prepare_workflow)
+    monkeypatch.setattr(prepare_service, "execute_prepare_workflow", fake_execute_prepare_workflow)
 
     result = prepare_product(
         PrepareRequest(
@@ -71,13 +80,13 @@ def test_prepare_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> No
     assert result.details["source"] == "electronet"
 
 
-def test_prepare_product_wraps_workflow_errors(monkeypatch) -> None:
-    from pipeline import workflow
+def test_prepare_product_wraps_execution_errors(monkeypatch) -> None:
+    from pipeline.services import prepare_service
 
-    def fake_prepare_workflow(_cli):
+    def fake_execute_prepare_workflow(_cli, *, work_root):
         raise RuntimeError("prepare exploded")
 
-    monkeypatch.setattr(workflow, "prepare_workflow", fake_prepare_workflow)
+    monkeypatch.setattr(prepare_service, "execute_prepare_workflow", fake_execute_prepare_workflow)
 
     with pytest.raises(ServiceError) as excinfo:
         prepare_product(PrepareRequest(model="233541", url="https://www.electronet.gr/example"))
@@ -87,10 +96,10 @@ def test_prepare_product_wraps_workflow_errors(monkeypatch) -> None:
     assert isinstance(excinfo.value.cause, RuntimeError)
 
 
-def test_render_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> None:
-    from pipeline import workflow
+def test_render_product_maps_execution_result(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_service
 
-    def fake_render_workflow(model: str):
+    def fake_execute_render_workflow(model: str):
         assert model == "233541"
         return {
             "candidate_dir": tmp_path / "work" / model / "candidate",
@@ -104,7 +113,7 @@ def test_render_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> Non
             "validation_report": {"ok": True, "warnings": ["render warning"]},
         }
 
-    monkeypatch.setattr(workflow, "render_workflow", fake_render_workflow)
+    monkeypatch.setattr(render_service, "execute_render_workflow", fake_execute_render_workflow)
 
     result = render_product(RenderRequest(model="233541"))
 
@@ -119,13 +128,13 @@ def test_render_product_maps_workflow_result(tmp_path: Path, monkeypatch) -> Non
     assert result.details["validation_ok"] is True
 
 
-def test_render_product_wraps_workflow_errors(monkeypatch) -> None:
-    from pipeline import workflow
+def test_render_product_wraps_execution_errors(monkeypatch) -> None:
+    from pipeline.services import render_service
 
-    def fake_render_workflow(_model: str):
+    def fake_execute_render_workflow(_model: str):
         raise FileNotFoundError("Missing LLM output")
 
-    monkeypatch.setattr(workflow, "render_workflow", fake_render_workflow)
+    monkeypatch.setattr(render_service, "execute_render_workflow", fake_execute_render_workflow)
 
     with pytest.raises(ServiceError) as excinfo:
         render_product(RenderRequest(model="233541"))

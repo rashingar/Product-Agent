@@ -1,10 +1,95 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M27 completed. Legacy direct source-routing fallback branches are retired, supported-source execution is now provider-only inside `execute_full_run(...)`, and the full pytest suite is green at `100 passed`.
+M28 completed. Prepare/render orchestration ownership now lives in service-owned execution modules, `workflow.py` is a thin adapter over that seam, and the full pytest suite is green at `103 passed`.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## M28 — make services the true owner of prepare/render orchestration
+
+Goal:
+- move the real prepare/render orchestration bodies out of `scraper/pipeline/workflow.py` and into service-owned execution modules
+- keep CLI/workflow commands, artifact paths, validation semantics, publish gating, and provider behavior unchanged
+- finish the prepare/render ownership inversion without widening scope into provider changes or full-run redesign
+
+Files added:
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/render_execution.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- extracted the prepare orchestration body from `workflow.prepare_workflow(...)` into `scraper/pipeline/services/prepare_execution.py::execute_prepare_workflow(...)`, including scrape artifact normalization, prompt/context generation, and prepare metadata writes
+- extracted the render orchestration body from `workflow.render_workflow(...)` into `scraper/pipeline/services/render_execution.py::execute_render_workflow(...)`, including LLM output loading, candidate generation, validation, publish gating, and render metadata writes
+- updated `scraper/pipeline/services/prepare_service.py` so `prepare_product(...)` now calls the service-owned prepare executor directly and no longer imports `workflow.py`
+- updated `scraper/pipeline/services/render_service.py` so `render_product(...)` now calls the service-owned render executor directly and no longer imports `workflow.py`
+- reduced `scraper/pipeline/workflow.py` to thin prepare/render adapters that inject the existing `WORK_ROOT`, `PRODUCTS_ROOT`, and `execute_full_run(...)` dependencies while keeping the CLI entrypoint behavior unchanged
+- updated `scraper/pipeline/tests/test_services.py` to assert the services no longer import `workflow.py` and to mock the new service-owned executors instead of workflow-owned orchestration
+- updated `scraper/pipeline/tests/test_workflow.py` with focused adapter-delegation coverage while preserving the existing prepare/render behavior tests at the current baseline
+
+Commands run:
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/render_service.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "prepare_workflow|render_workflow|prepare_product\\(|render_product\\(" scraper/pipeline -S`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/services/__init__.py`
+- `git status --short`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py -TotalCount 40`
+- `Get-Content scraper/pipeline/tests/test_skroutz_sections.py -TotalCount 40`
+- `Get-Content scraper/pipeline/workflow.py | Select-Object -First 220`
+- `Get-Content scraper/pipeline/workflow.py | Select-Object -Skip 220`
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -First 140`
+- `python -m compileall pipeline` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+- `python -m pytest -q` from `scraper/`
+- `py -0p`
+- `where.exe python`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+Validation:
+- compile validation:
+  - `python -m compileall pipeline` from `scraper/`
+  - passed
+- exact requested pytest commands:
+  - `python -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+  - `python -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+  - `python -m pytest -q` from `scraper/`
+  - all three failed before test discovery because the active `python` resolved to `C:\Users\Rashingar\AppData\Local\Programs\Python\Python310\python.exe`, which does not have `pytest` installed
+- executed pytest validation on the installed interpreter:
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+  - passed, `7 passed`
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+  - passed, `15 passed`
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed, `103 passed`
+
+Risks:
+- `workflow.prepare_workflow(...)` and `workflow.render_workflow(...)` remain as compatibility adapters for existing tests and callers; M28 intentionally changes ownership, not the public callable surface
+- service-layer path constants still exist in both workflow adapters and service-owned executors by design so the workflow layer can continue injecting the current roots without changing runtime semantics
+
+Deferred:
+- no provider changes, full-run service redesign, CLI UX changes, artifact-path changes, or validation-contract changes were attempted
+- `IMPLEMENT.md`, `AGENTS.md`, `README.md`, and `RULES.md` were left unchanged because M28 did not introduce a new durable operator rule or change the accepted runtime interface
 
 ## M27 — retire legacy runtime source branches and close the migration phase
 
