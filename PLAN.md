@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M28. The next active phase is Phase 3: hybrid RAG foundation; this plan records the handoff boundary, but M28 does not start that work.
+Phase 2: architecture foundation is complete through M29. The next active phase is Phase 3: hybrid RAG foundation; this plan records the handoff boundary, but M29 does not start that work.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -69,6 +69,7 @@ Phase 2 milestones:
 - M26 — migrate supported manufacturer flows behind provider adapters (completed; the current supported manufacturer runtime flow now selects `ManufacturerTefalProvider` through `_resolve_provider_for_source(...)`, the provider preserves the existing HTTPX-then-Playwright fetch order plus optional fixtures, and prepare/render contracts remain unchanged while manufacturer enrichment regressions are resolved)
 - M27 — retire legacy runtime source branches and close the migration phase (completed; `execute_full_run(...)` now fails fast when a supported source lacks a provider instead of falling back to legacy fetch/parser branches, the remaining dead pre-migration source-routing duplication in `full_run.py` was removed, and runtime tests now lock provider-based execution as the single active internal seam for supported sources)
 - M28 — make services the true owner of prepare/render orchestration (completed; the real prepare/render orchestration now lives under `scraper/pipeline/services/prepare_execution.py` and `scraper/pipeline/services/render_execution.py`, `prepare_service.py` and `render_service.py` call those service-owned executors directly without importing `workflow.py`, and `workflow.py` remains a thin CLI/adapter layer with unchanged runtime behavior)
+- M29 — make `run_service` the true owner of full-run orchestration (completed; the real full-run composition now lives under `scraper/pipeline/services/run_execution.py`, `run_service.py` calls that service-owned executor directly, and CLI/workflow adapter behavior plus runtime outputs remain unchanged)
 
 ### Phase 3 — Hybrid RAG foundation
 

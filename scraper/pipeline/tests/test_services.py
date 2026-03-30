@@ -21,10 +21,12 @@ from pipeline.services import (
 
 
 def test_service_modules_do_not_import_workflow() -> None:
-    from pipeline.services import prepare_service, render_service
+    from pipeline.services import prepare_service, render_service, run_execution, run_service
 
     assert "from .. import workflow" not in inspect.getsource(prepare_service)
     assert "from .. import workflow" not in inspect.getsource(render_service)
+    assert "from .. import workflow" not in inspect.getsource(run_execution)
+    assert "from .. import workflow" not in inspect.getsource(run_service)
 
 
 def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> None:
@@ -144,8 +146,8 @@ def test_render_product_wraps_execution_errors(monkeypatch) -> None:
     assert isinstance(excinfo.value.cause, FileNotFoundError)
 
 
-def test_run_product_maps_cli_result(tmp_path: Path, monkeypatch) -> None:
-    from pipeline.services import run_service
+def test_execute_run_workflow_composes_prepare_and_render_results(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import run_execution
 
     call_order: list[str] = []
     prepare_result = ServiceResult(
@@ -199,10 +201,10 @@ def test_run_product_maps_cli_result(tmp_path: Path, monkeypatch) -> None:
         assert request.model == "233541"
         return render_result
 
-    monkeypatch.setattr(run_service, "prepare_product", fake_prepare)
-    monkeypatch.setattr(run_service, "render_product", fake_render)
+    monkeypatch.setattr(run_execution, "prepare_product", fake_prepare)
+    monkeypatch.setattr(run_execution, "render_product", fake_render)
 
-    result = run_product(FullRunRequest(model="233541", url="https://www.electronet.gr/example"))
+    result = run_execution.execute_run_workflow(FullRunRequest(model="233541", url="https://www.electronet.gr/example"))
 
     assert call_order == ["prepare", "render"]
     assert result.run.run_type == RunType.FULL
@@ -215,13 +217,32 @@ def test_run_product_maps_cli_result(tmp_path: Path, monkeypatch) -> None:
     assert result.details["product_name"] == "LG Example"
 
 
-def test_run_product_wraps_cli_errors(monkeypatch) -> None:
+def test_run_product_delegates_to_service_owned_execution(monkeypatch) -> None:
     from pipeline.services import run_service
 
-    def fake_prepare(_request: PrepareRequest):
+    expected = ServiceResult(
+        run=RunMetadata(model="233541", run_type=RunType.FULL, status=RunStatus.COMPLETED),
+        artifacts=RunArtifacts(),
+        details={},
+    )
+
+    def fake_execute_run_workflow(request: FullRunRequest) -> ServiceResult:
+        assert request.model == "233541"
+        assert request.url == "https://www.electronet.gr/example"
+        return expected
+
+    monkeypatch.setattr(run_service, "execute_run_workflow", fake_execute_run_workflow)
+
+    assert run_product(FullRunRequest(model="233541", url="https://www.electronet.gr/example")) is expected
+
+
+def test_run_product_wraps_execution_errors(monkeypatch) -> None:
+    from pipeline.services import run_service
+
+    def fake_execute_run_workflow(_request: FullRunRequest) -> ServiceResult:
         raise RuntimeError("full run exploded")
 
-    monkeypatch.setattr(run_service, "prepare_product", fake_prepare)
+    monkeypatch.setattr(run_service, "execute_run_workflow", fake_execute_run_workflow)
 
     with pytest.raises(ServiceError) as excinfo:
         run_product(FullRunRequest(model="233541", url="https://www.electronet.gr/example"))

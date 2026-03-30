@@ -1,10 +1,80 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M28 completed. Prepare/render orchestration ownership now lives in service-owned execution modules, `workflow.py` is a thin adapter over that seam, and the full pytest suite is green at `103 passed`.
+M29 completed. Full-run orchestration ownership now lives in a service-owned execution module, `run_service.py` is a thin service wrapper over that seam, and CLI/workflow behavior remains unchanged.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## M29 — make run_service the true owner of full-run orchestration
+
+Goal:
+- move the real full-run orchestration body out of `scraper/pipeline/services/run_service.py` into a service-owned execution module
+- keep CLI commands, workflow adapter behavior, artifact paths, validation semantics, publish gating, output semantics, and provider behavior unchanged
+- finish the full-run ownership inversion without widening scope into workflow or provider redesign
+
+Files added:
+- `scraper/pipeline/services/run_execution.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/run_service.py`
+- `scraper/pipeline/tests/test_services.py`
+
+Changes:
+- extracted the full-run composition body from `scraper/pipeline/services/run_service.py::run_product(...)` into `scraper/pipeline/services/run_execution.py::execute_run_workflow(...)`
+- kept the full-run composition service-owned by having the new executor compose `prepare_product(...)` and `render_product(...)` and return the same aggregated `ServiceResult` shape as before
+- reduced `scraper/pipeline/services/run_service.py` to a thin service wrapper that directly calls the new service-owned full-run executor and preserves the existing exception-wrapping behavior
+- updated `scraper/pipeline/tests/test_services.py` to prove:
+  - service-owned modules involved in prepare/render/full-run execution do not import `workflow.py`
+  - the new full-run executor still composes prepare/render results in order with unchanged aggregation semantics
+  - `run_product(...)` now delegates to the service-owned full-run executor and still wraps executor errors
+
+Commands run:
+- `Get-ChildItem -Force`
+- `rg -n "run_product|FullRunRequest|prepare_product|render_product|run_execution|workflow" scraper/pipeline -S`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scraper/pipeline/services/run_service.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/cli.py`
+- `Get-Content scraper/pipeline/services/__init__.py`
+- `rg -n "run_product\\(|prepare_product\\(|render_product\\(" scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_services.py scraper/pipeline/cli.py -S`
+- `git status --short`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/render_service.py`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `rg -n "Current milestone|M28|M29|Phase 2 milestones" PLAN.md DOCUMENTATION.md -S`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 940 -First 40`
+- `python -m compileall pipeline` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+Validation:
+- compile validation:
+  - `python -m compileall pipeline` from `scraper/`
+  - passed
+- exact requested pytest commands:
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+  - passed
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+  - passed
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed
+
+Risks:
+- `run_product(...)` remains the stable service entrypoint while the real full-run composition now lives one layer lower in `run_execution.py`; this is intentional and keeps the service contract unchanged
+- `cli.py` still owns standalone full-run metadata emission, while M29 only moves service-layer orchestration ownership
+
+Deferred:
+- no provider migration, CLI redesign, workflow redesign, artifact-path change, validation-contract change, or publish-gating change was attempted
+- `scraper/pipeline/tests/test_workflow.py` did not require edits because the workflow layer remains an unchanged adapter for prepare/render-only commands
+- `IMPLEMENT.md`, `AGENTS.md`, `README.md`, and `RULES.md` were left unchanged because M29 did not add a new durable operator rule or change the accepted runtime interface
 
 ## M28 — make services the true owner of prepare/render orchestration
 
