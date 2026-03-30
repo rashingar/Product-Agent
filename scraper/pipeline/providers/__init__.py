@@ -1,4 +1,5 @@
 from .base import ProductProvider, ProviderError
+from .electronet_provider import ElectronetProvider
 from .manufacturer_tefal_provider import ManufacturerTefalProvider
 from .models import (
     ProviderCapability,
@@ -13,9 +14,10 @@ from .models import (
     ProviderStage,
 )
 from .skroutz_provider import SkroutzProvider
-from .registry import ProviderRegistry
+from .registry import ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
 
 __all__ = [
+    "ElectronetProvider",
     "ProductProvider",
     "ManufacturerTefalProvider",
     "ProviderCapability",
@@ -26,9 +28,11 @@ __all__ = [
     "ProviderInputIdentity",
     "ProviderKind",
     "ProviderRegistry",
+    "bootstrap_runtime_provider_registry",
     "ProviderResult",
     "ProviderSnapshot",
     "ProviderSnapshotKind",
     "SkroutzProvider",
     "ProviderStage",
+    "source_to_provider_id",
 ]

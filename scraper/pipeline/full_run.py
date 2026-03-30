@@ -15,33 +15,12 @@ from .prepare_stage import (
     build_identity_checks,
     execute_prepare_stage,
 )
-from .providers.electronet_provider import ElectronetProvider
-from .providers.manufacturer_tefal_provider import ManufacturerTefalProvider
-from .providers.skroutz_provider import SkroutzProvider
+from .providers.registry import bootstrap_runtime_provider_registry, source_to_provider_id
 from .repo_paths import SCHEMA_LIBRARY_PATH
 from .schema_matcher import SchemaMatcher
 from .source_detection import detect_source, validate_url_scope
 from .taxonomy import TaxonomyResolver
 from .utils import write_json
-
-
-def _resolve_provider_for_source(
-    *,
-    source: str,
-    cli,
-    fetcher,
-    electronet_parser,
-    skroutz_parser,
-    manufacturer_parser,
-):
-    del cli
-    if source == "electronet":
-        return ElectronetProvider(fetcher=fetcher, parser=electronet_parser)
-    if source == "skroutz":
-        return SkroutzProvider(fetcher=fetcher, parser=skroutz_parser)
-    if source == "manufacturer_tefal":
-        return ManufacturerTefalProvider(fetcher=fetcher, parser=manufacturer_parser)
-    return None
 
 
 def execute_full_run(cli) -> dict[str, Any]:
@@ -55,7 +34,8 @@ def execute_full_run(cli) -> dict[str, Any]:
         manufacturer_parser_factory=ManufacturerProductParser,
         fetcher_factory=ElectronetFetcher,
         taxonomy_resolver_factory=TaxonomyResolver,
-        resolve_provider_for_source_fn=_resolve_provider_for_source,
+        bootstrap_provider_registry_fn=bootstrap_runtime_provider_registry,
+        source_to_provider_id_fn=source_to_provider_id,
         enrich_source_from_manufacturer_docs_fn=enrich_source_from_manufacturer_docs,
     )
 
@@ -76,19 +56,17 @@ __all__ = [
     "SCHEMA_LIBRARY_PATH",
     "ElectronetFetcher",
     "ElectronetProductParser",
-    "ElectronetProvider",
     "ManufacturerProductParser",
-    "ManufacturerTefalProvider",
     "SchemaMatcher",
     "SkroutzProductParser",
-    "SkroutzProvider",
     "TaxonomyResolver",
-    "_resolve_provider_for_source",
     "_select_skroutz_image_backed_sections",
     "apply_skroutz_contract_hints",
+    "bootstrap_runtime_provider_registry",
     "build_identity_checks",
     "detect_source",
     "enrich_source_from_manufacturer_docs",
     "execute_full_run",
+    "source_to_provider_id",
     "validate_url_scope",
 ]

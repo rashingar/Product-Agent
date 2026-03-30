@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from pipeline.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.providers import ProviderRegistry
 from pipeline.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 from pipeline.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
@@ -243,6 +244,24 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
             raise AssertionError("Electronet parser should not be called directly")
 
     class DummyElectronetProvider:
+        definition = ProviderDefinition(
+            provider_id="electronet",
+            source_name="electronet",
+            kind=ProviderKind.VENDOR_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
         def __init__(self, *, fetcher, parser):
             assert isinstance(fetcher, DummyFetcher)
             assert isinstance(parser, UnexpectedParser)
@@ -264,19 +283,7 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
         def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
             assert snapshot.requested_url == identity.url
             return ProviderResult(
-                provider=ProviderDefinition(
-                    provider_id="electronet",
-                    source_name="electronet",
-                    kind=ProviderKind.VENDOR_SITE,
-                    capabilities=frozenset(
-                        {
-                            ProviderCapability.URL_INPUT,
-                            ProviderCapability.LIVE_FETCH,
-                            ProviderCapability.HTML_SNAPSHOT,
-                            ProviderCapability.NORMALIZED_PRODUCT,
-                        }
-                    ),
-                ),
+                provider=self.definition,
                 identity=identity,
                 snapshot=snapshot,
                 product=parsed.source,
@@ -290,12 +297,12 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "electronet")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(run_module, "ElectronetProvider", DummyElectronetProvider)
-    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {})
+    registry = ProviderRegistry()
+    registry.register(DummyElectronetProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
 
     result = run_module.execute_full_run(cli)
 
@@ -378,6 +385,24 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
             raise AssertionError("Electronet provider should not be selected for Skroutz by default")
 
     class DummySkroutzProvider:
+        definition = ProviderDefinition(
+            provider_id="skroutz",
+            source_name="skroutz",
+            kind=ProviderKind.VENDOR_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
         def __init__(self, *, fetcher, parser):
             assert isinstance(fetcher, DummyFetcher)
             assert isinstance(parser, UnexpectedParser)
@@ -399,19 +424,7 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
         def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
             assert snapshot.requested_url == identity.url
             return ProviderResult(
-                provider=ProviderDefinition(
-                    provider_id="skroutz",
-                    source_name="skroutz",
-                    kind=ProviderKind.VENDOR_SITE,
-                    capabilities=frozenset(
-                        {
-                            ProviderCapability.URL_INPUT,
-                            ProviderCapability.LIVE_FETCH,
-                            ProviderCapability.HTML_SNAPSHOT,
-                            ProviderCapability.NORMALIZED_PRODUCT,
-                        }
-                    ),
-                ),
+                provider=self.definition,
                 identity=identity,
                 snapshot=snapshot,
                 product=parsed.source,
@@ -424,11 +437,7 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
 
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("skroutz", True, "skroutz_product_path"))
-    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(run_module, "SkroutzProvider", DummySkroutzProvider)
-    monkeypatch.setattr(run_module, "ElectronetProvider", UnexpectedElectronetProvider)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(
         run_module,
@@ -450,6 +459,9 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
             "fallback_reason": "test_stub",
         },
     )
+    registry = ProviderRegistry()
+    registry.register(DummySkroutzProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
 
     result = run_module.execute_full_run(cli)
 
@@ -547,6 +559,24 @@ def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(
             raise AssertionError("Manufacturer parser should not be called directly outside the provider seam")
 
     class DummyManufacturerTefalProvider:
+        definition = ProviderDefinition(
+            provider_id="manufacturer_tefal",
+            source_name="manufacturer_tefal",
+            kind=ProviderKind.MANUFACTURER_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
         def __init__(self, *, fetcher, parser):
             assert isinstance(fetcher, DummyFetcher)
             assert isinstance(parser, UnexpectedParser)
@@ -568,19 +598,7 @@ def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(
         def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
             assert snapshot.requested_url == identity.url
             return ProviderResult(
-                provider=ProviderDefinition(
-                    provider_id="manufacturer_tefal",
-                    source_name="manufacturer_tefal",
-                    kind=ProviderKind.MANUFACTURER_SITE,
-                    capabilities=frozenset(
-                        {
-                            ProviderCapability.URL_INPUT,
-                            ProviderCapability.LIVE_FETCH,
-                            ProviderCapability.HTML_SNAPSHOT,
-                            ProviderCapability.NORMALIZED_PRODUCT,
-                        }
-                    ),
-                ),
+                provider=self.definition,
                 identity=identity,
                 snapshot=snapshot,
                 product=parsed.source,
@@ -593,14 +611,12 @@ def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(
 
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "manufacturer_tefal")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
-    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(run_module, "ManufacturerTefalProvider", DummyManufacturerTefalProvider)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
+    registry = ProviderRegistry()
+    registry.register(DummyManufacturerTefalProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
 
     result = run_module.execute_full_run(cli)
 
@@ -634,12 +650,9 @@ def test_execute_full_run_fails_fast_when_supported_source_has_no_provider(monke
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: object())
-    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: object())
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: object())
-    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: object())
-    monkeypatch.setattr(run_module, "_resolve_provider_for_source", lambda **_kwargs: None)
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: ProviderRegistry())
 
-    with pytest.raises(RuntimeError, match="No provider configured for supported source: skroutz"):
+    with pytest.raises(RuntimeError, match="Provider 'skroutz' is not registered"):
         run_module.execute_full_run(cli)
 
 

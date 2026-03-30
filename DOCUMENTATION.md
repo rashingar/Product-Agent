@@ -1,10 +1,78 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M35 completed. The repo now uses a scrape-only prepare-stage core for the active prepare path, `prepare` no longer writes a scrape-stage CSV, `render` remains the sole owner of candidate and publish outputs, and `scraper/pipeline/full_run.py` is reduced to a thin compatibility wrapper for explicit direct callers.
+M35 completed. The repo now uses a scrape-only prepare-stage core for the active prepare path, `prepare` no longer writes a scrape-stage CSV, `render` remains the sole owner of candidate and publish outputs, `scraper/pipeline/full_run.py` is reduced to a thin compatibility wrapper for explicit direct callers, and provider resolution now flows through the registry bootstrap and source-to-provider-id mapping seam.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## 2026-03-30 - Resolve providers through registry bootstrap
+
+Goal:
+- replace ad hoc provider-selection branches in orchestration with registry-driven resolution
+- keep provider fetch and normalize behavior unchanged
+- add public coverage for registry bootstrap and source-to-provider-id mapping
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/providers/__init__.py`
+- `scraper/pipeline/providers/registry.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- extended `scraper/pipeline/providers/registry.py` with:
+  - `bootstrap_runtime_provider_registry(...)`
+  - `source_to_provider_id(...)`
+- made `bootstrap_runtime_provider_registry(...)` the single runtime bootstrap point for the active providers:
+  - `electronet`
+  - `skroutz`
+  - `manufacturer_tefal`
+- updated `scraper/pipeline/prepare_stage.py` orchestration to:
+  - build the provider registry once per run
+  - map detected source to provider id through `source_to_provider_id(...)`
+  - resolve the provider through `registry.require(...)`
+- removed the active-path dependence on the old ad hoc provider-selection helper branches from orchestration
+- kept the existing readable failure behavior for missing runtime providers by surfacing the registry-not-registered failure as a direct runtime error
+- updated `scraper/pipeline/full_run.py` to pass the registry bootstrap and source-mapping functions through to the compatibility wrapper path
+- re-exported the new bootstrap and mapping helpers from `scraper/pipeline/providers/__init__.py`
+- updated tests so public registry behavior is what is asserted now:
+  - bootstrap coverage
+  - source mapping coverage
+  - orchestration tests inject a registry instead of anchoring on private branch-selection internals
+
+Intentional behavior changes:
+- no provider fetch or normalize behavior changed
+- no provider ids changed
+- orchestration now depends on the public registry bootstrap plus mapping seam instead of private branch selection code
+
+Commands run:
+- `Get-Content -Raw scraper/pipeline/providers/registry.py`
+- `Get-Content -Raw scraper/pipeline/prepare_stage.py`
+- `Get-Content -Raw scraper/pipeline/tests/test_provider_selection.py`
+- `rg -n "_resolve_provider_for_source|ProviderRegistry|provider_id|detect_source\\(|require\\(" scraper/pipeline scraper/pipeline/tests -S`
+- `Get-Content -Raw scraper/pipeline/providers/__init__.py`
+- `Get-Content -Raw scraper/pipeline/providers/electronet_provider.py`
+- `Get-Content -Raw scraper/pipeline/providers/skroutz_provider.py`
+- `Get-Content -Raw scraper/pipeline/providers/manufacturer_tefal_provider.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+- `rg -n "_resolve_provider_for_source|bootstrap_runtime_provider_registry|source_to_provider_id|registry.require\\(" scraper/pipeline scraper/pipeline/tests -S`
+
+Validation:
+- targeted provider/orchestration subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py` from `scraper/`
+  - passed, `26 passed`
+- broader affected suite:
+  - `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+  - passed, `47 passed`
+
+Deferred:
+- no error taxonomy changes were made
+- no CI changes were made
+- no provider fetch/normalize internals were changed
 
 ## 2026-03-30 - Make prepare scrape-only under the split-task workflow
 

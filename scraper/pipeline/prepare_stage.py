@@ -15,11 +15,9 @@ from .normalize import normalize_for_match
 from .parser_product_electronet import ElectronetProductParser
 from .parser_product_manufacturer import ManufacturerProductParser
 from .parser_product_skroutz import SkroutzProductParser
-from .providers.base import ProductProvider, ProviderError
-from .providers.electronet_provider import ElectronetProvider
-from .providers.manufacturer_tefal_provider import ManufacturerTefalProvider
+from .providers.base import ProviderError
 from .providers.models import ProviderInputIdentity, ProviderResult
-from .providers.skroutz_provider import SkroutzProvider
+from .providers.registry import ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
 from .repo_paths import SCHEMA_LIBRARY_PATH
 from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
@@ -94,25 +92,6 @@ def _provider_result_to_parsed(provider_result: ProviderResult) -> ParsedProduct
     )
 
 
-def _resolve_provider_for_source(
-    *,
-    source: str,
-    cli: CLIInput,
-    fetcher: ElectronetFetcher,
-    electronet_parser: ElectronetProductParser,
-    skroutz_parser: SkroutzProductParser,
-    manufacturer_parser: ManufacturerProductParser,
-) -> ProductProvider | None:
-    del cli
-    if source == "electronet":
-        return ElectronetProvider(fetcher=fetcher, parser=electronet_parser)
-    if source == "skroutz":
-        return SkroutzProvider(fetcher=fetcher, parser=skroutz_parser)
-    if source == "manufacturer_tefal":
-        return ManufacturerTefalProvider(fetcher=fetcher, parser=manufacturer_parser)
-    return None
-
-
 def execute_prepare_stage(
     cli: CLIInput,
     *,
@@ -125,7 +104,8 @@ def execute_prepare_stage(
     manufacturer_parser_factory: Callable[[], ManufacturerProductParser] = ManufacturerProductParser,
     fetcher_factory: Callable[[], ElectronetFetcher] = ElectronetFetcher,
     taxonomy_resolver_factory: Callable[[], TaxonomyResolver] = TaxonomyResolver,
-    resolve_provider_for_source_fn: Callable[..., ProductProvider | None] = _resolve_provider_for_source,
+    bootstrap_provider_registry_fn: Callable[..., ProviderRegistry] = bootstrap_runtime_provider_registry,
+    source_to_provider_id_fn: Callable[[str], str | None] = source_to_provider_id,
     enrich_source_from_manufacturer_docs_fn: Callable[..., dict[str, Any]] = enrich_source_from_manufacturer_docs,
 ) -> dict[str, Any]:
     source = detect_source_fn(cli.url)
@@ -134,16 +114,19 @@ def execute_prepare_stage(
     skroutz_parser = skroutz_parser_factory()
     manufacturer_parser = manufacturer_parser_factory()
     fetcher = fetcher_factory()
-    provider = resolve_provider_for_source_fn(
-        source=source,
-        cli=cli,
+    registry = bootstrap_provider_registry_fn(
         fetcher=fetcher,
         electronet_parser=electronet_parser,
         skroutz_parser=skroutz_parser,
         manufacturer_parser=manufacturer_parser,
     )
-    if provider is None:
+    provider_id = source_to_provider_id_fn(source)
+    if not provider_id:
         raise RuntimeError(f"No provider configured for supported source: {source}")
+    try:
+        provider = registry.require(provider_id)
+    except ProviderError as exc:
+        raise RuntimeError(str(exc)) from exc
 
     identity = ProviderInputIdentity(model=cli.model, url=cli.url)
     try:
