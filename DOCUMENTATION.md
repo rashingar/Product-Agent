@@ -1,10 +1,101 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M34 completed. The branch now runs in steady state with split `intro_text` and `seo_meta` task artifacts only, deterministic presentation rendering owned by code, and legacy combined LLM artifacts removed from the active workflow.
+M35 scope defined; implementation pending. The repo is already post-split on LLM artifacts and render-side deterministic section ownership, but the prepare/render execution seam is not fully cleaned up yet: `scraper/pipeline/services/prepare_execution.py` still calls `execute_full_run(...)`, `scraper/pipeline/full_run.py` still writes a scrape-stage CSV, and `scraper/pipeline/services/render_execution.py` remains the owner of candidate artifacts and publish gating from split-task outputs.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## 2026-03-30 - Define post-split prepare/render execution seam cleanup scope
+
+Goal:
+- document the complete post-split branch scope before any runtime code changes
+- keep this commit docs-only and record the actual current prepare/render seam versus the intended steady-state ownership boundary
+- avoid implying that the seam cleanup is already implemented
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `IMPLEMENT.md`
+
+Current state:
+- `README.md` still documents the two-stage `prepare` / `render` workflow under `scraper/`, including prepare handoff artifacts under `work/{model}/llm/` and render candidate artifacts under `work/{model}/candidate/`
+- `scraper/pipeline/services/prepare_execution.py` still routes prepare through `execute_full_run(...)`
+- `scraper/pipeline/full_run.py` still writes `{model}.csv` into the output root it is given, so the active prepare path still produces a scrape-stage CSV side effect under `work/{model}/scrape/`
+- `scraper/pipeline/services/render_execution.py` already consumes split-task outputs:
+  - `work/{model}/llm/intro_text.output.txt`
+  - `work/{model}/llm/seo_meta.output.json`
+- `scraper/pipeline/services/render_execution.py` already writes candidate-stage artifacts and publish copy:
+  - `work/{model}/candidate/{model}.csv`
+  - `work/{model}/candidate/{model}.validation.json`
+  - `work/{model}/candidate/description.html`
+  - `work/{model}/candidate/characteristics.html`
+  - `products/{model}.csv` when validation passes
+
+Target state:
+- prepare owns scrape-only execution plus task handoff artifact creation
+- render owns all final candidate and publish outputs
+- the active prepare path no longer depends on `execute_full_run(...)`
+- `full_run.py` is reduced to explicit full-run composition only, or retired from the active prepare path entirely
+
+Ownership boundary after split-LLM:
+- prepare-owned artifacts:
+  - `work/{model}/scrape/{model}.raw.html`
+  - `work/{model}/scrape/{model}.source.json`
+  - `work/{model}/scrape/{model}.normalized.json`
+  - `work/{model}/scrape/{model}.report.json`
+  - scrape-stage downloaded assets and supporting scrape artifacts under `work/{model}/scrape/`
+  - `work/{model}/llm/task_manifest.json`
+  - `work/{model}/llm/intro_text.context.json`
+  - `work/{model}/llm/intro_text.prompt.txt`
+  - `work/{model}/llm/seo_meta.context.json`
+  - `work/{model}/llm/seo_meta.prompt.txt`
+- render-owned artifacts:
+  - `work/{model}/candidate/{model}.csv`
+  - `work/{model}/candidate/{model}.normalized.json`
+  - `work/{model}/candidate/{model}.validation.json`
+  - `work/{model}/candidate/description.html`
+  - `work/{model}/candidate/characteristics.html`
+  - `products/{model}.csv`
+- LLM-stage handoff note:
+  - the LLM still writes `work/{model}/llm/intro_text.output.txt` and `work/{model}/llm/seo_meta.output.json`, but prepare owns the contract and handoff scaffolding for those files rather than render owning their creation
+
+Intended fate of `full_run.py`:
+- `scraper/pipeline/full_run.py` should stop being the active implementation seam behind workflow prepare
+- acceptable end states for this branch are:
+  - a narrowed explicit full-run composition wrapper above scrape-only prepare plus render
+  - retirement from the active prepare path if service-owned composition fully replaces it
+- unacceptable end state:
+  - any remaining prepare-stage dependency that keeps candidate CSV generation or other render/publish side effects inside the active prepare path
+
+Out of scope for this branch:
+- provider bootstrap changes
+- service error taxonomy redesign
+- CI changes
+
+Commands run:
+- `Get-Content -Raw PLAN.md`
+- `Get-Content -Raw DOCUMENTATION.md`
+- `Get-Content -Raw IMPLEMENT.md`
+- `Get-Content -Raw scraper/pipeline/services/prepare_execution.py`
+- `Get-Content -Raw scraper/pipeline/services/render_execution.py`
+- `Get-Content -Raw scraper/pipeline/full_run.py`
+- `Get-Content -Raw scraper/pipeline/workflow.py`
+- `Get-Content -Raw README.md`
+- `rg -n "execute_full_run\\(|llm_output\\.json|intro_text\\.output|seo_meta\\.output|candidate|validation|publish|csv_path" scraper/pipeline/services scraper/pipeline/full_run.py scraper/pipeline/workflow.py README.md -S`
+- `rg --files scraper/pipeline/tests`
+- `git status --short`
+- `git diff --check -- PLAN.md DOCUMENTATION.md IMPLEMENT.md`
+
+Validation:
+- docs-only commit
+- `git diff --check -- PLAN.md DOCUMENTATION.md IMPLEMENT.md` passed
+- no runtime tests were run because this commit only updates control docs and must not include runtime or test changes
+
+Deferred:
+- no runtime code, tests, or README changes were made in this commit
+- the prepare/render seam cleanup remains planned work only at this stage
+- earlier M34 records remain preserved below as historical execution evidence for the split-task contract, even though the post-split execution seam cleanup is now tracked separately as pending work
 
 ## 2026-03-30 - Remove legacy combined LLM handoff and finalize split-task workflow
 

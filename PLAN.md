@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M29. Phase 3 is complete through M34. Hybrid RAG shifts to Phase 4 and remains blocked until the split-LLM deterministic-presentation rollout is stable in steady state.
+Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. A post-split execution seam cleanup milestone, M35, is now pending before Phase 4. Hybrid RAG remains blocked until that seam cleanup lands and the prepare/render split is stable in steady state.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -95,15 +95,49 @@ Phase 3 milestones:
 - M33 — render final description HTML and SEO normalization in code (completed; description HTML is now assembled in code from plain-text `intro_text`, deterministic CTA data, and cleaned deterministic source sections; wrappers/classes/styles remain code-owned; keyword normalization in code enforces brand/model presence while collapsing duplicates and singular/plural variants; and section-image mapping stays tied to original source order when weak sections are skipped)
 - M34 — final cleanup of legacy combined artifacts and docs (completed; the legacy single-prompt artifact contract was removed from steady-state prepare/render expectations, `render` no longer depends on combined `llm_output.json`, obsolete combined prompt/schema assets were retired, and user-facing/runtime docs now describe the final split-task contract)
 
+### Post-split execution seam cleanup
+
+Status: pending
+
+Goals:
+1. Finish the prepare/render execution seam after the split-LLM refactor.
+2. Make `prepare` truly scrape-only plus LLM-handoff-only.
+3. Keep `render` as the sole owner of candidate CSV generation, validation artifacts, description HTML, characteristics HTML, and publish copy.
+4. Remove the remaining active-path dependence on `execute_full_run(...)` for prepare-stage behavior.
+5. Reduce or retire `full_run.py` from the active prepare path without broadening scope into provider bootstrap, service error taxonomy, or CI.
+
+Hard rules:
+- Do not reintroduce combined LLM artifacts or change the split-task `intro_text` / `seo_meta` contract.
+- Do not let `prepare` write candidate or publish artifacts in steady state.
+- Do not broaden this cleanup into provider bootstrap, service error taxonomy, or CI work.
+
+Post-split milestone:
+- M35 — clean up the prepare/render execution seam (pending; `scraper/pipeline/services/prepare_execution.py` still routes prepare through `execute_full_run(...)`, `scraper/pipeline/full_run.py` still writes a scrape-stage CSV, and `scraper/pipeline/services/render_execution.py` already owns candidate-stage artifact generation from split-task outputs, so this milestone finishes the stage boundary rather than changing the split-task LLM contract)
+
+Implementation substeps:
+1. Extract or introduce a scrape-only execution seam that returns the parsed, taxonomy, normalized, and report data needed by `prepare` without writing candidate-stage outputs.
+2. Re-route `scraper/pipeline/services/prepare_execution.py` to that scrape-only seam and remove its active-path dependency on `execute_full_run(...)`.
+3. Remove scrape-stage CSV generation and any other candidate/publish side effects from the active prepare path while preserving scrape artifacts under `work/{model}/scrape/` and task handoff artifacts under `work/{model}/llm/`.
+4. Keep `scraper/pipeline/services/render_execution.py` as the sole owner of candidate CSV generation, validation reports, `description.html`, `characteristics.html`, and publish-copy to `products/`.
+5. Narrow `scraper/pipeline/full_run.py` to explicit full-run composition only, or retire it from the active prepare path entirely, without changing supported-provider behavior.
+
+Acceptance criteria:
+1. `python -m pipeline.workflow prepare ...` writes only scrape artifacts and LLM handoff artifacts under `work/{model}/`; it does not write `work/{model}/scrape/{model}.csv`, candidate artifacts, or publish outputs.
+2. `scraper/pipeline/services/prepare_execution.py` no longer imports or depends on `execute_full_run(...)` for active prepare behavior.
+3. `python -m pipeline.workflow render --model {model}` remains the sole owner of `work/{model}/candidate/{model}.csv`, `work/{model}/candidate/{model}.validation.json`, `work/{model}/candidate/description.html`, `work/{model}/candidate/characteristics.html`, and `products/{model}.csv`.
+4. Split-task `intro_text` / `seo_meta` inputs and outputs, supported-provider behavior, and render validation semantics remain unchanged.
+5. `scraper/pipeline/full_run.py` is either reduced to an explicit full-run wrapper over prepare plus render or otherwise removed from the active prepare path, with no new scope added in provider bootstrap, service error taxonomy, or CI.
+
 ### Phase 4 — Hybrid RAG foundation
 
 Status: pending
 
 Entry handoff:
-1. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
-2. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
-3. Preserve the completed split-task steady-state contract while starting retrieval-layer work; do not reintroduce combined LLM artifacts.
-4. Do not reintroduce source-specific routing below the provider boundary.
+1. Complete M35 before starting any hybrid RAG work.
+2. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
+3. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
+4. Preserve the completed split-task steady-state contract while starting retrieval-layer work; do not reintroduce combined LLM artifacts.
+5. Do not reintroduce source-specific routing below the provider boundary.
 
 ## Root policy
 ### Keep in root
@@ -237,7 +271,7 @@ Evidence:
 
 Cleanup is complete through M14.
 
-New implementation work starts at M30 and must follow the active Phase 3 rules above. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
+New implementation work starts at M30 and now continues through the pending post-split M35 seam cleanup before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
 
 ## Validation rules
 After each milestone:

@@ -17,41 +17,50 @@
 8. If a seam is not cleanly extractable, document the seam and stop instead of improvising a larger refactor.
 9. Update docs continuously.
 
-## Branch execution checklist — split-LLM `intro_text` and deterministic presentation
+## Branch execution checklist — post-split prepare/render seam cleanup
 Commit order for this branch:
 1. docs-only scope commit updating `PLAN.md`, `DOCUMENTATION.md`, and `IMPLEMENT.md`
-2. split the single LLM handoff into task-specific `intro_text` and `seo_meta` prepare artifacts and contracts
-3. add the render compatibility phase so split task outputs are preferred while the branch transitions off the combined workflow
-4. move presentation section ownership to deterministic code paths with `usable` / `weak` / `missing` quality classification and the planned fail/warn rules
-5. render final description HTML in code from `intro_text`, deterministic CTA data, and cleaned deterministic presentation sections, and normalize SEO keywords in code
-6. perform final cleanup by removing the legacy combined-output path and then updating remaining runtime docs, including `README.md`
+2. extract or introduce a scrape-only execution seam that preserves the current scrape artifacts and split-task handoff contract without writing candidate or publish outputs
+3. reroute `scraper/pipeline/services/prepare_execution.py` off `execute_full_run(...)` and make `prepare` truly scrape-only plus handoff-only
+4. remove prepare-stage CSV generation and any remaining active-path candidate or publish side effects from the prepare path
+5. keep `scraper/pipeline/services/render_execution.py` as the sole owner of candidate CSV generation, validation artifacts, `description.html`, `characteristics.html`, and publish copy to `products/`
+6. reduce `scraper/pipeline/full_run.py` to explicit full-run composition only, or retire it from the active prepare path, and then update runtime-facing docs such as `README.md`
+
+Out of scope for this branch:
+- provider bootstrap changes
+- service error taxonomy redesign
+- CI changes
 
 Targeted test files likely to change:
-- `scraper/pipeline/tests/test_llm_contract.py`
 - `scraper/pipeline/tests/test_workflow.py`
 - `scraper/pipeline/tests/test_services.py`
 - `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
 - `scraper/pipeline/tests/test_skroutz_sections.py`
-- `scraper/pipeline/tests/test_validator.py`
 
-Expected runtime artifact changes:
-- steady-state task-specific inputs:
+Expected artifact changes after seam cleanup:
+- prepare-owned scrape artifacts remain under `work/{model}/scrape/`:
+  - `work/{model}/scrape/{model}.raw.html`
+  - `work/{model}/scrape/{model}.source.json`
+  - `work/{model}/scrape/{model}.normalized.json`
+  - `work/{model}/scrape/{model}.report.json`
+  - scrape-stage downloaded assets and supporting scrape artifacts
+- prepare-owned task handoff artifacts remain under `work/{model}/llm/`:
   - `work/{model}/llm/task_manifest.json`
   - `work/{model}/llm/intro_text.context.json`
   - `work/{model}/llm/intro_text.prompt.txt`
   - `work/{model}/llm/seo_meta.context.json`
   - `work/{model}/llm/seo_meta.prompt.txt`
-- steady-state task-specific outputs:
-  - `work/{model}/llm/intro_text.output.txt`
-  - `work/{model}/llm/seo_meta.output.json`
-- removed legacy combined artifacts from the active workflow:
-  - `work/{model}/llm_context.json`
-  - `work/{model}/prompt.txt`
-  - `work/{model}/llm_output.json`
-- steady-state render behavior:
-  - `render` reads `intro_text.output.txt` and `seo_meta.output.json` directly
-  - description HTML is assembled in code from `intro_text`, deterministic CTA data, and deterministic cleaned source sections
-  - section-copy generation is not part of the LLM contract
+  - expected output targets for `intro_text.output.txt` and `seo_meta.output.json`
+- removed from the active prepare path:
+  - `work/{model}/scrape/{model}.csv`
+- render remains the sole owner of final candidate and publish artifacts:
+  - `work/{model}/candidate/{model}.csv`
+  - `work/{model}/candidate/{model}.normalized.json`
+  - `work/{model}/candidate/{model}.validation.json`
+  - `work/{model}/candidate/description.html`
+  - `work/{model}/candidate/characteristics.html`
+  - `products/{model}.csv`
 
 ## Execution docs policy
 For milestone commits:
