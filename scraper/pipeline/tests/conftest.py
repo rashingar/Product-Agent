@@ -7,7 +7,6 @@ import pytest
 _TESTS_ROOT = Path(__file__).resolve().parent
 _FIXTURES_ROOT = _TESTS_ROOT / "fixtures"
 _PROVIDERS_FIXTURES_ROOT = _FIXTURES_ROOT / "providers"
-_REPO_ROOT = _TESTS_ROOT.parents[2]
 
 
 @pytest.fixture(scope="session")
@@ -51,10 +50,10 @@ def golden_outputs_root(fixtures_root: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def skroutz_fixtures_root(skroutz_provider_fixtures_root: Path) -> Path:
-    return skroutz_provider_fixtures_root
+def skroutz_golden_outputs_root(golden_outputs_root: Path) -> Path:
+    return golden_outputs_root / "skroutz"
 
 
 @pytest.fixture(scope="session")
-def products_root() -> Path:
-    return _REPO_ROOT / "products"
+def skroutz_fixtures_root(skroutz_provider_fixtures_root: Path) -> Path:
+    return skroutz_provider_fixtures_root

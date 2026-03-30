@@ -125,10 +125,13 @@ def make_cli(model: str) -> CLIInput:
     )
 
 
-def copy_baseline_products(tmp_products_root: Path, products_root: Path) -> None:
+def copy_baseline_products(tmp_products_root: Path, skroutz_golden_outputs_root: Path) -> None:
     tmp_products_root.mkdir(parents=True, exist_ok=True)
     for model in SAMPLES:
-        (tmp_products_root / f"{model}.csv").write_text((products_root / f"{model}.csv").read_text(encoding="utf-8-sig"), encoding="utf-8")
+        (tmp_products_root / f"{model}.csv").write_text(
+            (skroutz_golden_outputs_root / f"{model}.csv").read_text(encoding="utf-8-sig"),
+            encoding="utf-8",
+        )
 
 
 def test_validate_input_accepts_skroutz_sections_for_v2() -> None:
@@ -234,14 +237,14 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
     tmp_path: Path,
     monkeypatch,
     skroutz_fixtures_root: Path,
-    products_root: Path,
+    skroutz_golden_outputs_root: Path,
 ) -> None:
     from pipeline import workflow
 
     install_fixture_fetcher(monkeypatch, skroutz_fixtures_root)
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
-    copy_baseline_products(tmp_path / "products", products_root)
+    copy_baseline_products(tmp_path / "products", skroutz_golden_outputs_root)
 
     expected_match_fields = {"mpn", "name", "meta_title", "seo_keyword", "price", "category"}
 
@@ -273,16 +276,22 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
             assert len(report["section_image_urls_resolved"]) == SAMPLES[model]["sections"]
 
         llm_output_path = prepare_result["model_root"] / "llm_output.json"
-        llm_output_path.write_text(json.dumps(build_llm_payload_from_baseline(products_root / f"{model}.csv"), ensure_ascii=False, indent=2), encoding="utf-8")
-        baseline_row = read_csv_row(products_root / f"{model}.csv")
+        llm_output_path.write_text(
+            json.dumps(build_llm_payload_from_baseline(skroutz_golden_outputs_root / f"{model}.csv"), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        baseline_row = read_csv_row(skroutz_golden_outputs_root / f"{model}.csv")
 
         render_result = render_workflow(model)
         candidate_row = read_csv_row(render_result["candidate_csv_path"])
         validation = render_result["validation_report"]
 
-        assert render_result["published_csv_path"].exists()
-        assert read_csv_row(render_result["published_csv_path"]) == candidate_row
+        assert render_result["candidate_csv_path"].exists()
+        assert render_result["published_csv_path"] is None
+        assert render_result["run_status"] == "failed"
+        assert validation["ok"] is False
         assert set(validation["errors"]) <= {"llm_product_shape_invalid", "llm_presentation_shape_invalid"}
+        assert "Candidate failed validation; skipping publish to products/." in validation["warnings"]
         assert validation["summary"]["missing"] == 0
         assert validation["summary"]["empty"] == 0
         for field in expected_match_fields:

@@ -561,7 +561,7 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
     assert metadata["run"]["error_detail"] == "prepare exploded"
 
 
-def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) -> None:
+def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
@@ -638,22 +638,25 @@ def test_render_workflow_writes_candidate_bundle(tmp_path: Path, monkeypatch) ->
     result = render_workflow(model)
 
     assert result["candidate_csv_path"].exists()
-    assert result["published_csv_path"].exists()
-    assert result["published_csv_path"] == products_dir / f"{model}.csv"
-    assert result["published_csv_path"].read_text(encoding="utf-8-sig") == result["candidate_csv_path"].read_text(encoding="utf-8-sig")
+    assert result["published_csv_path"] is None
     assert result["validation_report_path"].exists()
     assert result["metadata_path"].exists()
+    assert result["run_status"] == "failed"
+    assert result["validation_report"]["ok"] is False
     assert "field_health" in result["validation_report"]
+    assert result["validation_report"]["errors"] == ["llm_presentation_shape_invalid"]
+    assert "Candidate failed validation; skipping publish to products/." in result["validation_report"]["warnings"]
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
     assert result["metadata_path"].name == "render.run.json"
     assert metadata["run"]["model"] == model
     assert metadata["run"]["run_type"] == "render"
-    assert metadata["run"]["status"] == "completed"
+    assert metadata["run"]["status"] == "failed"
     assert metadata["artifacts"]["candidate_csv_path"] == str(result["candidate_csv_path"])
-    assert metadata["artifacts"]["published_csv_path"] == str(result["published_csv_path"])
+    assert metadata["artifacts"]["published_csv_path"] is None
     assert metadata["artifacts"]["validation_report_path"] == str(result["validation_report_path"])
     assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
-    assert metadata["details"]["validation_ok"] == result["validation_report"]["ok"]
+    assert metadata["details"]["validation_ok"] is False
+    assert metadata["details"]["published"] is False
 
 
 def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_path: Path, monkeypatch) -> None:

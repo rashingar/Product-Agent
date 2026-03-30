@@ -1,10 +1,84 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M23 completed. The active runtime layout is now `scraper/pipeline`, active invocation runs from `scraper/` via `python -m pipeline...`, and runtime behavior remained unchanged.
+M24 completed. The post-workdir test baseline is now fixture-owned under `scraper/pipeline/tests/fixtures/...`, the touched workflow tests match the live render contract, and runtime behavior remained unchanged.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## M24 — stabilize the post-workdir test baseline
+
+Goal:
+- stabilize the post-M23 pytest baseline without changing runtime behavior by moving touched test baselines under `scraper/pipeline/tests/fixtures/...` and aligning workflow assertions with the live render contract
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/conftest.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Files added:
+- `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/143481.csv`
+- `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/307497.csv`
+- `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/341490.csv`
+- `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/344317.csv`
+
+Changes:
+- added `skroutz_golden_outputs_root` as the shared pytest fixture root for committed Skroutz golden CSV baselines
+- removed the touched test-layer dependency on repo-level `products/*.csv` by copying the four committed Skroutz baseline CSVs into `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/`
+- updated `test_skroutz_integration.py` to seed temporary publish baselines from fixture-owned golden outputs only and to assert the live render contract:
+  - candidate CSV still exists when validation fails
+  - `published_csv_path` is `None` when validation is not ok
+  - publish-skip warnings are surfaced in the validation report
+- updated `test_skroutz_sections.py` to build its LLM payload and temporary baseline only from fixture-owned golden outputs
+- updated `test_workflow.py` to assert that render still writes the full candidate bundle even when validation fails and publish is skipped
+- left runtime modules unchanged because the failing behavior was test-expectation drift, not a proven workflow bug
+
+Commands run:
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content IMPLEMENT.md`
+- `rg --files scraper/pipeline/tests`
+- `Get-Content scraper/pipeline/tests/conftest.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py`
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content scraper/pipeline/services/run_service.py`
+- `git ls-files products work scraper/work`
+- `rg -n "products_root|products/.*csv|golden_outputs/skroutz" scraper/pipeline/tests`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py::test_render_workflow_writes_candidate_bundle pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures pipeline/tests/test_skroutz_sections.py::test_143481_rendered_description_preserves_locked_wrappers` from `scraper/`
+- `Get-Content` for the generated `233541.validation.json`, `143481.validation.json`, and matching `render.run.json` files under the temporary pytest workdirs
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+- `git status --short`
+
+Validation:
+- focused failing-contract reproduction before the test updates:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py::test_render_workflow_writes_candidate_bundle pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures pipeline/tests/test_skroutz_sections.py::test_143481_rendered_description_preserves_locked_wrappers` from `scraper/`
+  - result: `2 failed, 1 passed`
+  - failures:
+    - `pipeline/tests/test_workflow.py::test_render_workflow_writes_candidate_bundle`
+    - `pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures`
+  - both failures were stale publish expectations against a real `published_csv_path is None` contract when validation was not ok
+- targeted touched-test validation after the fix:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+  - passed, `24 passed`
+- full suite validation after the fix:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - returned the accepted baseline: `92 passed, 2 failed`
+  - unchanged accepted failures:
+    - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_pdf_candidates`
+    - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_html_candidates`
+
+Risks:
+- the committed deliverable CSVs under `products/` still exist in the repo by design; M24 only removed the touched tests' baseline dependency on them
+- the full-suite baseline still includes the two long-standing manufacturer-enrichment failures outside M24 scope
+
+Deferred:
+- no runtime-code, workflow-contract, provider-routing, or CLI changes were made
+- no additional fixture migration beyond the touched baseline CSVs was attempted in this milestone
 
 ## M23 — rename `scrapper/electronet_single_import` to `scraper/pipeline`
 
