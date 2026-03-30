@@ -1,10 +1,913 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M29 completed. Full-run orchestration ownership now lives in a service-owned execution module, `run_service.py` is a thin service wrapper over that seam, and CLI/workflow behavior remains unchanged.
+M36 completed, and the repo now also has a minimal GitHub Actions workflow that installs dependencies from `requirements.txt`, installs Playwright Chromium, and runs `python -m pytest -q` from `scraper/` on push and pull request events without changing runtime code.
+
+## 2026-03-30 - Add minimal GitHub Actions scraper test workflow
+
+Goal:
+- add the smallest GitHub Actions workflow that matches the documented scraper test path
+- keep CI setup aligned with the root README install and test commands
+- avoid any runtime-code changes in the same commit
+
+Files edited:
+- `.github/workflows/tests.yml`
+- `DOCUMENTATION.md`
+
+Changes:
+- added `.github/workflows/tests.yml`
+- configured the workflow to trigger on:
+  - `push`
+  - `pull_request`
+- configured a single `ubuntu-latest` job
+- configured Python setup through `actions/setup-python@v5` with Python `3.11`
+- installed dependencies from repo-root `requirements.txt`
+- installed Playwright Chromium with `python -m playwright install chromium`
+- ran the test suite from `scraper/` with `python -m pytest -q`
+- kept the workflow minimal and aligned with the README command sequence as closely as possible
+
+Assumptions:
+- GitHub-hosted Ubuntu runners provide the system libraries Playwright Chromium needs for this repo's current test suite
+- the repo-root `requirements.txt` remains the canonical dependency file for CI, matching the current README guidance
+
+Commands run:
+- `Get-Content README.md`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 120`
+- `rg -n "CI|GitHub Actions|workflow|tests.yml|Phase 4|pending" PLAN.md IMPLEMENT.md DOCUMENTATION.md README.md -S`
+- `Get-Content .github/workflows/tests.yml`
+- `py -3.12 -m pip install PyYAML --target %TEMP%\\product-agent-yamlcheck`
+- temporary Python validation of `.github/workflows/tests.yml` via `yaml.safe_load(...)`
+- temporary removal of `%TEMP%\\product-agent-yamlcheck`
+- `git diff --check`
+
+Validation:
+- workflow YAML syntax parsed successfully via a temporary isolated `PyYAML` install and `yaml.safe_load(...)`
+- quoted the top-level `"on"` key so the workflow remains GitHub-valid and also parses cleanly under generic YAML tooling
+- validation in this commit was limited to workflow syntax and control-doc accuracy because no runtime code changed
+
+Deferred:
+- no runtime code changes were made
+- no test files were changed
+- no expansion into broader CI features such as caching, matrix builds, or artifact uploads
+
+## 2026-03-30 - Add stable service error taxonomy and workflow exit mapping
+
+Goal:
+- replace exception-type-name service errors with stable semantic service codes
+- map low-level exceptions to those codes at the service boundary
+- make workflow exit behavior explicit and stable
+- persist stable semantic error codes in run metadata
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/__init__.py`
+- `scraper/pipeline/services/errors.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/services/run_execution.py`
+- `scraper/pipeline/services/run_service.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `scraper/pipeline/workflow.py`
+
+Changes:
+- added stable semantic service error codes in `scraper/pipeline/services/errors.py`:
+  - `missing_artifact`
+  - `provider_failure`
+  - `parse_failure`
+  - `validation_failure`
+  - `publish_failure`
+  - `unexpected_failure`
+- extended `ServiceError` to carry:
+  - `code`
+  - `message`
+  - `cause`
+  - `retryable`
+  - `details`
+- added a single service-boundary mapper that converts low-level exceptions into stable service errors:
+  - `FileNotFoundError` -> `missing_artifact`
+  - provider errors during fetch/load stages -> `provider_failure`
+  - provider normalization failures and known parse/section failures -> `parse_failure`
+  - render-stage `OSError` publish failures -> `publish_failure`
+  - everything else -> `unexpected_failure`
+- updated `prepare_service.py`, `render_service.py`, and `run_service.py` to wrap failures through the stable mapper instead of using `type(exc).__name__`
+- updated `prepare_execution.py` and `render_execution.py` so prepare/render run metadata now store semantic `error_code` values
+- updated render success/failure metadata handling so failed validation stores:
+  - `error_code: validation_failure`
+  - `error_detail: Candidate validation failed`
+- updated full-run composition metadata in `run_execution.py` so stable child error codes and details propagate into the composed run result
+- replaced the old workflow `ServiceError` exit handling with an explicit matrix in `scraper/pipeline/workflow.py`:
+  - `missing_artifact` -> `3`
+  - `provider_failure` -> `4`
+  - `validation_failure` -> `5`
+  - `parse_failure` -> `6`
+  - `publish_failure` -> `7`
+  - `unexpected_failure` -> `8`
+- kept user-facing workflow stderr output readable by continuing to print the mapped service message rather than raw exception metadata
+- updated service/workflow tests to assert stable public error behavior instead of exception-type-name internals
+
+Intentional behavior changes:
+- service-layer `error_code` values are now stable semantic codes rather than Python exception class names
+- workflow exit codes now distinguish missing artifacts, provider failures, validation failures, parse failures, publish failures, and unexpected failures explicitly
+- failed render validation now records `validation_failure` in run metadata instead of leaving `error_code` empty
+
+Commands run:
+- `Get-Content -Path scraper/pipeline/services/errors.py`
+- `Get-Content -Path scraper/pipeline/services/prepare_service.py`
+- `Get-Content -Path scraper/pipeline/services/render_service.py`
+- `Get-Content -Path scraper/pipeline/services/run_service.py`
+- `Get-Content -Path scraper/pipeline/services/run_execution.py`
+- `Get-Content -Path scraper/pipeline/services/prepare_execution.py`
+- `Get-Content -Path scraper/pipeline/services/render_execution.py`
+- `Get-Content -Path scraper/pipeline/workflow.py`
+- `Get-Content -Path scraper/pipeline/tests/test_services.py`
+- `Get-Content -Path scraper/pipeline/tests/test_workflow.py`
+- `rg -n "ServiceError|error_code|validation_failure|type\\(exc\\)__name__|exit_code" PLAN.md IMPLEMENT.md DOCUMENTATION.md scraper/pipeline scraper/pipeline/tests -S`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py pipeline/tests/test_provider_selection.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+- `git diff --check`
+
+Validation:
+- targeted service/workflow subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py` from `scraper/`
+  - passed, `34 passed`
+- broader affected suite:
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py pipeline/tests/test_provider_selection.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+  - passed, `54 passed`
+- `git diff --check` passed
+
+Deferred:
+- no CI changes were made
+- no provider bootstrap changes were made in this milestone
+- no provider fetch/normalize internals were changed
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## 2026-03-30 - Resolve providers through registry bootstrap
+
+Goal:
+- replace ad hoc provider-selection branches in orchestration with registry-driven resolution
+- keep provider fetch and normalize behavior unchanged
+- add public coverage for registry bootstrap and source-to-provider-id mapping
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/providers/__init__.py`
+- `scraper/pipeline/providers/registry.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- extended `scraper/pipeline/providers/registry.py` with:
+  - `bootstrap_runtime_provider_registry(...)`
+  - `source_to_provider_id(...)`
+- made `bootstrap_runtime_provider_registry(...)` the single runtime bootstrap point for the active providers:
+  - `electronet`
+  - `skroutz`
+  - `manufacturer_tefal`
+- updated `scraper/pipeline/prepare_stage.py` orchestration to:
+  - build the provider registry once per run
+  - map detected source to provider id through `source_to_provider_id(...)`
+  - resolve the provider through `registry.require(...)`
+- removed the active-path dependence on the old ad hoc provider-selection helper branches from orchestration
+- kept the existing readable failure behavior for missing runtime providers by surfacing the registry-not-registered failure as a direct runtime error
+- updated `scraper/pipeline/full_run.py` to pass the registry bootstrap and source-mapping functions through to the compatibility wrapper path
+- re-exported the new bootstrap and mapping helpers from `scraper/pipeline/providers/__init__.py`
+- updated tests so public registry behavior is what is asserted now:
+  - bootstrap coverage
+  - source mapping coverage
+  - orchestration tests inject a registry instead of anchoring on private branch-selection internals
+
+Intentional behavior changes:
+- no provider fetch or normalize behavior changed
+- no provider ids changed
+- orchestration now depends on the public registry bootstrap plus mapping seam instead of private branch selection code
+
+Commands run:
+- `Get-Content -Raw scraper/pipeline/providers/registry.py`
+- `Get-Content -Raw scraper/pipeline/prepare_stage.py`
+- `Get-Content -Raw scraper/pipeline/tests/test_provider_selection.py`
+- `rg -n "_resolve_provider_for_source|ProviderRegistry|provider_id|detect_source\\(|require\\(" scraper/pipeline scraper/pipeline/tests -S`
+- `Get-Content -Raw scraper/pipeline/providers/__init__.py`
+- `Get-Content -Raw scraper/pipeline/providers/electronet_provider.py`
+- `Get-Content -Raw scraper/pipeline/providers/skroutz_provider.py`
+- `Get-Content -Raw scraper/pipeline/providers/manufacturer_tefal_provider.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+- `rg -n "_resolve_provider_for_source|bootstrap_runtime_provider_registry|source_to_provider_id|registry.require\\(" scraper/pipeline scraper/pipeline/tests -S`
+
+Validation:
+- targeted provider/orchestration subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py` from `scraper/`
+  - passed, `26 passed`
+- broader affected suite:
+  - `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+  - passed, `47 passed`
+
+Deferred:
+- no error taxonomy changes were made
+- no CI changes were made
+- no provider fetch/normalize internals were changed
+
+## 2026-03-30 - Make prepare scrape-only under the split-task workflow
+
+Goal:
+- finish the prepare/render execution seam after the split-LLM refactor
+- make `prepare` scrape-only plus split-task handoff-only
+- keep `render` as the sole owner of final candidate outputs and publish copy
+
+Files added:
+- `scraper/pipeline/prepare_stage.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `README.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- extracted the scrape-only execution core into `scraper/pipeline/prepare_stage.py`
+- moved the active prepare-stage behavior there:
+  - provider-backed fetch and normalization
+  - scrape artifact writes under `work/{model}/scrape/`
+  - deterministic normalization used by the split-task handoff
+  - report generation
+- kept candidate CSV generation out of the new prepare-stage core
+- updated `scraper/pipeline/services/prepare_execution.py` so the active prepare path now calls `execute_prepare_stage(...)` directly instead of `execute_full_run(...)`
+- removed the old nested scrape-dir workaround from prepare because the new core now writes directly to `work/{model}/scrape/`
+- kept `scraper/pipeline/services/render_execution.py` as the only owner of:
+  - `work/{model}/candidate/{model}.csv`
+  - `work/{model}/candidate/{model}.normalized.json`
+  - `work/{model}/candidate/{model}.validation.json`
+  - `work/{model}/candidate/description.html`
+  - `work/{model}/candidate/characteristics.html`
+  - `products/{model}.csv`
+- reduced `scraper/pipeline/full_run.py` to a thin compatibility wrapper:
+  - it now delegates to `execute_prepare_stage(...)`
+  - it performs the legacy direct CSV write only for explicit callers of `execute_full_run(...)`
+  - it is no longer part of the active workflow prepare path
+- updated `scraper/pipeline/workflow.py` so `prepare_workflow(...)` no longer imports or passes through `execute_full_run(...)`
+- fixed `scraper/pipeline/services/prepare_service.py` so prepare result details come from the actual scrape result payload
+- fixed `scraper/pipeline/services/render_service.py` so an unpublished render result can map `published_csv_path` as `None` safely
+- updated `README.md` to describe the steady-state boundary:
+  - prepare writes scrape plus split-task handoff artifacts only
+  - render owns candidate outputs and publish copy
+
+Intentional behavior changes:
+- `python -m pipeline.workflow prepare ...` no longer creates `work/{model}/scrape/{model}.csv`
+- `python -m pipeline.workflow prepare ...` does not create `work/{model}/candidate/{model}.csv`
+- explicit compatibility calls to `execute_full_run(...)` still write a direct CSV for callers and tests that intentionally exercise the legacy full-run helper
+
+Commands run:
+- `Get-Content -Raw scraper/pipeline/services/prepare_execution.py`
+- `Get-Content -Raw scraper/pipeline/services/render_execution.py`
+- `Get-Content -Raw scraper/pipeline/services/prepare_service.py`
+- `Get-Content -Raw scraper/pipeline/services/render_service.py`
+- `Get-Content -Raw scraper/pipeline/services/run_execution.py`
+- `Get-Content -Raw scraper/pipeline/workflow.py`
+- `Get-Content -Raw scraper/pipeline/full_run.py`
+- `Get-Content -Raw README.md`
+- `Get-Content -Raw scraper/pipeline/tests/test_workflow.py`
+- `Get-Content -Raw scraper/pipeline/tests/test_services.py`
+- `Get-Content -Raw scraper/pipeline/tests/test_skroutz_integration.py`
+- `Get-Content -Raw scraper/pipeline/cli.py`
+- `rg -n "execute_full_run\\(|prepare_workflow\\(|execute_prepare_workflow\\(|candidate_csv_path|published_csv_path|work/\\{model\\}/scrape/\\{model\\}\\.csv|llm_output\\.json|intro_text\\.output|seo_meta\\.output" scraper/pipeline scraper/pipeline/tests README.md -S`
+- `rg -n "_select_skroutz_image_backed_sections" scraper/pipeline/tests scraper/pipeline -S`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_services.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_provider_selection.py` from `scraper/`
+
+Validation:
+- smallest relevant subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_services.py` from `scraper/`
+  - passed, `27 passed`
+- broader affected suite:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_provider_selection.py` from `scraper/`
+  - passed, `47 passed`
+
+Deferred:
+- no provider registry refactor was attempted
+- no service error taxonomy work was attempted
+- no CI changes were attempted
+- `execute_full_run(...)` remains available as a thin compatibility wrapper for explicit direct callers rather than being removed entirely in this milestone
+
+## 2026-03-30 - Define post-split prepare/render execution seam cleanup scope
+
+Goal:
+- document the complete post-split branch scope before any runtime code changes
+- keep this commit docs-only and record the actual current prepare/render seam versus the intended steady-state ownership boundary
+- avoid implying that the seam cleanup is already implemented
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `IMPLEMENT.md`
+
+Current state:
+- `README.md` still documents the two-stage `prepare` / `render` workflow under `scraper/`, including prepare handoff artifacts under `work/{model}/llm/` and render candidate artifacts under `work/{model}/candidate/`
+- `scraper/pipeline/services/prepare_execution.py` still routes prepare through `execute_full_run(...)`
+- `scraper/pipeline/full_run.py` still writes `{model}.csv` into the output root it is given, so the active prepare path still produces a scrape-stage CSV side effect under `work/{model}/scrape/`
+- `scraper/pipeline/services/render_execution.py` already consumes split-task outputs:
+  - `work/{model}/llm/intro_text.output.txt`
+  - `work/{model}/llm/seo_meta.output.json`
+- `scraper/pipeline/services/render_execution.py` already writes candidate-stage artifacts and publish copy:
+  - `work/{model}/candidate/{model}.csv`
+  - `work/{model}/candidate/{model}.validation.json`
+  - `work/{model}/candidate/description.html`
+  - `work/{model}/candidate/characteristics.html`
+  - `products/{model}.csv` when validation passes
+
+Target state:
+- prepare owns scrape-only execution plus task handoff artifact creation
+- render owns all final candidate and publish outputs
+- the active prepare path no longer depends on `execute_full_run(...)`
+- `full_run.py` is reduced to explicit full-run composition only, or retired from the active prepare path entirely
+
+Ownership boundary after split-LLM:
+- prepare-owned artifacts:
+  - `work/{model}/scrape/{model}.raw.html`
+  - `work/{model}/scrape/{model}.source.json`
+  - `work/{model}/scrape/{model}.normalized.json`
+  - `work/{model}/scrape/{model}.report.json`
+  - scrape-stage downloaded assets and supporting scrape artifacts under `work/{model}/scrape/`
+  - `work/{model}/llm/task_manifest.json`
+  - `work/{model}/llm/intro_text.context.json`
+  - `work/{model}/llm/intro_text.prompt.txt`
+  - `work/{model}/llm/seo_meta.context.json`
+  - `work/{model}/llm/seo_meta.prompt.txt`
+- render-owned artifacts:
+  - `work/{model}/candidate/{model}.csv`
+  - `work/{model}/candidate/{model}.normalized.json`
+  - `work/{model}/candidate/{model}.validation.json`
+  - `work/{model}/candidate/description.html`
+  - `work/{model}/candidate/characteristics.html`
+  - `products/{model}.csv`
+- LLM-stage handoff note:
+  - the LLM still writes `work/{model}/llm/intro_text.output.txt` and `work/{model}/llm/seo_meta.output.json`, but prepare owns the contract and handoff scaffolding for those files rather than render owning their creation
+
+Intended fate of `full_run.py`:
+- `scraper/pipeline/full_run.py` should stop being the active implementation seam behind workflow prepare
+- acceptable end states for this branch are:
+  - a narrowed explicit full-run composition wrapper above scrape-only prepare plus render
+  - retirement from the active prepare path if service-owned composition fully replaces it
+- unacceptable end state:
+  - any remaining prepare-stage dependency that keeps candidate CSV generation or other render/publish side effects inside the active prepare path
+
+Out of scope for this branch:
+- provider bootstrap changes
+- service error taxonomy redesign
+- CI changes
+
+Commands run:
+- `Get-Content -Raw PLAN.md`
+- `Get-Content -Raw DOCUMENTATION.md`
+- `Get-Content -Raw IMPLEMENT.md`
+- `Get-Content -Raw scraper/pipeline/services/prepare_execution.py`
+- `Get-Content -Raw scraper/pipeline/services/render_execution.py`
+- `Get-Content -Raw scraper/pipeline/full_run.py`
+- `Get-Content -Raw scraper/pipeline/workflow.py`
+- `Get-Content -Raw README.md`
+- `rg -n "execute_full_run\\(|llm_output\\.json|intro_text\\.output|seo_meta\\.output|candidate|validation|publish|csv_path" scraper/pipeline/services scraper/pipeline/full_run.py scraper/pipeline/workflow.py README.md -S`
+- `rg --files scraper/pipeline/tests`
+- `git status --short`
+- `git diff --check -- PLAN.md DOCUMENTATION.md IMPLEMENT.md`
+
+Validation:
+- docs-only commit
+- `git diff --check -- PLAN.md DOCUMENTATION.md IMPLEMENT.md` passed
+- no runtime tests were run because this commit only updates control docs and must not include runtime or test changes
+
+Deferred:
+- no runtime code, tests, or README changes were made in this commit
+- the prepare/render seam cleanup remains planned work only at this stage
+- earlier M34 records remain preserved below as historical execution evidence for the split-task contract, even though the post-split execution seam cleanup is now tracked separately as pending work
+
+## 2026-03-30 - Remove legacy combined LLM handoff and finalize split-task workflow
+
+Goal:
+- remove the temporary combined LLM compatibility path from prepare, render, validators, tests, and runtime docs
+- leave the branch in its final steady state with split `intro_text` and `seo_meta` artifacts only
+- align operator-facing docs with deterministic section rendering and the final failure policy
+
+Files edited:
+- `AGENTS.md`
+- `README.md`
+- `PLAN.md`
+- `IMPLEMENT.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/llm_contract.py`
+- `scraper/pipeline/repo_paths.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/services/models.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/services/run_execution.py`
+- `scraper/pipeline/tests/test_llm_contract.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+- `scraper/pipeline/tests/test_utils_support_paths.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Files removed:
+- `resources/prompts/master_prompt+.txt`
+- `resources/schemas/compact_response.schema.json`
+
+Changes:
+- removed legacy combined prepare artifact generation:
+  - `work/{model}/llm_context.json`
+  - `work/{model}/prompt.txt`
+- removed the legacy combined render input path:
+  - `work/{model}/llm_output.json`
+- simplified the active LLM contract in `scraper/pipeline/llm_contract.py` to split-task-only helpers and validators:
+  - kept `build_intro_text_context(...)`
+  - kept `build_seo_meta_context(...)`
+  - kept `build_task_manifest(...)`
+  - kept `validate_intro_text_output(...)`
+  - kept `validate_seo_meta_output(...)`
+  - removed the old combined-context builder and combined/legacy validators
+- updated `scraper/pipeline/services/prepare_execution.py` so prepare now writes only:
+  - `work/{model}/llm/task_manifest.json`
+  - `work/{model}/llm/intro_text.context.json`
+  - `work/{model}/llm/intro_text.prompt.txt`
+  - `work/{model}/llm/seo_meta.context.json`
+  - `work/{model}/llm/seo_meta.prompt.txt`
+- updated the manifest to steady-state mode:
+  - `prepare_mode: split_tasks`
+  - removed compatibility metadata for legacy combined artifacts
+- updated `scraper/pipeline/services/render_execution.py` so render now requires:
+  - `work/{model}/llm/intro_text.output.txt`
+  - `work/{model}/llm/seo_meta.output.json`
+- removed the render fallback to legacy combined payloads and changed the missing-artifact error to the split-task-only path
+- removed legacy artifact fields from service-layer artifact models and service result mapping
+- retired the obsolete combined prompt/schema resources and removed their centralized path constants
+- updated workflow CLI output to print only the split-task artifact paths
+- updated `AGENTS.md` and `README.md` to describe the final runtime:
+  - split prepare outputs
+  - split LLM outputs
+  - deterministic section rendering
+  - section warning/failure policy
+  - no LLM section-copy generation
+- updated tests so final steady-state behavior is the only active runtime expectation
+
+Legacy behavior removed:
+- prepare no longer writes combined `llm_context.json` or `prompt.txt`
+- render no longer accepts combined `llm_output.json`
+- the LLM no longer owns:
+  - `presentation.intro_html`
+  - `presentation.sections[].title`
+  - `presentation.sections[].body_html`
+- the reduced combined prompt/schema resources are no longer part of the runtime
+
+Commands run:
+- `rg -n "llm_context\\.json|prompt\\.txt|llm_output\\.json|presentation\\.intro_html|presentation\\.sections|validate_llm_output|legacy|split_tasks_with_legacy_compatibility|intro_text\\.output|seo_meta\\.output|task_manifest" README.md PLAN.md DOCUMENTATION.md IMPLEMENT.md AGENTS.md scraper resources -S`
+- `Get-Content scraper/pipeline/llm_contract.py`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/render_service.py`
+- `Get-Content scraper/pipeline/services/run_execution.py`
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content README.md`
+- `Get-Content AGENTS.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content scraper/pipeline/tests/test_llm_contract.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_sections.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_utils_support_paths.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+Validation:
+- targeted cleanup-facing subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_utils_support_paths.py` from `scraper/`
+  - passed, `46 passed`
+- full suite:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed, `120 passed`
+
+Deferred:
+- no provider-registry, CI, or unrelated service-layer refactors were attempted in this cleanup commit
+- historical documentation below still mentions old combined artifacts as prior-state evidence and was not rewritten wholesale
+
+## 2026-03-30 - Assemble description HTML from `intro_text` and deterministic sections
+
+Goal:
+- migrate render to the split-task outputs introduced in M30
+- make final description HTML code-owned and assembled from plain-text `intro_text`, deterministic CTA data, and deterministic cleaned presentation sections
+- keep the compatibility phase active by accepting legacy combined `llm_output.json` until final cleanup
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/html_builders.py`
+- `scraper/pipeline/llm_contract.py`
+- `scraper/pipeline/mapping.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/tests/test_llm_contract.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- updated `scraper/pipeline/services/render_execution.py` so render now prefers split-task outputs from `work/{model}/llm/`:
+  - `intro_text.output.txt`
+  - `seo_meta.output.json`
+- kept compatibility with legacy `work/{model}/llm_output.json`:
+  - legacy `product.meta_description` and `product.meta_keywords` are still accepted
+  - legacy `presentation.intro_html` is reduced to plain text for the active render path
+  - legacy section title/body content is no longer required or used for final description assembly
+- replaced the active render-time LLM validation path in `scraper/pipeline/llm_contract.py`:
+  - added split validators for `intro_text` and `seo_meta`
+  - removed render-time dependence on LLM-owned section title/body validation
+  - kept the old combined validator available only as legacy compatibility support for older tests and artifacts
+- added `build_description_html_from_intro_and_sections(...)` in `scraper/pipeline/html_builders.py`
+- updated `scraper/pipeline/mapping.py` so final description HTML is now assembled in code from:
+  - plain-text `intro_text`
+  - deterministic CTA text
+  - deterministic cleaned presentation sections
+- kept wrappers, classes, styles, and CTA/link rendering code-owned
+- enforced deterministic section failure policy during render:
+  - hard fail when source sections are missing entirely and sections were requested
+  - hard fail when usable section count is `0` and sections were requested
+  - hard fail when more than one requested section is classified `missing`
+  - warn and continue when sections are `weak`
+  - warn and continue when exactly one requested section is `missing`
+- passed only `usable` deterministic sections into the final HTML renderer
+- preserved source titles and sanitized source wording for section bodies; no section rewriting or LLM section generation remains in the active path
+- normalized SEO keywords in `scraper/pipeline/mapping.py` so render now:
+  - guarantees brand and model/MPN are present
+  - collapses duplicate keywords
+  - collapses singular/plural variants in code before CSV serialization
+- preserved section-image wiring by original `source_index` so skipped weak sections do not shift later Besco image assignments
+- wrote split/legacy mode details into render normalized artifacts and run metadata:
+  - `llm_mode`
+  - `llm_artifact_paths`
+  - `presentation_sections`
+
+Behavior changes:
+- final `description` HTML is no longer sourced from LLM HTML sections in the active render path
+- the intro paragraph now comes from plain-text LLM `intro_text` and is escaped into the existing wrapper structure in code
+- deterministic section warnings now surface in render validation reports, including reduced-section cases during the compatibility phase
+- legacy combined LLM outputs remain accepted intentionally, but only for intro/meta compatibility; section rendering is deterministic even when legacy artifacts are present
+- compatibility fixture coverage now expects legacy render inputs to succeed when the active split-compatible validation rules are satisfied
+
+Commands run:
+- `rg -n "validate_llm_output|meta_keywords|build_description_html_from_llm|build_description_html|extract_presentation_blocks" scraper/pipeline -S`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/html_builders.py`
+- `Get-Content scraper/pipeline/mapping.py`
+- `Get-Content scraper/pipeline/llm_contract.py`
+- `Get-Content scraper/pipeline/presentation_sections.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_sections.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_skroutz_sections.py::test_143481_rendered_description_preserves_locked_wrappers pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_presentation_sections.py` from `scraper/`
+
+Validation:
+- render-focused subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py` from `scraper/`
+  - passed, `27 passed`
+- targeted compatibility regressions after the image-mapping fix:
+  - `py -3.12 -m pytest -q pipeline/tests/test_skroutz_sections.py::test_143481_rendered_description_preserves_locked_wrappers pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures` from `scraper/`
+  - passed, `2 passed`
+- broader affected suite:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_presentation_sections.py` from `scraper/`
+  - passed, `57 passed`
+
+Deferred:
+- final cleanup is still pending:
+  - legacy `work/{model}/llm_output.json` is still accepted
+  - legacy `work/{model}/llm_context.json` and `work/{model}/prompt.txt` still exist as compatibility artifacts from prepare
+  - `README.md` has not been updated to the final steady-state split-output flow yet
+- no LLM prompt split changes were made in this commit beyond consuming the split outputs already introduced in prepare
+
+## 2026-03-30 - Split prepare into `intro_text` and `seo_meta` task artifacts
+
+Goal:
+- make split task-specific LLM handoff artifacts the primary prepare outputs
+- keep the branch mergeable by preserving the legacy combined prepare files and legacy render input path during the transition
+- remove section title/body generation from the new task ownership model without changing render to consume the new task outputs yet
+
+Files added:
+- `resources/prompts/intro_text_prompt.txt`
+- `resources/prompts/seo_meta_prompt.txt`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/repo_paths.py`
+- `scraper/pipeline/llm_contract.py`
+- `scraper/pipeline/services/models.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/run_execution.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/tests/test_llm_contract.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_utils_support_paths.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- added two task-specific prompt resources under `resources/prompts/`:
+  - `intro_text_prompt.txt`
+  - `seo_meta_prompt.txt`
+- added new prompt path constants in `scraper/pipeline/repo_paths.py`
+- extended `scraper/pipeline/llm_contract.py` with split-task builders:
+  - `build_intro_text_context(...)`
+  - `build_seo_meta_context(...)`
+  - `build_task_manifest(...)`
+- kept the existing combined `build_llm_context(...)` and legacy prompt rendering path in place strictly for compatibility
+- updated `scraper/pipeline/services/prepare_execution.py` so prepare now writes these primary artifacts:
+  - `work/{model}/llm/intro_text.context.json`
+  - `work/{model}/llm/intro_text.prompt.txt`
+  - `work/{model}/llm/seo_meta.context.json`
+  - `work/{model}/llm/seo_meta.prompt.txt`
+  - `work/{model}/llm/task_manifest.json`
+- reserved expected task output targets in the manifest for the later render migration:
+  - `work/{model}/llm/intro_text.output.txt`
+  - `work/{model}/llm/seo_meta.output.json`
+- preserved these compatibility artifacts intentionally:
+  - `work/{model}/llm_context.json`
+  - `work/{model}/prompt.txt`
+  - `work/{model}/llm_output.json`
+- updated prepare metadata and service-layer artifact models so run metadata now records:
+  - `llm_dir`
+  - `llm_task_manifest_path`
+  - `intro_text_*` paths
+  - `seo_meta_*` paths
+- updated workflow prepare CLI output to print the new primary task artifact paths plus the legacy compatibility paths
+
+Task ownership changes:
+- `intro_text` now owns only the intro paragraph prompt/output contract:
+  - plain text only
+  - one paragraph
+  - Greek
+  - 120-180 words
+  - no HTML
+  - no bullets
+  - no CTA language
+- `seo_meta` now owns only:
+  - `product.meta_description`
+  - `product.meta_keywords`
+- the new task contexts do not include section title/body generation instructions
+- deterministic `presentation_source_sections` remain outside the split task contexts and stay in deterministic artifacts instead of being passed as a required `intro_text` writing input
+
+Compatibility behavior intentionally preserved:
+- prepare still writes the legacy combined context and prompt files because render has not been migrated yet
+- render still reads legacy `work/{model}/llm_output.json` in this commit
+- the task manifest explicitly marks the prepare mode as `split_tasks_with_legacy_compatibility`
+
+Commands run:
+- `Get-Content scraper/pipeline/repo_paths.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `rg -n "llm_context_path|prompt_path|llm_output_path|MASTER_PROMPT_PATH|prompt.txt|llm_context.json|task_manifest|intro_text|seo_meta" scraper/pipeline scraper/pipeline/tests resources -S`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/metadata.py`
+- `Get-Content scraper/pipeline/workflow.py`
+- `rg -n "meta_description_draft|differentiator|key_specs|deterministic_product" scraper/pipeline/deterministic_fields.py scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_skroutz_integration.py -S`
+- `Get-Content scraper/pipeline/deterministic_fields.py`
+- `Get-Content scraper/pipeline/tests/test_utils_support_paths.py`
+- `Get-Content scraper/pipeline/services/run_execution.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -First 170`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 900 -First 60`
+- `Get-Content scraper/pipeline/tests/test_services.py | Select-Object -First 240`
+- `Get-Content scraper/pipeline/tests/test_llm_contract.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_utils_support_paths.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_utils_support_paths.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_integration.py` from `scraper/`
+
+Validation:
+- targeted prepare-facing subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_utils_support_paths.py` from `scraper/`
+  - passed, `30 passed`
+- broader affected tests:
+  - `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_utils_support_paths.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_skroutz_integration.py` from `scraper/`
+  - passed, `52 passed`
+
+Deferred:
+- render was not changed to consume `intro_text` or `seo_meta` outputs in this commit
+- legacy combined `llm_context.json`, `prompt.txt`, and `llm_output.json` remain intentionally present for the transition
+- section title/body generation is still part of the legacy combined compatibility prompt only; the new split task artifacts do not assign that work to the LLM
+
+## 2026-03-30 - Deterministic presentation section cleaning and quality classification foundation
+
+Goal:
+- add a deterministic normalization and quality-classification seam for extracted `presentation_source_sections`
+- keep the current single-prompt LLM handoff intact for now while making section cleaning and section-state evaluation code-owned
+- avoid changing final HTML assembly in this step
+
+Files added:
+- `scraper/pipeline/presentation_sections.py`
+- `scraper/pipeline/tests/test_presentation_sections.py`
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/models.py`
+- `scraper/pipeline/llm_contract.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- added `scraper/pipeline/presentation_sections.py` as the deterministic section normalization module
+- introduced normalized presentation section dataclasses in `scraper/pipeline/models.py`:
+  - `NormalizedPresentationSection`
+  - `NormalizedPresentationSectionMetrics`
+- implemented deterministic section normalization with these behaviors:
+  - preserves source order
+  - preserves source wording while stripping markup, URLs, and non-content tags
+  - preserves source titles when present
+  - classifies each section as `usable`, `weak`, or `missing`
+  - emits reason codes including:
+    - `missing_extraction`
+    - `missing_empty_after_clean`
+    - `missing_image_only`
+    - `weak_short_body`
+    - `weak_missing_title`
+    - `weak_noisy_body`
+    - `weak_duplicate`
+    - `usable_clean`
+  - applies the agreed word-count and alphabetic-character thresholds
+  - detects duplicates against previously accepted non-missing section bodies
+- updated `scraper/pipeline/llm_contract.py` so `build_llm_context(...)` now writes normalized deterministic `presentation_source_sections` into `work/{model}/llm_context.json`
+- kept the current LLM output contract unchanged in this commit:
+  - `presentation.intro_html`
+  - `presentation.sections[].title`
+  - `presentation.sections[].body_html`
+  - `product.meta_description`
+  - `product.meta_keywords`
+- did not change render HTML assembly in this step
+
+Behavior changes:
+- `prepare` now exposes normalized section records in LLM context instead of raw extracted title/paragraph pairs
+- each section record now includes:
+  - `source_index`
+  - `title`
+  - `body_text`
+  - `image_url`
+  - `quality`
+  - `reason`
+  - `metrics`
+- when fewer extracted sections exist than requested, `build_llm_context(...)` pads the deterministic section list with `missing_extraction` placeholders up to `sections_required`
+
+Commands run:
+- `rg -n "presentation_source_sections|sections|rendered_sections|section" scraper/pipeline -S`
+- `Get-Content scraper/pipeline/llm_contract.py`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/html_builders.py`
+- `Get-Content scraper/pipeline/models.py`
+- `Get-Content scraper/pipeline/mapping.py`
+- `Get-Content scraper/pipeline/tests/test_llm_contract.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -First 180`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content resources/prompts/master_prompt+.txt`
+- `rg -n "presentation_source_sections|paragraph|image_url|title" resources/prompts/master_prompt+.txt scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_skroutz_integration.py scraper/pipeline/tests/test_skroutz_sections.py -S`
+- `Get-Content scraper/pipeline/normalize.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py pipeline/tests/test_services.py` from `scraper/`
+
+Validation:
+- smallest relevant subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py` from `scraper/`
+  - passed, `10 passed`
+- broader affected tests:
+  - `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py` from `scraper/`
+  - passed, `29 passed`
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+  - passed, `8 passed`
+  - final rerun:
+  - `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py pipeline/tests/test_services.py` from `scraper/`
+  - passed, `37 passed`
+
+Deferred:
+- no LLM task split was attempted in this commit
+- no prompt-template change was attempted in this commit
+- no render-side deterministic section consumption was attempted in this commit
+- no README change was made in this commit
+
+## 2026-03-30 - Branch scope design note for split-LLM `intro_text` and deterministic presentation
+
+Purpose:
+- document the full planned scope of the split-LLM deterministic-presentation branch before runtime code changes
+- keep this commit docs-only and avoid implying that any runtime or test work is already complete
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `IMPLEMENT.md`
+
+Current state:
+- `README.md` still documents single prepare outputs:
+  - `work/{model}/llm_context.json`
+  - `work/{model}/prompt.txt`
+- `scraper/pipeline/llm_contract.py` currently marks these fields as LLM-owned:
+  - `presentation.intro_html`
+  - `presentation.sections[].title`
+  - `presentation.sections[].body_html`
+  - `product.meta_description`
+  - `product.meta_keywords`
+- `scraper/pipeline/services/prepare_execution.py` still builds one LLM context and one prompt
+- `scraper/pipeline/services/render_execution.py` still reads `work/{model}/llm_output.json`
+
+Target state:
+- prepare emits two task-specific LLM handoffs:
+  - `intro_text`
+  - `seo_meta`
+- `intro_text` returns plain text only, one paragraph, 120-180 words
+- `seo_meta` returns:
+  - `meta_description`
+  - `meta_keywords`
+- presentation section title/body generation is removed from the LLM
+- presentation sections are built deterministically from `presentation_source_sections`
+- existing source section titles are kept when present
+- deterministic section handling is limited to cleaning/sanitizing unsafe or noisy markup while preserving wording
+- final description HTML is rendered in code from:
+  - the LLM `intro_text` paragraph
+  - deterministic CTA data
+  - cleaned deterministic source sections
+- HTML wrappers, CTA block, image wiring, section layout, classes, and styles become code-owned
+
+Compatibility phase:
+- render will first look for task-specific outputs:
+  - `work/{model}/intro_text.llm_output.json`
+  - `work/{model}/seo_meta.llm_output.json`
+- render will continue to accept legacy combined `work/{model}/llm_output.json` during the compatibility phase
+- final cleanup removes the combined-output fallback and the single-prompt artifact contract
+
+Deterministic ownership boundaries:
+- LLM-owned in the target branch:
+  - `intro_text`
+  - `product.meta_description`
+  - `product.meta_keywords`
+- code-owned in the target branch:
+  - presentation section selection, classification, and cleaning
+  - section titles when sourced
+  - CTA text and CTA block wiring
+  - description wrappers, classes, and styles
+  - image wiring
+  - section layout
+  - keyword deduplication
+  - singular/plural keyword collapsing
+  - final HTML assembly
+
+Section quality classifier:
+- `usable`: the source section has enough preserved text or media-backed structure to render as a deterministic feature block
+- `weak`: the source section exists but is too thin, noisy, or redundant to count confidently; warn and continue if remaining sections are sufficient
+- `missing`: the requested section slot cannot be filled from source data after extraction and cleaning
+
+Failure policy:
+- if `presentation_source_sections` are missing entirely, fail the run
+- if sections are `weak`, warn and continue with fewer sections
+- if exactly one requested section is `missing`, warn and continue with fewer sections
+- do not add a fallback that asks the LLM to regenerate missing deterministic section copy
+
+SEO rules planned for code ownership:
+- `intro_text` stays plain text only and is converted to HTML in code
+- `seo_meta` must return `meta_description` and `meta_keywords`
+- brand and model must always appear in `meta_keywords`
+- duplicate keywords and singular/plural variants are collapsed in code before CSV mapping
+
+Commands run:
+- `Get-Location | Select-Object -ExpandProperty Path`
+- `git status --short`
+- `Get-Content -Raw PLAN.md`
+- `Get-Content -Raw IMPLEMENT.md`
+- `Get-Content -Raw DOCUMENTATION.md`
+- `rg -n "intro_html|meta_description|meta_keywords|sections\\[\\]\\.title|sections\\[\\]\\.body_html|llm_output\\.json|prompt\\.txt|llm_context\\.json|prepare_execution|render_execution|presentation_source_sections" scraper resources README.md -S`
+- `rg --files scraper/pipeline/tests`
+- `rg -n "llm_contract|compact_response.schema.json|master_prompt\\+\\.txt|prompt.txt|llm_context.json" scraper/pipeline resources -S`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 140`
+- `rg -n "Phase 3|M29|Validation rules|Stop conditions|Current milestone" PLAN.md DOCUMENTATION.md IMPLEMENT.md -S`
+- `git diff --check`
+- `git diff -- PLAN.md IMPLEMENT.md DOCUMENTATION.md`
+
+Validation:
+- docs-only commit
+- `git diff --check` passed
+- no runtime tests were run because this commit only updates control docs and must not include runtime or test changes
+
+Deferred:
+- no runtime code, tests, or README changes were made in this commit
+- the compatibility phase, deterministic section pipeline, and final cleanup remain planned work only at this stage
 
 ## M29 — make run_service the true owner of full-run orchestration
 

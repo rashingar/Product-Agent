@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M29. The next active phase is Phase 3: hybrid RAG foundation; this plan records the handoff boundary, but M29 does not start that work.
+Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. Post-split execution seam cleanup and service/workflow error hardening are now complete through M36. Phase 4 remains pending.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -71,14 +71,91 @@ Phase 2 milestones:
 - M28 — make services the true owner of prepare/render orchestration (completed; the real prepare/render orchestration now lives under `scraper/pipeline/services/prepare_execution.py` and `scraper/pipeline/services/render_execution.py`, `prepare_service.py` and `render_service.py` call those service-owned executors directly without importing `workflow.py`, and `workflow.py` remains a thin CLI/adapter layer with unchanged runtime behavior)
 - M29 — make `run_service` the true owner of full-run orchestration (completed; the real full-run composition now lives under `scraper/pipeline/services/run_execution.py`, `run_service.py` calls that service-owned executor directly, and CLI/workflow adapter behavior plus runtime outputs remain unchanged)
 
-### Phase 3 — Hybrid RAG foundation
+### Phase 3 — Split-LLM `intro_text` and deterministic presentation refactor
+
+Status: completed
+
+Goals:
+1. Replace the current single-prompt LLM handoff with two task-specific LLM tasks: `intro_text` and `seo_meta`.
+2. Remove presentation section title/body generation from the LLM contract.
+3. Build deterministic presentation sections from `presentation_source_sections` while preserving source titles when present and only cleaning/sanitizing wording.
+4. Render the final description HTML in code from LLM `intro_text`, deterministic CTA data, and cleaned deterministic source sections while keeping wrappers, classes, and styles code-owned.
+5. Add a render-side compatibility phase during the transition and then remove it in final cleanup.
+6. Enforce the planned section failure policy and SEO keyword normalization rules in code.
+
+Hard rules:
+- Do not move HTML wrappers, CTA blocks, image wiring, or section layout ownership back to the LLM.
+- Do not silently continue when `presentation_source_sections` are absent entirely; that case must hard fail.
+- Do not remove the compatibility path until regression coverage proves the split-output path is stable.
+
+Phase 3 milestones:
+- M30 — split the LLM contract and prepare artifacts (completed; `prepare` now writes task-specific artifacts under `work/{model}/llm/` for `intro_text` and `seo_meta`, emits `task_manifest.json` as the primary handoff index, constrains `intro_text` to plain-text one-paragraph output, and defines `seo_meta` as `meta_description` plus structured `meta_keywords`)
+- M31 — add render compatibility for split outputs and legacy combined output (completed; the branch transition proved `render` against both split outputs and the temporary combined fallback before final cleanup removed the legacy path)
+- M32 — build deterministic presentation sections and section-quality policy (completed; `presentation_source_sections` are now classified as `usable`, `weak`, or `missing`; missing source sections hard fail; weak sections or exactly one missing requested section warn and continue with fewer sections; source wording is preserved apart from cleaning/sanitization; and source titles are retained when present)
+- M33 — render final description HTML and SEO normalization in code (completed; description HTML is now assembled in code from plain-text `intro_text`, deterministic CTA data, and cleaned deterministic source sections; wrappers/classes/styles remain code-owned; keyword normalization in code enforces brand/model presence while collapsing duplicates and singular/plural variants; and section-image mapping stays tied to original source order when weak sections are skipped)
+- M34 — final cleanup of legacy combined artifacts and docs (completed; the legacy single-prompt artifact contract was removed from steady-state prepare/render expectations, `render` no longer depends on combined `llm_output.json`, obsolete combined prompt/schema assets were retired, and user-facing/runtime docs now describe the final split-task contract)
+
+### Post-split execution seam cleanup
+
+Status: completed
+
+Goals:
+1. Finish the prepare/render execution seam after the split-LLM refactor.
+2. Make `prepare` truly scrape-only plus LLM-handoff-only.
+3. Keep `render` as the sole owner of candidate CSV generation, validation artifacts, description HTML, characteristics HTML, and publish copy.
+4. Remove the remaining active-path dependence on `execute_full_run(...)` for prepare-stage behavior.
+5. Reduce or retire `full_run.py` from the active prepare path without broadening scope into provider bootstrap, service error taxonomy, or CI.
+
+Hard rules:
+- Do not reintroduce combined LLM artifacts or change the split-task `intro_text` / `seo_meta` contract.
+- Do not let `prepare` write candidate or publish artifacts in steady state.
+- Do not broaden this cleanup into provider bootstrap, service error taxonomy, or CI work.
+
+Post-split milestone:
+- M35 — clean up the prepare/render execution seam (completed; `scraper/pipeline/prepare_stage.py` is now the scrape-only execution core, `scraper/pipeline/services/prepare_execution.py` writes scrape plus split-task handoff artifacts without routing through `execute_full_run(...)`, `prepare` no longer writes a scrape-stage CSV, `render` remains the sole owner of candidate and publish outputs, and `scraper/pipeline/full_run.py` is reduced to a thin compatibility wrapper for explicit direct callers)
+
+Implementation substeps:
+1. Extract or introduce a scrape-only execution seam that returns the parsed, taxonomy, normalized, and report data needed by `prepare` without writing candidate-stage outputs.
+2. Re-route `scraper/pipeline/services/prepare_execution.py` to that scrape-only seam and remove its active-path dependency on `execute_full_run(...)`.
+3. Remove scrape-stage CSV generation and any other candidate/publish side effects from the active prepare path while preserving scrape artifacts under `work/{model}/scrape/` and task handoff artifacts under `work/{model}/llm/`.
+4. Keep `scraper/pipeline/services/render_execution.py` as the sole owner of candidate CSV generation, validation reports, `description.html`, `characteristics.html`, and publish-copy to `products/`.
+5. Narrow `scraper/pipeline/full_run.py` to explicit full-run composition only, or retire it from the active prepare path entirely, without changing supported-provider behavior.
+
+Acceptance criteria:
+1. `python -m pipeline.workflow prepare ...` writes only scrape artifacts and LLM handoff artifacts under `work/{model}/`; it does not write `work/{model}/scrape/{model}.csv`, candidate artifacts, or publish outputs.
+2. `scraper/pipeline/services/prepare_execution.py` no longer imports or depends on `execute_full_run(...)` for active prepare behavior.
+3. `python -m pipeline.workflow render --model {model}` remains the sole owner of `work/{model}/candidate/{model}.csv`, `work/{model}/candidate/{model}.validation.json`, `work/{model}/candidate/description.html`, `work/{model}/candidate/characteristics.html`, and `products/{model}.csv`.
+4. Split-task `intro_text` / `seo_meta` inputs and outputs, supported-provider behavior, and render validation semantics remain unchanged.
+5. `scraper/pipeline/full_run.py` is either reduced to an explicit full-run wrapper over prepare plus render or otherwise removed from the active prepare path, with no new scope added in provider bootstrap, service error taxonomy, or CI.
+
+### Service/workflow error taxonomy hardening
+
+Status: completed
+
+Goals:
+1. Replace exception-type-name service errors with stable semantic service codes.
+2. Keep low-level exception mapping at the service boundary without introducing a large exception hierarchy.
+3. Make workflow exit behavior explicit and stable across prepare/render failure modes.
+4. Store stable semantic error codes in run metadata instead of raw exception type names.
+
+Hard rules:
+- Keep user-facing CLI/workflow error messages readable.
+- Do not broaden this work into provider bootstrap, CI, or a larger exception hierarchy redesign.
+- Keep fetch/normalize behavior inside providers unchanged.
+
+Milestone:
+- M36 — add stable service error taxonomy and workflow exit mapping (completed; `scraper/pipeline/services/errors.py` now defines stable semantic error codes plus a boundary mapper, prepare/render/full-run services wrap low-level failures into those codes, workflow exit behavior is driven by an explicit code-to-exit matrix, and prepare/render metadata now persist stable semantic `error_code` values including validation failures)
+
+### Phase 4 — Hybrid RAG foundation
 
 Status: pending
 
 Entry handoff:
-1. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
-2. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
-3. Do not reintroduce source-specific routing below the provider boundary.
+1. Complete M36 before starting any hybrid RAG work.
+2. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
+3. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
+4. Preserve the completed split-task steady-state contract while starting retrieval-layer work; do not reintroduce combined LLM artifacts.
+5. Do not reintroduce source-specific routing below the provider boundary.
 
 ## Root policy
 ### Keep in root
@@ -102,9 +179,9 @@ Entry handoff:
 
 ### Shared support assets under `resources/`
 - `resources/mappings/`: `MANUFACTURER_SOURCE_MAP.json`, `catalog_taxonomy.json`, `filter_map.json`, `name_rules.json`, `differentiator_priority_map.csv`, `taxonomy_mapping_template.csv`
-- `resources/schemas/`: `electronet_schema_library.json`, `schema_index.csv`, `compact_response.schema.json`
+- `resources/schemas/`: `electronet_schema_library.json`, `schema_index.csv`
 - `resources/templates/`: `TEMPLATE_presentation.html`, `characteristics_templates.json`, `product_import_template.csv`
-- `resources/prompts/`: `master_prompt+.txt`
+- `resources/prompts/`: `intro_text_prompt.txt`, `seo_meta_prompt.txt`
 
 ### Move now
 - none; M4 completed the two previously approved safe documentation/planning moves
@@ -212,7 +289,7 @@ Evidence:
 
 Cleanup is complete through M14.
 
-New architecture work starts at M15 and must follow the active Phase 2 rules above. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
+New implementation work starts at M30 and now continues through the completed post-split M36 error-hardening milestone before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
 
 ## Validation rules
 After each milestone:

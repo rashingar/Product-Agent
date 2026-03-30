@@ -5,12 +5,32 @@ from pathlib import Path
 import pytest
 
 from pipeline.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
-from pipeline.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
+from pipeline.providers import ProviderRegistry
+from pipeline.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceError, ServiceErrorCode, ServiceResult
 from pipeline.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
 
 def build_intro(words: int = 120) -> str:
     return " ".join(["λέξη"] * words)
+
+
+def write_split_llm_outputs(model_root: Path, *, intro_text: str, meta_description: str, meta_keywords: list[str]) -> None:
+    llm_dir = model_root / "llm"
+    llm_dir.mkdir(parents=True, exist_ok=True)
+    (llm_dir / "intro_text.output.txt").write_text(intro_text, encoding="utf-8")
+    (llm_dir / "seo_meta.output.json").write_text(
+        json.dumps(
+            {
+                "product": {
+                    "meta_description": meta_description,
+                    "meta_keywords": meta_keywords,
+                }
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
 
 def test_build_cli_input_from_template_file(tmp_path: Path, monkeypatch) -> None:
@@ -43,17 +63,18 @@ def test_prepare_workflow_delegates_to_service_execution(tmp_path: Path, monkeyp
 
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_execute_full_run(_cli):
+    def fake_execute_prepare_stage(_cli, *, model_dir):
+        assert model_dir == tmp_path / "work" / "233541" / "scrape"
         return {"unused": True}
 
-    def fake_execute_prepare_workflow(cli_arg, *, work_root, execute_full_run_fn):
+    def fake_execute_prepare_workflow(cli_arg, *, work_root, execute_prepare_stage_fn):
         assert cli_arg is cli
         assert work_root == tmp_path / "work"
-        assert execute_full_run_fn is fake_execute_full_run
+        assert execute_prepare_stage_fn is fake_execute_prepare_stage
         return {"delegated": True}
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
-    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
     monkeypatch.setattr(workflow, "execute_prepare_workflow", fake_execute_prepare_workflow)
 
     assert workflow.prepare_workflow(cli) == {"delegated": True}
@@ -75,7 +96,8 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     )
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_execute_full_run(_cli):
+    def fake_execute_prepare_stage(_cli, *, model_dir):
+        assert model_dir == tmp_path / "work" / "233541" / "scrape"
         return {
             "normalized": {
                 "deterministic_product": {
@@ -97,27 +119,46 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
             "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
         }
 
-    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
 
     result = prepare_workflow(cli)
 
-    assert result["llm_context_path"].exists()
-    assert result["prompt_path"].exists()
+    assert result["llm_dir"].exists()
+    assert result["task_manifest_path"].exists()
+    assert result["intro_text_context_path"].exists()
+    assert result["intro_text_prompt_path"].exists()
+    assert result["seo_meta_context_path"].exists()
+    assert result["seo_meta_prompt_path"].exists()
     assert result["metadata_path"].exists()
-    llm_context = json.loads(result["llm_context_path"].read_text(encoding="utf-8"))
+    task_manifest = json.loads(result["task_manifest_path"].read_text(encoding="utf-8"))
+    intro_text_context = json.loads(result["intro_text_context_path"].read_text(encoding="utf-8"))
+    seo_meta_context = json.loads(result["seo_meta_context_path"].read_text(encoding="utf-8"))
+    intro_text_prompt = result["intro_text_prompt_path"].read_text(encoding="utf-8")
+    seo_meta_prompt = result["seo_meta_prompt_path"].read_text(encoding="utf-8")
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
-    prompt_text = result["prompt_path"].read_text(encoding="utf-8")
-    assert llm_context["writer_rules"]["intro_html_rule"] == "120-180 Greek words in one intro paragraph."
-    assert "between 120 and 180 Greek words" in prompt_text
-    assert "120-180 Greek words" in prompt_text
+    assert task_manifest["prepare_mode"] == "split_tasks"
+    assert task_manifest["primary_outputs"]["tasks"]["intro_text"]["context_path"] == str(result["intro_text_context_path"])
+    assert task_manifest["primary_outputs"]["tasks"]["seo_meta"]["prompt_path"] == str(result["seo_meta_prompt_path"])
+    assert intro_text_context["task"] == "intro_text"
+    assert intro_text_context["writer_rules"]["plain_text_only"] is True
+    assert intro_text_context["writer_rules"]["llm_owned_fields"] == ["intro_text"]
+    assert "presentation_source_sections" not in intro_text_context
+    assert "Do not use HTML." in intro_text_prompt
+    assert "Do not use CTA language" in intro_text_prompt
+    assert seo_meta_context["task"] == "seo_meta"
+    assert seo_meta_context["writer_rules"]["required_keywords"] == ["LG", "GSGV80PYLL"]
+    assert seo_meta_context["product"]["meta_title"] == "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt | eTranoulis"
+    assert "always include the provided brand and mpn/model values" in seo_meta_prompt
     assert result["metadata_path"].name == "prepare.run.json"
     assert metadata["run"]["model"] == "233541"
     assert metadata["run"]["run_type"] == "prepare"
     assert metadata["run"]["status"] == "completed"
-    assert metadata["artifacts"]["llm_context_path"] == str(result["llm_context_path"])
-    assert metadata["artifacts"]["prompt_path"] == str(result["prompt_path"])
+    assert metadata["artifacts"]["llm_dir"] == str(result["llm_dir"])
+    assert metadata["artifacts"]["llm_task_manifest_path"] == str(result["task_manifest_path"])
+    assert metadata["artifacts"]["intro_text_context_path"] == str(result["intro_text_context_path"])
+    assert metadata["artifacts"]["seo_meta_context_path"] == str(result["seo_meta_context_path"])
     assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
-    assert metadata["artifacts"]["llm_output_path"] == str(result["model_root"] / "llm_output.json")
+    assert metadata["details"]["llm_prepare_mode"] == "split_tasks"
     assert metadata["details"]["source"] == ""
 
 
@@ -203,6 +244,24 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
             raise AssertionError("Electronet parser should not be called directly")
 
     class DummyElectronetProvider:
+        definition = ProviderDefinition(
+            provider_id="electronet",
+            source_name="electronet",
+            kind=ProviderKind.VENDOR_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
         def __init__(self, *, fetcher, parser):
             assert isinstance(fetcher, DummyFetcher)
             assert isinstance(parser, UnexpectedParser)
@@ -224,19 +283,7 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
         def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
             assert snapshot.requested_url == identity.url
             return ProviderResult(
-                provider=ProviderDefinition(
-                    provider_id="electronet",
-                    source_name="electronet",
-                    kind=ProviderKind.VENDOR_SITE,
-                    capabilities=frozenset(
-                        {
-                            ProviderCapability.URL_INPUT,
-                            ProviderCapability.LIVE_FETCH,
-                            ProviderCapability.HTML_SNAPSHOT,
-                            ProviderCapability.NORMALIZED_PRODUCT,
-                        }
-                    ),
-                ),
+                provider=self.definition,
                 identity=identity,
                 snapshot=snapshot,
                 product=parsed.source,
@@ -250,12 +297,12 @@ def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, t
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "electronet")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(run_module, "ElectronetProvider", DummyElectronetProvider)
-    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: type("P", (), {"parse": lambda self, *_args, **_kwargs: parsed})())
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {})
+    registry = ProviderRegistry()
+    registry.register(DummyElectronetProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
 
     result = run_module.execute_full_run(cli)
 
@@ -338,6 +385,24 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
             raise AssertionError("Electronet provider should not be selected for Skroutz by default")
 
     class DummySkroutzProvider:
+        definition = ProviderDefinition(
+            provider_id="skroutz",
+            source_name="skroutz",
+            kind=ProviderKind.VENDOR_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
         def __init__(self, *, fetcher, parser):
             assert isinstance(fetcher, DummyFetcher)
             assert isinstance(parser, UnexpectedParser)
@@ -359,19 +424,7 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
         def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
             assert snapshot.requested_url == identity.url
             return ProviderResult(
-                provider=ProviderDefinition(
-                    provider_id="skroutz",
-                    source_name="skroutz",
-                    kind=ProviderKind.VENDOR_SITE,
-                    capabilities=frozenset(
-                        {
-                            ProviderCapability.URL_INPUT,
-                            ProviderCapability.LIVE_FETCH,
-                            ProviderCapability.HTML_SNAPSHOT,
-                            ProviderCapability.NORMALIZED_PRODUCT,
-                        }
-                    ),
-                ),
+                provider=self.definition,
                 identity=identity,
                 snapshot=snapshot,
                 product=parsed.source,
@@ -384,11 +437,7 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
 
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("skroutz", True, "skroutz_product_path"))
-    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(run_module, "SkroutzProvider", DummySkroutzProvider)
-    monkeypatch.setattr(run_module, "ElectronetProvider", UnexpectedElectronetProvider)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(
         run_module,
@@ -410,6 +459,9 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
             "fallback_reason": "test_stub",
         },
     )
+    registry = ProviderRegistry()
+    registry.register(DummySkroutzProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
 
     result = run_module.execute_full_run(cli)
 
@@ -507,6 +559,24 @@ def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(
             raise AssertionError("Manufacturer parser should not be called directly outside the provider seam")
 
     class DummyManufacturerTefalProvider:
+        definition = ProviderDefinition(
+            provider_id="manufacturer_tefal",
+            source_name="manufacturer_tefal",
+            kind=ProviderKind.MANUFACTURER_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
         def __init__(self, *, fetcher, parser):
             assert isinstance(fetcher, DummyFetcher)
             assert isinstance(parser, UnexpectedParser)
@@ -528,19 +598,7 @@ def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(
         def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
             assert snapshot.requested_url == identity.url
             return ProviderResult(
-                provider=ProviderDefinition(
-                    provider_id="manufacturer_tefal",
-                    source_name="manufacturer_tefal",
-                    kind=ProviderKind.MANUFACTURER_SITE,
-                    capabilities=frozenset(
-                        {
-                            ProviderCapability.URL_INPUT,
-                            ProviderCapability.LIVE_FETCH,
-                            ProviderCapability.HTML_SNAPSHOT,
-                            ProviderCapability.NORMALIZED_PRODUCT,
-                        }
-                    ),
-                ),
+                provider=self.definition,
                 identity=identity,
                 snapshot=snapshot,
                 product=parsed.source,
@@ -553,14 +611,12 @@ def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(
 
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "manufacturer_tefal")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
-    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(run_module, "ManufacturerTefalProvider", DummyManufacturerTefalProvider)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
+    registry = ProviderRegistry()
+    registry.register(DummyManufacturerTefalProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
 
     result = run_module.execute_full_run(cli)
 
@@ -594,43 +650,24 @@ def test_execute_full_run_fails_fast_when_supported_source_has_no_provider(monke
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: object())
-    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: object())
-    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: object())
-    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: object())
-    monkeypatch.setattr(run_module, "_resolve_provider_for_source", lambda **_kwargs: None)
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: ProviderRegistry())
 
-    with pytest.raises(RuntimeError, match="No provider configured for supported source: skroutz"):
+    with pytest.raises(RuntimeError, match="Provider 'skroutz' is not registered"):
         run_module.execute_full_run(cli)
 
 
-def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monkeypatch) -> None:
+def test_prepare_workflow_keeps_prepare_scrape_only_without_candidate_csv(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
 
     model = "233541"
-    generated_scrape_dir = tmp_path / "work" / model / "scrape" / model
-    generated_scrape_dir.mkdir(parents=True)
-    old_prefix = str(generated_scrape_dir)
-    raw_html_path = generated_scrape_dir / f"{model}.raw.html"
-    source_json_path = generated_scrape_dir / f"{model}.source.json"
-    normalized_json_path = generated_scrape_dir / f"{model}.normalized.json"
-    report_json_path = generated_scrape_dir / f"{model}.report.json"
-    csv_path = generated_scrape_dir / f"{model}.csv"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    raw_html_path = scrape_dir / f"{model}.raw.html"
+    source_json_path = scrape_dir / f"{model}.source.json"
+    normalized_json_path = scrape_dir / f"{model}.normalized.json"
+    report_json_path = scrape_dir / f"{model}.report.json"
 
-    raw_html_path.write_text("<html></html>", encoding="utf-8")
-    csv_path.write_text("model\n233541\n", encoding="utf-8")
-
-    source_payload = {
-        "url": "https://www.electronet.gr/example",
-        "canonical_url": "https://www.electronet.gr/example",
-        "product_code": model,
-        "brand": "LG",
-        "name": "Ψυγείο Ντουλάπα LG GSGV80PYLL",
-        "raw_html_path": str(raw_html_path),
-        "gallery_images": [{"local_path": f"{old_prefix}\\gallery\\{model}-1.jpg"}],
-        "besco_images": [{"local_path": f"{old_prefix}\\bescos\\besco1.jpg"}],
-    }
     normalized_payload = {
         "deterministic_product": {
             "brand": "LG",
@@ -641,13 +678,8 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
             "seo_keyword": "lg-gsgv80pyll-psygeio-ntoulapa",
         },
         "input": {"out": str(tmp_path / "work" / model / "scrape")},
-        "csv_row": {"model": model},
     }
-    report_payload = {"files_written": [str(raw_html_path), str(source_json_path), str(normalized_json_path), str(report_json_path), str(csv_path)]}
-
-    source_json_path.write_text(json.dumps(source_payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    normalized_json_path.write_text(json.dumps(normalized_payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    report_json_path.write_text(json.dumps(report_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    report_payload = {"warnings": [], "files_written": [str(raw_html_path), str(source_json_path), str(normalized_json_path), str(report_json_path)]}
 
     parsed = ParsedProduct(
         source=SourceProductData(
@@ -657,13 +689,35 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
             brand="LG",
             name="Ψυγείο Ντουλάπα LG GSGV80PYLL",
             raw_html_path=str(raw_html_path),
-            gallery_images=[GalleryImage(url="https://example.com/1.jpg", local_path=f"{old_prefix}\\gallery\\{model}-1.jpg")],
-            besco_images=[GalleryImage(url="https://example.com/besco1.jpg", local_path=f"{old_prefix}\\bescos\\besco1.jpg")],
+            gallery_images=[GalleryImage(url="https://example.com/1.jpg", local_path=str(scrape_dir / "gallery" / f"{model}-1.jpg"))],
+            besco_images=[GalleryImage(url="https://example.com/besco1.jpg", local_path=str(scrape_dir / "bescos" / "besco1.jpg"))],
         )
     )
     cli = CLIInput(model=model, url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_execute_full_run(_cli):
+    def fake_execute_prepare_stage(_cli, *, model_dir):
+        assert model_dir == scrape_dir
+        model_dir.mkdir(parents=True, exist_ok=True)
+        raw_html_path.write_text("<html></html>", encoding="utf-8")
+        source_json_path.write_text(
+            json.dumps(
+                {
+                    "url": "https://www.electronet.gr/example",
+                    "canonical_url": "https://www.electronet.gr/example",
+                    "product_code": model,
+                    "brand": "LG",
+                    "name": "Ψυγείο Ντουλάπα LG GSGV80PYLL",
+                    "raw_html_path": str(raw_html_path),
+                    "gallery_images": [{"local_path": str(scrape_dir / "gallery" / f"{model}-1.jpg")}],
+                    "besco_images": [{"local_path": str(scrape_dir / "bescos" / "besco1.jpg")}],
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        normalized_json_path.write_text(json.dumps(normalized_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        report_json_path.write_text(json.dumps(report_payload, ensure_ascii=False, indent=2), encoding="utf-8")
         return {
             "normalized": normalized_payload,
             "parsed": parsed,
@@ -675,25 +729,22 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
             ),
             "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
             "report": report_payload,
-            "model_dir": generated_scrape_dir,
+            "model_dir": scrape_dir,
             "raw_html_path": raw_html_path,
             "source_json_path": source_json_path,
             "normalized_json_path": normalized_json_path,
             "report_json_path": report_json_path,
-            "csv_path": csv_path,
         }
 
-    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
 
     result = prepare_workflow(cli)
-    scrape_dir = result["scrape_dir"]
-    rewritten_source = json.loads((scrape_dir / f"{model}.source.json").read_text(encoding="utf-8"))
-    rewritten_report = json.loads((scrape_dir / f"{model}.report.json").read_text(encoding="utf-8"))
-
     assert result["scrape_result"]["model_dir"] == scrape_dir
-    assert rewritten_source["raw_html_path"] == str(scrape_dir / f"{model}.raw.html")
-    assert all(Path(path).parent == scrape_dir for path in rewritten_report["files_written"])
-    assert rewritten_source["gallery_images"][0]["local_path"] == str(scrape_dir / "gallery" / f"{model}-1.jpg")
+    assert (scrape_dir / f"{model}.source.json").exists()
+    assert (scrape_dir / f"{model}.normalized.json").exists()
+    assert (scrape_dir / f"{model}.report.json").exists()
+    assert not (scrape_dir / f"{model}.csv").exists()
+    assert not (tmp_path / "work" / model / "candidate" / f"{model}.csv").exists()
 
 
 def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkeypatch) -> None:
@@ -702,10 +753,11 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=1, sections=0, skroutz_status=0, boxnow=0, price="0", out=str(tmp_path))
 
-    def fake_execute_full_run(_cli):
+    def fake_execute_prepare_stage(_cli, *, model_dir):
+        assert model_dir == tmp_path / "work" / "233541" / "scrape"
         raise RuntimeError("prepare exploded")
 
-    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
 
     try:
         prepare_workflow(cli)
@@ -717,7 +769,7 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
     metadata_path = tmp_path / "work" / "233541" / "prepare.run.json"
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
-    assert metadata["run"]["error_code"] == "RuntimeError"
+    assert metadata["run"]["error_code"] == ServiceErrorCode.UNEXPECTED_FAILURE.value
     assert metadata["run"]["error_detail"] == "prepare exploded"
 
 
@@ -749,6 +801,13 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
             SpecItem(label="Τεχνολογία Ψύξης", value="Total No Frost"),
             SpecItem(label="Συνδεσιμότητα", value="WiFi"),
         ],
+        presentation_source_html="""
+        <section>
+          <h3>NatureFRESH για καθημερινή φρεσκάδα</h3>
+          <p>Το NatureFRESH βοηθά στη σωστή συντήρηση και υποστηρίζει σταθερή ψύξη σε όλη τη διάρκεια της ημέρας
+          με καθαρή οργάνωση, πρακτική χρήση και άνετη πρόσβαση στα τρόφιμα για όλη την οικογένεια.</p>
+        </section>
+        """,
         spec_sections=[
             SpecSection(section="Επισκόπηση Προϊόντος", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")]),
         ],
@@ -777,23 +836,12 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
     }
     (scrape_dir / f"{model}.normalized.json").write_text(__import__("json").dumps(normalized_payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    llm_output = {
-        "product": {
-            "meta_description": "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost και WiFi για άνεση κάθε μέρα.",
-            "meta_keywords": ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα", "Total No Frost"],
-        },
-        "presentation": {
-            "intro_html": build_intro(),
-            "cta_text": "Δείτε περισσότερα ψυγεία ντουλάπες εδώ",
-            "sections": [
-                {
-                    "title": "NatureFRESH για καθημερινή φρεσκάδα",
-                    "body_html": "Το <strong>NatureFRESH</strong> βοηθά στη σωστή συντήρηση.",
-                }
-            ],
-        },
-    }
-    (tmp_path / "work" / model / "llm_output.json").write_text(__import__("json").dumps(llm_output, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text="Σύντομο κείμενο.",
+        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost και WiFi για άνεση κάθε μέρα.",
+        meta_keywords=["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα", "Total No Frost"],
+    )
 
     result = render_workflow(model)
 
@@ -804,13 +852,15 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
     assert result["run_status"] == "failed"
     assert result["validation_report"]["ok"] is False
     assert "field_health" in result["validation_report"]
-    assert result["validation_report"]["errors"] == ["llm_presentation_shape_invalid"]
+    assert result["validation_report"]["errors"] == ["llm_intro_text_word_count_invalid"]
     assert "Candidate failed validation; skipping publish to products/." in result["validation_report"]["warnings"]
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
     assert result["metadata_path"].name == "render.run.json"
     assert metadata["run"]["model"] == model
     assert metadata["run"]["run_type"] == "render"
     assert metadata["run"]["status"] == "failed"
+    assert metadata["run"]["error_code"] == ServiceErrorCode.VALIDATION_FAILURE.value
+    assert metadata["run"]["error_detail"] == "Candidate validation failed"
     assert metadata["artifacts"]["candidate_csv_path"] == str(result["candidate_csv_path"])
     assert metadata["artifacts"]["published_csv_path"] is None
     assert metadata["artifacts"]["validation_report_path"] == str(result["validation_report_path"])
@@ -853,15 +903,204 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     try:
         render_workflow(model)
     except FileNotFoundError as exc:
-        assert str(exc) == f"Missing LLM output: {tmp_path / 'work' / model / 'llm_output.json'}"
+        assert str(exc) == f"Missing split-task LLM outputs in {tmp_path / 'work' / model / 'llm'}"
     else:
         raise AssertionError("Expected FileNotFoundError")
 
     metadata_path = tmp_path / "work" / model / "render.run.json"
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
-    assert metadata["run"]["error_code"] == "FileNotFoundError"
-    assert "Missing LLM output" in metadata["run"]["error_detail"]
+    assert metadata["run"]["error_code"] == ServiceErrorCode.MISSING_ARTIFACT.value
+    assert "Missing split-task LLM outputs" in metadata["run"]["error_detail"]
+
+
+def test_render_workflow_builds_description_from_split_outputs_and_deterministic_sections(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        mpn="GSGV80PYLL",
+        name="Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E",
+        hero_summary="Το LG GSGV80PYLL προσφέρει μεγάλη χωρητικότητα.",
+        price_text="2.099,00 €",
+        price_value=2099.0,
+        gallery_images=[GalleryImage(url="https://example.com/233541-1.jpg", position=1, local_filename="233541-1.jpg", downloaded=True)],
+        besco_images=[
+            GalleryImage(url="https://example.com/besco1.jpg", position=1, local_filename="besco1.jpg", downloaded=True),
+            GalleryImage(url="https://example.com/besco2.jpg", position=2, local_filename="besco2.jpg", downloaded=True),
+        ],
+        key_specs=[
+            SpecItem(label="Συνολική Καθαρή Χωρητικότητα", value="635"),
+            SpecItem(label="Τεχνολογία Ψύξης", value="Total No Frost"),
+            SpecItem(label="Συνδεσιμότητα", value="WiFi"),
+        ],
+        spec_sections=[SpecSection(section="Βασικά Χαρακτηριστικά", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")])],
+        presentation_source_html="""
+        <section>
+          <h3>NatureFRESH για καθημερινή φρεσκάδα</h3>
+          <p>Το NatureFRESH βοηθά στη σωστή συντήρηση και διατηρεί σταθερή ψύξη σε όλο τον θάλαμο,
+          προσφέροντας πρακτική οργάνωση και εύκολη καθημερινή πρόσβαση στα τρόφιμα με σταθερή απόδοση και άνεση.</p>
+        </section>
+        <section>
+          <h3>DoorCooling+ για ομοιόμορφη ψύξη</h3>
+          <p>Η λειτουργία DoorCooling+ ενισχύει την ομοιόμορφη κατανομή του αέρα και υποστηρίζει σταθερή ψύξη,
+          ώστε τα τρόφιμα να παραμένουν οργανωμένα και προσβάσιμα με καθαρή και πρακτική καθημερινή χρήση.</p>
+        </section>
+        """,
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {
+                    "model": model,
+                    "url": "https://www.electronet.gr/example",
+                    "photos": 1,
+                    "sections": 2,
+                    "skroutz_status": 1,
+                    "boxnow": 0,
+                    "price": "2099",
+                },
+                "taxonomy": TaxonomyResolution(
+                    parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+                    leaf_category="Ψυγεία & Καταψύκτες",
+                    sub_category="Ψυγεία Ντουλάπες",
+                    cta_url="https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+                ).to_dict(),
+                "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9).to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text=build_intro(),
+        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost και WiFi για άνεση κάθε μέρα.",
+        meta_keywords=["Ψυγεία Ντουλάπες", "Ψυγείο Ντουλάπα", "Total No Frost"],
+    )
+
+    result = render_workflow(model)
+    description = result["description_path"].read_text(encoding="utf-8")
+    candidate_row = next(__import__("csv").DictReader(result["candidate_csv_path"].open("r", encoding="utf-8-sig", newline="")))
+
+    assert result["run_status"] == "completed"
+    assert result["published_csv_path"] == tmp_path / "products" / f"{model}.csv"
+    assert "NatureFRESH για καθημερινή φρεσκάδα" in description
+    assert "DoorCooling+ για ομοιόμορφη ψύξη" in description
+    assert "λέξη λέξη λέξη" in description
+    assert candidate_row["meta_keyword"].startswith("LG, GSGV80PYLL")
+    assert candidate_row["meta_keyword"].count("Ψυγ") == 1
+
+def test_render_workflow_fails_when_source_sections_are_missing_entirely(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        mpn="GSGV80PYLL",
+        name="LG Example",
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {"model": model, "url": source.url, "photos": 1, "sections": 1, "skroutz_status": 0, "boxnow": 0, "price": "0"},
+                "taxonomy": TaxonomyResolution(cta_url="https://example.com", leaf_category="Ψυγεία & Καταψύκτες").to_dict(),
+                "schema_match": SchemaMatchResult().to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text=build_intro(),
+        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με άνετη καθημερινή χρήση.",
+        meta_keywords=["LG", "GSGV80PYLL"],
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        render_workflow(model)
+
+    assert str(excinfo.value) == "Missing presentation source sections for requested render sections"
+
+
+def test_render_workflow_warns_and_continues_when_one_requested_section_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        mpn="GSGV80PYLL",
+        name="LG Example",
+        spec_sections=[SpecSection(section="Βασικά Χαρακτηριστικά", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")])],
+        presentation_source_html="""
+        <section>
+          <h3>Κανονική ενότητα</h3>
+          <p>Η συγκεκριμένη ενότητα περιγράφει καθαρά τη λειτουργία της συσκευής με αρκετές λέξεις και
+          σταθερό περιεχόμενο ώστε να θεωρείται χρήσιμη για τελική προβολή στη σελίδα προϊόντος.</p>
+        </section>
+        <section>
+          <h3>Εικόνα μόνο</h3>
+          <img src="https://example.com/image.jpg" />
+        </section>
+        """,
+        besco_images=[GalleryImage(url="https://example.com/besco1.jpg", position=1, local_filename="besco1.jpg", downloaded=True)],
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {"model": model, "url": source.url, "photos": 1, "sections": 2, "skroutz_status": 0, "boxnow": 0, "price": "0"},
+                "taxonomy": TaxonomyResolution(parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ", cta_url="https://example.com", leaf_category="Ψυγεία & Καταψύκτες").to_dict(),
+                "schema_match": SchemaMatchResult().to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text=build_intro(),
+        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με άνετη καθημερινή χρήση.",
+        meta_keywords=["Ψυγείο Ντουλάπες", "Ψυγείο Ντουλάπα"],
+    )
+
+    result = render_workflow(model)
+    description = result["description_path"].read_text(encoding="utf-8")
+
+    assert result["run_status"] == "completed"
+    assert "Κανονική ενότητα" in description
+    assert result["validation_report"]["ok"] is True
+    assert "presentation_sections_missing:1" in result["validation_report"]["warnings"]
+    assert "requested_sections_reduced:1" in result["validation_report"]["warnings"]
 
 
 def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsys, tmp_path: Path) -> None:
@@ -888,8 +1127,11 @@ def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsy
             run=RunMetadata(model=cli.model, run_type=RunType.PREPARE, status=RunStatus.COMPLETED),
             artifacts=RunArtifacts(
                 scrape_dir=tmp_path / "work" / cli.model / "scrape",
-                llm_context_path=tmp_path / "work" / cli.model / "llm_context.json",
-                prompt_path=tmp_path / "work" / cli.model / "prompt.txt",
+                llm_task_manifest_path=tmp_path / "work" / cli.model / "llm" / "task_manifest.json",
+                intro_text_context_path=tmp_path / "work" / cli.model / "llm" / "intro_text.context.json",
+                intro_text_prompt_path=tmp_path / "work" / cli.model / "llm" / "intro_text.prompt.txt",
+                seo_meta_context_path=tmp_path / "work" / cli.model / "llm" / "seo_meta.context.json",
+                seo_meta_prompt_path=tmp_path / "work" / cli.model / "llm" / "seo_meta.prompt.txt",
                 metadata_path=tmp_path / "work" / cli.model / "prepare.run.json",
             ),
         )
@@ -932,6 +1174,78 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
     assert exit_code == 0
     assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
     assert "Validation ok: True" in captured.out
+
+
+@pytest.mark.parametrize(
+    ("service_code", "expected_exit"),
+    [
+        (ServiceErrorCode.MISSING_ARTIFACT.value, 3),
+        (ServiceErrorCode.PROVIDER_FAILURE.value, 4),
+        (ServiceErrorCode.PARSE_FAILURE.value, 6),
+        (ServiceErrorCode.PUBLISH_FAILURE.value, 7),
+        (ServiceErrorCode.UNEXPECTED_FAILURE.value, 8),
+    ],
+)
+def test_workflow_main_maps_service_error_codes_to_explicit_exit_codes(monkeypatch, capsys, service_code: str, expected_exit: int) -> None:
+    from pipeline import workflow
+
+    def fake_build_cli_input_from_args(_args):
+        return CLIInput(
+            model="233541",
+            url="https://www.electronet.gr/example",
+            photos=2,
+            sections=1,
+            skroutz_status=1,
+            boxnow=0,
+            price="2099",
+            out="out",
+        )
+
+    def fake_prepare_product(_request: PrepareRequest) -> ServiceResult:
+        raise ServiceError(service_code, f"{service_code} message")
+
+    monkeypatch.setattr(workflow, "build_cli_input_from_args", fake_build_cli_input_from_args)
+    monkeypatch.setattr(workflow, "prepare_product", fake_prepare_product)
+
+    exit_code = workflow.main(["prepare"])
+    captured = capsys.readouterr()
+
+    assert exit_code == expected_exit
+    assert f"{service_code} message" in captured.err
+
+
+def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        assert request.model == "233541"
+        return ServiceResult(
+            run=RunMetadata(
+                model="233541",
+                run_type=RunType.RENDER,
+                status=RunStatus.FAILED,
+                error_code=ServiceErrorCode.VALIDATION_FAILURE.value,
+                error_detail="Candidate validation failed",
+            ),
+            artifacts=RunArtifacts(
+                candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+                validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+                metadata_path=tmp_path / "work" / "233541" / "render.run.json",
+            ),
+            details={"validation_ok": False},
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 5
+    assert "Validation ok: False" in captured.out
 
 
 def test_run_cli_input_calls_service_layer(monkeypatch) -> None:

@@ -40,29 +40,29 @@ def read_csv_row(path: Path) -> dict[str, str]:
         return next(csv.DictReader(handle))
 
 
-def build_llm_payload_from_baseline(path: Path) -> dict[str, object]:
+def write_split_llm_outputs_from_baseline(model_root: Path, path: Path) -> None:
     row = read_csv_row(path)
+    llm_dir = model_root / "llm"
+    llm_dir.mkdir(parents=True, exist_ok=True)
     soup = BeautifulSoup(row["description"], "lxml")
     intro_span = soup.select_one("p span")
-    cta = soup.select_one("a")
-    return {
-        "product": {
-            "meta_description": row["meta_description"],
-            "meta_keywords": [item.strip() for item in row["meta_keyword"].split(",") if item.strip()],
-        },
-        "presentation": {
-            "intro_html": intro_span.decode_contents().strip() if intro_span else "",
-            "cta_text": cta.get_text(" ", strip=True) if cta else "",
-            "sections": [
-                {
-                    "title": section.select_one(".etr-text h2").get_text(" ", strip=True),
-                    "body_html": section.select_one(".etr-text p span").decode_contents().strip(),
+    (llm_dir / "intro_text.output.txt").write_text(
+        intro_span.get_text(" ", strip=True) if intro_span else "",
+        encoding="utf-8",
+    )
+    (llm_dir / "seo_meta.output.json").write_text(
+        json.dumps(
+            {
+                "product": {
+                    "meta_description": row["meta_description"],
+                    "meta_keywords": [item.strip() for item in row["meta_keyword"].split(",") if item.strip()],
                 }
-                for section in soup.select("div.etr-sec, div.etr-sec.rev")
-                if section.select_one(".etr-text h2") is not None and section.select_one(".etr-text p span") is not None
-            ],
-        },
-    }
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
 
 def install_143481_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> None:
@@ -320,32 +320,32 @@ def test_143481_rendered_description_preserves_locked_wrappers(
         out="unused",
     )
     prepare_result = prepare_workflow(cli)
-    llm_output_path = prepare_result["model_root"] / "llm_output.json"
-    llm_output_path.write_text(
-        json.dumps(build_llm_payload_from_baseline(skroutz_golden_outputs_root / "143481.csv"), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    write_split_llm_outputs_from_baseline(prepare_result["model_root"], skroutz_golden_outputs_root / "143481.csv")
 
     render_result = render_workflow("143481")
     description = render_result["description_path"].read_text(encoding="utf-8")
     soup = BeautifulSoup(description, "lxml")
     section_nodes = soup.select("div.etr-sec, div.etr-sec.rev")
     besco_dir = prepare_result["scrape_dir"] / "bescos"
+    rendered_besco_indexes = [1, 2, 5, 6, 7, 8, 9]
 
-    assert description.count('class="etr-sec"') == 5
-    assert description.count('class="etr-sec rev"') == 4
-    assert description.count("<!-- SECTION ") == 9
-    assert len(section_nodes) == 9
+    assert render_result["run_status"] == "completed"
+    assert "presentation_sections_weak:2" in render_result["validation_report"]["warnings"]
+    assert "requested_sections_reduced:7" in render_result["validation_report"]["warnings"]
+    assert description.count('class="etr-sec"') == 4
+    assert description.count('class="etr-sec rev"') == 3
+    assert description.count("<!-- SECTION ") == 7
+    assert len(section_nodes) == 7
     assert sorted(path.name for path in besco_dir.glob("*.jpg")) == [f"besco{index}.jpg" for index in range(1, 10)]
 
-    for index, section in enumerate(section_nodes, start=1):
+    for index, (section, source_index) in enumerate(zip(section_nodes, rendered_besco_indexes, strict=True), start=1):
         expected_class = ["etr-sec", "rev"] if index % 2 == 0 else ["etr-sec"]
         assert section.get("class") == expected_class
         direct_children = [child for child in section.find_all(recursive=False)]
         assert [child.get("class") for child in direct_children] == [["etr-text"], ["etr-img"]]
         image = section.select_one(".etr-img img")
         assert image is not None
-        assert image.get("src", "").endswith(f"/143481/besco{index}.jpg")
+        assert image.get("src", "").endswith(f"/143481/besco{source_index}.jpg")
         if index % 2 == 0:
             assert image.get("style") == "display:block; margin-left:auto; margin-right:0;"
         else:

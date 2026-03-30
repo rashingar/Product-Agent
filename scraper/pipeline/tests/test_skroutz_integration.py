@@ -55,33 +55,28 @@ def read_csv_row(path: Path) -> dict[str, str]:
         return next(csv.DictReader(handle))
 
 
-def build_llm_payload_from_baseline(path: Path) -> dict[str, object]:
+def write_split_llm_outputs_from_baseline(model_root: Path, path: Path) -> None:
     row = read_csv_row(path)
+    llm_dir = model_root / "llm"
+    llm_dir.mkdir(parents=True, exist_ok=True)
     soup = BeautifulSoup(row["description"], "lxml")
     intro_span = soup.select_one("p span")
-    cta = soup.select_one("a")
-    section_nodes = soup.select("div.etr-sec, div.etr-sec.rev")
-    intro_html = intro_span.decode_contents().strip() if intro_span else ""
-    cta_text = cta.get_text(" ", strip=True) if cta else ""
+    intro_text = intro_span.get_text(" ", strip=True) if intro_span else ""
     meta_keywords = [item.strip() for item in row["meta_keyword"].split(",") if item.strip()]
-    return {
-        "product": {
-            "meta_description": row["meta_description"],
-            "meta_keywords": meta_keywords,
-        },
-        "presentation": {
-            "intro_html": intro_html,
-            "cta_text": cta_text,
-            "sections": [
-                {
-                    "title": section.select_one(".etr-text h2").get_text(" ", strip=True),
-                    "body_html": section.select_one(".etr-text p span").decode_contents().strip(),
+    (llm_dir / "intro_text.output.txt").write_text(intro_text, encoding="utf-8")
+    (llm_dir / "seo_meta.output.json").write_text(
+        json.dumps(
+            {
+                "product": {
+                    "meta_description": row["meta_description"],
+                    "meta_keywords": meta_keywords,
                 }
-                for section in section_nodes
-                if section.select_one(".etr-text h2") is not None and section.select_one(".etr-text p span") is not None
-            ],
-        },
-    }
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
 
 def install_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> None:
@@ -257,6 +252,8 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
         assert source_payload["source_name"] == "skroutz"
         assert prepare_result["scrape_result"]["fetch"].method == "playwright"
         assert report["fetch_mode"] == "playwright"
+        assert not (prepare_result["scrape_dir"] / f"{model}.csv").exists()
+        assert not (prepare_result["model_root"] / "candidate" / f"{model}.csv").exists()
         assert len(source_payload["gallery_images"]) == SAMPLES[model]["photos"]
         assert taxonomy_diagnostics["raw_category_tag"] == source_payload["category_tag_text"]
         assert taxonomy_diagnostics["raw_category_href"] == source_payload["category_tag_href"]
@@ -277,11 +274,7 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
             assert report["section_extraction_window"]["stop_anchor"] == "Κατασκευαστής"
             assert len(report["section_image_urls_resolved"]) == SAMPLES[model]["sections"]
 
-        llm_output_path = prepare_result["model_root"] / "llm_output.json"
-        llm_output_path.write_text(
-            json.dumps(build_llm_payload_from_baseline(skroutz_golden_outputs_root / f"{model}.csv"), ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        write_split_llm_outputs_from_baseline(prepare_result["model_root"], skroutz_golden_outputs_root / f"{model}.csv")
         baseline_row = read_csv_row(skroutz_golden_outputs_root / f"{model}.csv")
 
         render_result = render_workflow(model)
@@ -289,11 +282,10 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
         validation = render_result["validation_report"]
 
         assert render_result["candidate_csv_path"].exists()
-        assert render_result["published_csv_path"] is None
-        assert render_result["run_status"] == "failed"
-        assert validation["ok"] is False
-        assert set(validation["errors"]) <= {"llm_product_shape_invalid", "llm_presentation_shape_invalid"}
-        assert "Candidate failed validation; skipping publish to products/." in validation["warnings"]
+        assert render_result["published_csv_path"] == tmp_path / "products" / f"{model}.csv"
+        assert render_result["run_status"] == "completed"
+        assert validation["ok"] is True
+        assert validation["errors"] == []
         assert validation["summary"]["missing"] == 0
         assert validation["summary"]["empty"] == 0
         for field in expected_match_fields:

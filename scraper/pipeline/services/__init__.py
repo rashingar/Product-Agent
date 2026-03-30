@@ -1,4 +1,4 @@
-from .errors import ServiceError
+from .errors import ServiceError, ServiceErrorCode
 from .models import (
     FullRunRequest,
     PrepareRequest,
@@ -22,6 +22,7 @@ __all__ = [
     "RunStatus",
     "RunType",
     "ServiceError",
+    "ServiceErrorCode",
     "ServiceResult",
     "prepare_product",
     "render_product",

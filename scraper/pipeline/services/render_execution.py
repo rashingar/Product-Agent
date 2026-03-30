@@ -5,12 +5,15 @@ from pathlib import Path
 from typing import Any
 
 from ..csv_writer import write_csv_row
-from ..llm_contract import validate_llm_output
+from ..html_builders import extract_presentation_blocks
+from ..llm_contract import validate_intro_text_output, validate_seo_meta_output
 from ..mapping import build_row
 from ..models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from ..presentation_sections import normalize_presentation_sections
 from ..repo_paths import REPO_ROOT
 from ..utils import ensure_directory, read_json, utcnow_iso, write_json, write_text
 from ..validator import validate_candidate_csv, write_validation_report
+from .errors import ServiceErrorCode, service_error_from_exception
 from .metadata import maybe_write_run_metadata
 from .models import RunArtifacts, RunStatus, RunType
 
@@ -26,9 +29,10 @@ def execute_render_workflow(
 ) -> dict[str, Any]:
     model_root = work_root / model
     scrape_dir = model_root / "scrape"
+    llm_dir = model_root / "llm"
     source_json = scrape_dir / f"{model}.source.json"
     normalized_json = scrape_dir / f"{model}.normalized.json"
-    llm_output_json = model_root / "llm_output.json"
+    task_manifest_json = llm_dir / "task_manifest.json"
     candidate_dir = model_root / "candidate"
     candidate_csv_path = candidate_dir / f"{model}.csv"
     published_csv_path = products_root / f"{model}.csv"
@@ -41,8 +45,6 @@ def execute_render_workflow(
     try:
         if not source_json.exists() or not normalized_json.exists():
             raise FileNotFoundError(f"Missing scrape artifacts in {scrape_dir}")
-        if not llm_output_json.exists():
-            raise FileNotFoundError(f"Missing LLM output: {llm_output_json}")
 
         source = load_source_product(source_json)
         normalized = read_json(normalized_json)
@@ -61,8 +63,22 @@ def execute_render_workflow(
         schema_match = SchemaMatchResult(**normalized.get("schema_match", {}))
         parsed = ParsedProduct(source=source)
 
-        llm_payload = read_json(llm_output_json)
-        normalized_llm, llm_errors = validate_llm_output(llm_payload, cli.sections)
+        llm_inputs = _load_render_llm_inputs(
+            model_root=model_root,
+            llm_dir=llm_dir,
+            task_manifest_path=task_manifest_json,
+        )
+        llm_product, llm_intro_text, llm_errors, llm_mode, llm_artifact_paths = _normalize_render_llm_inputs(llm_inputs)
+
+        extracted_sections = extract_presentation_blocks(
+            presentation_source_html=source.presentation_source_html,
+            presentation_source_text=source.presentation_source_text,
+            base_url=source.canonical_url or source.url,
+        )
+        render_sections, section_warnings = _resolve_render_sections(
+            extracted_sections=extracted_sections,
+            sections_requested=max(int(cli.sections), 0),
+        )
 
         candidate_dir = ensure_directory(model_root / "candidate")
 
@@ -78,13 +94,17 @@ def execute_render_workflow(
             schema_match=schema_match,
             downloaded_image_count=len(source.gallery_images),
             besco_filenames_by_section=besco_filenames_by_section,
-            llm_product=normalized_llm.get("product", {}),
-            llm_presentation=normalized_llm.get("presentation", {}),
+            llm_product=llm_product,
+            llm_intro_text=llm_intro_text,
+            deterministic_presentation_sections=render_sections,
         )
         headers, ordered_row = write_csv_row(row, candidate_csv_path)
         candidate_normalized["csv_headers"] = headers
         candidate_normalized["csv_ordered_row"] = ordered_row
         candidate_normalized["mapping_warnings"] = mapping_warnings
+        candidate_normalized["llm_mode"] = llm_mode
+        candidate_normalized["llm_artifact_paths"] = {key: str(value) for key, value in llm_artifact_paths.items()}
+        candidate_normalized["presentation_sections"] = render_sections
         write_json(normalized_candidate_path, candidate_normalized)
         write_text(description_path, row["description"])
         write_text(characteristics_path, row["characteristics"])
@@ -97,6 +117,8 @@ def execute_render_workflow(
         )
         if mapping_warnings:
             validation_report["warnings"].extend(mapping_warnings)
+        if section_warnings:
+            validation_report["warnings"].extend(section_warnings)
         validation_ok = bool(validation_report.get("ok", False))
         if not validation_ok:
             validation_report["warnings"].append(
@@ -119,10 +141,13 @@ def execute_render_workflow(
             artifacts=RunArtifacts(
                 model_root=model_root,
                 scrape_dir=scrape_dir,
+                llm_dir=llm_dir if llm_dir.exists() else None,
                 candidate_dir=candidate_dir,
                 source_json_path=source_json,
                 scrape_normalized_json_path=normalized_json,
-                llm_output_path=llm_output_json,
+                llm_task_manifest_path=task_manifest_json if task_manifest_json.exists() else None,
+                intro_text_output_path=llm_artifact_paths.get("intro_text_output_path"),
+                seo_meta_output_path=llm_artifact_paths.get("seo_meta_output_path"),
                 candidate_csv_path=candidate_csv_path,
                 published_csv_path=published_csv_result_path,
                 candidate_normalized_json_path=normalized_candidate_path,
@@ -134,9 +159,12 @@ def execute_render_workflow(
             started_at=started_at,
             finished_at=finished_at,
             warnings=list(validation_report.get("warnings", [])),
+            error_code=None if validation_ok else ServiceErrorCode.VALIDATION_FAILURE.value,
+            error_detail=None if validation_ok else "Candidate validation failed",
             details={
                 "validation_ok": validation_ok,
                 "published": validation_ok,
+                "llm_mode": llm_mode,
             },
         )
 
@@ -154,6 +182,7 @@ def execute_render_workflow(
     except Exception as exc:
         finished_at = utcnow_iso()
         if model_root.exists():
+            service_error = service_error_from_exception(exc, operation="render")
             maybe_write_run_metadata(
                 model=model,
                 run_type=RunType.RENDER,
@@ -162,10 +191,11 @@ def execute_render_workflow(
                 artifacts=RunArtifacts(
                     model_root=model_root,
                     scrape_dir=scrape_dir,
+                    llm_dir=llm_dir if llm_dir.exists() else None,
                     candidate_dir=candidate_dir,
                     source_json_path=source_json,
                     scrape_normalized_json_path=normalized_json,
-                    llm_output_path=llm_output_json,
+                    llm_task_manifest_path=task_manifest_json if task_manifest_json.exists() else None,
                     candidate_csv_path=candidate_csv_path,
                     published_csv_path=published_csv_path,
                     candidate_normalized_json_path=normalized_candidate_path,
@@ -176,8 +206,8 @@ def execute_render_workflow(
                 requested_at=requested_at,
                 started_at=started_at,
                 finished_at=finished_at,
-                error_code=type(exc).__name__,
-                error_detail=str(exc),
+                error_code=service_error.code,
+                error_detail=service_error.message,
             )
         raise
 
@@ -237,3 +267,85 @@ def load_source_product(path: str | Path) -> SourceProductData:
         fallback_used=bool(payload.get("fallback_used", False)),
         mpn=payload.get("mpn", ""),
     )
+
+
+def _load_render_llm_inputs(
+    *,
+    model_root: Path,
+    llm_dir: Path,
+    task_manifest_path: Path,
+) -> dict[str, Any]:
+    intro_text_output_path = llm_dir / "intro_text.output.txt"
+    seo_meta_output_path = llm_dir / "seo_meta.output.json"
+    manifest = read_json(task_manifest_path) if task_manifest_path.exists() else {}
+    tasks = manifest.get("primary_outputs", {}).get("tasks", {}) if isinstance(manifest, dict) else {}
+    if isinstance(tasks, dict):
+        intro_text_output_path = Path(tasks.get("intro_text", {}).get("expected_output_path", intro_text_output_path))
+        seo_meta_output_path = Path(tasks.get("seo_meta", {}).get("expected_output_path", seo_meta_output_path))
+
+    if not intro_text_output_path.exists() or not seo_meta_output_path.exists():
+        raise FileNotFoundError(f"Missing split-task LLM outputs in {llm_dir}")
+    return {
+        "mode": "split_tasks",
+        "intro_text_output_path": intro_text_output_path,
+        "seo_meta_output_path": seo_meta_output_path,
+        "intro_text_payload": intro_text_output_path.read_text(encoding="utf-8"),
+        "seo_meta_payload": read_json(seo_meta_output_path),
+    }
+
+
+def _normalize_render_llm_inputs(inputs: dict[str, Any]) -> tuple[dict[str, Any], str, list[str], str, dict[str, Path]]:
+    intro_text, intro_errors = validate_intro_text_output(inputs.get("intro_text_payload", ""))
+    normalized_seo, seo_errors = validate_seo_meta_output(inputs.get("seo_meta_payload", {}))
+    return (
+        normalized_seo.get("product", {}),
+        intro_text,
+        [*intro_errors, *seo_errors],
+        "split_tasks",
+        {
+            "intro_text_output_path": Path(inputs["intro_text_output_path"]),
+            "seo_meta_output_path": Path(inputs["seo_meta_output_path"]),
+        },
+    )
+
+
+def _resolve_render_sections(
+    *,
+    extracted_sections: list[dict[str, Any]],
+    sections_requested: int,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    if sections_requested <= 0:
+        return [], []
+    if not extracted_sections:
+        raise ValueError("Missing presentation source sections for requested render sections")
+
+    normalized_sections = normalize_presentation_sections(extracted_sections, sections_requested=sections_requested)
+    usable_sections = [
+        {
+            "title": section.title,
+            "body_text": section.body_text,
+            "quality": section.quality,
+            "reason": section.reason,
+            "metrics": section.metrics.to_dict(),
+            "source_index": section.source_index,
+            "image_url": section.image_url,
+        }
+        for section in normalized_sections
+        if section.quality == "usable"
+    ]
+    missing_count = sum(1 for section in normalized_sections if section.quality == "missing")
+    weak_count = sum(1 for section in normalized_sections if section.quality == "weak")
+
+    if not usable_sections:
+        raise ValueError("No usable deterministic presentation sections for requested render sections")
+    if missing_count > 1:
+        raise ValueError(f"Too many missing deterministic presentation sections: {missing_count}")
+
+    warnings: list[str] = []
+    if weak_count > 0:
+        warnings.append(f"presentation_sections_weak:{weak_count}")
+    if missing_count == 1:
+        warnings.append("presentation_sections_missing:1")
+    if len(usable_sections) < sections_requested:
+        warnings.append(f"requested_sections_reduced:{len(usable_sections)}")
+    return usable_sections[:sections_requested], warnings

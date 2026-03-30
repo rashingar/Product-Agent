@@ -50,14 +50,19 @@ class FullRunRequest:
 class RunArtifacts:
     model_root: Path | None = None
     scrape_dir: Path | None = None
+    llm_dir: Path | None = None
     candidate_dir: Path | None = None
     raw_html_path: Path | None = None
     source_json_path: Path | None = None
     scrape_normalized_json_path: Path | None = None
     source_report_json_path: Path | None = None
-    llm_context_path: Path | None = None
-    prompt_path: Path | None = None
-    llm_output_path: Path | None = None
+    llm_task_manifest_path: Path | None = None
+    intro_text_context_path: Path | None = None
+    intro_text_prompt_path: Path | None = None
+    intro_text_output_path: Path | None = None
+    seo_meta_context_path: Path | None = None
+    seo_meta_prompt_path: Path | None = None
+    seo_meta_output_path: Path | None = None
     candidate_csv_path: Path | None = None
     published_csv_path: Path | None = None
     candidate_normalized_json_path: Path | None = None

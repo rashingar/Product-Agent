@@ -5,11 +5,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from .full_run import execute_full_run
 from .input_validation import FAIL_MESSAGE, validate_input
 from .models import CLIInput
+from .prepare_stage import execute_prepare_stage
 from .repo_paths import REPO_ROOT
-from .services.errors import ServiceError
+from .services.errors import ServiceError, ServiceErrorCode
 from .services.models import PrepareRequest, RenderRequest
 from .services.prepare_execution import execute_prepare_workflow
 from .services.prepare_service import prepare_product
@@ -18,6 +18,18 @@ from .services.render_service import render_product
 
 WORK_ROOT = REPO_ROOT / "work"
 PRODUCTS_ROOT = REPO_ROOT / "products"
+SERVICE_ERROR_EXIT_CODES = {
+    ServiceErrorCode.MISSING_ARTIFACT.value: 3,
+    ServiceErrorCode.PROVIDER_FAILURE.value: 4,
+    ServiceErrorCode.VALIDATION_FAILURE.value: 5,
+    ServiceErrorCode.PARSE_FAILURE.value: 6,
+    ServiceErrorCode.PUBLISH_FAILURE.value: 7,
+    ServiceErrorCode.UNEXPECTED_FAILURE.value: 8,
+}
+
+
+def exit_code_for_service_error(code: str | None) -> int:
+    return SERVICE_ERROR_EXIT_CODES.get(str(code or ""), SERVICE_ERROR_EXIT_CODES[ServiceErrorCode.UNEXPECTED_FAILURE.value])
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -68,8 +80,11 @@ def main(argv: list[str] | None = None) -> int:
                 )
             )
             print(f"Scrape artifacts: {result.artifacts.scrape_dir}")
-            print(f"LLM context: {result.artifacts.llm_context_path}")
-            print(f"Prompt: {result.artifacts.prompt_path}")
+            print(f"LLM task manifest: {result.artifacts.llm_task_manifest_path}")
+            print(f"Intro task context: {result.artifacts.intro_text_context_path}")
+            print(f"Intro task prompt: {result.artifacts.intro_text_prompt_path}")
+            print(f"SEO task context: {result.artifacts.seo_meta_context_path}")
+            print(f"SEO task prompt: {result.artifacts.seo_meta_prompt_path}")
             print(f"Run status: {result.run.status.value}")
             print(f"Metadata path: {result.artifacts.metadata_path}")
             return 0
@@ -81,14 +96,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Validation ok: {bool(result.details.get('validation_ok', False))}")
         print(f"Run status: {result.run.status.value}")
         print(f"Metadata path: {result.artifacts.metadata_path}")
-        return 0 if bool(result.details.get("validation_ok", False)) else 5
+        return 0 if bool(result.details.get("validation_ok", False)) else exit_code_for_service_error(result.run.error_code)
     except ValueError as exc:
         message = str(exc)
         print(message)
         return 1 if message == FAIL_MESSAGE else 2
     except ServiceError as exc:
         print(exc.message, file=sys.stderr)
-        return 3 if exc.code == "FileNotFoundError" else 4
+        return exit_code_for_service_error(exc.code)
 
 
 def build_cli_input_from_args(args: argparse.Namespace) -> CLIInput:
@@ -153,7 +168,7 @@ def parse_template_text(text: str) -> dict[str, str]:
 
 
 def prepare_workflow(cli: CLIInput) -> dict[str, Any]:
-    return execute_prepare_workflow(cli, work_root=WORK_ROOT, execute_full_run_fn=execute_full_run)
+    return execute_prepare_workflow(cli, work_root=WORK_ROOT, execute_prepare_stage_fn=execute_prepare_stage)
 
 
 def resolve_model_for_render(args: argparse.Namespace) -> str:

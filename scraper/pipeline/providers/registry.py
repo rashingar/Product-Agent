@@ -1,7 +1,20 @@
 from __future__ import annotations
 
+from ..fetcher import ElectronetFetcher
+from ..parser_product_electronet import ElectronetProductParser
+from ..parser_product_manufacturer import ManufacturerProductParser
+from ..parser_product_skroutz import SkroutzProductParser
 from .base import ProductProvider, ProviderError
+from .electronet_provider import ElectronetProvider
+from .manufacturer_tefal_provider import ManufacturerTefalProvider
 from .models import ProviderDefinition, ProviderErrorCode, ProviderKind, ProviderStage
+from .skroutz_provider import SkroutzProvider
+
+RUNTIME_SOURCE_PROVIDER_IDS = {
+    "electronet": "electronet",
+    "skroutz": "skroutz",
+    "manufacturer_tefal": "manufacturer_tefal",
+}
 
 
 class ProviderRegistry:
@@ -48,3 +61,21 @@ class ProviderRegistry:
 
     def ids(self) -> tuple[str, ...]:
         return tuple(sorted(self._providers))
+
+
+def source_to_provider_id(source: str) -> str | None:
+    return RUNTIME_SOURCE_PROVIDER_IDS.get(source.strip())
+
+
+def bootstrap_runtime_provider_registry(
+    *,
+    fetcher: ElectronetFetcher,
+    electronet_parser: ElectronetProductParser,
+    skroutz_parser: SkroutzProductParser,
+    manufacturer_parser: ManufacturerProductParser,
+) -> ProviderRegistry:
+    registry = ProviderRegistry()
+    registry.register(ElectronetProvider(fetcher=fetcher, parser=electronet_parser))
+    registry.register(SkroutzProvider(fetcher=fetcher, parser=skroutz_parser))
+    registry.register(ManufacturerTefalProvider(fetcher=fetcher, parser=manufacturer_parser))
+    return registry

@@ -1,0 +1,22 @@
+You are writing the `intro_text` task for the Product-Agent pipeline.
+
+You will receive one JSON object in `LLM_CONTEXT_JSON`.
+Use only verified evidence from that context.
+
+OUTPUT RULE
+- Return plain text only.
+- Do not return JSON.
+- Do not return Markdown.
+- Do not add any commentary before or after the paragraph.
+
+WRITING RULES
+- Write exactly one paragraph in Greek.
+- Keep it between 120 and 180 words.
+- Do not use HTML.
+- Do not use bullets or numbered lists.
+- Do not use CTA language or purchase prompts.
+- Do not invent specs, technologies, or claims.
+- Base the copy on the provided product facts, hero summary, and safe key specs only.
+
+LLM_CONTEXT_JSON
+{{LLM_CONTEXT_JSON}}

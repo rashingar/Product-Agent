@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ..models import CLIInput
-from .errors import ServiceError
+from .errors import service_error_from_exception
 from .prepare_execution import WORK_ROOT, execute_prepare_workflow
 from .models import PrepareRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 
@@ -22,12 +22,16 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
     try:
         result = execute_prepare_workflow(cli, work_root=WORK_ROOT)
     except Exception as exc:
-        raise ServiceError(type(exc).__name__, str(exc), cause=exc) from exc
+        raise service_error_from_exception(exc, operation="prepare") from exc
 
+    scrape_result = result.get("scrape_result", {})
+    parsed = scrape_result.get("parsed")
+    taxonomy = scrape_result.get("taxonomy")
+    schema_match = scrape_result.get("schema_match")
     model_root = Path(result["model_root"])
     scrape_dir = Path(result["scrape_dir"])
     metadata_path = Path(result["metadata_path"])
-    warnings = list(result.get("scrape_result", {}).get("report", {}).get("warnings", []))
+    warnings = list(scrape_result.get("report", {}).get("warnings", []))
     return ServiceResult(
         run=RunMetadata(
             model=request.model,
@@ -38,23 +42,29 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
         artifacts=RunArtifacts(
             model_root=model_root,
             scrape_dir=scrape_dir,
+            llm_dir=Path(result["llm_dir"]),
             raw_html_path=scrape_dir / f"{request.model}.raw.html",
             source_json_path=scrape_dir / f"{request.model}.source.json",
             scrape_normalized_json_path=scrape_dir / f"{request.model}.normalized.json",
             source_report_json_path=scrape_dir / f"{request.model}.report.json",
-            llm_context_path=Path(result["llm_context_path"]),
-            prompt_path=Path(result["prompt_path"]),
-            llm_output_path=model_root / "llm_output.json",
+            llm_task_manifest_path=Path(result["task_manifest_path"]),
+            intro_text_context_path=Path(result["intro_text_context_path"]),
+            intro_text_prompt_path=Path(result["intro_text_prompt_path"]),
+            intro_text_output_path=Path(result["intro_text_output_path"]),
+            seo_meta_context_path=Path(result["seo_meta_context_path"]),
+            seo_meta_prompt_path=Path(result["seo_meta_prompt_path"]),
+            seo_meta_output_path=Path(result["seo_meta_output_path"]),
             metadata_path=metadata_path,
         ),
         details={
-            "source": str(result.get("scrape_result", {}).get("source", "")),
-            "product_name": str(getattr(result.get("parsed", None), "source", None).name if result.get("parsed", None) else ""),
-            "product_code": str(getattr(result.get("parsed", None), "source", None).product_code if result.get("parsed", None) else ""),
-            "brand": str(getattr(result.get("parsed", None), "source", None).brand if result.get("parsed", None) else ""),
-            "taxonomy_path": str(getattr(result.get("taxonomy", None), "taxonomy_path", "") or ""),
-            "matched_schema_id": str(getattr(result.get("schema_match", None), "matched_schema_id", "") or ""),
-            "schema_score": float(getattr(result.get("schema_match", None), "score", 0.0) or 0.0),
+            "source": str(scrape_result.get("source", "")),
+            "product_name": str(getattr(getattr(parsed, "source", None), "name", "") or ""),
+            "product_code": str(getattr(getattr(parsed, "source", None), "product_code", "") or ""),
+            "brand": str(getattr(getattr(parsed, "source", None), "brand", "") or ""),
+            "taxonomy_path": str(getattr(taxonomy, "taxonomy_path", "") or ""),
+            "matched_schema_id": str(getattr(schema_match, "matched_schema_id", "") or ""),
+            "schema_score": float(getattr(schema_match, "score", 0.0) or 0.0),
             "warnings_count": len(warnings),
+            "llm_prepare_mode": "split_tasks",
         },
     )

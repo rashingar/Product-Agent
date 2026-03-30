@@ -27,20 +27,21 @@ treat it as a request to run the full pipeline.
    `python -m pipeline.workflow prepare --model {model} --url "{url}" --photos {photos} --sections {sections} --skroutz-status {skroutz_status} --boxnow {boxnow} --price {price}`
    Run from `scraper/`.
 3. Read:
-   - `work/{model}/llm_context.json`
-   - `work/{model}/prompt.txt`
+   - `work/{model}/llm/task_manifest.json`
+   - `work/{model}/llm/intro_text.context.json`
+   - `work/{model}/llm/intro_text.prompt.txt`
+   - `work/{model}/llm/seo_meta.context.json`
+   - `work/{model}/llm/seo_meta.prompt.txt`
    - `work/{model}/scrape/{model}.source.json`
    - `work/{model}/scrape/{model}.report.json`
 4. The assistant is the LLM stage in this workflow.
-5. Using the reduced contract from `resources/prompts/master_prompt+.txt` and `resources/schemas/compact_response.schema.json`, author:
-   - `work/{model}/llm_output.json`
+5. Author these task outputs:
+   - `work/{model}/llm/intro_text.output.txt`
+   - `work/{model}/llm/seo_meta.output.json`
 6. The assistant must write only the LLM-owned fields:
+   - `intro_text`
    - `product.meta_description`
    - `product.meta_keywords`
-   - `presentation.intro_html`
-   - `presentation.cta_text`
-   - `presentation.sections[].title`
-   - `presentation.sections[].body_html`
 7. Do not invent deterministic fields already owned by local code:
    - brand
    - mpn
@@ -51,16 +52,36 @@ treat it as a request to run the full pipeline.
    - category serialization
    - image paths
    - characteristics HTML
+   - CTA block text/layout
+   - presentation section titles
+   - presentation section body copy
+   - description HTML wrappers/classes/styles
    - final CSV structure
-8. After `llm_output.json` is written, run:
+8. Output rules:
+   - `intro_text.output.txt` must contain plain Greek text only
+   - exactly one paragraph
+   - 120-180 words
+   - no HTML
+   - no bullets
+   - no CTA language
+   - `seo_meta.output.json` must contain only:
+     - `product.meta_description`
+     - `product.meta_keywords`
+   - `product.meta_keywords` must be a JSON array, not CSV text
+9. Deterministic render ownership:
+   - presentation sections are rendered from cleaned deterministic source sections
+   - source wording is preserved after sanitation
+   - source titles are kept when present
+   - no section-copy generation belongs to the LLM
+10. After both task outputs are written, run:
    `python -m pipeline.workflow render --model {model}`
    Run from `scraper/`.
-9. Inspect:
+11. Inspect:
    - `work/{model}/candidate/{model}.csv`
    - `work/{model}/candidate/{model}.validation.json`
    - `work/{model}/candidate/description.html`
    - `work/{model}/candidate/characteristics.html`
-10. If validation fails, debug the pipeline and rerun until the output is complete and the failure cause is understood.
+12. If validation fails, debug the pipeline and rerun until the output is complete and the failure cause is understood.
 
 ## Validation Expectations
 
@@ -109,6 +130,7 @@ Rules for the completion message:
 
 - Keep all runtime artifacts in `work/{model}/`.
 - Keep source scraper artifacts in `work/{model}/scrape/`.
+- Keep task-specific LLM artifacts in `work/{model}/llm/`.
 - Keep rendered outputs in `work/{model}/candidate/`.
 - When the user asks for testing or debugging on a sample model, rerun the actual workflow instead of reasoning from stale files.
 - If a bug appears on one product, fix it generically in the pipeline and verify against the committed regression samples under `scraper/pipeline/tests/fixtures/...`.

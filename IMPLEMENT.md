@@ -17,6 +17,51 @@
 8. If a seam is not cleanly extractable, document the seam and stop instead of improvising a larger refactor.
 9. Update docs continuously.
 
+## Branch execution checklist — post-split prepare/render seam cleanup
+Commit order for this branch:
+1. docs-only scope commit updating `PLAN.md`, `DOCUMENTATION.md`, and `IMPLEMENT.md`
+2. extract or introduce a scrape-only execution seam that preserves the current scrape artifacts and split-task handoff contract without writing candidate or publish outputs
+3. reroute `scraper/pipeline/services/prepare_execution.py` off `execute_full_run(...)` and make `prepare` truly scrape-only plus handoff-only
+4. remove prepare-stage CSV generation and any remaining active-path candidate or publish side effects from the prepare path
+5. keep `scraper/pipeline/services/render_execution.py` as the sole owner of candidate CSV generation, validation artifacts, `description.html`, `characteristics.html`, and publish copy to `products/`
+6. reduce `scraper/pipeline/full_run.py` to explicit full-run composition only, or retire it from the active prepare path, and then update runtime-facing docs such as `README.md`
+
+Out of scope for this branch:
+- provider bootstrap changes
+- service error taxonomy redesign
+- CI changes
+
+Targeted test files likely to change:
+- `scraper/pipeline/tests/test_workflow.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+
+Expected artifact changes after seam cleanup:
+- prepare-owned scrape artifacts remain under `work/{model}/scrape/`:
+  - `work/{model}/scrape/{model}.raw.html`
+  - `work/{model}/scrape/{model}.source.json`
+  - `work/{model}/scrape/{model}.normalized.json`
+  - `work/{model}/scrape/{model}.report.json`
+  - scrape-stage downloaded assets and supporting scrape artifacts
+- prepare-owned task handoff artifacts remain under `work/{model}/llm/`:
+  - `work/{model}/llm/task_manifest.json`
+  - `work/{model}/llm/intro_text.context.json`
+  - `work/{model}/llm/intro_text.prompt.txt`
+  - `work/{model}/llm/seo_meta.context.json`
+  - `work/{model}/llm/seo_meta.prompt.txt`
+  - expected output targets for `intro_text.output.txt` and `seo_meta.output.json`
+- removed from the active prepare path:
+  - `work/{model}/scrape/{model}.csv`
+- render remains the sole owner of final candidate and publish artifacts:
+  - `work/{model}/candidate/{model}.csv`
+  - `work/{model}/candidate/{model}.normalized.json`
+  - `work/{model}/candidate/{model}.validation.json`
+  - `work/{model}/candidate/description.html`
+  - `work/{model}/candidate/characteristics.html`
+  - `products/{model}.csv`
+
 ## Execution docs policy
 For milestone commits:
 1. Update `DOCUMENTATION.md` on every milestone.

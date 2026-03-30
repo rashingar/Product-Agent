@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pipeline import full_run as run_module
 from pipeline.models import CLIInput, SchemaMatchResult, TaxonomyResolution
-from pipeline.providers import ProviderInputIdentity
+from pipeline.providers import ProviderInputIdentity, ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
 from pipeline.providers.models import ProviderKind, ProviderSnapshotKind
 from pipeline.providers.manufacturer_tefal_provider import ManufacturerTefalProvider
 from pipeline.providers.skroutz_provider import SkroutzProvider
@@ -80,55 +80,23 @@ def build_manufacturer_provider(manufacturer_tefal_provider_fixtures_root: Path)
     )
 
 
-def test_resolve_provider_for_source_selects_supported_runtime_providers() -> None:
-    cli = CLIInput(model="233541", url="https://www.electronet.gr/example")
-
-    electronet_provider = run_module._resolve_provider_for_source(
-        source="electronet",
-        cli=cli,
-        fetcher=object(),
-        electronet_parser=object(),
-        skroutz_parser=object(),
-        manufacturer_parser=object(),
-    )
-    skroutz_provider = run_module._resolve_provider_for_source(
-        source="skroutz",
-        cli=cli,
-        fetcher=object(),
-        electronet_parser=object(),
-        skroutz_parser=object(),
-        manufacturer_parser=object(),
-    )
-    manufacturer_provider = run_module._resolve_provider_for_source(
-        source="manufacturer_tefal",
-        cli=cli,
+def test_bootstrap_runtime_provider_registry_registers_active_providers() -> None:
+    registry = bootstrap_runtime_provider_registry(
         fetcher=object(),
         electronet_parser=object(),
         skroutz_parser=object(),
         manufacturer_parser=object(),
     )
 
-    assert electronet_provider is not None
-    assert electronet_provider.provider_id == "electronet"
-    assert skroutz_provider is not None
-    assert skroutz_provider.provider_id == "skroutz"
-    assert manufacturer_provider is not None
-    assert manufacturer_provider.provider_id == "manufacturer_tefal"
+    assert registry.ids() == ("electronet", "manufacturer_tefal", "skroutz")
+    assert [definition.provider_id for definition in registry.definitions()] == ["electronet", "manufacturer_tefal", "skroutz"]
 
 
-def test_resolve_provider_for_source_returns_none_for_unsupported_source() -> None:
-    cli = CLIInput(model="233541", url="https://www.electronet.gr/example")
-
-    unsupported_provider = run_module._resolve_provider_for_source(
-        source="unsupported_source",
-        cli=cli,
-        fetcher=object(),
-        electronet_parser=object(),
-        skroutz_parser=object(),
-        manufacturer_parser=object(),
-    )
-
-    assert unsupported_provider is None
+def test_source_to_provider_id_maps_supported_sources() -> None:
+    assert source_to_provider_id("electronet") == "electronet"
+    assert source_to_provider_id("skroutz") == "skroutz"
+    assert source_to_provider_id("manufacturer_tefal") == "manufacturer_tefal"
+    assert source_to_provider_id("unsupported_source") is None
 
 
 def test_skroutz_provider_fetch_snapshot_reads_fixture_html(skroutz_fixtures_root: Path) -> None:
@@ -259,11 +227,9 @@ def test_execute_full_run_uses_test_injected_skroutz_provider(monkeypatch, tmp_p
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: _build_manufacturer_enrichment_stub())
-    monkeypatch.setattr(
-        run_module,
-        "_resolve_provider_for_source",
-        lambda **kwargs: provider if kwargs["source"] == "skroutz" else None,
-    )
+    registry = ProviderRegistry()
+    registry.register(provider)
+    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
 
     result = run_module.execute_full_run(cli)
 

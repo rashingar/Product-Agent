@@ -47,10 +47,30 @@ python -m pipeline.workflow prepare \
 ```
 
 After `prepare`, inspect:
-- `work/{model}/llm_context.json`
-- `work/{model}/prompt.txt`
+- `work/{model}/scrape/{model}.raw.html`
 - `work/{model}/scrape/{model}.source.json`
+- `work/{model}/scrape/{model}.normalized.json`
 - `work/{model}/scrape/{model}.report.json`
+- `work/{model}/llm/task_manifest.json`
+- `work/{model}/llm/intro_text.context.json`
+- `work/{model}/llm/intro_text.prompt.txt`
+- `work/{model}/llm/seo_meta.context.json`
+- `work/{model}/llm/seo_meta.prompt.txt`
+
+Prepare is scrape-only in the steady-state workflow:
+- it writes scrape artifacts under `work/{model}/scrape/`
+- it writes split-task handoff artifacts under `work/{model}/llm/`
+- it does not write candidate CSVs, validation reports, description HTML, characteristics HTML, or publish outputs
+
+The LLM stage now writes:
+- `work/{model}/llm/intro_text.output.txt`
+- `work/{model}/llm/seo_meta.output.json`
+
+Rules:
+- `intro_text` is plain Greek text only, one paragraph, 120-180 words, with no HTML, bullets, or CTA language.
+- `seo_meta.output.json` contains only `product.meta_description` and `product.meta_keywords`.
+- `product.meta_keywords` is structured JSON, not CSV text.
+- Presentation section titles/body copy are not LLM outputs.
 
 Then run:
 
@@ -60,17 +80,42 @@ python -m pipeline.workflow render --model 234385
 
 After `render`, inspect:
 - `work/{model}/candidate/{model}.csv`
+- `work/{model}/candidate/{model}.normalized.json`
 - `work/{model}/candidate/{model}.validation.json`
 - `work/{model}/candidate/description.html`
 - `work/{model}/candidate/characteristics.html`
+- `products/{model}.csv` when validation passes
+
+## Deterministic Description Rendering
+
+Render assembles the final `description` HTML in code from:
+- LLM `intro_text`
+- deterministic CTA data
+- cleaned deterministic presentation source sections
+
+Behavior:
+- wrappers, classes, styles, CTA layout, and image wiring are code-owned
+- source section titles are preserved when present
+- source wording is preserved after sanitation; render does not rewrite or summarize section copy
+- no section-copy LLM generation is part of the steady-state workflow
+
+Section policy:
+- if presentation source sections are missing entirely and sections were requested, render fails
+- if usable section count is `0` and sections were requested, render fails
+- if sections are weak or exactly one requested section is missing, render warns and continues with fewer sections
+
+SEO policy:
+- `meta_description` comes from `seo_meta.output.json`
+- `meta_keywords` comes from `seo_meta.output.json`
+- render normalizes meta keywords in code so brand/model are always present and duplicate singular/plural variants are collapsed
 
 ## Runtime Outputs
 
 The scraper writes runtime artifacts under `work/{model}/`, including:
-- scrape-stage JSON and HTML artifacts
-- prompt and LLM handoff files
-- candidate CSV and validation outputs
-- downloaded gallery and Besco images when present
+- scrape-stage JSON, HTML, and downloaded source assets under `work/{model}/scrape/`
+- task-specific LLM handoff files under `work/{model}/llm/`
+- candidate CSV, normalized candidate JSON, validation outputs, and rendered HTML only under `work/{model}/candidate/`
+- downloaded gallery and Besco images when present under the scrape stage
 
 Final deliverable CSVs remain under `products/`.
 
