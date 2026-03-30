@@ -1,10 +1,94 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M25 completed. Supported Skroutz product URLs now route through `SkroutzProvider` in production, the existing prepare/render contract remains unchanged, and the pytest baseline is now `93 passed, 2 failed`.
+M26 completed. The supported manufacturer runtime flow now routes through `ManufacturerTefalProvider`, the existing prepare/render contract remains unchanged, and the full pytest suite is green at `98 passed`.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## M26 — migrate supported manufacturer flows behind provider adapters
+
+Goal:
+- route the currently supported manufacturer runtime flow behind the existing provider seam without changing CLI/workflow inputs, artifact locations, metadata filenames, service contracts, or validation semantics
+- address the current manufacturer enrichment weak spot reflected in the failing test baseline
+
+Files added:
+- `scraper/pipeline/providers/manufacturer_tefal_provider.py`
+- `scraper/pipeline/tests/fixtures/providers/manufacturer_tefal/344709/product.html`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/manufacturer_enrichment.py`
+- `scraper/pipeline/providers/__init__.py`
+- `scraper/pipeline/tests/test_manufacturer_enrichment.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- added `ManufacturerTefalProvider` under `scraper/pipeline/providers/` as the production adapter for the currently supported manufacturer source:
+  - preserves the existing live fetch order of HTTPX first, then Playwright fallback
+  - reuses the existing `ManufacturerProductParser`
+  - supports optional fixture HTML overrides for deterministic provider tests
+- updated `scraper/pipeline/full_run.py` so `_resolve_provider_for_source(...)` now selects `ManufacturerTefalProvider` for `manufacturer_tefal` while leaving the rest of the prepare/render pipeline unchanged
+- exported `ManufacturerTefalProvider` from `scraper/pipeline/providers/__init__.py`
+- added a committed manufacturer provider fixture at `scraper/pipeline/tests/fixtures/providers/manufacturer_tefal/344709/product.html` so provider normalization can be tested against a stable Tefal product page sample
+- updated `scraper/pipeline/tests/test_provider_selection.py` to prove:
+  - Electronet, Skroutz, and the supported manufacturer source all resolve through the production provider seam
+  - `ManufacturerTefalProvider.fetch_snapshot()` reads the committed fixture
+  - `ManufacturerTefalProvider.normalize()` returns the expected provider/runtime result shape
+- updated `scraper/pipeline/tests/test_workflow.py` so the manufacturer default-flow regression now proves provider-backed execution in production instead of the legacy direct parser branch
+- made one narrow compatibility fix in `scraper/pipeline/manufacturer_enrichment.py`:
+  - enrichment now tolerates official-doc adapters whose `discover(...)` implementation does not accept the optional `fetcher` keyword
+  - this preserves the current enrichment contract while resolving the previously failing manufacturer framework tests
+- updated `scraper/pipeline/tests/test_manufacturer_enrichment.py` to keep the manufacturer regression explicit, including the no-`fetcher` discover-signature compatibility path
+- left `scraper/pipeline/parser_product_manufacturer.py`, workflow metadata, CLI/service entrypoints, output locations, and validation semantics unchanged
+
+Commands run:
+- `Get-Content PLAN.md | Select-Object -First 90`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 180`
+- `rg -n "manufacturer_tefal|ManufacturerProductParser|enrich_source_from_manufacturer_docs|provider|supported manufacturer|adapter" scraper/pipeline PLAN.md DOCUMENTATION.md -S`
+- `git status --short`
+- `Get-Content scraper/pipeline/full_run.py`
+- `Get-Content scraper/pipeline/manufacturer_enrichment.py`
+- `Get-Content scraper/pipeline/parser_product_manufacturer.py`
+- `Get-Content scraper/pipeline/source_detection.py`
+- `Get-Content scraper/pipeline/tests/test_manufacturer_enrichment.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 380 -First 140`
+- `Get-Content scraper/pipeline/tests/conftest.py`
+- `Get-ChildItem -Recurse scraper/pipeline/tests/fixtures/providers/manufacturer_tefal`
+- `Get-Content scraper/pipeline/providers/__init__.py`
+- `Get-Content scraper/pipeline/tests/test_manufacturer_enrichment_tefal.py`
+- `Get-Content scraper/pipeline/tests/test_provider_selection.py`
+- `Get-Content scraper/pipeline/models.py | Select-String -Pattern "class FetchResult|class ParsedProduct|class SourceProductData" -Context 0,60`
+- `rg -n "_resolve_provider_for_source\\(" scraper/pipeline/tests scraper/pipeline -S`
+- `python -m compileall scraper/pipeline`
+- `py -3.12 -m pytest -q pipeline/tests/test_manufacturer_enrichment.py pipeline/tests/test_manufacturer_enrichment_tefal.py pipeline/tests/test_parser_product_manufacturer.py pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py::test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+- `git status --short`
+- `git diff --stat`
+
+Validation:
+- compile validation:
+  - `python -m compileall scraper/pipeline`
+  - passed
+- targeted manufacturer validation:
+  - `py -3.12 -m pytest -q pipeline/tests/test_manufacturer_enrichment.py pipeline/tests/test_manufacturer_enrichment_tefal.py pipeline/tests/test_parser_product_manufacturer.py pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py::test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default` from `scraper/`
+  - passed, `17 passed`
+- full suite validation:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed, `98 passed`
+
+Risks:
+- only the currently supported manufacturer runtime source is provider-backed in M26; broader manufacturer-provider expansion remains future work
+- the manufacturer fixture coverage is intentionally narrow and focused on the committed Tefal regression sample, so future manufacturer providers should add their own fixture roots rather than overloading this one
+
+Deferred:
+- no service-layer redesign, workflow metadata redesign, CLI change, README change, or source-scope expansion was attempted
+- no legacy manufacturer code was removed beyond the smallest runtime-routing change needed for this milestone
+- `IMPLEMENT.md`, `AGENTS.md`, `RULES.md`, and `README.md` were left unchanged because no new durable process rule or accepted runtime I/O change was introduced
 
 ## M25 — route Skroutz through the provider seam in production
 

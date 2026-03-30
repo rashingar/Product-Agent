@@ -6,10 +6,13 @@ from pipeline import full_run as run_module
 from pipeline.models import CLIInput, SchemaMatchResult, TaxonomyResolution
 from pipeline.providers import ProviderInputIdentity
 from pipeline.providers.models import ProviderKind, ProviderSnapshotKind
+from pipeline.providers.manufacturer_tefal_provider import ManufacturerTefalProvider
 from pipeline.providers.skroutz_provider import SkroutzProvider
 
 SAMPLE_MODEL = "341490"
 SAMPLE_URL = "https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html"
+MANUFACTURER_MODEL = "344709"
+MANUFACTURER_URL = "https://shop.tefal.gr/products/dolci-%CF%80%CE%B1%CE%B3%CF%89%CF%84%CE%BF%CE%BC%CE%B7%CF%87%CE%B1%CE%BD%CE%AE-ig602a"
 
 
 def _build_manufacturer_enrichment_stub() -> dict[str, object]:
@@ -71,7 +74,13 @@ def build_provider(skroutz_fixtures_root: Path) -> SkroutzProvider:
     return SkroutzProvider(fixture_html_by_url={SAMPLE_URL: skroutz_fixtures_root / "html" / f"{SAMPLE_MODEL}.html"})
 
 
-def test_resolve_provider_for_source_selects_electronet_and_skroutz() -> None:
+def build_manufacturer_provider(manufacturer_tefal_provider_fixtures_root: Path) -> ManufacturerTefalProvider:
+    return ManufacturerTefalProvider(
+        fixture_html_by_url={MANUFACTURER_URL: manufacturer_tefal_provider_fixtures_root / MANUFACTURER_MODEL / "product.html"}
+    )
+
+
+def test_resolve_provider_for_source_selects_supported_runtime_providers() -> None:
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example")
 
     electronet_provider = run_module._resolve_provider_for_source(
@@ -80,6 +89,7 @@ def test_resolve_provider_for_source_selects_electronet_and_skroutz() -> None:
         fetcher=object(),
         electronet_parser=object(),
         skroutz_parser=object(),
+        manufacturer_parser=object(),
     )
     skroutz_provider = run_module._resolve_provider_for_source(
         source="skroutz",
@@ -87,6 +97,7 @@ def test_resolve_provider_for_source_selects_electronet_and_skroutz() -> None:
         fetcher=object(),
         electronet_parser=object(),
         skroutz_parser=object(),
+        manufacturer_parser=object(),
     )
     manufacturer_provider = run_module._resolve_provider_for_source(
         source="manufacturer_tefal",
@@ -94,13 +105,15 @@ def test_resolve_provider_for_source_selects_electronet_and_skroutz() -> None:
         fetcher=object(),
         electronet_parser=object(),
         skroutz_parser=object(),
+        manufacturer_parser=object(),
     )
 
     assert electronet_provider is not None
     assert electronet_provider.provider_id == "electronet"
     assert skroutz_provider is not None
     assert skroutz_provider.provider_id == "skroutz"
-    assert manufacturer_provider is None
+    assert manufacturer_provider is not None
+    assert manufacturer_provider.provider_id == "manufacturer_tefal"
 
 
 def test_skroutz_provider_fetch_snapshot_reads_fixture_html(skroutz_fixtures_root: Path) -> None:
@@ -171,6 +184,45 @@ def test_skroutz_provider_fetch_snapshot_uses_live_fetcher_when_no_fixture_overr
     assert snapshot.final_url == SAMPLE_URL
     assert snapshot.metadata["fetch_method"] == "playwright"
     assert snapshot.metadata["fallback_used"] is True
+
+
+def test_manufacturer_tefal_provider_fetch_snapshot_reads_fixture_html(
+    manufacturer_tefal_provider_fixtures_root: Path,
+) -> None:
+    provider = build_manufacturer_provider(manufacturer_tefal_provider_fixtures_root)
+    identity = ProviderInputIdentity(model=MANUFACTURER_MODEL, url=MANUFACTURER_URL)
+
+    snapshot = provider.fetch_snapshot(identity)
+
+    assert provider.supports_identity(identity) is True
+    assert snapshot.snapshot_kind == ProviderSnapshotKind.HTML
+    assert snapshot.requested_url == MANUFACTURER_URL
+    assert snapshot.final_url == MANUFACTURER_URL
+    assert snapshot.status_code == 200
+    assert snapshot.metadata["fetch_method"] == "fixture"
+    assert str(snapshot.metadata["fixture_path"]).endswith("product.html")
+    assert "Tefal Dolci Παγωτομηχανή IG602A" in snapshot.body_text
+
+
+def test_manufacturer_tefal_provider_normalize_returns_provider_result(
+    manufacturer_tefal_provider_fixtures_root: Path,
+) -> None:
+    provider = build_manufacturer_provider(manufacturer_tefal_provider_fixtures_root)
+    identity = ProviderInputIdentity(model=MANUFACTURER_MODEL, url=MANUFACTURER_URL)
+
+    snapshot = provider.fetch_snapshot(identity)
+    result = provider.normalize(snapshot, identity)
+
+    assert result.provider.provider_id == "manufacturer_tefal"
+    assert result.provider.kind == ProviderKind.MANUFACTURER_SITE
+    assert result.snapshot is snapshot
+    assert result.product.source_name == "manufacturer_tefal"
+    assert result.product.page_type == "product"
+    assert result.product.canonical_url == MANUFACTURER_URL
+    assert result.product.mpn == "IG602A"
+    assert result.metadata["fetch_method"] == "fixture"
+    assert "name" in result.provenance
+    assert "name" in result.field_diagnostics
 
 
 def test_execute_full_run_uses_test_injected_skroutz_provider(monkeypatch, tmp_path: Path, skroutz_fixtures_root: Path) -> None:

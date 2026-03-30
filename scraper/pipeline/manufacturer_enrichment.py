@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import io
 import json
 import re
@@ -229,6 +230,16 @@ def get_official_doc_adapters() -> list[OfficialDocAdapter]:
     return [BoschSpecsheetAdapter(), NeffSpecsheetAdapter(), TefalShopAdapter(), ManufacturerMappedHtmlAdapter()]
 
 
+def _adapter_accepts_fetcher_argument(adapter: OfficialDocAdapter) -> bool:
+    try:
+        signature = inspect.signature(adapter.discover)
+    except (TypeError, ValueError):
+        return True
+    if "fetcher" in signature.parameters:
+        return True
+    return any(parameter.kind == inspect.Parameter.VAR_KEYWORD for parameter in signature.parameters.values())
+
+
 def enrich_source_from_manufacturer_docs(
     source: SourceProductData,
     taxonomy: TaxonomyResolution,
@@ -283,8 +294,12 @@ def enrich_source_from_manufacturer_docs(
 
     for adapter in matched_adapters:
         try:
+            if _adapter_accepts_fetcher_argument(adapter):
+                discovered = adapter.discover(source, taxonomy, fetcher=fetcher)
+            else:
+                discovered = adapter.discover(source, taxonomy)
             candidates = sorted(
-                adapter.discover(source, taxonomy, fetcher=fetcher),
+                discovered,
                 key=lambda candidate: (candidate.priority, candidate.name, candidate.url),
             )
         except Exception as exc:

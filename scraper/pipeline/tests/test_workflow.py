@@ -382,9 +382,17 @@ def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch
     assert result["fetch"].method == "playwright"
 
 
-def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch, tmp_path: Path) -> None:
+def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(monkeypatch, tmp_path: Path) -> None:
     from pipeline import full_run as run_module
-    from pipeline.models import FetchResult
+    from pipeline.providers.models import (
+        ProviderCapability,
+        ProviderDefinition,
+        ProviderInputIdentity,
+        ProviderKind,
+        ProviderResult,
+        ProviderSnapshot,
+        ProviderSnapshotKind,
+    )
 
     cli = CLIInput(
         model="344709",
@@ -435,14 +443,9 @@ def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch,
             ],
         ),
     )
+    provider_calls: list[ProviderInputIdentity] = []
 
     class DummyFetcher:
-        def fetch_httpx(self, _url):
-            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="httpx", fallback_used=False, response_headers={})
-
-        def fetch_playwright(self, _url):
-            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
-
         def download_gallery_images(self, **_kwargs):
             return [], [], []
 
@@ -462,29 +465,72 @@ def test_execute_full_run_uses_manufacturer_parser_for_tefal_source(monkeypatch,
         def match(self, *_args, **_kwargs):
             return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
 
-    class DummyManufacturerParser:
-        def parse(self, _html, _url, *, source_name, fallback_used=False):
-            assert source_name == "manufacturer_tefal"
-            assert fallback_used is False
-            return parsed
-
     class UnexpectedParser:
         def parse(self, *_args, **_kwargs):
-            raise AssertionError("Unexpected parser used")
+            raise AssertionError("Manufacturer parser should not be called directly outside the provider seam")
+
+    class DummyManufacturerTefalProvider:
+        def __init__(self, *, fetcher, parser):
+            assert isinstance(fetcher, DummyFetcher)
+            assert isinstance(parser, UnexpectedParser)
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="manufacturer_tefal",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "httpx", "fallback_used": False},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=ProviderDefinition(
+                    provider_id="manufacturer_tefal",
+                    source_name="manufacturer_tefal",
+                    kind=ProviderKind.MANUFACTURER_SITE,
+                    capabilities=frozenset(
+                        {
+                            ProviderCapability.URL_INPUT,
+                            ProviderCapability.LIVE_FETCH,
+                            ProviderCapability.HTML_SNAPSHOT,
+                            ProviderCapability.NORMALIZED_PRODUCT,
+                        }
+                    ),
+                ),
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
 
     monkeypatch.setattr(run_module, "detect_source", lambda _url: "manufacturer_tefal")
     monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
     monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
     monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: UnexpectedParser())
     monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: UnexpectedParser())
-    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: DummyManufacturerParser())
+    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: UnexpectedParser())
+    monkeypatch.setattr(run_module, "ManufacturerTefalProvider", DummyManufacturerTefalProvider)
     monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
     monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
     monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
 
     result = run_module.execute_full_run(cli)
 
+    assert provider_calls == [ProviderInputIdentity(model="344709", url=cli.url)]
     assert result["parsed"].source.source_name == "manufacturer_tefal"
+    assert result["report"]["fetch_mode"] == "httpx"
+    assert result["fetch"].method == "httpx"
     assert result["normalized"]["deterministic_product"]["mpn"] == "IG602A"
 
 
