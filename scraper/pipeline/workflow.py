@@ -396,15 +396,24 @@ def render_workflow(model: str) -> dict[str, Any]:
         )
         if mapping_warnings:
             validation_report["warnings"].extend(mapping_warnings)
+        validation_ok = bool(validation_report.get("ok", False))
+        if not validation_ok:
+            validation_report["warnings"].append(
+                "Candidate failed validation; skipping publish to products/."
+            )
         write_validation_report(validation_report, validation_report_path)
 
-        ensure_directory(PRODUCTS_ROOT)
-        shutil.copyfile(candidate_csv_path, published_csv_path)
+        published_csv_result_path: Path | None = None
+        if validation_ok:
+            ensure_directory(PRODUCTS_ROOT)
+            shutil.copyfile(candidate_csv_path, published_csv_path)
+            published_csv_result_path = published_csv_path
+        run_status = RunStatus.COMPLETED if validation_ok else RunStatus.FAILED
         finished_at = utcnow_iso()
         metadata_path = maybe_write_run_metadata(
             model=model,
             run_type=RunType.RENDER,
-            status=RunStatus.COMPLETED,
+            status=run_status,
             model_root=model_root,
             artifacts=RunArtifacts(
                 model_root=model_root,
@@ -414,7 +423,7 @@ def render_workflow(model: str) -> dict[str, Any]:
                 scrape_normalized_json_path=normalized_json,
                 llm_output_path=llm_output_json,
                 candidate_csv_path=candidate_csv_path,
-                published_csv_path=published_csv_path,
+                published_csv_path=published_csv_result_path,
                 candidate_normalized_json_path=normalized_candidate_path,
                 validation_report_path=validation_report_path,
                 description_html_path=description_path,
@@ -424,17 +433,20 @@ def render_workflow(model: str) -> dict[str, Any]:
             started_at=started_at,
             finished_at=finished_at,
             warnings=list(validation_report.get("warnings", [])),
-            details={"validation_ok": bool(validation_report.get("ok", False))},
+            details={
+                "validation_ok": validation_ok,
+                "published": validation_ok,
+            },
         )
 
         return {
             "candidate_dir": candidate_dir,
             "candidate_csv_path": candidate_csv_path,
-            "published_csv_path": published_csv_path,
+            "published_csv_path": published_csv_result_path,
             "description_path": description_path,
             "characteristics_path": characteristics_path,
             "validation_report_path": validation_report_path,
-            "run_status": RunStatus.COMPLETED.value,
+            "run_status": run_status.value,
             "metadata_path": metadata_path,
             "validation_report": validation_report,
         }
