@@ -116,6 +116,21 @@ def test_resolve_provider_for_source_selects_supported_runtime_providers() -> No
     assert manufacturer_provider.provider_id == "manufacturer_tefal"
 
 
+def test_resolve_provider_for_source_returns_none_for_unsupported_source() -> None:
+    cli = CLIInput(model="233541", url="https://www.electronet.gr/example")
+
+    unsupported_provider = run_module._resolve_provider_for_source(
+        source="unsupported_source",
+        cli=cli,
+        fetcher=object(),
+        electronet_parser=object(),
+        skroutz_parser=object(),
+        manufacturer_parser=object(),
+    )
+
+    assert unsupported_provider is None
+
+
 def test_skroutz_provider_fetch_snapshot_reads_fixture_html(skroutz_fixtures_root: Path) -> None:
     provider = build_provider(skroutz_fixtures_root)
     identity = ProviderInputIdentity(model=SAMPLE_MODEL, url=SAMPLE_URL)

@@ -1,10 +1,78 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M26 completed. The supported manufacturer runtime flow now routes through `ManufacturerTefalProvider`, the existing prepare/render contract remains unchanged, and the full pytest suite is green at `98 passed`.
+M27 completed. Legacy direct source-routing fallback branches are retired, supported-source execution is now provider-only inside `execute_full_run(...)`, and the full pytest suite is green at `100 passed`.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## M27 — retire legacy runtime source branches and close the migration phase
+
+Goal:
+- remove the now-obsolete legacy source-routing fallback branches left behind after provider parity was proven
+- keep provider-backed execution as the single active internal seam for all currently supported runtime sources
+- preserve CLI/workflow commands, accepted inputs, outputs, artifact paths, and validation semantics while closing Phase 2 cleanly
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Files moved:
+- none
+
+Before/after summary:
+- before:
+  - all supported sources already had provider adapters, but `scraper/pipeline/full_run.py` still carried direct fetch/parser fallback branches that could bypass the provider seam if provider selection returned `None`
+  - `full_run.py` also still contained one dead pre-migration section-routing branch under `if cli.sections > 0 and source != "skroutz":` that could never execute
+- after:
+  - `execute_full_run(...)` now fails fast with `No provider configured for supported source: ...` instead of falling back to legacy per-source fetch/parser logic
+  - the dead non-provider section-routing branch was removed, leaving the live non-Skroutz section extraction path and the existing Skroutz-specific post-enrichment path intact
+  - tests now lock both the supported provider map and the fail-fast no-provider behavior so the migration boundary does not regress silently
+
+Changes:
+- updated `scraper/pipeline/full_run.py` to remove the legacy direct fetch/parse branches for supported sources and require provider selection before normalization proceeds
+- removed the unreachable dead source-branch duplication in the non-Skroutz section extraction block of `scraper/pipeline/full_run.py`
+- added `test_resolve_provider_for_source_returns_none_for_unsupported_source` in `scraper/pipeline/tests/test_provider_selection.py` so the supported-provider map stays explicit
+- added `test_execute_full_run_fails_fast_when_supported_source_has_no_provider` in `scraper/pipeline/tests/test_workflow.py` so a missing provider can no longer silently reactivate legacy runtime routing
+- updated `PLAN.md` to mark M27 completed, mark Phase 2 completed, and add the Phase 3 handoff header without starting new implementation work
+
+Commands run:
+- `Get-ChildItem`
+- `Get-Content PLAN.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scraper\\pipeline\\full_run.py`
+- `Get-Content scraper\\pipeline\\tests\\test_workflow.py`
+- `Get-Content scraper\\pipeline\\tests\\test_provider_selection.py`
+- `rg -n '_resolve_provider_for_source|provider is not None|provider seam|provider-backed|legacy branch|legacy routing|source == "skroutz"|source == "manufacturer_tefal"|return None' scraper\\pipeline PLAN.md README.md IMPLEMENT.md -S`
+- `rg -n 'fetch_httpx\\(|fetch_playwright\\(|ManufacturerProductParser\\(|SkroutzProductParser\\(|ElectronetProductParser\\(' scraper\\pipeline\\full_run.py scraper\\pipeline\\providers scraper\\pipeline\\tests -S`
+- `Get-Content scraper\\pipeline\\source_detection.py`
+- `Get-Content scraper\\pipeline\\tests\\conftest.py`
+- `Get-Content scraper\\pipeline\\providers\\registry.py`
+- `Get-Content scraper\\pipeline\\providers\\electronet_provider.py`
+- `Get-Content scraper\\pipeline\\providers\\skroutz_provider.py`
+- `Get-Content scraper\\pipeline\\providers\\manufacturer_tefal_provider.py`
+- `git diff -- scraper/pipeline/full_run.py scraper/pipeline/tests/test_provider_selection.py scraper/pipeline/tests/test_workflow.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+Validation:
+- targeted migration-closure validation:
+  - `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py` from `scraper/`
+  - passed, `21 passed`
+- full suite validation:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed, `100 passed`
+
+Risks:
+- provider resolution still uses the existing private helper `_resolve_provider_for_source(...)`; M27 intentionally closes the migration by removing fallback routing rather than redesigning provider registration or widening the contract
+
+Deferred:
+- no provider-registry runtime rewrite, hybrid RAG work, service-layer redesign, CLI UX change, README change, or source-scope expansion was attempted
+- `IMPLEMENT.md`, `README.md`, `AGENTS.md`, and `RULES.md` were left unchanged because no durable process rule or user-facing runtime behavior changed
 
 ## M26 — migrate supported manufacturer flows behind provider adapters
 

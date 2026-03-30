@@ -534,6 +534,38 @@ def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(
     assert result["normalized"]["deterministic_product"]["mpn"] == "IG602A"
 
 
+def test_execute_full_run_fails_fast_when_supported_source_has_no_provider(monkeypatch, tmp_path: Path) -> None:
+    from pipeline import full_run as run_module
+
+    cli = CLIInput(
+        model="341490",
+        url="https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html",
+        photos=2,
+        sections=0,
+        skroutz_status=0,
+        boxnow=1,
+        price="19",
+        out=str(tmp_path),
+    )
+
+    class DummySchemaMatcher:
+        known_section_titles = set()
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+    monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
+    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
+    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: object())
+    monkeypatch.setattr(run_module, "ElectronetProductParser", lambda known_section_titles=None: object())
+    monkeypatch.setattr(run_module, "SkroutzProductParser", lambda: object())
+    monkeypatch.setattr(run_module, "ManufacturerProductParser", lambda: object())
+    monkeypatch.setattr(run_module, "_resolve_provider_for_source", lambda **_kwargs: None)
+
+    with pytest.raises(RuntimeError, match="No provider configured for supported source: skroutz"):
+        run_module.execute_full_run(cli)
+
+
 def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
 

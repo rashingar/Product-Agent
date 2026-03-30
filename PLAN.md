@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-The active phase is Phase 2: architecture foundation. This phase introduces the run contract, metadata emission, service layer, provider abstraction, and one second-provider proof before any hybrid RAG work begins.
+Phase 2: architecture foundation is complete through M27. The next active phase is Phase 3: hybrid RAG foundation; this plan records the handoff boundary, but M27 does not start that work.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -38,7 +38,7 @@ The active phase is Phase 2: architecture foundation. This phase introduces the 
 
 ### Phase 2 — Architecture foundation
 
-Status: active
+Status: completed
 
 Goals:
 1. Define a stable run contract for CLI, workflow, future API, and future job execution.
@@ -67,6 +67,16 @@ Phase 2 milestones:
 - M24 — stabilize the post-workdir test baseline (completed; touched workflow and Skroutz tests now read committed golden CSV baselines from `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/` and assert the live render contract where candidate bundles can exist while publish is skipped on failed validation)
 - M25 — route Skroutz through the provider seam in production (completed; supported Skroutz product URLs now select `SkroutzProvider` through `_resolve_provider_for_source(...)`, the provider supports live fetch plus fixture overrides, and prepare/render artifact shapes plus validation semantics remain unchanged)
 - M26 — migrate supported manufacturer flows behind provider adapters (completed; the current supported manufacturer runtime flow now selects `ManufacturerTefalProvider` through `_resolve_provider_for_source(...)`, the provider preserves the existing HTTPX-then-Playwright fetch order plus optional fixtures, and prepare/render contracts remain unchanged while manufacturer enrichment regressions are resolved)
+- M27 — retire legacy runtime source branches and close the migration phase (completed; `execute_full_run(...)` now fails fast when a supported source lacks a provider instead of falling back to legacy fetch/parser branches, the remaining dead pre-migration source-routing duplication in `full_run.py` was removed, and runtime tests now lock provider-based execution as the single active internal seam for supported sources)
+
+### Phase 3 — Hybrid RAG foundation
+
+Status: pending
+
+Entry handoff:
+1. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
+2. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
+3. Do not reintroduce source-specific routing below the provider boundary.
 
 ## Root policy
 ### Keep in root
