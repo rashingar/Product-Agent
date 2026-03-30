@@ -6,6 +6,103 @@ M29 completed. Full-run orchestration ownership now lives in a service-owned exe
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
 
+## 2026-03-30 - Deterministic presentation section cleaning and quality classification foundation
+
+Goal:
+- add a deterministic normalization and quality-classification seam for extracted `presentation_source_sections`
+- keep the current single-prompt LLM handoff intact for now while making section cleaning and section-state evaluation code-owned
+- avoid changing final HTML assembly in this step
+
+Files added:
+- `scraper/pipeline/presentation_sections.py`
+- `scraper/pipeline/tests/test_presentation_sections.py`
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/models.py`
+- `scraper/pipeline/llm_contract.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- added `scraper/pipeline/presentation_sections.py` as the deterministic section normalization module
+- introduced normalized presentation section dataclasses in `scraper/pipeline/models.py`:
+  - `NormalizedPresentationSection`
+  - `NormalizedPresentationSectionMetrics`
+- implemented deterministic section normalization with these behaviors:
+  - preserves source order
+  - preserves source wording while stripping markup, URLs, and non-content tags
+  - preserves source titles when present
+  - classifies each section as `usable`, `weak`, or `missing`
+  - emits reason codes including:
+    - `missing_extraction`
+    - `missing_empty_after_clean`
+    - `missing_image_only`
+    - `weak_short_body`
+    - `weak_missing_title`
+    - `weak_noisy_body`
+    - `weak_duplicate`
+    - `usable_clean`
+  - applies the agreed word-count and alphabetic-character thresholds
+  - detects duplicates against previously accepted non-missing section bodies
+- updated `scraper/pipeline/llm_contract.py` so `build_llm_context(...)` now writes normalized deterministic `presentation_source_sections` into `work/{model}/llm_context.json`
+- kept the current LLM output contract unchanged in this commit:
+  - `presentation.intro_html`
+  - `presentation.sections[].title`
+  - `presentation.sections[].body_html`
+  - `product.meta_description`
+  - `product.meta_keywords`
+- did not change render HTML assembly in this step
+
+Behavior changes:
+- `prepare` now exposes normalized section records in LLM context instead of raw extracted title/paragraph pairs
+- each section record now includes:
+  - `source_index`
+  - `title`
+  - `body_text`
+  - `image_url`
+  - `quality`
+  - `reason`
+  - `metrics`
+- when fewer extracted sections exist than requested, `build_llm_context(...)` pads the deterministic section list with `missing_extraction` placeholders up to `sections_required`
+
+Commands run:
+- `rg -n "presentation_source_sections|sections|rendered_sections|section" scraper/pipeline -S`
+- `Get-Content scraper/pipeline/llm_contract.py`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/html_builders.py`
+- `Get-Content scraper/pipeline/models.py`
+- `Get-Content scraper/pipeline/mapping.py`
+- `Get-Content scraper/pipeline/tests/test_llm_contract.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -First 180`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content resources/prompts/master_prompt+.txt`
+- `rg -n "presentation_source_sections|paragraph|image_url|title" resources/prompts/master_prompt+.txt scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_skroutz_integration.py scraper/pipeline/tests/test_skroutz_sections.py -S`
+- `Get-Content scraper/pipeline/normalize.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py pipeline/tests/test_services.py` from `scraper/`
+
+Validation:
+- smallest relevant subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py` from `scraper/`
+  - passed, `10 passed`
+- broader affected tests:
+  - `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py` from `scraper/`
+  - passed, `29 passed`
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+  - passed, `8 passed`
+  - final rerun:
+  - `py -3.12 -m pytest -q pipeline/tests/test_presentation_sections.py pipeline/tests/test_workflow.py pipeline/tests/test_llm_contract.py pipeline/tests/test_services.py` from `scraper/`
+  - passed, `37 passed`
+
+Deferred:
+- no LLM task split was attempted in this commit
+- no prompt-template change was attempted in this commit
+- no render-side deterministic section consumption was attempted in this commit
+- no README change was made in this commit
+
 ## 2026-03-30 - Branch scope design note for split-LLM `intro_text` and deterministic presentation
 
 Purpose:

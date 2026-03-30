@@ -8,6 +8,7 @@ from .html_builders import extract_presentation_blocks
 from .mapping import serialize_meta_keywords
 from .models import CLIInput, ParsedProduct, SchemaMatchResult, TaxonomyResolution
 from .normalize import normalize_whitespace
+from .presentation_sections import normalize_presentation_sections
 
 INTRO_MIN_WORDS = 120
 INTRO_MAX_WORDS = 180
@@ -22,11 +23,19 @@ def build_llm_context(
     deterministic_product: dict[str, Any],
 ) -> dict[str, Any]:
     source = parsed.source
-    presentation_sections = extract_presentation_blocks(
+    sections_required = max(int(cli.sections), 0)
+    extracted_sections = extract_presentation_blocks(
         presentation_source_html=source.presentation_source_html,
         presentation_source_text=source.presentation_source_text,
         base_url=source.canonical_url or source.url,
-    )[: max(int(cli.sections), 0)]
+    )[:sections_required]
+    presentation_sections = [
+        section.to_dict()
+        for section in normalize_presentation_sections(
+            extracted_sections,
+            sections_requested=sections_required,
+        )
+    ]
     return {
         "input": {
             "model": cli.model,
@@ -54,7 +63,7 @@ def build_llm_context(
         "presentation_source_sections": presentation_sections,
         "writer_rules": {
             "language": "Greek",
-            "sections_required": max(int(cli.sections), 0),
+            "sections_required": sections_required,
             "llm_owned_fields": [
                 "presentation.intro_html",
                 "presentation.sections[].title",

@@ -108,6 +108,13 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
     prompt_text = result["prompt_path"].read_text(encoding="utf-8")
     assert llm_context["writer_rules"]["intro_html_rule"] == "120-180 Greek words in one intro paragraph."
+    assert len(llm_context["presentation_source_sections"]) == 2
+    assert llm_context["presentation_source_sections"][0]["source_index"] == 1
+    assert llm_context["presentation_source_sections"][0]["quality"] == "missing"
+    assert llm_context["presentation_source_sections"][0]["reason"] == "missing_extraction"
+    assert llm_context["presentation_source_sections"][1]["source_index"] == 2
+    assert llm_context["presentation_source_sections"][1]["quality"] == "missing"
+    assert llm_context["presentation_source_sections"][1]["reason"] == "missing_extraction"
     assert "between 120 and 180 Greek words" in prompt_text
     assert "120-180 Greek words" in prompt_text
     assert result["metadata_path"].name == "prepare.run.json"

@@ -66,6 +66,43 @@ class SpecSection:
 
 
 @dataclass(slots=True)
+class NormalizedPresentationSectionMetrics:
+    word_count: int = 0
+    alphabetic_char_count: int = 0
+    char_count: int = 0
+    alpha_ratio: float = 0.0
+    unique_word_ratio: float = 0.0
+    has_title: bool = False
+    has_image: bool = False
+    is_duplicate: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(slots=True)
+class NormalizedPresentationSection:
+    source_index: int = 0
+    title: str = ""
+    body_text: str = ""
+    image_url: str = ""
+    quality: str = "missing"
+    reason: str = "missing_extraction"
+    metrics: NormalizedPresentationSectionMetrics = field(default_factory=NormalizedPresentationSectionMetrics)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "source_index": self.source_index,
+            "title": self.title,
+            "body_text": self.body_text,
+            "image_url": self.image_url,
+            "quality": self.quality,
+            "reason": self.reason,
+            "metrics": self.metrics.to_dict(),
+        }
+
+
+@dataclass(slots=True)
 class SelectorTraceEntry:
     strategy: str
     selector: str = ""
