@@ -4,12 +4,15 @@ from pathlib import Path
 import pytest
 
 from pipeline.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, TaxonomyResolution
+from pipeline.providers.base import ProviderError
+from pipeline.providers.models import ProviderErrorCode, ProviderStage
 from pipeline.services import (
     FullRunRequest,
     PrepareRequest,
     RenderRequest,
     RunArtifacts,
     RunMetadata,
+    ServiceErrorCode,
     RunStatus,
     RunType,
     ServiceError,
@@ -119,8 +122,9 @@ def test_prepare_product_wraps_execution_errors(monkeypatch) -> None:
     with pytest.raises(ServiceError) as excinfo:
         prepare_product(PrepareRequest(model="233541", url="https://www.electronet.gr/example"))
 
-    assert excinfo.value.code == "RuntimeError"
+    assert excinfo.value.code == ServiceErrorCode.UNEXPECTED_FAILURE.value
     assert excinfo.value.message == "prepare exploded"
+    assert excinfo.value.retryable is False
     assert isinstance(excinfo.value.cause, RuntimeError)
 
 
@@ -178,6 +182,8 @@ def test_render_product_allows_missing_published_csv_path(tmp_path: Path, monkey
     result = render_product(RenderRequest(model="233541"))
 
     assert result.run.status == RunStatus.FAILED
+    assert result.run.error_code == ServiceErrorCode.VALIDATION_FAILURE.value
+    assert result.run.error_detail == "Candidate validation failed"
     assert result.artifacts.published_csv_path is None
     assert result.details["validation_ok"] is False
 
@@ -193,9 +199,38 @@ def test_render_product_wraps_execution_errors(monkeypatch) -> None:
     with pytest.raises(ServiceError) as excinfo:
         render_product(RenderRequest(model="233541"))
 
-    assert excinfo.value.code == "FileNotFoundError"
+    assert excinfo.value.code == ServiceErrorCode.MISSING_ARTIFACT.value
     assert excinfo.value.message == "Missing LLM output"
+    assert excinfo.value.retryable is False
     assert isinstance(excinfo.value.cause, FileNotFoundError)
+
+
+def test_prepare_product_maps_provider_failures_to_stable_service_codes(monkeypatch) -> None:
+    from pipeline.services import prepare_service
+
+    def fake_execute_prepare_workflow(_cli, *, work_root):
+        provider_error = ProviderError.build(
+            provider_id="skroutz",
+            code=ProviderErrorCode.FETCH_FAILED,
+            stage=ProviderStage.FETCH,
+            message="Skroutz fetch failed",
+            retryable=True,
+            details={"url": "https://www.skroutz.gr/example"},
+        )
+        raise RuntimeError("provider failed") from provider_error
+
+    monkeypatch.setattr(prepare_service, "execute_prepare_workflow", fake_execute_prepare_workflow)
+
+    with pytest.raises(ServiceError) as excinfo:
+        prepare_product(PrepareRequest(model="233541", url="https://www.skroutz.gr/example"))
+
+    assert excinfo.value.code == ServiceErrorCode.PROVIDER_FAILURE.value
+    assert excinfo.value.message == "Skroutz fetch failed"
+    assert excinfo.value.retryable is True
+    assert excinfo.value.details["provider_id"] == "skroutz"
+    assert excinfo.value.details["provider_code"] == "fetch_failed"
+    assert excinfo.value.details["provider_stage"] == "fetch"
+    assert excinfo.value.details["url"] == "https://www.skroutz.gr/example"
 
 
 def test_execute_run_workflow_composes_prepare_and_render_results(tmp_path: Path, monkeypatch) -> None:
@@ -306,6 +341,7 @@ def test_run_product_wraps_execution_errors(monkeypatch) -> None:
     with pytest.raises(ServiceError) as excinfo:
         run_product(FullRunRequest(model="233541", url="https://www.electronet.gr/example"))
 
-    assert excinfo.value.code == "RuntimeError"
+    assert excinfo.value.code == ServiceErrorCode.UNEXPECTED_FAILURE.value
     assert excinfo.value.message == "full run exploded"
+    assert excinfo.value.retryable is False
 

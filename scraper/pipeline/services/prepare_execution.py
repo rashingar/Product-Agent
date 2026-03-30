@@ -13,6 +13,7 @@ from ..models import CLIInput
 from ..prepare_stage import execute_prepare_stage
 from ..repo_paths import INTRO_TEXT_PROMPT_PATH, REPO_ROOT, SEO_META_PROMPT_PATH
 from ..utils import ensure_directory, utcnow_iso, write_json, write_text
+from .errors import service_error_from_exception
 from .metadata import maybe_write_run_metadata
 from .models import RunArtifacts, RunStatus, RunType
 
@@ -130,6 +131,7 @@ def execute_prepare_workflow(
         }
     except Exception as exc:
         finished_at = utcnow_iso()
+        service_error = service_error_from_exception(exc, operation="prepare")
         maybe_write_run_metadata(
             model=cli.model,
             run_type=RunType.PREPARE,
@@ -154,7 +156,7 @@ def execute_prepare_workflow(
             requested_at=requested_at,
             started_at=started_at,
             finished_at=finished_at,
-            error_code=type(exc).__name__,
-            error_detail=str(exc),
+            error_code=service_error.code,
+            error_detail=service_error.message,
         )
         raise

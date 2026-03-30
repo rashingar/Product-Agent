@@ -25,6 +25,8 @@ def execute_run_workflow(request: FullRunRequest) -> ServiceResult:
             run_type=RunType.FULL,
             status=render_result.run.status,
             warnings=[*prepare_result.run.warnings, *render_result.run.warnings],
+            error_code=render_result.run.error_code or prepare_result.run.error_code,
+            error_detail=render_result.run.error_detail or prepare_result.run.error_detail,
         ),
         artifacts=RunArtifacts(
             model_root=prepare_result.artifacts.model_root or render_result.artifacts.model_root,

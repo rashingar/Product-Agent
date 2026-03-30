@@ -6,7 +6,7 @@ import pytest
 
 from pipeline.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.providers import ProviderRegistry
-from pipeline.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
+from pipeline.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceError, ServiceErrorCode, ServiceResult
 from pipeline.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
 
@@ -769,7 +769,7 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
     metadata_path = tmp_path / "work" / "233541" / "prepare.run.json"
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
-    assert metadata["run"]["error_code"] == "RuntimeError"
+    assert metadata["run"]["error_code"] == ServiceErrorCode.UNEXPECTED_FAILURE.value
     assert metadata["run"]["error_detail"] == "prepare exploded"
 
 
@@ -859,6 +859,8 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
     assert metadata["run"]["model"] == model
     assert metadata["run"]["run_type"] == "render"
     assert metadata["run"]["status"] == "failed"
+    assert metadata["run"]["error_code"] == ServiceErrorCode.VALIDATION_FAILURE.value
+    assert metadata["run"]["error_detail"] == "Candidate validation failed"
     assert metadata["artifacts"]["candidate_csv_path"] == str(result["candidate_csv_path"])
     assert metadata["artifacts"]["published_csv_path"] is None
     assert metadata["artifacts"]["validation_report_path"] == str(result["validation_report_path"])
@@ -908,7 +910,7 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     metadata_path = tmp_path / "work" / model / "render.run.json"
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
-    assert metadata["run"]["error_code"] == "FileNotFoundError"
+    assert metadata["run"]["error_code"] == ServiceErrorCode.MISSING_ARTIFACT.value
     assert "Missing split-task LLM outputs" in metadata["run"]["error_detail"]
 
 
@@ -1172,6 +1174,78 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
     assert exit_code == 0
     assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
     assert "Validation ok: True" in captured.out
+
+
+@pytest.mark.parametrize(
+    ("service_code", "expected_exit"),
+    [
+        (ServiceErrorCode.MISSING_ARTIFACT.value, 3),
+        (ServiceErrorCode.PROVIDER_FAILURE.value, 4),
+        (ServiceErrorCode.PARSE_FAILURE.value, 6),
+        (ServiceErrorCode.PUBLISH_FAILURE.value, 7),
+        (ServiceErrorCode.UNEXPECTED_FAILURE.value, 8),
+    ],
+)
+def test_workflow_main_maps_service_error_codes_to_explicit_exit_codes(monkeypatch, capsys, service_code: str, expected_exit: int) -> None:
+    from pipeline import workflow
+
+    def fake_build_cli_input_from_args(_args):
+        return CLIInput(
+            model="233541",
+            url="https://www.electronet.gr/example",
+            photos=2,
+            sections=1,
+            skroutz_status=1,
+            boxnow=0,
+            price="2099",
+            out="out",
+        )
+
+    def fake_prepare_product(_request: PrepareRequest) -> ServiceResult:
+        raise ServiceError(service_code, f"{service_code} message")
+
+    monkeypatch.setattr(workflow, "build_cli_input_from_args", fake_build_cli_input_from_args)
+    monkeypatch.setattr(workflow, "prepare_product", fake_prepare_product)
+
+    exit_code = workflow.main(["prepare"])
+    captured = capsys.readouterr()
+
+    assert exit_code == expected_exit
+    assert f"{service_code} message" in captured.err
+
+
+def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        assert request.model == "233541"
+        return ServiceResult(
+            run=RunMetadata(
+                model="233541",
+                run_type=RunType.RENDER,
+                status=RunStatus.FAILED,
+                error_code=ServiceErrorCode.VALIDATION_FAILURE.value,
+                error_detail="Candidate validation failed",
+            ),
+            artifacts=RunArtifacts(
+                candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+                validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+                metadata_path=tmp_path / "work" / "233541" / "render.run.json",
+            ),
+            details={"validation_ok": False},
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 5
+    assert "Validation ok: False" in captured.out
 
 
 def test_run_cli_input_calls_service_layer(monkeypatch) -> None:

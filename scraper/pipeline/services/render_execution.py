@@ -13,6 +13,7 @@ from ..presentation_sections import normalize_presentation_sections
 from ..repo_paths import REPO_ROOT
 from ..utils import ensure_directory, read_json, utcnow_iso, write_json, write_text
 from ..validator import validate_candidate_csv, write_validation_report
+from .errors import ServiceErrorCode, service_error_from_exception
 from .metadata import maybe_write_run_metadata
 from .models import RunArtifacts, RunStatus, RunType
 
@@ -158,6 +159,8 @@ def execute_render_workflow(
             started_at=started_at,
             finished_at=finished_at,
             warnings=list(validation_report.get("warnings", [])),
+            error_code=None if validation_ok else ServiceErrorCode.VALIDATION_FAILURE.value,
+            error_detail=None if validation_ok else "Candidate validation failed",
             details={
                 "validation_ok": validation_ok,
                 "published": validation_ok,
@@ -179,6 +182,7 @@ def execute_render_workflow(
     except Exception as exc:
         finished_at = utcnow_iso()
         if model_root.exists():
+            service_error = service_error_from_exception(exc, operation="render")
             maybe_write_run_metadata(
                 model=model,
                 run_type=RunType.RENDER,
@@ -202,8 +206,8 @@ def execute_render_workflow(
                 requested_at=requested_at,
                 started_at=started_at,
                 finished_at=finished_at,
-                error_code=type(exc).__name__,
-                error_detail=str(exc),
+                error_code=service_error.code,
+                error_detail=service_error.message,
             )
         raise
 

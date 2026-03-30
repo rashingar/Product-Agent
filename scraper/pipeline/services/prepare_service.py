@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ..models import CLIInput
-from .errors import ServiceError
+from .errors import service_error_from_exception
 from .prepare_execution import WORK_ROOT, execute_prepare_workflow
 from .models import PrepareRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 
@@ -22,7 +22,7 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
     try:
         result = execute_prepare_workflow(cli, work_root=WORK_ROOT)
     except Exception as exc:
-        raise ServiceError(type(exc).__name__, str(exc), cause=exc) from exc
+        raise service_error_from_exception(exc, operation="prepare") from exc
 
     scrape_result = result.get("scrape_result", {})
     parsed = scrape_result.get("parsed")

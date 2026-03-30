@@ -1,7 +1,101 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M35 completed. The repo now uses a scrape-only prepare-stage core for the active prepare path, `prepare` no longer writes a scrape-stage CSV, `render` remains the sole owner of candidate and publish outputs, `scraper/pipeline/full_run.py` is reduced to a thin compatibility wrapper for explicit direct callers, and provider resolution now flows through the registry bootstrap and source-to-provider-id mapping seam.
+M36 completed. The repo now uses stable semantic service error codes at the service boundary, workflow exit handling is driven by an explicit error-code matrix, prepare/render/full-run metadata persist stable `error_code` values instead of raw exception type names, and the earlier M35 scrape-only prepare seam plus registry-driven provider resolution remain in place.
+
+## 2026-03-30 - Add stable service error taxonomy and workflow exit mapping
+
+Goal:
+- replace exception-type-name service errors with stable semantic service codes
+- map low-level exceptions to those codes at the service boundary
+- make workflow exit behavior explicit and stable
+- persist stable semantic error codes in run metadata
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/__init__.py`
+- `scraper/pipeline/services/errors.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/services/run_execution.py`
+- `scraper/pipeline/services/run_service.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `scraper/pipeline/workflow.py`
+
+Changes:
+- added stable semantic service error codes in `scraper/pipeline/services/errors.py`:
+  - `missing_artifact`
+  - `provider_failure`
+  - `parse_failure`
+  - `validation_failure`
+  - `publish_failure`
+  - `unexpected_failure`
+- extended `ServiceError` to carry:
+  - `code`
+  - `message`
+  - `cause`
+  - `retryable`
+  - `details`
+- added a single service-boundary mapper that converts low-level exceptions into stable service errors:
+  - `FileNotFoundError` -> `missing_artifact`
+  - provider errors during fetch/load stages -> `provider_failure`
+  - provider normalization failures and known parse/section failures -> `parse_failure`
+  - render-stage `OSError` publish failures -> `publish_failure`
+  - everything else -> `unexpected_failure`
+- updated `prepare_service.py`, `render_service.py`, and `run_service.py` to wrap failures through the stable mapper instead of using `type(exc).__name__`
+- updated `prepare_execution.py` and `render_execution.py` so prepare/render run metadata now store semantic `error_code` values
+- updated render success/failure metadata handling so failed validation stores:
+  - `error_code: validation_failure`
+  - `error_detail: Candidate validation failed`
+- updated full-run composition metadata in `run_execution.py` so stable child error codes and details propagate into the composed run result
+- replaced the old workflow `ServiceError` exit handling with an explicit matrix in `scraper/pipeline/workflow.py`:
+  - `missing_artifact` -> `3`
+  - `provider_failure` -> `4`
+  - `validation_failure` -> `5`
+  - `parse_failure` -> `6`
+  - `publish_failure` -> `7`
+  - `unexpected_failure` -> `8`
+- kept user-facing workflow stderr output readable by continuing to print the mapped service message rather than raw exception metadata
+- updated service/workflow tests to assert stable public error behavior instead of exception-type-name internals
+
+Intentional behavior changes:
+- service-layer `error_code` values are now stable semantic codes rather than Python exception class names
+- workflow exit codes now distinguish missing artifacts, provider failures, validation failures, parse failures, publish failures, and unexpected failures explicitly
+- failed render validation now records `validation_failure` in run metadata instead of leaving `error_code` empty
+
+Commands run:
+- `Get-Content -Path scraper/pipeline/services/errors.py`
+- `Get-Content -Path scraper/pipeline/services/prepare_service.py`
+- `Get-Content -Path scraper/pipeline/services/render_service.py`
+- `Get-Content -Path scraper/pipeline/services/run_service.py`
+- `Get-Content -Path scraper/pipeline/services/run_execution.py`
+- `Get-Content -Path scraper/pipeline/services/prepare_execution.py`
+- `Get-Content -Path scraper/pipeline/services/render_execution.py`
+- `Get-Content -Path scraper/pipeline/workflow.py`
+- `Get-Content -Path scraper/pipeline/tests/test_services.py`
+- `Get-Content -Path scraper/pipeline/tests/test_workflow.py`
+- `rg -n "ServiceError|error_code|validation_failure|type\\(exc\\)__name__|exit_code" PLAN.md IMPLEMENT.md DOCUMENTATION.md scraper/pipeline scraper/pipeline/tests -S`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py pipeline/tests/test_provider_selection.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+- `git diff --check`
+
+Validation:
+- targeted service/workflow subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py` from `scraper/`
+  - passed, `34 passed`
+- broader affected suite:
+  - `py -3.12 -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py pipeline/tests/test_provider_selection.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py` from `scraper/`
+  - passed, `54 passed`
+- `git diff --check` passed
+
+Deferred:
+- no CI changes were made
+- no provider bootstrap changes were made in this milestone
+- no provider fetch/normalize internals were changed
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.

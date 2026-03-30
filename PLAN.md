@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. Post-split execution seam cleanup is now complete through M35. Phase 4 remains pending.
+Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. Post-split execution seam cleanup and service/workflow error hardening are now complete through M36. Phase 4 remains pending.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -128,12 +128,30 @@ Acceptance criteria:
 4. Split-task `intro_text` / `seo_meta` inputs and outputs, supported-provider behavior, and render validation semantics remain unchanged.
 5. `scraper/pipeline/full_run.py` is either reduced to an explicit full-run wrapper over prepare plus render or otherwise removed from the active prepare path, with no new scope added in provider bootstrap, service error taxonomy, or CI.
 
+### Service/workflow error taxonomy hardening
+
+Status: completed
+
+Goals:
+1. Replace exception-type-name service errors with stable semantic service codes.
+2. Keep low-level exception mapping at the service boundary without introducing a large exception hierarchy.
+3. Make workflow exit behavior explicit and stable across prepare/render failure modes.
+4. Store stable semantic error codes in run metadata instead of raw exception type names.
+
+Hard rules:
+- Keep user-facing CLI/workflow error messages readable.
+- Do not broaden this work into provider bootstrap, CI, or a larger exception hierarchy redesign.
+- Keep fetch/normalize behavior inside providers unchanged.
+
+Milestone:
+- M36 — add stable service error taxonomy and workflow exit mapping (completed; `scraper/pipeline/services/errors.py` now defines stable semantic error codes plus a boundary mapper, prepare/render/full-run services wrap low-level failures into those codes, workflow exit behavior is driven by an explicit code-to-exit matrix, and prepare/render metadata now persist stable semantic `error_code` values including validation failures)
+
 ### Phase 4 — Hybrid RAG foundation
 
 Status: pending
 
 Entry handoff:
-1. Complete M35 before starting any hybrid RAG work.
+1. Complete M36 before starting any hybrid RAG work.
 2. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
 3. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
 4. Preserve the completed split-task steady-state contract while starting retrieval-layer work; do not reintroduce combined LLM artifacts.
@@ -271,7 +289,7 @@ Evidence:
 
 Cleanup is complete through M14.
 
-New implementation work starts at M30 and now continues through the completed post-split M35 seam cleanup before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
+New implementation work starts at M30 and now continues through the completed post-split M36 error-hardening milestone before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
 
 ## Validation rules
 After each milestone:

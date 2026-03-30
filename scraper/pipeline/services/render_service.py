@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .errors import ServiceError
+from .errors import ServiceErrorCode, service_error_from_exception
 from .render_execution import execute_render_workflow
 from .models import RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 
@@ -17,18 +17,23 @@ def render_product(request: RenderRequest) -> ServiceResult:
     try:
         result = execute_render_workflow(request.model)
     except Exception as exc:
-        raise ServiceError(type(exc).__name__, str(exc), cause=exc) from exc
+        raise service_error_from_exception(exc, operation="render") from exc
 
     candidate_dir = Path(result["candidate_dir"])
     model_root = candidate_dir.parent
     scrape_dir = model_root / "scrape"
     validation_report = result["validation_report"]
+    validation_ok = bool(validation_report.get("ok", False))
+    error_code = None if validation_ok else ServiceErrorCode.VALIDATION_FAILURE.value
+    error_detail = None if validation_ok else "Candidate validation failed"
     return ServiceResult(
         run=RunMetadata(
             model=request.model,
             run_type=RunType.RENDER,
             status=RunStatus(result["run_status"]),
             warnings=list(validation_report.get("warnings", [])),
+            error_code=error_code,
+            error_detail=error_detail,
         ),
         artifacts=RunArtifacts(
             model_root=model_root,
@@ -49,7 +54,7 @@ def render_product(request: RenderRequest) -> ServiceResult:
             metadata_path=Path(result["metadata_path"]),
         ),
         details={
-            "validation_ok": bool(validation_report.get("ok", False)),
+            "validation_ok": validation_ok,
         },
     )
 
