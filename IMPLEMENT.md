@@ -31,6 +31,7 @@ For milestone commits:
 - Treat current runtime support assets as sensitive until path resolution is centralized.
 - Treat `products/` as final deliverable storage.
 - Treat `work/{model}/...` as runtime artifact storage.
+- Keep committed fixtures and regression samples under `scraper/pipeline/tests/fixtures/...`; treat `work/` and `scraper/work/` as runtime/debug only.
 - Do not place planning docs inside model runtime folders.
 - Do not reintroduce the old script-driven workflow implicitly.
 

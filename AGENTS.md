@@ -111,7 +111,7 @@ Rules for the completion message:
 - Keep source scraper artifacts in `work/{model}/scrape/`.
 - Keep rendered outputs in `work/{model}/candidate/`.
 - When the user asks for testing or debugging on a sample model, rerun the actual workflow instead of reasoning from stale files.
-- If a bug appears on one product, fix it generically in the pipeline and verify against the active regression samples already present in `work/`.
+- If a bug appears on one product, fix it generically in the pipeline and verify against the committed regression samples under `scraper/pipeline/tests/fixtures/...`.
 
 ## Execution docs policy
 

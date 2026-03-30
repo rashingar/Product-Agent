@@ -72,14 +72,14 @@ def install_143481_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> 
         raise fetcher.FetchError(f"httpx disabled for test: {url}")
 
     def fake_fetch_playwright(self, url: str):
-        html = (skroutz_fixtures_root / "143481.html").read_text(encoding="utf-8")
+        html = (skroutz_fixtures_root / "html" / "143481.html").read_text(encoding="utf-8")
         return FetchResult(url=url, final_url=url, html=html, status_code=200, method="playwright", fallback_used=True, response_headers={})
 
     def fake_fetch_binary(self, url: str):
         return JPEG_BYTES, "image/jpeg"
 
     def fake_extract_skroutz_section_image_records(self, url: str):
-        return json.loads((skroutz_fixtures_root / "143481.rendered_sections.json").read_text(encoding="utf-8"))
+        return json.loads((skroutz_fixtures_root / "rendered_sections" / "143481.rendered_sections.json").read_text(encoding="utf-8"))
 
     monkeypatch.setattr(fetcher.ElectronetFetcher, "fetch_httpx", fake_fetch_httpx)
     monkeypatch.setattr(fetcher.ElectronetFetcher, "fetch_playwright", fake_fetch_playwright)
@@ -88,7 +88,7 @@ def install_143481_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> 
 
 
 def test_143481_html_fixture_resolves_9_sections_in_stable_order(skroutz_fixtures_root: Path) -> None:
-    html = (skroutz_fixtures_root / "143481.html").read_text(encoding="utf-8")
+    html = (skroutz_fixtures_root / "html" / "143481.html").read_text(encoding="utf-8")
     extracted = extract_skroutz_section_window(html, SAMPLE["url"])
 
     assert extracted["window"]["start_anchor"] == "Περιγραφή"
@@ -102,7 +102,7 @@ def test_143481_html_fixture_resolves_9_sections_in_stable_order(skroutz_fixture
 
 
 def test_placeholder_urls_are_rejected_for_resolved_section_images(skroutz_fixtures_root: Path) -> None:
-    rendered = json.loads((skroutz_fixtures_root / "143481.rendered_sections.json").read_text(encoding="utf-8"))
+    rendered = json.loads((skroutz_fixtures_root / "rendered_sections" / "143481.rendered_sections.json").read_text(encoding="utf-8"))
     lazy_attr = rendered["sections"][0]["image_record"]["lazy_attrs"]["data-lazy-media-src-value"]
     record = {
         "currentSrc": "",

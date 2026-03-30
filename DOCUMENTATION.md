@@ -1261,3 +1261,80 @@ No cleanup follow-up is scheduled by default. If approved, open a narrowly scope
 ## Risks, blockers, or skipped items
 - no runtime behavior risk is expected because the change is confined to test path resolution
 - no `PLAN.md` update was needed because this is a test-baseline stabilization task rather than a milestone-order change
+
+## 2026-03-30 - Phase 2 test fixture hierarchy migration
+
+## What changed
+- migrated the committed Skroutz test fixtures from the legacy flat `scraper/pipeline/tests/fixtures/skroutz/` layout into the explicit provider hierarchy under `scraper/pipeline/tests/fixtures/providers/skroutz/`
+- added the new shared pytest fixture roots in `scraper/pipeline/tests/conftest.py` and kept `skroutz_fixtures_root` as a backward-compatible alias to the new Skroutz provider fixture root
+- updated the touched Skroutz tests to read fixture HTML, rendered-sections JSON, and taxonomy-case assets from the new hierarchy
+- created empty committed placeholder directories for the requested explicit fixture tree with `.gitkeep` files where no tracked fixture content exists yet
+- made one minimal stale-guidance fix in `AGENTS.md` and one additive fixture-location rule in `IMPLEMENT.md`
+- left `work/` and `scraper/work/` untouched because `git ls-files work scraper/work` returned no tracked files in this checkout
+
+## Files and directories affected
+- edited:
+  - `scraper/pipeline/tests/conftest.py`
+  - `scraper/pipeline/tests/test_provider_selection.py`
+  - `scraper/pipeline/tests/test_skroutz_integration.py`
+  - `scraper/pipeline/tests/test_skroutz_sections.py`
+  - `scraper/pipeline/tests/test_skroutz_taxonomy.py`
+  - `AGENTS.md`
+  - `IMPLEMENT.md`
+  - `DOCUMENTATION.md`
+- moved:
+  - `scraper/pipeline/tests/fixtures/skroutz/*.html` -> `scraper/pipeline/tests/fixtures/providers/skroutz/html/`
+  - `scraper/pipeline/tests/fixtures/skroutz/143481.rendered_sections.json` -> `scraper/pipeline/tests/fixtures/providers/skroutz/rendered_sections/`
+  - `scraper/pipeline/tests/fixtures/skroutz/skroutz_taxonomy_regression.csv` -> `scraper/pipeline/tests/fixtures/providers/skroutz/taxonomy_cases/`
+  - `scraper/pipeline/tests/fixtures/skroutz/taxonomy_cases/*` -> `scraper/pipeline/tests/fixtures/providers/skroutz/taxonomy_cases/`
+- added placeholder directories:
+  - `scraper/pipeline/tests/fixtures/providers/skroutz/json/`
+  - `scraper/pipeline/tests/fixtures/providers/electronet/html/`
+  - `scraper/pipeline/tests/fixtures/providers/electronet/json/`
+  - `scraper/pipeline/tests/fixtures/providers/manufacturer_tefal/344709/`
+  - `scraper/pipeline/tests/fixtures/pipeline_runs/`
+  - `scraper/pipeline/tests/fixtures/golden_outputs/`
+
+## Commands run
+- `git ls-files work scraper/work`
+- `New-Item -ItemType Directory -Force ...` for the new fixture hierarchy roots
+- `git mv` for the explicit Skroutz fixture moves into `providers/skroutz/...`
+- `Remove-Item scraper/pipeline/tests/fixtures/skroutz` after the legacy directory became empty
+- `Get-Content` inspection for `AGENTS.md`, `IMPLEMENT.md`, `DOCUMENTATION.md`, and the touched test files
+- `git status --short`
+- `rg -n "def .*fixtures_root|skroutz_fixtures_root|fixtures/skroutz|work/|scraper/work/|active regression samples" scraper/pipeline/tests AGENTS.md IMPLEMENT.md .gitignore`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_skroutz_integration.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_skroutz_sections.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_skroutz_taxonomy.py` from `scraper/`
+- `where.exe python`
+- `py -0p`
+- `py -3.12 -m pytest --version`
+- `py -3.12 -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_skroutz_integration.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_skroutz_sections.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_skroutz_taxonomy.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+## Validation results
+- initial validation command path using `python -m pytest` could not run because the active `python` interpreter did not have `pytest` installed
+- focused touched-test results using `py -3.12 -m pytest`:
+  - `pipeline/tests/test_provider_selection.py`: `4 passed`
+  - `pipeline/tests/test_skroutz_sections.py`: `5 passed`
+  - `pipeline/tests/test_skroutz_taxonomy.py`: `5 passed`
+  - `pipeline/tests/test_skroutz_integration.py`: `6 passed, 1 failed`
+- the touched integration failure was `test_prepare_and_render_workflow_with_skroutz_fixtures`, failing on `render_result["published_csv_path"] is None` after fixture loading had already succeeded from the new hierarchy
+- full suite result: `90 passed, 4 failed`
+- unchanged baseline failures from the earlier documented suite baseline:
+  - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_pdf_candidates`
+  - `pipeline/tests/test_manufacturer_enrichment.py::test_enrichment_framework_supports_html_candidates`
+- additional currently failing workflow publication tests:
+  - `pipeline/tests/test_skroutz_integration.py::test_prepare_and_render_workflow_with_skroutz_fixtures`
+  - `pipeline/tests/test_workflow.py::test_render_workflow_writes_candidate_bundle`
+- no new fixture-path lookup failures were observed in the focused path-migration assertions
+
+## Risks, blockers, or skipped items
+- `scraper/work/344709/debug_manufacturer/` was absent in this checkout, so no manufacturer repro assets were promoted in this phase
+- `work/229957_skroutz_debug.html` exists only as an ignored local file and was intentionally left untracked
+- no `.gitignore` change was needed or made
+- the remaining test failures are outside this migration's edit scope; the fixture path migration stopped at test-layer changes and the minimal allowed control-file updates

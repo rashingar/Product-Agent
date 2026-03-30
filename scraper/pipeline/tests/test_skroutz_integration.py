@@ -92,7 +92,7 @@ def install_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> None:
 
     def fake_fetch_playwright(self, url: str):
         model = next(model for model, sample in SAMPLES.items() if sample["url"] == url)
-        html = (skroutz_fixtures_root / f"{model}.html").read_text(encoding="utf-8")
+        html = (skroutz_fixtures_root / "html" / f"{model}.html").read_text(encoding="utf-8")
         return FetchResult(url=url, final_url=url, html=html, status_code=200, method="playwright", fallback_used=True, response_headers={})
 
     def fake_fetch_binary(self, url: str):
@@ -100,7 +100,7 @@ def install_fixture_fetcher(monkeypatch, skroutz_fixtures_root: Path) -> None:
 
     def fake_extract_skroutz_section_image_records(self, url: str):
         model = next(model for model, sample in SAMPLES.items() if sample["url"] == url)
-        path = skroutz_fixtures_root / f"{model}.rendered_sections.json"
+        path = skroutz_fixtures_root / "rendered_sections" / f"{model}.rendered_sections.json"
         if not path.exists():
             return {"window": {}, "containers": [], "sections": []}
         return json.loads(path.read_text(encoding="utf-8"))
@@ -216,7 +216,7 @@ def test_skroutz_parser_and_deterministic_fields_cover_supported_families(skrout
     }
 
     for model, sample in ((model, SAMPLES[model]) for model in expected):
-        parsed = parser.parse((skroutz_fixtures_root / f"{model}.html").read_text(encoding="utf-8"), sample["url"])
+        parsed = parser.parse((skroutz_fixtures_root / "html" / f"{model}.html").read_text(encoding="utf-8"), sample["url"])
         taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url or sample["url"], parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
         deterministic = build_row(
             cli=make_cli(model),

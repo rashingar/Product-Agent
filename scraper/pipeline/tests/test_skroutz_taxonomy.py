@@ -51,7 +51,7 @@ def build_minimal_taxonomy_html(row: dict[str, str]) -> str:
 def test_taxonomy_regression_fixture_resolves_expected_categories(skroutz_fixtures_root: Path) -> None:
     parser = SkroutzProductParser()
     resolver = TaxonomyResolver()
-    rows = read_taxonomy_rows(skroutz_fixtures_root / "skroutz_taxonomy_regression.csv")
+    rows = read_taxonomy_rows(skroutz_fixtures_root / "taxonomy_cases" / "skroutz_taxonomy_regression.csv")
     skipped = [(row["model"], row["skip_reason"]) for row in rows if row.get("skip_reason")]
 
     assert skipped == [("231412", "mapping_conflict_live_page_45cm_freestanding_not_tabletop")]

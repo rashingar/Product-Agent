@@ -68,7 +68,7 @@ class DummyFetcher:
 
 
 def build_provider(skroutz_fixtures_root: Path) -> SkroutzProvider:
-    return SkroutzProvider(fixture_html_by_url={SAMPLE_URL: skroutz_fixtures_root / f"{SAMPLE_MODEL}.html"})
+    return SkroutzProvider(fixture_html_by_url={SAMPLE_URL: skroutz_fixtures_root / "html" / f"{SAMPLE_MODEL}.html"})
 
 
 def test_resolve_provider_for_source_defaults_to_electronet_only() -> None:
