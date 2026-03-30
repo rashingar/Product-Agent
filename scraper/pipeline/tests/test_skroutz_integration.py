@@ -252,6 +252,8 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
         assert source_payload["source_name"] == "skroutz"
         assert prepare_result["scrape_result"]["fetch"].method == "playwright"
         assert report["fetch_mode"] == "playwright"
+        assert not (prepare_result["scrape_dir"] / f"{model}.csv").exists()
+        assert not (prepare_result["model_root"] / "candidate" / f"{model}.csv").exists()
         assert len(source_payload["gallery_images"]) == SAMPLES[model]["photos"]
         assert taxonomy_diagnostics["raw_category_tag"] == source_payload["category_tag_text"]
         assert taxonomy_diagnostics["raw_category_href"] == source_payload["category_tag_href"]

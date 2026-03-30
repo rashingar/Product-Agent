@@ -7,6 +7,12 @@ from .render_execution import execute_render_workflow
 from .models import RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceResult
 
 
+def _path_or_none(value) -> Path | None:
+    if value in (None, ""):
+        return None
+    return Path(value)
+
+
 def render_product(request: RenderRequest) -> ServiceResult:
     try:
         result = execute_render_workflow(request.model)
@@ -35,7 +41,7 @@ def render_product(request: RenderRequest) -> ServiceResult:
             intro_text_output_path=model_root / "llm" / "intro_text.output.txt",
             seo_meta_output_path=model_root / "llm" / "seo_meta.output.json",
             candidate_csv_path=Path(result["candidate_csv_path"]),
-            published_csv_path=Path(result["published_csv_path"]),
+            published_csv_path=_path_or_none(result.get("published_csv_path")),
             candidate_normalized_json_path=candidate_dir / f"{request.model}.normalized.json",
             validation_report_path=Path(result["validation_report_path"]),
             description_html_path=Path(result["description_path"]),

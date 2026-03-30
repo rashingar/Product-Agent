@@ -1,10 +1,98 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M35 scope defined; implementation pending. The repo is already post-split on LLM artifacts and render-side deterministic section ownership, but the prepare/render execution seam is not fully cleaned up yet: `scraper/pipeline/services/prepare_execution.py` still calls `execute_full_run(...)`, `scraper/pipeline/full_run.py` still writes a scrape-stage CSV, and `scraper/pipeline/services/render_execution.py` remains the owner of candidate artifacts and publish gating from split-task outputs.
+M35 completed. The repo now uses a scrape-only prepare-stage core for the active prepare path, `prepare` no longer writes a scrape-stage CSV, `render` remains the sole owner of candidate and publish outputs, and `scraper/pipeline/full_run.py` is reduced to a thin compatibility wrapper for explicit direct callers.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## 2026-03-30 - Make prepare scrape-only under the split-task workflow
+
+Goal:
+- finish the prepare/render execution seam after the split-LLM refactor
+- make `prepare` scrape-only plus split-task handoff-only
+- keep `render` as the sole owner of final candidate outputs and publish copy
+
+Files added:
+- `scraper/pipeline/prepare_stage.py`
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `README.md`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- extracted the scrape-only execution core into `scraper/pipeline/prepare_stage.py`
+- moved the active prepare-stage behavior there:
+  - provider-backed fetch and normalization
+  - scrape artifact writes under `work/{model}/scrape/`
+  - deterministic normalization used by the split-task handoff
+  - report generation
+- kept candidate CSV generation out of the new prepare-stage core
+- updated `scraper/pipeline/services/prepare_execution.py` so the active prepare path now calls `execute_prepare_stage(...)` directly instead of `execute_full_run(...)`
+- removed the old nested scrape-dir workaround from prepare because the new core now writes directly to `work/{model}/scrape/`
+- kept `scraper/pipeline/services/render_execution.py` as the only owner of:
+  - `work/{model}/candidate/{model}.csv`
+  - `work/{model}/candidate/{model}.normalized.json`
+  - `work/{model}/candidate/{model}.validation.json`
+  - `work/{model}/candidate/description.html`
+  - `work/{model}/candidate/characteristics.html`
+  - `products/{model}.csv`
+- reduced `scraper/pipeline/full_run.py` to a thin compatibility wrapper:
+  - it now delegates to `execute_prepare_stage(...)`
+  - it performs the legacy direct CSV write only for explicit callers of `execute_full_run(...)`
+  - it is no longer part of the active workflow prepare path
+- updated `scraper/pipeline/workflow.py` so `prepare_workflow(...)` no longer imports or passes through `execute_full_run(...)`
+- fixed `scraper/pipeline/services/prepare_service.py` so prepare result details come from the actual scrape result payload
+- fixed `scraper/pipeline/services/render_service.py` so an unpublished render result can map `published_csv_path` as `None` safely
+- updated `README.md` to describe the steady-state boundary:
+  - prepare writes scrape plus split-task handoff artifacts only
+  - render owns candidate outputs and publish copy
+
+Intentional behavior changes:
+- `python -m pipeline.workflow prepare ...` no longer creates `work/{model}/scrape/{model}.csv`
+- `python -m pipeline.workflow prepare ...` does not create `work/{model}/candidate/{model}.csv`
+- explicit compatibility calls to `execute_full_run(...)` still write a direct CSV for callers and tests that intentionally exercise the legacy full-run helper
+
+Commands run:
+- `Get-Content -Raw scraper/pipeline/services/prepare_execution.py`
+- `Get-Content -Raw scraper/pipeline/services/render_execution.py`
+- `Get-Content -Raw scraper/pipeline/services/prepare_service.py`
+- `Get-Content -Raw scraper/pipeline/services/render_service.py`
+- `Get-Content -Raw scraper/pipeline/services/run_execution.py`
+- `Get-Content -Raw scraper/pipeline/workflow.py`
+- `Get-Content -Raw scraper/pipeline/full_run.py`
+- `Get-Content -Raw README.md`
+- `Get-Content -Raw scraper/pipeline/tests/test_workflow.py`
+- `Get-Content -Raw scraper/pipeline/tests/test_services.py`
+- `Get-Content -Raw scraper/pipeline/tests/test_skroutz_integration.py`
+- `Get-Content -Raw scraper/pipeline/cli.py`
+- `rg -n "execute_full_run\\(|prepare_workflow\\(|execute_prepare_workflow\\(|candidate_csv_path|published_csv_path|work/\\{model\\}/scrape/\\{model\\}\\.csv|llm_output\\.json|intro_text\\.output|seo_meta\\.output" scraper/pipeline scraper/pipeline/tests README.md -S`
+- `rg -n "_select_skroutz_image_backed_sections" scraper/pipeline/tests scraper/pipeline -S`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_services.py` from `scraper/`
+- `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_provider_selection.py` from `scraper/`
+
+Validation:
+- smallest relevant subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_services.py` from `scraper/`
+  - passed, `27 passed`
+- broader affected suite:
+  - `py -3.12 -m pytest -q pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_provider_selection.py` from `scraper/`
+  - passed, `47 passed`
+
+Deferred:
+- no provider registry refactor was attempted
+- no service error taxonomy work was attempted
+- no CI changes were attempted
+- `execute_full_run(...)` remains available as a thin compatibility wrapper for explicit direct callers rather than being removed entirely in this milestone
 
 ## 2026-03-30 - Define post-split prepare/render execution seam cleanup scope
 

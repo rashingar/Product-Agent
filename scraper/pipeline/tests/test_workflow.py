@@ -62,17 +62,18 @@ def test_prepare_workflow_delegates_to_service_execution(tmp_path: Path, monkeyp
 
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_execute_full_run(_cli):
+    def fake_execute_prepare_stage(_cli, *, model_dir):
+        assert model_dir == tmp_path / "work" / "233541" / "scrape"
         return {"unused": True}
 
-    def fake_execute_prepare_workflow(cli_arg, *, work_root, execute_full_run_fn):
+    def fake_execute_prepare_workflow(cli_arg, *, work_root, execute_prepare_stage_fn):
         assert cli_arg is cli
         assert work_root == tmp_path / "work"
-        assert execute_full_run_fn is fake_execute_full_run
+        assert execute_prepare_stage_fn is fake_execute_prepare_stage
         return {"delegated": True}
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
-    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
     monkeypatch.setattr(workflow, "execute_prepare_workflow", fake_execute_prepare_workflow)
 
     assert workflow.prepare_workflow(cli) == {"delegated": True}
@@ -94,7 +95,8 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     )
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_execute_full_run(_cli):
+    def fake_execute_prepare_stage(_cli, *, model_dir):
+        assert model_dir == tmp_path / "work" / "233541" / "scrape"
         return {
             "normalized": {
                 "deterministic_product": {
@@ -116,7 +118,7 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
             "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
         }
 
-    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
 
     result = prepare_workflow(cli)
 
@@ -641,34 +643,18 @@ def test_execute_full_run_fails_fast_when_supported_source_has_no_provider(monke
         run_module.execute_full_run(cli)
 
 
-def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monkeypatch) -> None:
+def test_prepare_workflow_keeps_prepare_scrape_only_without_candidate_csv(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
 
     model = "233541"
-    generated_scrape_dir = tmp_path / "work" / model / "scrape" / model
-    generated_scrape_dir.mkdir(parents=True)
-    old_prefix = str(generated_scrape_dir)
-    raw_html_path = generated_scrape_dir / f"{model}.raw.html"
-    source_json_path = generated_scrape_dir / f"{model}.source.json"
-    normalized_json_path = generated_scrape_dir / f"{model}.normalized.json"
-    report_json_path = generated_scrape_dir / f"{model}.report.json"
-    csv_path = generated_scrape_dir / f"{model}.csv"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    raw_html_path = scrape_dir / f"{model}.raw.html"
+    source_json_path = scrape_dir / f"{model}.source.json"
+    normalized_json_path = scrape_dir / f"{model}.normalized.json"
+    report_json_path = scrape_dir / f"{model}.report.json"
 
-    raw_html_path.write_text("<html></html>", encoding="utf-8")
-    csv_path.write_text("model\n233541\n", encoding="utf-8")
-
-    source_payload = {
-        "url": "https://www.electronet.gr/example",
-        "canonical_url": "https://www.electronet.gr/example",
-        "product_code": model,
-        "brand": "LG",
-        "name": "Ψυγείο Ντουλάπα LG GSGV80PYLL",
-        "raw_html_path": str(raw_html_path),
-        "gallery_images": [{"local_path": f"{old_prefix}\\gallery\\{model}-1.jpg"}],
-        "besco_images": [{"local_path": f"{old_prefix}\\bescos\\besco1.jpg"}],
-    }
     normalized_payload = {
         "deterministic_product": {
             "brand": "LG",
@@ -679,13 +665,8 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
             "seo_keyword": "lg-gsgv80pyll-psygeio-ntoulapa",
         },
         "input": {"out": str(tmp_path / "work" / model / "scrape")},
-        "csv_row": {"model": model},
     }
-    report_payload = {"files_written": [str(raw_html_path), str(source_json_path), str(normalized_json_path), str(report_json_path), str(csv_path)]}
-
-    source_json_path.write_text(json.dumps(source_payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    normalized_json_path.write_text(json.dumps(normalized_payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    report_json_path.write_text(json.dumps(report_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    report_payload = {"warnings": [], "files_written": [str(raw_html_path), str(source_json_path), str(normalized_json_path), str(report_json_path)]}
 
     parsed = ParsedProduct(
         source=SourceProductData(
@@ -695,13 +676,35 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
             brand="LG",
             name="Ψυγείο Ντουλάπα LG GSGV80PYLL",
             raw_html_path=str(raw_html_path),
-            gallery_images=[GalleryImage(url="https://example.com/1.jpg", local_path=f"{old_prefix}\\gallery\\{model}-1.jpg")],
-            besco_images=[GalleryImage(url="https://example.com/besco1.jpg", local_path=f"{old_prefix}\\bescos\\besco1.jpg")],
+            gallery_images=[GalleryImage(url="https://example.com/1.jpg", local_path=str(scrape_dir / "gallery" / f"{model}-1.jpg"))],
+            besco_images=[GalleryImage(url="https://example.com/besco1.jpg", local_path=str(scrape_dir / "bescos" / "besco1.jpg"))],
         )
     )
     cli = CLIInput(model=model, url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
 
-    def fake_execute_full_run(_cli):
+    def fake_execute_prepare_stage(_cli, *, model_dir):
+        assert model_dir == scrape_dir
+        model_dir.mkdir(parents=True, exist_ok=True)
+        raw_html_path.write_text("<html></html>", encoding="utf-8")
+        source_json_path.write_text(
+            json.dumps(
+                {
+                    "url": "https://www.electronet.gr/example",
+                    "canonical_url": "https://www.electronet.gr/example",
+                    "product_code": model,
+                    "brand": "LG",
+                    "name": "Ψυγείο Ντουλάπα LG GSGV80PYLL",
+                    "raw_html_path": str(raw_html_path),
+                    "gallery_images": [{"local_path": str(scrape_dir / "gallery" / f"{model}-1.jpg")}],
+                    "besco_images": [{"local_path": str(scrape_dir / "bescos" / "besco1.jpg")}],
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        normalized_json_path.write_text(json.dumps(normalized_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        report_json_path.write_text(json.dumps(report_payload, ensure_ascii=False, indent=2), encoding="utf-8")
         return {
             "normalized": normalized_payload,
             "parsed": parsed,
@@ -713,25 +716,22 @@ def test_prepare_workflow_normalizes_scrape_artifact_paths(tmp_path: Path, monke
             ),
             "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
             "report": report_payload,
-            "model_dir": generated_scrape_dir,
+            "model_dir": scrape_dir,
             "raw_html_path": raw_html_path,
             "source_json_path": source_json_path,
             "normalized_json_path": normalized_json_path,
             "report_json_path": report_json_path,
-            "csv_path": csv_path,
         }
 
-    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
 
     result = prepare_workflow(cli)
-    scrape_dir = result["scrape_dir"]
-    rewritten_source = json.loads((scrape_dir / f"{model}.source.json").read_text(encoding="utf-8"))
-    rewritten_report = json.loads((scrape_dir / f"{model}.report.json").read_text(encoding="utf-8"))
-
     assert result["scrape_result"]["model_dir"] == scrape_dir
-    assert rewritten_source["raw_html_path"] == str(scrape_dir / f"{model}.raw.html")
-    assert all(Path(path).parent == scrape_dir for path in rewritten_report["files_written"])
-    assert rewritten_source["gallery_images"][0]["local_path"] == str(scrape_dir / "gallery" / f"{model}-1.jpg")
+    assert (scrape_dir / f"{model}.source.json").exists()
+    assert (scrape_dir / f"{model}.normalized.json").exists()
+    assert (scrape_dir / f"{model}.report.json").exists()
+    assert not (scrape_dir / f"{model}.csv").exists()
+    assert not (tmp_path / "work" / model / "candidate" / f"{model}.csv").exists()
 
 
 def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkeypatch) -> None:
@@ -740,10 +740,11 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=1, sections=0, skroutz_status=0, boxnow=0, price="0", out=str(tmp_path))
 
-    def fake_execute_full_run(_cli):
+    def fake_execute_prepare_stage(_cli, *, model_dir):
+        assert model_dir == tmp_path / "work" / "233541" / "scrape"
         raise RuntimeError("prepare exploded")
 
-    monkeypatch.setattr(workflow, "execute_full_run", fake_execute_full_run)
+    monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
 
     try:
         prepare_workflow(cli)

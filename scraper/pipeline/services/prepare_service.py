@@ -24,10 +24,14 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
     except Exception as exc:
         raise ServiceError(type(exc).__name__, str(exc), cause=exc) from exc
 
+    scrape_result = result.get("scrape_result", {})
+    parsed = scrape_result.get("parsed")
+    taxonomy = scrape_result.get("taxonomy")
+    schema_match = scrape_result.get("schema_match")
     model_root = Path(result["model_root"])
     scrape_dir = Path(result["scrape_dir"])
     metadata_path = Path(result["metadata_path"])
-    warnings = list(result.get("scrape_result", {}).get("report", {}).get("warnings", []))
+    warnings = list(scrape_result.get("report", {}).get("warnings", []))
     return ServiceResult(
         run=RunMetadata(
             model=request.model,
@@ -53,13 +57,13 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
             metadata_path=metadata_path,
         ),
         details={
-            "source": str(result.get("scrape_result", {}).get("source", "")),
-            "product_name": str(getattr(result.get("parsed", None), "source", None).name if result.get("parsed", None) else ""),
-            "product_code": str(getattr(result.get("parsed", None), "source", None).product_code if result.get("parsed", None) else ""),
-            "brand": str(getattr(result.get("parsed", None), "source", None).brand if result.get("parsed", None) else ""),
-            "taxonomy_path": str(getattr(result.get("taxonomy", None), "taxonomy_path", "") or ""),
-            "matched_schema_id": str(getattr(result.get("schema_match", None), "matched_schema_id", "") or ""),
-            "schema_score": float(getattr(result.get("schema_match", None), "score", 0.0) or 0.0),
+            "source": str(scrape_result.get("source", "")),
+            "product_name": str(getattr(getattr(parsed, "source", None), "name", "") or ""),
+            "product_code": str(getattr(getattr(parsed, "source", None), "product_code", "") or ""),
+            "brand": str(getattr(getattr(parsed, "source", None), "brand", "") or ""),
+            "taxonomy_path": str(getattr(taxonomy, "taxonomy_path", "") or ""),
+            "matched_schema_id": str(getattr(schema_match, "matched_schema_id", "") or ""),
+            "schema_score": float(getattr(schema_match, "score", 0.0) or 0.0),
             "warnings_count": len(warnings),
             "llm_prepare_mode": "split_tasks",
         },

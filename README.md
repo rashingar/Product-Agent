@@ -47,13 +47,20 @@ python -m pipeline.workflow prepare \
 ```
 
 After `prepare`, inspect:
+- `work/{model}/scrape/{model}.raw.html`
+- `work/{model}/scrape/{model}.source.json`
+- `work/{model}/scrape/{model}.normalized.json`
+- `work/{model}/scrape/{model}.report.json`
 - `work/{model}/llm/task_manifest.json`
 - `work/{model}/llm/intro_text.context.json`
 - `work/{model}/llm/intro_text.prompt.txt`
 - `work/{model}/llm/seo_meta.context.json`
 - `work/{model}/llm/seo_meta.prompt.txt`
-- `work/{model}/scrape/{model}.source.json`
-- `work/{model}/scrape/{model}.report.json`
+
+Prepare is scrape-only in the steady-state workflow:
+- it writes scrape artifacts under `work/{model}/scrape/`
+- it writes split-task handoff artifacts under `work/{model}/llm/`
+- it does not write candidate CSVs, validation reports, description HTML, characteristics HTML, or publish outputs
 
 The LLM stage now writes:
 - `work/{model}/llm/intro_text.output.txt`
@@ -73,9 +80,11 @@ python -m pipeline.workflow render --model 234385
 
 After `render`, inspect:
 - `work/{model}/candidate/{model}.csv`
+- `work/{model}/candidate/{model}.normalized.json`
 - `work/{model}/candidate/{model}.validation.json`
 - `work/{model}/candidate/description.html`
 - `work/{model}/candidate/characteristics.html`
+- `products/{model}.csv` when validation passes
 
 ## Deterministic Description Rendering
 
@@ -103,10 +112,10 @@ SEO policy:
 ## Runtime Outputs
 
 The scraper writes runtime artifacts under `work/{model}/`, including:
-- scrape-stage JSON and HTML artifacts
+- scrape-stage JSON, HTML, and downloaded source assets under `work/{model}/scrape/`
 - task-specific LLM handoff files under `work/{model}/llm/`
-- candidate CSV and validation outputs
-- downloaded gallery and Besco images when present
+- candidate CSV, normalized candidate JSON, validation outputs, and rendered HTML only under `work/{model}/candidate/`
+- downloaded gallery and Besco images when present under the scrape stage
 
 Final deliverable CSVs remain under `products/`.
 

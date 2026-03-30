@@ -59,6 +59,17 @@ def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> N
             "metadata_path": tmp_path / "work" / "233541" / "prepare.run.json",
             "scrape_result": {
                 "source": "electronet",
+                "parsed": ParsedProduct(
+                    source=SourceProductData(
+                        url="https://www.electronet.gr/example",
+                        canonical_url="https://www.electronet.gr/example",
+                        product_code="233541",
+                        brand="LG",
+                        name="LG Example",
+                    )
+                ),
+                "taxonomy": TaxonomyResolution(parent_category="A", leaf_category="B", sub_category="C"),
+                "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
                 "report": {"warnings": ["prepare warning"]},
             },
         }
@@ -89,6 +100,11 @@ def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> N
     assert result.artifacts.source_json_path == tmp_path / "work" / "233541" / "scrape" / "233541.source.json"
     assert result.artifacts.metadata_path == tmp_path / "work" / "233541" / "prepare.run.json"
     assert result.details["source"] == "electronet"
+    assert result.details["product_name"] == "LG Example"
+    assert result.details["product_code"] == "233541"
+    assert result.details["brand"] == "LG"
+    assert result.details["matched_schema_id"] == "schema-1"
+    assert result.details["schema_score"] == 0.9
     assert result.details["llm_prepare_mode"] == "split_tasks"
 
 
@@ -138,6 +154,32 @@ def test_render_product_maps_execution_result(tmp_path: Path, monkeypatch) -> No
     assert result.artifacts.candidate_csv_path == tmp_path / "work" / "233541" / "candidate" / "233541.csv"
     assert result.artifacts.metadata_path == tmp_path / "work" / "233541" / "render.run.json"
     assert result.details["validation_ok"] is True
+
+
+def test_render_product_allows_missing_published_csv_path(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_service
+
+    def fake_execute_render_workflow(model: str):
+        assert model == "233541"
+        return {
+            "candidate_dir": tmp_path / "work" / model / "candidate",
+            "candidate_csv_path": tmp_path / "work" / model / "candidate" / f"{model}.csv",
+            "published_csv_path": None,
+            "description_path": tmp_path / "work" / model / "candidate" / "description.html",
+            "characteristics_path": tmp_path / "work" / model / "candidate" / "characteristics.html",
+            "validation_report_path": tmp_path / "work" / model / "candidate" / f"{model}.validation.json",
+            "run_status": "failed",
+            "metadata_path": tmp_path / "work" / model / "render.run.json",
+            "validation_report": {"ok": False, "warnings": ["render warning"]},
+        }
+
+    monkeypatch.setattr(render_service, "execute_render_workflow", fake_execute_render_workflow)
+
+    result = render_product(RenderRequest(model="233541"))
+
+    assert result.run.status == RunStatus.FAILED
+    assert result.artifacts.published_csv_path is None
+    assert result.details["validation_ok"] is False
 
 
 def test_render_product_wraps_execution_errors(monkeypatch) -> None:

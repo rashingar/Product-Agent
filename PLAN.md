@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. A post-split execution seam cleanup milestone, M35, is now pending before Phase 4. Hybrid RAG remains blocked until that seam cleanup lands and the prepare/render split is stable in steady state.
+Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. Post-split execution seam cleanup is now complete through M35. Phase 4 remains pending.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -97,7 +97,7 @@ Phase 3 milestones:
 
 ### Post-split execution seam cleanup
 
-Status: pending
+Status: completed
 
 Goals:
 1. Finish the prepare/render execution seam after the split-LLM refactor.
@@ -112,7 +112,7 @@ Hard rules:
 - Do not broaden this cleanup into provider bootstrap, service error taxonomy, or CI work.
 
 Post-split milestone:
-- M35 — clean up the prepare/render execution seam (pending; `scraper/pipeline/services/prepare_execution.py` still routes prepare through `execute_full_run(...)`, `scraper/pipeline/full_run.py` still writes a scrape-stage CSV, and `scraper/pipeline/services/render_execution.py` already owns candidate-stage artifact generation from split-task outputs, so this milestone finishes the stage boundary rather than changing the split-task LLM contract)
+- M35 — clean up the prepare/render execution seam (completed; `scraper/pipeline/prepare_stage.py` is now the scrape-only execution core, `scraper/pipeline/services/prepare_execution.py` writes scrape plus split-task handoff artifacts without routing through `execute_full_run(...)`, `prepare` no longer writes a scrape-stage CSV, `render` remains the sole owner of candidate and publish outputs, and `scraper/pipeline/full_run.py` is reduced to a thin compatibility wrapper for explicit direct callers)
 
 Implementation substeps:
 1. Extract or introduce a scrape-only execution seam that returns the parsed, taxonomy, normalized, and report data needed by `prepare` without writing candidate-stage outputs.
@@ -271,7 +271,7 @@ Evidence:
 
 Cleanup is complete through M14.
 
-New implementation work starts at M30 and now continues through the pending post-split M35 seam cleanup before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
+New implementation work starts at M30 and now continues through the completed post-split M35 seam cleanup before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
 
 ## Validation rules
 After each milestone:

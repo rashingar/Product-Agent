@@ -5,9 +5,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from .full_run import execute_full_run
 from .input_validation import FAIL_MESSAGE, validate_input
 from .models import CLIInput
+from .prepare_stage import execute_prepare_stage
 from .repo_paths import REPO_ROOT
 from .services.errors import ServiceError
 from .services.models import PrepareRequest, RenderRequest
@@ -156,7 +156,7 @@ def parse_template_text(text: str) -> dict[str, str]:
 
 
 def prepare_workflow(cli: CLIInput) -> dict[str, Any]:
-    return execute_prepare_workflow(cli, work_root=WORK_ROOT, execute_full_run_fn=execute_full_run)
+    return execute_prepare_workflow(cli, work_root=WORK_ROOT, execute_prepare_stage_fn=execute_prepare_stage)
 
 
 def resolve_model_for_render(args: argparse.Namespace) -> str:
