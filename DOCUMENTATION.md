@@ -1,10 +1,122 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M33 completed. Render now prefers split `intro_text` and `seo_meta` outputs, assembles description HTML in code from deterministic sections and CTA data, keeps legacy `llm_output.json` as a compatibility fallback, and leaves only M34 final cleanup pending in Phase 3.
+M34 completed. The branch now runs in steady state with split `intro_text` and `seo_meta` task artifacts only, deterministic presentation rendering owned by code, and legacy combined LLM artifacts removed from the active workflow.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## 2026-03-30 - Remove legacy combined LLM handoff and finalize split-task workflow
+
+Goal:
+- remove the temporary combined LLM compatibility path from prepare, render, validators, tests, and runtime docs
+- leave the branch in its final steady state with split `intro_text` and `seo_meta` artifacts only
+- align operator-facing docs with deterministic section rendering and the final failure policy
+
+Files edited:
+- `AGENTS.md`
+- `README.md`
+- `PLAN.md`
+- `IMPLEMENT.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/llm_contract.py`
+- `scraper/pipeline/repo_paths.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/services/models.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/services/run_execution.py`
+- `scraper/pipeline/tests/test_llm_contract.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+- `scraper/pipeline/tests/test_utils_support_paths.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Files removed:
+- `resources/prompts/master_prompt+.txt`
+- `resources/schemas/compact_response.schema.json`
+
+Changes:
+- removed legacy combined prepare artifact generation:
+  - `work/{model}/llm_context.json`
+  - `work/{model}/prompt.txt`
+- removed the legacy combined render input path:
+  - `work/{model}/llm_output.json`
+- simplified the active LLM contract in `scraper/pipeline/llm_contract.py` to split-task-only helpers and validators:
+  - kept `build_intro_text_context(...)`
+  - kept `build_seo_meta_context(...)`
+  - kept `build_task_manifest(...)`
+  - kept `validate_intro_text_output(...)`
+  - kept `validate_seo_meta_output(...)`
+  - removed the old combined-context builder and combined/legacy validators
+- updated `scraper/pipeline/services/prepare_execution.py` so prepare now writes only:
+  - `work/{model}/llm/task_manifest.json`
+  - `work/{model}/llm/intro_text.context.json`
+  - `work/{model}/llm/intro_text.prompt.txt`
+  - `work/{model}/llm/seo_meta.context.json`
+  - `work/{model}/llm/seo_meta.prompt.txt`
+- updated the manifest to steady-state mode:
+  - `prepare_mode: split_tasks`
+  - removed compatibility metadata for legacy combined artifacts
+- updated `scraper/pipeline/services/render_execution.py` so render now requires:
+  - `work/{model}/llm/intro_text.output.txt`
+  - `work/{model}/llm/seo_meta.output.json`
+- removed the render fallback to legacy combined payloads and changed the missing-artifact error to the split-task-only path
+- removed legacy artifact fields from service-layer artifact models and service result mapping
+- retired the obsolete combined prompt/schema resources and removed their centralized path constants
+- updated workflow CLI output to print only the split-task artifact paths
+- updated `AGENTS.md` and `README.md` to describe the final runtime:
+  - split prepare outputs
+  - split LLM outputs
+  - deterministic section rendering
+  - section warning/failure policy
+  - no LLM section-copy generation
+- updated tests so final steady-state behavior is the only active runtime expectation
+
+Legacy behavior removed:
+- prepare no longer writes combined `llm_context.json` or `prompt.txt`
+- render no longer accepts combined `llm_output.json`
+- the LLM no longer owns:
+  - `presentation.intro_html`
+  - `presentation.sections[].title`
+  - `presentation.sections[].body_html`
+- the reduced combined prompt/schema resources are no longer part of the runtime
+
+Commands run:
+- `rg -n "llm_context\\.json|prompt\\.txt|llm_output\\.json|presentation\\.intro_html|presentation\\.sections|validate_llm_output|legacy|split_tasks_with_legacy_compatibility|intro_text\\.output|seo_meta\\.output|task_manifest" README.md PLAN.md DOCUMENTATION.md IMPLEMENT.md AGENTS.md scraper resources -S`
+- `Get-Content scraper/pipeline/llm_contract.py`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/render_service.py`
+- `Get-Content scraper/pipeline/services/run_execution.py`
+- `Get-Content scraper/pipeline/workflow.py`
+- `Get-Content README.md`
+- `Get-Content AGENTS.md`
+- `Get-Content IMPLEMENT.md`
+- `Get-Content scraper/pipeline/tests/test_llm_contract.py`
+- `Get-Content scraper/pipeline/tests/test_services.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_integration.py`
+- `Get-Content scraper/pipeline/tests/test_skroutz_sections.py`
+- `py -3.12 -m pytest -q pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_utils_support_paths.py` from `scraper/`
+- `py -3.12 -m pytest -q` from `scraper/`
+
+Validation:
+- targeted cleanup-facing subset first:
+  - `py -3.12 -m pytest -q pipeline/tests/test_llm_contract.py pipeline/tests/test_workflow.py pipeline/tests/test_services.py pipeline/tests/test_skroutz_integration.py pipeline/tests/test_skroutz_sections.py pipeline/tests/test_utils_support_paths.py` from `scraper/`
+  - passed, `46 passed`
+- full suite:
+  - `py -3.12 -m pytest -q` from `scraper/`
+  - passed, `120 passed`
+
+Deferred:
+- no provider-registry, CI, or unrelated service-layer refactors were attempted in this cleanup commit
+- historical documentation below still mentions old combined artifacts as prior-state evidence and was not rewritten wholesale
 
 ## 2026-03-30 - Assemble description HTML from `intro_text` and deterministic sections
 

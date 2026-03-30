@@ -50,9 +50,6 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
             seo_meta_context_path=Path(result["seo_meta_context_path"]),
             seo_meta_prompt_path=Path(result["seo_meta_prompt_path"]),
             seo_meta_output_path=Path(result["seo_meta_output_path"]),
-            llm_context_path=Path(result["llm_context_path"]),
-            prompt_path=Path(result["prompt_path"]),
-            llm_output_path=model_root / "llm_output.json",
             metadata_path=metadata_path,
         ),
         details={
@@ -64,6 +61,6 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
             "matched_schema_id": str(getattr(result.get("schema_match", None), "matched_schema_id", "") or ""),
             "schema_score": float(getattr(result.get("schema_match", None), "score", 0.0) or 0.0),
             "warnings_count": len(warnings),
-            "llm_prepare_mode": "split_tasks_with_legacy_compatibility",
+            "llm_prepare_mode": "split_tasks",
         },
     )

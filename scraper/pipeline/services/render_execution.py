@@ -6,7 +6,7 @@ from typing import Any
 
 from ..csv_writer import write_csv_row
 from ..html_builders import extract_presentation_blocks
-from ..llm_contract import validate_intro_text_output, validate_legacy_render_payload, validate_seo_meta_output
+from ..llm_contract import validate_intro_text_output, validate_seo_meta_output
 from ..mapping import build_row
 from ..models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from ..presentation_sections import normalize_presentation_sections
@@ -31,7 +31,6 @@ def execute_render_workflow(
     llm_dir = model_root / "llm"
     source_json = scrape_dir / f"{model}.source.json"
     normalized_json = scrape_dir / f"{model}.normalized.json"
-    llm_output_json = model_root / "llm_output.json"
     task_manifest_json = llm_dir / "task_manifest.json"
     candidate_dir = model_root / "candidate"
     candidate_csv_path = candidate_dir / f"{model}.csv"
@@ -67,7 +66,6 @@ def execute_render_workflow(
             model_root=model_root,
             llm_dir=llm_dir,
             task_manifest_path=task_manifest_json,
-            legacy_llm_output_path=llm_output_json,
         )
         llm_product, llm_intro_text, llm_errors, llm_mode, llm_artifact_paths = _normalize_render_llm_inputs(llm_inputs)
 
@@ -149,7 +147,6 @@ def execute_render_workflow(
                 llm_task_manifest_path=task_manifest_json if task_manifest_json.exists() else None,
                 intro_text_output_path=llm_artifact_paths.get("intro_text_output_path"),
                 seo_meta_output_path=llm_artifact_paths.get("seo_meta_output_path"),
-                llm_output_path=llm_output_json,
                 candidate_csv_path=candidate_csv_path,
                 published_csv_path=published_csv_result_path,
                 candidate_normalized_json_path=normalized_candidate_path,
@@ -195,7 +192,6 @@ def execute_render_workflow(
                     source_json_path=source_json,
                     scrape_normalized_json_path=normalized_json,
                     llm_task_manifest_path=task_manifest_json if task_manifest_json.exists() else None,
-                    llm_output_path=llm_output_json,
                     candidate_csv_path=candidate_csv_path,
                     published_csv_path=published_csv_path,
                     candidate_normalized_json_path=normalized_candidate_path,
@@ -274,7 +270,6 @@ def _load_render_llm_inputs(
     model_root: Path,
     llm_dir: Path,
     task_manifest_path: Path,
-    legacy_llm_output_path: Path,
 ) -> dict[str, Any]:
     intro_text_output_path = llm_dir / "intro_text.output.txt"
     seo_meta_output_path = llm_dir / "seo_meta.output.json"
@@ -284,45 +279,29 @@ def _load_render_llm_inputs(
         intro_text_output_path = Path(tasks.get("intro_text", {}).get("expected_output_path", intro_text_output_path))
         seo_meta_output_path = Path(tasks.get("seo_meta", {}).get("expected_output_path", seo_meta_output_path))
 
-    if intro_text_output_path.exists() and seo_meta_output_path.exists():
-        return {
-            "mode": "split_tasks",
-            "intro_text_output_path": intro_text_output_path,
-            "seo_meta_output_path": seo_meta_output_path,
-            "intro_text_payload": intro_text_output_path.read_text(encoding="utf-8"),
-            "seo_meta_payload": read_json(seo_meta_output_path),
-        }
-    if legacy_llm_output_path.exists():
-        return {
-            "mode": "legacy_combined",
-            "legacy_llm_output_path": legacy_llm_output_path,
-            "legacy_payload": read_json(legacy_llm_output_path),
-        }
-    raise FileNotFoundError(f"Missing split or legacy LLM outputs in {model_root}")
+    if not intro_text_output_path.exists() or not seo_meta_output_path.exists():
+        raise FileNotFoundError(f"Missing split-task LLM outputs in {llm_dir}")
+    return {
+        "mode": "split_tasks",
+        "intro_text_output_path": intro_text_output_path,
+        "seo_meta_output_path": seo_meta_output_path,
+        "intro_text_payload": intro_text_output_path.read_text(encoding="utf-8"),
+        "seo_meta_payload": read_json(seo_meta_output_path),
+    }
 
 
 def _normalize_render_llm_inputs(inputs: dict[str, Any]) -> tuple[dict[str, Any], str, list[str], str, dict[str, Path]]:
-    mode = str(inputs.get("mode", ""))
-    if mode == "split_tasks":
-        intro_text, intro_errors = validate_intro_text_output(inputs.get("intro_text_payload", ""))
-        normalized_seo, seo_errors = validate_seo_meta_output(inputs.get("seo_meta_payload", {}))
-        return (
-            normalized_seo.get("product", {}),
-            intro_text,
-            [*intro_errors, *seo_errors],
-            mode,
-            {
-                "intro_text_output_path": Path(inputs["intro_text_output_path"]),
-                "seo_meta_output_path": Path(inputs["seo_meta_output_path"]),
-            },
-        )
-    normalized_legacy, legacy_errors = validate_legacy_render_payload(inputs.get("legacy_payload", {}))
+    intro_text, intro_errors = validate_intro_text_output(inputs.get("intro_text_payload", ""))
+    normalized_seo, seo_errors = validate_seo_meta_output(inputs.get("seo_meta_payload", {}))
     return (
-        normalized_legacy.get("product", {}),
-        str(normalized_legacy.get("intro_text", "")),
-        legacy_errors,
-        "legacy_combined",
-        {"legacy_llm_output_path": Path(inputs["legacy_llm_output_path"])},
+        normalized_seo.get("product", {}),
+        intro_text,
+        [*intro_errors, *seo_errors],
+        "split_tasks",
+        {
+            "intro_text_output_path": Path(inputs["intro_text_output_path"]),
+            "seo_meta_output_path": Path(inputs["seo_meta_output_path"]),
+        },
     )
 
 

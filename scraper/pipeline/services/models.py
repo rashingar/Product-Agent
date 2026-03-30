@@ -63,9 +63,6 @@ class RunArtifacts:
     seo_meta_context_path: Path | None = None
     seo_meta_prompt_path: Path | None = None
     seo_meta_output_path: Path | None = None
-    llm_context_path: Path | None = None
-    prompt_path: Path | None = None
-    llm_output_path: Path | None = None
     candidate_csv_path: Path | None = None
     published_csv_path: Path | None = None
     candidate_normalized_json_path: Path | None = None

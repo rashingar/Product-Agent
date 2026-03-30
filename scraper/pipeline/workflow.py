@@ -73,8 +73,6 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Intro task prompt: {result.artifacts.intro_text_prompt_path}")
             print(f"SEO task context: {result.artifacts.seo_meta_context_path}")
             print(f"SEO task prompt: {result.artifacts.seo_meta_prompt_path}")
-            print(f"Legacy LLM context: {result.artifacts.llm_context_path}")
-            print(f"Legacy prompt: {result.artifacts.prompt_path}")
             print(f"Run status: {result.run.status.value}")
             print(f"Metadata path: {result.artifacts.metadata_path}")
             return 0

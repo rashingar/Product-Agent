@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M29. Phase 3 now has M30-M33 completed, and the next active milestone is M34 final cleanup. Hybrid RAG shifts to Phase 4 and remains blocked until the split-LLM branch reaches final cleanup.
+Phase 2: architecture foundation is complete through M29. Phase 3 is complete through M34. Hybrid RAG shifts to Phase 4 and remains blocked until the split-LLM deterministic-presentation rollout is stable in steady state.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -73,27 +73,27 @@ Phase 2 milestones:
 
 ### Phase 3 — Split-LLM `intro_text` and deterministic presentation refactor
 
-Status: in progress
+Status: completed
 
 Goals:
 1. Replace the current single-prompt LLM handoff with two task-specific LLM tasks: `intro_text` and `seo_meta`.
 2. Remove presentation section title/body generation from the LLM contract.
 3. Build deterministic presentation sections from `presentation_source_sections` while preserving source titles when present and only cleaning/sanitizing wording.
 4. Render the final description HTML in code from LLM `intro_text`, deterministic CTA data, and cleaned deterministic source sections while keeping wrappers, classes, and styles code-owned.
-5. Add a render-side compatibility phase that can still consume legacy combined `llm_output.json` before final cleanup.
+5. Add a render-side compatibility phase during the transition and then remove it in final cleanup.
 6. Enforce the planned section failure policy and SEO keyword normalization rules in code.
 
 Hard rules:
 - Do not move HTML wrappers, CTA blocks, image wiring, or section layout ownership back to the LLM.
 - Do not silently continue when `presentation_source_sections` are absent entirely; that case must hard fail.
-- Do not remove legacy combined-output render support until the compatibility phase lands and regression coverage proves both the split-output and legacy-output paths.
+- Do not remove the compatibility path until regression coverage proves the split-output path is stable.
 
 Phase 3 milestones:
-- M30 — split the LLM contract and prepare artifacts (completed; `prepare` now writes task-specific artifacts under `work/{model}/llm/` for `intro_text` and `seo_meta`, emits `task_manifest.json` as the primary handoff index, constrains `intro_text` to plain-text one-paragraph output, defines `seo_meta` as `meta_description` plus structured `meta_keywords`, and preserves legacy combined `llm_context.json` plus `prompt.txt` only as compatibility artifacts while render still depends on `llm_output.json`)
-- M31 — add render compatibility for split outputs and legacy combined output (completed; `render` now prefers split `intro_text` and `seo_meta` outputs under `work/{model}/llm/`, still falls back to legacy `work/{model}/llm_output.json`, and regression coverage proves both paths during the compatibility phase)
+- M30 — split the LLM contract and prepare artifacts (completed; `prepare` now writes task-specific artifacts under `work/{model}/llm/` for `intro_text` and `seo_meta`, emits `task_manifest.json` as the primary handoff index, constrains `intro_text` to plain-text one-paragraph output, and defines `seo_meta` as `meta_description` plus structured `meta_keywords`)
+- M31 — add render compatibility for split outputs and legacy combined output (completed; the branch transition proved `render` against both split outputs and the temporary combined fallback before final cleanup removed the legacy path)
 - M32 — build deterministic presentation sections and section-quality policy (completed; `presentation_source_sections` are now classified as `usable`, `weak`, or `missing`; missing source sections hard fail; weak sections or exactly one missing requested section warn and continue with fewer sections; source wording is preserved apart from cleaning/sanitization; and source titles are retained when present)
 - M33 — render final description HTML and SEO normalization in code (completed; description HTML is now assembled in code from plain-text `intro_text`, deterministic CTA data, and cleaned deterministic source sections; wrappers/classes/styles remain code-owned; keyword normalization in code enforces brand/model presence while collapsing duplicates and singular/plural variants; and section-image mapping stays tied to original source order when weak sections are skipped)
-- M34 — final cleanup of legacy combined artifacts and docs (pending; acceptance criteria: the legacy single-prompt artifact contract is removed from steady-state prepare/render expectations, `render` no longer depends on combined `llm_output.json`, and user-facing/runtime docs are updated to the final steady-state artifact contract)
+- M34 — final cleanup of legacy combined artifacts and docs (completed; the legacy single-prompt artifact contract was removed from steady-state prepare/render expectations, `render` no longer depends on combined `llm_output.json`, obsolete combined prompt/schema assets were retired, and user-facing/runtime docs now describe the final split-task contract)
 
 ### Phase 4 — Hybrid RAG foundation
 
@@ -102,7 +102,7 @@ Status: pending
 Entry handoff:
 1. Keep provider-based execution under `scraper/pipeline/` as the single internal seam for supported sources.
 2. Preserve current CLI/workflow commands, accepted inputs, artifact paths, and validation semantics while future retrieval work layers above that seam.
-3. Complete M34, including compatibility-phase cleanup, before starting retrieval-layer work.
+3. Preserve the completed split-task steady-state contract while starting retrieval-layer work; do not reintroduce combined LLM artifacts.
 4. Do not reintroduce source-specific routing below the provider boundary.
 
 ## Root policy
@@ -127,9 +127,9 @@ Entry handoff:
 
 ### Shared support assets under `resources/`
 - `resources/mappings/`: `MANUFACTURER_SOURCE_MAP.json`, `catalog_taxonomy.json`, `filter_map.json`, `name_rules.json`, `differentiator_priority_map.csv`, `taxonomy_mapping_template.csv`
-- `resources/schemas/`: `electronet_schema_library.json`, `schema_index.csv`, `compact_response.schema.json`
+- `resources/schemas/`: `electronet_schema_library.json`, `schema_index.csv`
 - `resources/templates/`: `TEMPLATE_presentation.html`, `characteristics_templates.json`, `product_import_template.csv`
-- `resources/prompts/`: `master_prompt+.txt`
+- `resources/prompts/`: `intro_text_prompt.txt`, `seo_meta_prompt.txt`
 
 ### Move now
 - none; M4 completed the two previously approved safe documentation/planning moves

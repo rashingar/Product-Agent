@@ -55,8 +55,6 @@ def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> N
             "seo_meta_context_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json",
             "seo_meta_prompt_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.prompt.txt",
             "seo_meta_output_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.output.json",
-            "llm_context_path": tmp_path / "work" / "233541" / "llm_context.json",
-            "prompt_path": tmp_path / "work" / "233541" / "prompt.txt",
             "run_status": "completed",
             "metadata_path": tmp_path / "work" / "233541" / "prepare.run.json",
             "scrape_result": {
@@ -89,10 +87,9 @@ def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> N
     assert result.artifacts.seo_meta_context_path == tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json"
     assert result.artifacts.scrape_dir == tmp_path / "work" / "233541" / "scrape"
     assert result.artifacts.source_json_path == tmp_path / "work" / "233541" / "scrape" / "233541.source.json"
-    assert result.artifacts.llm_output_path == tmp_path / "work" / "233541" / "llm_output.json"
     assert result.artifacts.metadata_path == tmp_path / "work" / "233541" / "prepare.run.json"
     assert result.details["source"] == "electronet"
-    assert result.details["llm_prepare_mode"] == "split_tasks_with_legacy_compatibility"
+    assert result.details["llm_prepare_mode"] == "split_tasks"
 
 
 def test_prepare_product_wraps_execution_errors(monkeypatch) -> None:
@@ -180,9 +177,6 @@ def test_execute_run_workflow_composes_prepare_and_render_results(tmp_path: Path
             seo_meta_context_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json",
             seo_meta_prompt_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.prompt.txt",
             seo_meta_output_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.output.json",
-            llm_context_path=tmp_path / "work" / "233541" / "llm_context.json",
-            prompt_path=tmp_path / "work" / "233541" / "prompt.txt",
-            llm_output_path=tmp_path / "work" / "233541" / "llm_output.json",
             metadata_path=tmp_path / "work" / "233541" / "prepare.run.json",
         ),
         details={

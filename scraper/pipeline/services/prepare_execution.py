@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 from typing import Any, Callable
@@ -7,13 +8,11 @@ from typing import Any, Callable
 from ..full_run import execute_full_run
 from ..llm_contract import (
     build_intro_text_context,
-    build_llm_context,
     build_seo_meta_context,
     build_task_manifest,
-    render_prompt,
 )
 from ..models import CLIInput
-from ..repo_paths import INTRO_TEXT_PROMPT_PATH, MASTER_PROMPT_PATH, REPO_ROOT, SEO_META_PROMPT_PATH
+from ..repo_paths import INTRO_TEXT_PROMPT_PATH, REPO_ROOT, SEO_META_PROMPT_PATH
 from ..utils import ensure_directory, read_json, utcnow_iso, write_json, write_text
 from .metadata import maybe_write_run_metadata
 from .models import RunArtifacts, RunStatus, RunType
@@ -85,9 +84,6 @@ def execute_prepare_workflow(
     model_root = ensure_directory(work_root / cli.model)
     scrape_dir = ensure_directory(model_root / "scrape")
     llm_dir = ensure_directory(model_root / "llm")
-    llm_context_path = model_root / "llm_context.json"
-    prompt_path = model_root / "prompt.txt"
-    llm_output_path = model_root / "llm_output.json"
     task_manifest_path = llm_dir / "task_manifest.json"
     intro_text_context_path = llm_dir / "intro_text.context.json"
     intro_text_prompt_path = llm_dir / "intro_text.prompt.txt"
@@ -132,17 +128,14 @@ def execute_prepare_workflow(
             taxonomy=result["taxonomy"],
             deterministic_product=deterministic_product,
         )
-        intro_text_prompt = render_prompt(INTRO_TEXT_PROMPT_PATH.read_text(encoding="utf-8"), intro_text_context)
-        seo_meta_prompt = render_prompt(SEO_META_PROMPT_PATH.read_text(encoding="utf-8"), seo_meta_context)
-        llm_context = build_llm_context(
-            cli=scrape_cli,
-            parsed=result["parsed"],
-            taxonomy=result["taxonomy"],
-            schema_match=result["schema_match"],
-            deterministic_product=deterministic_product,
+        intro_text_prompt = INTRO_TEXT_PROMPT_PATH.read_text(encoding="utf-8").replace(
+            "{{LLM_CONTEXT_JSON}}",
+            json.dumps(intro_text_context, ensure_ascii=False, indent=2),
         )
-        prompt_template = MASTER_PROMPT_PATH.read_text(encoding="utf-8")
-        prompt_text = render_prompt(prompt_template, llm_context)
+        seo_meta_prompt = SEO_META_PROMPT_PATH.read_text(encoding="utf-8").replace(
+            "{{LLM_CONTEXT_JSON}}",
+            json.dumps(seo_meta_context, ensure_ascii=False, indent=2),
+        )
         task_manifest = build_task_manifest(
             llm_dir=str(llm_dir),
             intro_text_context_path=str(intro_text_context_path),
@@ -151,17 +144,12 @@ def execute_prepare_workflow(
             seo_meta_context_path=str(seo_meta_context_path),
             seo_meta_prompt_path=str(seo_meta_prompt_path),
             seo_meta_output_path=str(seo_meta_output_path),
-            legacy_llm_context_path=str(llm_context_path),
-            legacy_prompt_path=str(prompt_path),
-            legacy_llm_output_path=str(llm_output_path),
         )
         write_json(intro_text_context_path, intro_text_context)
         write_text(intro_text_prompt_path, intro_text_prompt)
         write_json(seo_meta_context_path, seo_meta_context)
         write_text(seo_meta_prompt_path, seo_meta_prompt)
         write_json(task_manifest_path, task_manifest)
-        write_json(llm_context_path, llm_context)
-        write_text(prompt_path, prompt_text)
         finished_at = utcnow_iso()
         metadata_path = maybe_write_run_metadata(
             model=cli.model,
@@ -183,9 +171,6 @@ def execute_prepare_workflow(
                 seo_meta_context_path=seo_meta_context_path,
                 seo_meta_prompt_path=seo_meta_prompt_path,
                 seo_meta_output_path=seo_meta_output_path,
-                llm_context_path=llm_context_path,
-                prompt_path=prompt_path,
-                llm_output_path=llm_output_path,
             ),
             requested_at=requested_at,
             started_at=started_at,
@@ -193,7 +178,7 @@ def execute_prepare_workflow(
             warnings=list(result.get("report", {}).get("warnings", [])),
             details={
                 "source": str(result.get("source", "")),
-                "llm_prepare_mode": "split_tasks_with_legacy_compatibility",
+                "llm_prepare_mode": "split_tasks",
                 "llm_primary_outputs_dir": str(llm_dir),
             },
         )
@@ -208,8 +193,6 @@ def execute_prepare_workflow(
             "seo_meta_context_path": seo_meta_context_path,
             "seo_meta_prompt_path": seo_meta_prompt_path,
             "seo_meta_output_path": seo_meta_output_path,
-            "llm_context_path": llm_context_path,
-            "prompt_path": prompt_path,
             "run_status": RunStatus.COMPLETED.value,
             "metadata_path": metadata_path,
             "scrape_result": result,
@@ -236,9 +219,6 @@ def execute_prepare_workflow(
                 seo_meta_context_path=seo_meta_context_path,
                 seo_meta_prompt_path=seo_meta_prompt_path,
                 seo_meta_output_path=seo_meta_output_path,
-                llm_context_path=llm_context_path,
-                prompt_path=prompt_path,
-                llm_output_path=llm_output_path,
             ),
             requested_at=requested_at,
             started_at=started_at,

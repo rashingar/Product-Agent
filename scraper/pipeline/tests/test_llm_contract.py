@@ -5,88 +5,12 @@ from pipeline.llm_contract import (
     build_seo_meta_context,
     validate_intro_text_output,
     validate_seo_meta_output,
-    validate_llm_output,
 )
 from pipeline.models import CLIInput, ParsedProduct, SourceProductData, SpecItem, TaxonomyResolution
 
 
 def build_intro(words: int = INTRO_MIN_WORDS) -> str:
     return " ".join(["Ξ»Ξ­ΞΎΞ·"] * words)
-
-
-def test_validate_llm_output_accepts_reduced_contract() -> None:
-    payload = {
-        "product": {
-            "meta_description": "Ξ¤ΞΏ LG GSGV80PYLL ΞµΞ―Ξ½Ξ±ΞΉ ΟΟ…Ξ³ΞµΞ―ΞΏ Ξ½Ο„ΞΏΟ…Ξ»Ξ¬Ο€Ξ± 635 Ξ»Ξ―Ο„ΟΟ‰Ξ½ ΞΌΞµ Total No Frost ΞΊΞ±ΞΉ WiFi Ξ³ΞΉΞ± Ξ¬Ξ½ΞµΟƒΞ· ΞΊΞ¬ΞΈΞµ ΞΌΞ­ΟΞ±.",
-            "meta_keywords": ["LG", "GSGV80PYLL", "Ξ¨Ο…Ξ³ΞµΞ―ΞΏ ΞΟ„ΞΏΟ…Ξ»Ξ¬Ο€Ξ±", "Total No Frost"],
-        },
-        "presentation": {
-            "intro_html": build_intro(),
-            "sections": [
-                {"title": "NatureFRESH Ξ³ΞΉΞ± ΞΊΞ±ΞΈΞ·ΞΌΞµΟΞΉΞ½Ξ® Ο†ΟΞµΟƒΞΊΞ¬Ξ΄Ξ±", "body_html": "Ξ¤ΞΏ <strong>NatureFRESH</strong> Ξ²ΞΏΞ·ΞΈΞ¬ ΟƒΟ„Ξ· ΟƒΟ‰ΟƒΟ„Ξ® ΟƒΟ…Ξ½Ο„Ξ®ΟΞ·ΟƒΞ·."},
-                {"title": "DoorCooling+ Ξ³ΞΉΞ± ΞΏΞΌΞΏΞΉΟΞΌΞΏΟΟ†Ξ· ΟΟΞΎΞ·", "body_html": "Ξ— Ξ»ΞµΞΉΟ„ΞΏΟ…ΟΞ³Ξ―Ξ± <strong>DoorCooling+</strong> ΞµΞ½ΞΉΟƒΟ‡ΟΞµΞΉ Ο„Ξ·Ξ½ ΟΟΞΎΞ·."},
-            ],
-        },
-    }
-
-    normalized, errors = validate_llm_output(payload, sections_required=2)
-
-    assert errors == []
-    assert normalized["product"]["meta_keywords"] == ["LG", "GSGV80PYLL", "Ξ¨Ο…Ξ³ΞµΞ―ΞΏ ΞΟ„ΞΏΟ…Ξ»Ξ¬Ο€Ξ±", "Total No Frost"]
-    assert normalized["presentation"]["sections"][0]["title"] == "NatureFRESH Ξ³ΞΉΞ± ΞΊΞ±ΞΈΞ·ΞΌΞµΟΞΉΞ½Ξ® Ο†ΟΞµΟƒΞΊΞ¬Ξ΄Ξ±"
-
-
-def test_validate_llm_output_rejects_old_contract_shape() -> None:
-    payload = {
-        "product": {
-            "brand": "LG",
-            "name": "bad",
-            "meta_description": "bad",
-            "meta_keywords": [],
-        },
-        "presentation": {
-            "intro_html": "",
-            "sections": [],
-        },
-    }
-
-    _, errors = validate_llm_output(payload, sections_required=0)
-
-    assert "llm_product_shape_invalid" in errors
-
-
-def test_validate_llm_output_rejects_short_intro() -> None:
-    payload = {
-        "product": {
-            "meta_description": "Ξ¤ΞΏ Ο€ΟΞΏΟΟΞ½ ΞµΞ―Ξ½Ξ±ΞΉ Ο€ΟΞ±ΞΊΟ„ΞΉΞΊΞ® Ξ»ΟΟƒΞ· Ξ³ΞΉΞ± ΞΊΞ±ΞΈΞ·ΞΌΞµΟΞΉΞ½Ξ® Ο‡ΟΞ®ΟƒΞ· ΟƒΟ„Ξ·Ξ½ ΞΊΞΏΟ…Ξ¶Ξ―Ξ½Ξ±.",
-            "meta_keywords": ["ΞΊΞΏΟ…Ξ¶Ξ―Ξ½Ξ±"],
-        },
-        "presentation": {
-            "intro_html": "Ξ£ΟΞ½Ο„ΞΏΞΌΞΏ ΞΊΞµΞ―ΞΌΞµΞ½ΞΏ.",
-            "sections": [],
-        },
-    }
-
-    _, errors = validate_llm_output(payload, sections_required=0)
-
-    assert "llm_intro_word_count_invalid" in errors
-
-
-def test_validate_llm_output_rejects_long_intro() -> None:
-    payload = {
-        "product": {
-            "meta_description": "Ξ¤ΞΏ Ο€ΟΞΏΟΟΞ½ ΞµΞ―Ξ½Ξ±ΞΉ Ο€ΟΞ±ΞΊΟ„ΞΉΞΊΞ® Ξ»ΟΟƒΞ· Ξ³ΞΉΞ± ΞΊΞ±ΞΈΞ·ΞΌΞµΟΞΉΞ½Ξ® Ο‡ΟΞ®ΟƒΞ· ΟƒΟ„Ξ·Ξ½ ΞΊΞΏΟ…Ξ¶Ξ―Ξ½Ξ±.",
-            "meta_keywords": ["ΞΊΞΏΟ…Ξ¶Ξ―Ξ½Ξ±"],
-        },
-        "presentation": {
-            "intro_html": build_intro(INTRO_MAX_WORDS + 1),
-            "sections": [],
-        },
-    }
-
-    _, errors = validate_llm_output(payload, sections_required=0)
-
-    assert "llm_intro_word_count_invalid" in errors
 
 
 def test_build_intro_text_context_excludes_section_generation() -> None:
@@ -159,6 +83,18 @@ def test_validate_intro_text_output_accepts_plain_text_only() -> None:
     assert normalized.startswith("λέξη")
 
 
+def test_validate_intro_text_output_rejects_html() -> None:
+    _, errors = validate_intro_text_output("<p>λέξη</p> " + " ".join(["λέξη"] * 119))
+
+    assert "llm_intro_text_html_invalid" in errors
+
+
+def test_validate_intro_text_output_rejects_long_intro() -> None:
+    _, errors = validate_intro_text_output(" ".join(["λέξη"] * (INTRO_MAX_WORDS + 1)))
+
+    assert "llm_intro_text_word_count_invalid" in errors
+
+
 def test_validate_seo_meta_output_accepts_product_meta_only_shape() -> None:
     normalized, errors = validate_seo_meta_output(
         {
@@ -171,4 +107,20 @@ def test_validate_seo_meta_output_accepts_product_meta_only_shape() -> None:
 
     assert errors == []
     assert normalized["product"]["meta_keywords"] == ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα"]
+
+
+def test_validate_seo_meta_output_rejects_legacy_presentation_shape() -> None:
+    _, errors = validate_seo_meta_output(
+        {
+            "product": {
+                "meta_description": "ok",
+                "meta_keywords": ["LG"],
+            },
+            "presentation": {
+                "intro_html": build_intro(),
+            },
+        }
+    )
+
+    assert errors == ["llm_seo_meta_root_shape_invalid"]
 

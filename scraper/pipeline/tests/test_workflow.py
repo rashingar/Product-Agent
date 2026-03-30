@@ -126,21 +126,16 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert result["intro_text_prompt_path"].exists()
     assert result["seo_meta_context_path"].exists()
     assert result["seo_meta_prompt_path"].exists()
-    assert result["llm_context_path"].exists()
-    assert result["prompt_path"].exists()
     assert result["metadata_path"].exists()
     task_manifest = json.loads(result["task_manifest_path"].read_text(encoding="utf-8"))
     intro_text_context = json.loads(result["intro_text_context_path"].read_text(encoding="utf-8"))
     seo_meta_context = json.loads(result["seo_meta_context_path"].read_text(encoding="utf-8"))
     intro_text_prompt = result["intro_text_prompt_path"].read_text(encoding="utf-8")
     seo_meta_prompt = result["seo_meta_prompt_path"].read_text(encoding="utf-8")
-    llm_context = json.loads(result["llm_context_path"].read_text(encoding="utf-8"))
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
-    prompt_text = result["prompt_path"].read_text(encoding="utf-8")
-    assert task_manifest["prepare_mode"] == "split_tasks_with_legacy_compatibility"
+    assert task_manifest["prepare_mode"] == "split_tasks"
     assert task_manifest["primary_outputs"]["tasks"]["intro_text"]["context_path"] == str(result["intro_text_context_path"])
     assert task_manifest["primary_outputs"]["tasks"]["seo_meta"]["prompt_path"] == str(result["seo_meta_prompt_path"])
-    assert task_manifest["compatibility"]["legacy_llm_context_path"] == str(result["llm_context_path"])
     assert intro_text_context["task"] == "intro_text"
     assert intro_text_context["writer_rules"]["plain_text_only"] is True
     assert intro_text_context["writer_rules"]["llm_owned_fields"] == ["intro_text"]
@@ -151,16 +146,6 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert seo_meta_context["writer_rules"]["required_keywords"] == ["LG", "GSGV80PYLL"]
     assert seo_meta_context["product"]["meta_title"] == "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt | eTranoulis"
     assert "always include the provided brand and mpn/model values" in seo_meta_prompt
-    assert llm_context["writer_rules"]["intro_html_rule"] == "120-180 Greek words in one intro paragraph."
-    assert len(llm_context["presentation_source_sections"]) == 2
-    assert llm_context["presentation_source_sections"][0]["source_index"] == 1
-    assert llm_context["presentation_source_sections"][0]["quality"] == "missing"
-    assert llm_context["presentation_source_sections"][0]["reason"] == "missing_extraction"
-    assert llm_context["presentation_source_sections"][1]["source_index"] == 2
-    assert llm_context["presentation_source_sections"][1]["quality"] == "missing"
-    assert llm_context["presentation_source_sections"][1]["reason"] == "missing_extraction"
-    assert "between 120 and 180 Greek words" in prompt_text
-    assert "120-180 Greek words" in prompt_text
     assert result["metadata_path"].name == "prepare.run.json"
     assert metadata["run"]["model"] == "233541"
     assert metadata["run"]["run_type"] == "prepare"
@@ -169,11 +154,8 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert metadata["artifacts"]["llm_task_manifest_path"] == str(result["task_manifest_path"])
     assert metadata["artifacts"]["intro_text_context_path"] == str(result["intro_text_context_path"])
     assert metadata["artifacts"]["seo_meta_context_path"] == str(result["seo_meta_context_path"])
-    assert metadata["artifacts"]["llm_context_path"] == str(result["llm_context_path"])
-    assert metadata["artifacts"]["prompt_path"] == str(result["prompt_path"])
     assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
-    assert metadata["artifacts"]["llm_output_path"] == str(result["model_root"] / "llm_output.json")
-    assert metadata["details"]["llm_prepare_mode"] == "split_tasks_with_legacy_compatibility"
+    assert metadata["details"]["llm_prepare_mode"] == "split_tasks"
     assert metadata["details"]["source"] == ""
 
 
@@ -905,7 +887,7 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     try:
         render_workflow(model)
     except FileNotFoundError as exc:
-        assert str(exc) == f"Missing split or legacy LLM outputs in {tmp_path / 'work' / model}"
+        assert str(exc) == f"Missing split-task LLM outputs in {tmp_path / 'work' / model / 'llm'}"
     else:
         raise AssertionError("Expected FileNotFoundError")
 
@@ -913,7 +895,7 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
     assert metadata["run"]["error_code"] == "FileNotFoundError"
-    assert "Missing split or legacy LLM outputs" in metadata["run"]["error_detail"]
+    assert "Missing split-task LLM outputs" in metadata["run"]["error_detail"]
 
 
 def test_render_workflow_builds_description_from_split_outputs_and_deterministic_sections(tmp_path: Path, monkeypatch) -> None:
@@ -1004,79 +986,6 @@ def test_render_workflow_builds_description_from_split_outputs_and_deterministic
     assert "λέξη λέξη λέξη" in description
     assert candidate_row["meta_keyword"].startswith("LG, GSGV80PYLL")
     assert candidate_row["meta_keyword"].count("Ψυγ") == 1
-
-
-def test_render_workflow_uses_legacy_combined_output_as_compatibility_fallback(tmp_path: Path, monkeypatch) -> None:
-    from pipeline import workflow
-
-    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
-    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
-
-    model = "233541"
-    scrape_dir = tmp_path / "work" / model / "scrape"
-    scrape_dir.mkdir(parents=True)
-    source = SourceProductData(
-        url="https://www.electronet.gr/example",
-        canonical_url="https://www.electronet.gr/example",
-        product_code=model,
-        brand="LG",
-        mpn="GSGV80PYLL",
-        name="Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E",
-        hero_summary="Το LG GSGV80PYLL προσφέρει μεγάλη χωρητικότητα.",
-        spec_sections=[SpecSection(section="Βασικά Χαρακτηριστικά", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")])],
-        presentation_source_html="""
-        <section>
-          <h3>NatureFRESH για καθημερινή φρεσκάδα</h3>
-          <p>Το NatureFRESH βοηθά στη σωστή συντήρηση και διατηρεί σταθερή ψύξη σε όλο τον θάλαμο,
-          προσφέροντας πρακτική οργάνωση και εύκολη καθημερινή πρόσβαση στα τρόφιμα με σταθερή απόδοση και άνεση.</p>
-        </section>
-        """,
-        besco_images=[GalleryImage(url="https://example.com/besco1.jpg", position=1, local_filename="besco1.jpg", downloaded=True)],
-    )
-    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
-    (scrape_dir / f"{model}.normalized.json").write_text(
-        json.dumps(
-            {
-                "input": {"model": model, "url": source.url, "photos": 1, "sections": 1, "skroutz_status": 1, "boxnow": 0, "price": "2099"},
-                "taxonomy": TaxonomyResolution(
-                    parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
-                    leaf_category="Ψυγεία & Καταψύκτες",
-                    sub_category="Ψυγεία Ντουλάπες",
-                    cta_url="https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
-                ).to_dict(),
-                "schema_match": SchemaMatchResult().to_dict(),
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-    (tmp_path / "work" / model / "llm_output.json").write_text(
-        json.dumps(
-            {
-                "product": {
-                    "meta_description": "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με άνετη καθημερινή χρήση.",
-                    "meta_keywords": ["Ψυγείο Ντουλάπα"],
-                },
-                "presentation": {
-                    "intro_html": build_intro(),
-                    "cta_text": "Δείτε περισσότερα εδώ",
-                    "sections": [{"title": "Παλιός τίτλος", "body_html": "Παλιό σώμα"}],
-                },
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-    result = render_workflow(model)
-    description = result["description_path"].read_text(encoding="utf-8")
-
-    assert result["run_status"] == "completed"
-    assert "NatureFRESH για καθημερινή φρεσκάδα" in description
-    assert "Παλιός τίτλος" not in description
-
 
 def test_render_workflow_fails_when_source_sections_are_missing_entirely(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
@@ -1202,8 +1111,11 @@ def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsy
             run=RunMetadata(model=cli.model, run_type=RunType.PREPARE, status=RunStatus.COMPLETED),
             artifacts=RunArtifacts(
                 scrape_dir=tmp_path / "work" / cli.model / "scrape",
-                llm_context_path=tmp_path / "work" / cli.model / "llm_context.json",
-                prompt_path=tmp_path / "work" / cli.model / "prompt.txt",
+                llm_task_manifest_path=tmp_path / "work" / cli.model / "llm" / "task_manifest.json",
+                intro_text_context_path=tmp_path / "work" / cli.model / "llm" / "intro_text.context.json",
+                intro_text_prompt_path=tmp_path / "work" / cli.model / "llm" / "intro_text.prompt.txt",
+                seo_meta_context_path=tmp_path / "work" / cli.model / "llm" / "seo_meta.context.json",
+                seo_meta_prompt_path=tmp_path / "work" / cli.model / "llm" / "seo_meta.prompt.txt",
                 metadata_path=tmp_path / "work" / cli.model / "prepare.run.json",
             ),
         )
