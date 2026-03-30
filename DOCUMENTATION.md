@@ -1,10 +1,115 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M29 completed. Full-run orchestration ownership now lives in a service-owned execution module, `run_service.py` is a thin service wrapper over that seam, and CLI/workflow behavior remains unchanged.
+M29 completed. Full-run orchestration ownership now lives in a service-owned execution module, `run_service.py` is a thin service wrapper over that seam, and CLI/workflow behavior remains unchanged. This commit is docs-only and defines the pending Phase 3 split-LLM `intro_text` and deterministic presentation branch scope before runtime changes begin.
 
 Historical note:
 - Sections below, including this M23 rename record, preserve `scrapper/` and `electronet_single_import` references only as execution evidence unless a section explicitly states current guidance.
+
+## 2026-03-30 - Branch scope design note for split-LLM `intro_text` and deterministic presentation
+
+Purpose:
+- document the full planned scope of the split-LLM deterministic-presentation branch before runtime code changes
+- keep this commit docs-only and avoid implying that any runtime or test work is already complete
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `IMPLEMENT.md`
+
+Current state:
+- `README.md` still documents single prepare outputs:
+  - `work/{model}/llm_context.json`
+  - `work/{model}/prompt.txt`
+- `scraper/pipeline/llm_contract.py` currently marks these fields as LLM-owned:
+  - `presentation.intro_html`
+  - `presentation.sections[].title`
+  - `presentation.sections[].body_html`
+  - `product.meta_description`
+  - `product.meta_keywords`
+- `scraper/pipeline/services/prepare_execution.py` still builds one LLM context and one prompt
+- `scraper/pipeline/services/render_execution.py` still reads `work/{model}/llm_output.json`
+
+Target state:
+- prepare emits two task-specific LLM handoffs:
+  - `intro_text`
+  - `seo_meta`
+- `intro_text` returns plain text only, one paragraph, 120-180 words
+- `seo_meta` returns:
+  - `meta_description`
+  - `meta_keywords`
+- presentation section title/body generation is removed from the LLM
+- presentation sections are built deterministically from `presentation_source_sections`
+- existing source section titles are kept when present
+- deterministic section handling is limited to cleaning/sanitizing unsafe or noisy markup while preserving wording
+- final description HTML is rendered in code from:
+  - the LLM `intro_text` paragraph
+  - deterministic CTA data
+  - cleaned deterministic source sections
+- HTML wrappers, CTA block, image wiring, section layout, classes, and styles become code-owned
+
+Compatibility phase:
+- render will first look for task-specific outputs:
+  - `work/{model}/intro_text.llm_output.json`
+  - `work/{model}/seo_meta.llm_output.json`
+- render will continue to accept legacy combined `work/{model}/llm_output.json` during the compatibility phase
+- final cleanup removes the combined-output fallback and the single-prompt artifact contract
+
+Deterministic ownership boundaries:
+- LLM-owned in the target branch:
+  - `intro_text`
+  - `product.meta_description`
+  - `product.meta_keywords`
+- code-owned in the target branch:
+  - presentation section selection, classification, and cleaning
+  - section titles when sourced
+  - CTA text and CTA block wiring
+  - description wrappers, classes, and styles
+  - image wiring
+  - section layout
+  - keyword deduplication
+  - singular/plural keyword collapsing
+  - final HTML assembly
+
+Section quality classifier:
+- `usable`: the source section has enough preserved text or media-backed structure to render as a deterministic feature block
+- `weak`: the source section exists but is too thin, noisy, or redundant to count confidently; warn and continue if remaining sections are sufficient
+- `missing`: the requested section slot cannot be filled from source data after extraction and cleaning
+
+Failure policy:
+- if `presentation_source_sections` are missing entirely, fail the run
+- if sections are `weak`, warn and continue with fewer sections
+- if exactly one requested section is `missing`, warn and continue with fewer sections
+- do not add a fallback that asks the LLM to regenerate missing deterministic section copy
+
+SEO rules planned for code ownership:
+- `intro_text` stays plain text only and is converted to HTML in code
+- `seo_meta` must return `meta_description` and `meta_keywords`
+- brand and model must always appear in `meta_keywords`
+- duplicate keywords and singular/plural variants are collapsed in code before CSV mapping
+
+Commands run:
+- `Get-Location | Select-Object -ExpandProperty Path`
+- `git status --short`
+- `Get-Content -Raw PLAN.md`
+- `Get-Content -Raw IMPLEMENT.md`
+- `Get-Content -Raw DOCUMENTATION.md`
+- `rg -n "intro_html|meta_description|meta_keywords|sections\\[\\]\\.title|sections\\[\\]\\.body_html|llm_output\\.json|prompt\\.txt|llm_context\\.json|prepare_execution|render_execution|presentation_source_sections" scraper resources README.md -S`
+- `rg --files scraper/pipeline/tests`
+- `rg -n "llm_contract|compact_response.schema.json|master_prompt\\+\\.txt|prompt.txt|llm_context.json" scraper/pipeline resources -S`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 140`
+- `rg -n "Phase 3|M29|Validation rules|Stop conditions|Current milestone" PLAN.md DOCUMENTATION.md IMPLEMENT.md -S`
+- `git diff --check`
+- `git diff -- PLAN.md IMPLEMENT.md DOCUMENTATION.md`
+
+Validation:
+- docs-only commit
+- `git diff --check` passed
+- no runtime tests were run because this commit only updates control docs and must not include runtime or test changes
+
+Deferred:
+- no runtime code, tests, or README changes were made in this commit
+- the compatibility phase, deterministic section pipeline, and final cleanup remain planned work only at this stage
 
 ## M29 — make run_service the true owner of full-run orchestration
 

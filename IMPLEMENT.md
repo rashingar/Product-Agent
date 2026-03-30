@@ -17,6 +17,42 @@
 8. If a seam is not cleanly extractable, document the seam and stop instead of improvising a larger refactor.
 9. Update docs continuously.
 
+## Branch execution checklist — split-LLM `intro_text` and deterministic presentation
+Commit order for this branch:
+1. docs-only scope commit updating `PLAN.md`, `DOCUMENTATION.md`, and `IMPLEMENT.md`
+2. split the single LLM handoff into task-specific `intro_text` and `seo_meta` prepare artifacts and contracts
+3. add the render compatibility phase so split task outputs are preferred but legacy combined `llm_output.json` still works
+4. move presentation section ownership to deterministic code paths with `usable` / `weak` / `missing` quality classification and the planned fail/warn rules
+5. render final description HTML in code from `intro_text`, deterministic CTA data, and cleaned deterministic presentation sections, and normalize SEO keywords in code
+6. perform final cleanup by removing the legacy combined-output path and then updating remaining runtime docs, including `README.md`
+
+Targeted test files likely to change:
+- `scraper/pipeline/tests/test_llm_contract.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+- `scraper/pipeline/tests/test_validator.py`
+
+Expected runtime artifact changes:
+- new task-specific inputs:
+  - `work/{model}/intro_text.llm_context.json`
+  - `work/{model}/intro_text.prompt.txt`
+  - `work/{model}/seo_meta.llm_context.json`
+  - `work/{model}/seo_meta.prompt.txt`
+- new task-specific outputs:
+  - `work/{model}/intro_text.llm_output.json`
+  - `work/{model}/seo_meta.llm_output.json`
+- compatibility phase:
+  - `render` accepts the new task-specific outputs first
+  - `render` still accepts legacy `work/{model}/llm_output.json`
+  - legacy `work/{model}/llm_context.json` and `work/{model}/prompt.txt` may still exist in already-prepared workdirs, but new prepare work should move to the split task artifacts
+- final steady state:
+  - `work/{model}/llm_context.json`
+  - `work/{model}/prompt.txt`
+  - `work/{model}/llm_output.json`
+  - the steady-state render path reads the task-specific `intro_text` and `seo_meta` outputs directly and no longer relies on a combined LLM artifact
+
 ## Execution docs policy
 For milestone commits:
 1. Update `DOCUMENTATION.md` on every milestone.
