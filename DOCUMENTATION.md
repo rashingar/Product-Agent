@@ -2848,6 +2848,77 @@ Risks, blockers, or skipped items:
 - the uploader still depends on recognizable localized admin error strings; if the store theme/module changes those strings, the permission probe or duplicate-folder handling may need another localization update
 - no backfill was done for older render metadata that referenced a missing upload report before this fix
 
+## 2026-03-31 - Fix OpenCart CSV import session token handling and complete model 123455 publish
+
+Goal:
+- diagnose the remaining OpenCart `csv_import` failure after successful render and image upload
+- fix the importer generically if the failure is caused by the repo-native automation
+- complete the full runtime pipeline for model `123455`
+
+Files changed:
+- `tools/opencart_import_csv_playwright.py`
+- `work/123455/llm/intro_text.output.txt`
+- `work/123455/llm/seo_meta.output.json`
+- `work/123455/candidate/123455.csv`
+- `work/123455/candidate/123455.validation.json`
+- `work/123455/candidate/description.html`
+- `work/123455/candidate/characteristics.html`
+- `work/123455/import.opencart.json`
+- `work/123455/publish.run.json`
+- `products/123455.csv`
+- `DOCUMENTATION.md`
+
+Commands run:
+- `python -m pipeline.workflow prepare --model 123455 --url "https://www.skroutz.gr/s/60276903/tcl-smart-tileorasi-115-4k-uhd-mini-led-c7k-hdr-2025-115c7k.html" --photos 7 --sections 7 --skroutz-status 1 --boxnow 0 --price 9999` from `scraper/`
+- inspected:
+  - `work/123455/llm/task_manifest.json`
+  - `work/123455/llm/intro_text.context.json`
+  - `work/123455/llm/intro_text.prompt.txt`
+  - `work/123455/llm/seo_meta.context.json`
+  - `work/123455/llm/seo_meta.prompt.txt`
+  - `work/123455/scrape/123455.source.json`
+  - `work/123455/scrape/123455.report.json`
+  - `work/123455/candidate/123455.validation.json`
+  - `work/123455/render.run.json`
+  - `work/123455/publish.run.json`
+  - `work/123455/import.opencart.json`
+  - `resources/mappings/filter_map.json`
+- `python -m pipeline.workflow render --model 123455` from `scraper/`
+- debug probe against the admin import page using Playwright after sourcing `.secrets/opencart.env`
+- `bash -lc 'DRY_RUN=1 bash tools/run_opencart_import_csv.sh 123455'`
+- `bash -lc 'bash tools/run_opencart_import_csv.sh 123455'`
+- inline Python call to `execute_publish_workflow('123455', current_job_product_file=Path(...products/123455.csv))`
+
+Implementation notes:
+- the first render attempt failed only because `intro_text.output.txt` was under the required 120-word minimum; expanding the paragraph to 129 words resolved validation
+- the remaining publish failure was caused by `tools/opencart_import_csv_playwright.py` opening the CSV import route without carrying the authenticated OpenCart `user_token`
+- confirmed the failure mode by probing the post-login import page:
+  - requested route stayed on the import URL
+  - `select[name="profile_id"]` was absent
+  - the page body showed the invalid-session-token login prompt
+- fixed the importer generically by preserving the current admin `user_token` and appending it to the CSV import route before navigation
+- kept the existing Step 1/2/3 import flow unchanged; only the authenticated route construction was corrected
+
+Validation:
+- final candidate validation succeeded: `work/123455/candidate/123455.validation.json` reports `ok: true`
+- final deliverable exists: `products/123455.csv`
+- importer dry run succeeded and reached Step 2 with:
+  - `profile_name = product_new`
+  - `selected_model_mapping = model`
+  - `mapping_ok = true`
+- final OpenCart import succeeded: `work/123455/import.opencart.json` reports `ok: true`
+- final publish metadata succeeded: `work/123455/publish.run.json` reports:
+  - `status = completed`
+  - `publish_status = success`
+  - `publish_stage = csv_import`
+- remaining validation warnings are source/template warnings only:
+  - `characteristics_template_used:schema:sha1:954c8413f2da941e78f3ddce65df522654336c8c`
+  - `characteristics_template_unresolved_fields:12`
+
+Risks, blockers, or skipped items:
+- the importer currently assumes the admin session token remains exposed as `user_token` in the post-login URL; if the OpenCart admin auth flow changes again, the route-token helper may need to be expanded
+- no dedicated automated test coverage was added for the Playwright importer in this pass because the immediate validation path was the live OpenCart dry-run plus live import
+
 ## 2026-03-31 - Separate render and publish phases for OpenCart automation
 
 Goal:

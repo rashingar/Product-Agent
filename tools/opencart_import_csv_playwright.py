@@ -9,6 +9,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
@@ -140,9 +141,22 @@ def login(page, admin_index: str, username: str, password: str, timeout_ms: int)
         raise ImportErrorRuntime("Admin login appears to have failed; still on login route.")
 
 
+def _append_session_token(target_url: str, current_url: str) -> str:
+    user_token = parse_qs(urlparse(current_url).query).get("user_token", [None])[0]
+    if not user_token:
+        return target_url
+
+    parsed = urlparse(target_url)
+    query = parse_qs(parsed.query)
+    query["user_token"] = [user_token]
+    return urlunparse(parsed._replace(query=urlencode(query, doseq=True)))
+
 
 def open_import_page(page, admin_index: str, profile: str, timeout_ms: int) -> None:
-    url = f"{admin_index}?route=extension/ka_extensions/csv_product_import/ka_product_import"
+    url = _append_session_token(
+        f"{admin_index}?route=extension/ka_extensions/csv_product_import/ka_product_import",
+        page.url,
+    )
     page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
     page.wait_for_load_state("networkidle", timeout=timeout_ms)
 
