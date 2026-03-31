@@ -1228,3 +1228,46 @@ def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, cap
     assert exit_code == 5
     assert "Validation ok: False" in captured.out
 
+
+def test_workflow_main_render_validation_failure_still_prints_operator_paths(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        assert request.model == "233541"
+        return ServiceResult(
+            run=RunMetadata(
+                model="233541",
+                run_type=RunType.RENDER,
+                status=RunStatus.FAILED,
+                warnings=["Candidate failed validation; skipping publish to products/."],
+                error_code=ServiceErrorCode.VALIDATION_FAILURE.value,
+                error_detail="Candidate validation failed",
+            ),
+            artifacts=RunArtifacts(
+                candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+                validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+                metadata_path=tmp_path / "work" / "233541" / "render.run.json",
+            ),
+            details={"validation_ok": False, "published": False},
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 5
+    assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
+    assert f"Validation report: {tmp_path / 'work' / '233541' / 'candidate' / '233541.validation.json'}" in captured.out
+    assert "Validation ok: False" in captured.out
+    assert "Render status: failure" in captured.out
+    assert "Publish status: not_attempted" in captured.out
+    assert "Publish stage: -" in captured.out
+    assert "Publish message: Publish skipped because render did not publish products/233541.csv." in captured.out
+    assert "Run status: failed" in captured.out
+    assert f"Metadata path: {tmp_path / 'work' / '233541' / 'render.run.json'}" in captured.out
+

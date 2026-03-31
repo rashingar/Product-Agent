@@ -53,7 +53,13 @@ def test_service_modules_do_not_import_workflow() -> None:
     assert "from .. import workflow" not in inspect.getsource(render_service)
 
 
-def _build_prepare_execution_result(root: Path, *, model: str = "233541", warnings: list[str] | None = None) -> PrepareExecutionResult:
+def _build_prepare_execution_result(
+    root: Path,
+    *,
+    model: str = "233541",
+    warnings: list[str] | None = None,
+    run_status: RunStatus = RunStatus.COMPLETED,
+) -> PrepareExecutionResult:
     warnings = ["prepare warning"] if warnings is None else warnings
     model_root = root / "work" / model
     scrape_dir = model_root / "scrape"
@@ -69,7 +75,7 @@ def _build_prepare_execution_result(root: Path, *, model: str = "233541", warnin
         seo_meta_context_path=llm_dir / "seo_meta.context.json",
         seo_meta_prompt_path=llm_dir / "seo_meta.prompt.txt",
         seo_meta_output_path=llm_dir / "seo_meta.output.json",
-        run_status=RunStatus.COMPLETED,
+        run_status=run_status,
         metadata_path=model_root / "prepare.run.json",
         scrape_result=PrepareExecutionScrapeResult(
             source="electronet",
@@ -219,6 +225,34 @@ def test_prepare_product_keeps_detail_defaults_when_scrape_result_fields_are_mis
     assert result.artifacts.scrape_dir == tmp_path / "work" / "233541" / "scrape"
     assert result.artifacts.intro_text_prompt_path == tmp_path / "work" / "233541" / "llm" / "intro_text.prompt.txt"
     assert result.artifacts.seo_meta_output_path == tmp_path / "work" / "233541" / "llm" / "seo_meta.output.json"
+
+
+def test_prepare_product_preserves_execution_run_status_without_setting_error_fields(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import prepare_service
+
+    monkeypatch.setattr(prepare_service, "WORK_ROOT", tmp_path / "work")
+
+    def fake_execute_prepare_workflow(_cli, *, work_root):
+        assert work_root == tmp_path / "work"
+        return _build_prepare_execution_result(
+            tmp_path,
+            warnings=["prepare warning"],
+            run_status=RunStatus.FAILED,
+        )
+
+    monkeypatch.setattr(prepare_service, "execute_prepare_workflow", fake_execute_prepare_workflow)
+
+    result = prepare_product(PrepareRequest(model="233541", url="https://www.electronet.gr/example"))
+
+    assert result.run.status == RunStatus.FAILED
+    assert result.run.warnings == ["prepare warning"]
+    assert result.run.error_code is None
+    assert result.run.error_detail is None
+    assert result.artifacts.metadata_path == tmp_path / "work" / "233541" / "prepare.run.json"
+    assert result.artifacts.raw_html_path == tmp_path / "work" / "233541" / "scrape" / "233541.raw.html"
+    assert result.artifacts.source_json_path == tmp_path / "work" / "233541" / "scrape" / "233541.source.json"
+    assert result.artifacts.scrape_normalized_json_path == tmp_path / "work" / "233541" / "scrape" / "233541.normalized.json"
+    assert result.artifacts.source_report_json_path == tmp_path / "work" / "233541" / "scrape" / "233541.report.json"
 
 
 def test_prepare_product_wraps_execution_errors(monkeypatch) -> None:
