@@ -45,6 +45,13 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 PYTHON_SCRIPT="${PYTHON_SCRIPT:-${SCRIPT_DIR}/opencart_upload_images.py}"
 # ------------------------------------
 
+REPO_ROOT_PY="${REPO_ROOT}"
+PYTHON_SCRIPT_PY="${PYTHON_SCRIPT}"
+if command -v cygpath >/dev/null 2>&1; then
+  REPO_ROOT_PY="$(cygpath -w "${REPO_ROOT}")"
+  PYTHON_SCRIPT_PY="$(cygpath -w "${PYTHON_SCRIPT}")"
+fi
+
 if [[ -z "${ADMIN_USER}" || -z "${ADMIN_PASS}" ]]; then
   echo "ERROR: missing OPENCART_ADMIN_USER or OPENCART_ADMIN_PASS" >&2
   exit 1
@@ -251,9 +258,9 @@ if [[ -z "${MODEL}" ]]; then
 fi
 
 CMD=(
-  "${PYTHON_BIN}" "${PYTHON_SCRIPT}"
+  "${PYTHON_BIN}" "${PYTHON_SCRIPT_PY}"
   --model "${MODEL}"
-  --repo-root "${REPO_ROOT}"
+  --repo-root "${REPO_ROOT_PY}"
   --store-base "${STORE_BASE}"
   --admin-path "${ADMIN_PATH}"
   --username "${ADMIN_USER}"
@@ -268,5 +275,9 @@ echo "[opencart-upload] repo_root=${REPO_ROOT} model=${MODEL} resolved_from=${RE
 if [[ -n "${RESOLVED_INPUT}" ]]; then
   echo "[opencart-upload] resolved_input=${RESOLVED_INPUT}"
 fi
+
+# Prevent Git Bash / MSYS from rewriting the OpenCart web admin path such as
+# `/ipadmin/index.php` into a local Windows path before Python receives it.
+export MSYS2_ARG_CONV_EXCL="${ADMIN_PATH}"
 
 exec "${CMD[@]}"

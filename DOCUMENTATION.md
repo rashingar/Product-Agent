@@ -2800,3 +2800,50 @@ Notes:
   - `Smart Tv`: `Google TV`
   - `Ανάλυση`: `ULTRA HD (4K)`
   - `Μέγεθος Οθόνης`: `115"`
+## 2026-03-31 - OpenCart post-publish retry and diagnostics for model 123455
+
+Goal:
+- retry the post-publish OpenCart image upload for `products/123455.csv`
+- diagnose the failure mode from login, cookies, body preview, and filemanager responses
+- fix the uploader generically where the failure was caused by runtime/script issues
+
+Files changed:
+- `tools/run_opencart_image_upload.sh`
+- `tools/opencart_upload_images.py`
+- `work/123455/upload.opencart.json`
+- `DOCUMENTATION.md`
+
+Commands run:
+- `bash tools/run_opencart_image_upload.sh` with `CURRENT_JOB_PRODUCT_FILE=products/123455.csv`
+- `rg -n "permission_probe|user_token|body preview|cookie|login failed|filemanager|opencart" -S tools scraper`
+- `python tools/opencart_upload_images.py --model 123455 --repo-root ... --store-base https://www.etranoulis.gr --admin-path /ipadmin/index.php --username ... --password ... --report-file work/123455/upload.opencart.json`
+- inline Python diagnostics calling `login()` and `permission_probe()` from `tools/opencart_upload_images.py`
+- final verification: `bash tools/run_opencart_image_upload.sh` with `CURRENT_JOB_PRODUCT_FILE=products/123455.csv`
+
+Implementation notes:
+- fixed Git Bash / MSYS argument conversion in `tools/run_opencart_image_upload.sh` by converting repo/script paths with `cygpath` while excluding the OpenCart admin web path from MSYS rewriting
+- extended `tools/opencart_upload_images.py` to recognize localized Greek OpenCart responses for:
+  - missing-folder responses used by the modify-permission probe
+  - duplicate-folder responses during nested directory creation
+- kept the upload flow and filemanager endpoints unchanged; only robustness around runtime path handling and localized admin responses was updated
+
+Validation:
+- first retry showed the shell wrapper was building a bad login target after path mangling:
+  - POST target became `https://www.etranoulis.gr/C:/Program Files/Git/ipadmin/index.php?route=common/login`
+  - HTTP `404`
+  - body preview was the storefront not-found page, not the admin login/token flow
+- direct PowerShell run confirmed admin login/session were valid once the wrapper issue was bypassed:
+  - `user_token` present
+  - cookies present: `OCSESSID`
+  - permission probe returned Greek JSON error `Ειδοποίηση: Δεν υπάρχει ο φάκελος!`
+- final shell retry succeeded end-to-end
+- upload report now exists at `work/123455/upload.opencart.json`
+- final upload report shows:
+  - `login.ok = true`
+  - `permission_probe.can_modify = true`
+  - gallery upload success
+  - besco upload success
+
+Risks, blockers, or skipped items:
+- the uploader still depends on recognizable localized admin error strings; if the store theme/module changes those strings, the permission probe or duplicate-folder handling may need another localization update
+- no backfill was done for older render metadata that referenced a missing upload report before this fix
