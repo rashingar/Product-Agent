@@ -255,6 +255,76 @@ Acceptance criteria:
 Completion note:
 - completed; `scraper/pipeline/services/metadata.py` now raises structured metadata-write failures instead of silently ignoring them, `prepare_service.py` and `render_service.py` now distinguish degraded known-outcome results from hard failures when metadata or required artifacts are missing, and workflow-facing prepare/render summaries keep the same public command shape while showing `Metadata path: None` when degraded results do not have a persisted metadata file
 
+### Branch scope — prepare-stage provider-resolution refactor
+
+Status: scope defined
+
+Purpose:
+1. Freeze the exact branch scope for extracting the provider-resolution seam out of `scraper/pipeline/prepare_stage.py` first, without changing observable runtime behavior.
+2. Keep this branch limited to provider resolution and provider-backed source preparation concerns that currently sit inline inside `prepare_stage.py`.
+3. Preserve the current public workflow entrypoint, prepare/render ownership split, artifact paths, warnings, and failures while the seam is isolated.
+
+Branch goal:
+1. Move the provider-resolution decision path behind a dedicated internal seam while keeping `python -m pipeline.workflow prepare ...` behavior unchanged.
+
+Proposed extracted module:
+1. `scraper/pipeline/provider_resolution.py`
+
+Proposed seam responsibilities:
+1. Source detection.
+2. Runtime provider registry bootstrap.
+3. Source-to-`provider_id` mapping.
+4. `registry.require(...)`.
+5. `provider.fetch_snapshot(...)`.
+6. `provider.normalize(...)`.
+7. Conversion from `ProviderResult` into the existing local fetch/parsed shape consumed by `prepare_stage.py`.
+8. Final URL scope validation.
+9. Source-specific product-page checks and operator hints that currently run before gallery, taxonomy, and schema work.
+
+Proposed seam result type:
+1. `PrepareStageProviderResolutionResult`
+
+Proposed result fields:
+1. `source_type`
+2. `provider_id`
+3. `final_url`
+4. `fetch_result`
+5. `parsed_payload`
+6. `normalization_result`
+7. `warnings`
+
+Result contract notes:
+1. `fetch_result`, `parsed_payload`, and `normalization_result` are intentionally existing local shapes reused by `prepare_stage.py`; this branch does not redesign persistence payloads or schema-matching inputs.
+2. `warnings` must preserve current warning text, ordering, and emission points as observed by the active runtime.
+
+Invariants that must not change:
+1. Public workflow entrypoint and CLI flags remain unchanged.
+2. Prepare remains scrape-only plus LLM-handoff-only; render remains the sole owner of candidate and publish outputs.
+3. Output artifact paths remain exactly under the current `work/{model}/...` and `products/{model}.csv` locations.
+4. Artifact persistence stays where it is in this branch; no persistence extraction lands here.
+5. Schema matching stays where it is in this branch; no schema-matching extraction lands here.
+6. The split-task LLM handoff contract stays unchanged.
+7. Supported-source routing behavior, source-specific validation behavior, and error/warning behavior stay unchanged.
+8. The existing local conversion from provider output into prepare-stage fetch/parsed data remains behaviorally identical.
+
+Explicit non-goals:
+1. No public entrypoint or CLI behavior changes.
+2. No prepare/render ownership-boundary changes.
+3. No output artifact path changes.
+4. No artifact-persistence extraction in this branch.
+5. No schema-matching extraction in this branch.
+6. No split-task LLM handoff contract changes.
+7. No provider fetch/normalize behavior changes beyond relocating the orchestration seam.
+
+Test strategy for the next commits:
+1. Add focused regression coverage around the extracted seam using the current supported-source matrix so source detection, provider selection, final URL validation, and product-page guardrails are asserted directly.
+2. Keep prepare-stage and workflow regression coverage unchanged in meaning so the refactor proves no observable behavior change for Electronet, Skroutz, and currently supported manufacturer flows.
+3. Reuse committed fixtures and current workflow-oriented tests rather than introducing a new runtime path.
+4. Run targeted provider-selection and prepare/workflow tests during each extraction step, then run the full scraper test suite before closing the branch.
+
+Planned sequencing after this branch:
+1. The next follow-up branch after this provider-resolution extraction should isolate artifact persistence out of `prepare_stage.py`.
+
 ### Phase 4 — Hybrid RAG foundation
 
 Status: pending

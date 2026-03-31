@@ -3,6 +3,70 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Freeze prepare-stage provider-resolution refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-provider-resolution`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, or workflow entrypoints
+
+Scope framing:
+- this section records planned branch work for extracting the provider-resolution seam out of `scraper/pipeline/prepare_stage.py`
+- it is not a statement that the seam has already been extracted in the current runtime
+- active runtime behavior remains unchanged in this commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- branch goal:
+  - extract the provider-resolution seam out of `scraper/pipeline/prepare_stage.py` first, without changing observable behavior
+- concrete seam responsibilities:
+  - source detection
+  - runtime provider registry bootstrap
+  - source-to-`provider_id` mapping
+  - `registry.require(...)`
+  - `provider.fetch_snapshot(...)`
+  - `provider.normalize(...)`
+  - conversion from `ProviderResult` into the existing local fetch/parsed shape
+  - final URL scope validation
+  - source-specific product-page checks and operator hints that currently run before gallery/taxonomy/schema work
+- proposed extracted module:
+  - `scraper/pipeline/provider_resolution.py`
+- proposed seam result type:
+  - `PrepareStageProviderResolutionResult`
+  - planned fields: `source_type`, `provider_id`, `final_url`, `fetch_result`, `parsed_payload`, `normalization_result`, `warnings`
+- invariants recorded in `PLAN.md`:
+  - public workflow entrypoint and CLI behavior stay unchanged
+  - prepare/render ownership boundaries stay unchanged
+  - output artifact paths stay unchanged
+  - artifact persistence is not extracted in this branch
+  - schema matching is not extracted in this branch
+  - the split-task LLM handoff contract stays unchanged
+  - supported-source behavior and current warning/error behavior stay unchanged
+- next-commit test strategy:
+  - add focused regression coverage around source detection, provider selection, final URL validation, and pre-gallery source-specific page checks
+  - keep prepare-stage and workflow regression meaning unchanged across Electronet, Skroutz, and supported manufacturer flows
+  - use existing fixtures and workflow-oriented tests, then run the full scraper suite before branch completion
+- planned follow-up branch after this one:
+  - artifact persistence extraction
+
+Commands run:
+- `git status --short`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content README.md`
+- `rg -n "Branch scope|artifact persistence|provider-resolution|prepare_stage.py|typed execution results|metadata and error semantics hardening|Phase 4" PLAN.md DOCUMENTATION.md README.md`
+- `Get-Content PLAN.md | Select-Object -Skip 240 -First 60`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 120`
+- `git diff --stat`
+
+Validation:
+- scope is now documented in `PLAN.md` and logged in `DOCUMENTATION.md`
+- this commit remains docs-only and does not modify Python files, tests, imports, or runtime behavior
+- `README.md` did not require changes for this scope-freeze commit
+
 ## 2026-04-01 - Finalize metadata and error semantics hardening docs
 
 Goal:
