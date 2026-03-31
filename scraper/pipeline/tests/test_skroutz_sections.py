@@ -7,8 +7,8 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from pipeline.fetcher import ElectronetFetcher
-from pipeline.full_run import _select_skroutz_image_backed_sections
 from pipeline.models import CLIInput, FetchResult
+from pipeline.prepare_stage import _select_skroutz_image_backed_sections
 from pipeline.skroutz_sections import extract_skroutz_section_window, is_placeholder_image_url, resolve_skroutz_section_image_url
 from pipeline.workflow import prepare_workflow, render_workflow
 

@@ -7,7 +7,6 @@ from pipeline.models import CLIInput, ParsedProduct, SchemaMatchResult, SourcePr
 from pipeline.providers.base import ProviderError
 from pipeline.providers.models import ProviderErrorCode, ProviderStage
 from pipeline.services import (
-    FullRunRequest,
     PrepareRequest,
     PublishRequest,
     RenderRequest,
@@ -20,18 +19,15 @@ from pipeline.services import (
     ServiceResult,
     prepare_product,
     publish_product,
-    run_product,
     render_product,
 )
 
 
 def test_service_modules_do_not_import_workflow() -> None:
-    from pipeline.services import prepare_service, render_service, run_execution, run_service
+    from pipeline.services import prepare_service, render_service
 
     assert "from .. import workflow" not in inspect.getsource(prepare_service)
     assert "from .. import workflow" not in inspect.getsource(render_service)
-    assert "from .. import workflow" not in inspect.getsource(run_execution)
-    assert "from .. import workflow" not in inspect.getsource(run_service)
 
 
 def test_prepare_product_maps_execution_result(tmp_path: Path, monkeypatch) -> None:
@@ -275,148 +271,4 @@ def test_prepare_product_maps_provider_failures_to_stable_service_codes(monkeypa
     assert excinfo.value.details["url"] == "https://www.skroutz.gr/example"
 
 
-def test_execute_run_workflow_composes_prepare_and_render_results(tmp_path: Path, monkeypatch) -> None:
-    from pipeline.services import run_execution
-
-    call_order: list[str] = []
-    prepare_result = ServiceResult(
-        run=RunMetadata(model="233541", run_type=RunType.PREPARE, status=RunStatus.COMPLETED, warnings=["prepare warning"]),
-        artifacts=RunArtifacts(
-            model_root=tmp_path / "work" / "233541",
-            scrape_dir=tmp_path / "work" / "233541" / "scrape",
-            llm_dir=tmp_path / "work" / "233541" / "llm",
-            raw_html_path=tmp_path / "work" / "233541" / "scrape" / "233541.raw.html",
-            source_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.source.json",
-            scrape_normalized_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.normalized.json",
-            source_report_json_path=tmp_path / "work" / "233541" / "scrape" / "233541.report.json",
-            llm_task_manifest_path=tmp_path / "work" / "233541" / "llm" / "task_manifest.json",
-            intro_text_context_path=tmp_path / "work" / "233541" / "llm" / "intro_text.context.json",
-            intro_text_prompt_path=tmp_path / "work" / "233541" / "llm" / "intro_text.prompt.txt",
-            intro_text_output_path=tmp_path / "work" / "233541" / "llm" / "intro_text.output.txt",
-            seo_meta_context_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json",
-            seo_meta_prompt_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.prompt.txt",
-            seo_meta_output_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.output.json",
-            metadata_path=tmp_path / "work" / "233541" / "prepare.run.json",
-        ),
-        details={
-            "source": "electronet",
-            "product_name": "LG Example",
-            "product_code": "233541",
-            "brand": "LG",
-            "taxonomy_path": "A > B > C",
-            "matched_schema_id": "schema-1",
-            "schema_score": 0.9,
-        },
-    )
-    render_result = ServiceResult(
-        run=RunMetadata(model="233541", run_type=RunType.RENDER, status=RunStatus.COMPLETED, warnings=["render warning"]),
-        artifacts=RunArtifacts(
-            model_root=tmp_path / "work" / "233541",
-            scrape_dir=tmp_path / "work" / "233541" / "scrape",
-            candidate_dir=tmp_path / "work" / "233541" / "candidate",
-            candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
-            published_csv_path=tmp_path / "products" / "233541.csv",
-            candidate_normalized_json_path=tmp_path / "work" / "233541" / "candidate" / "233541.normalized.json",
-            validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
-            description_html_path=tmp_path / "work" / "233541" / "candidate" / "description.html",
-            characteristics_html_path=tmp_path / "work" / "233541" / "candidate" / "characteristics.html",
-            metadata_path=tmp_path / "work" / "233541" / "render.run.json",
-        ),
-        details={"validation_ok": True, "published": True},
-    )
-    publish_result = ServiceResult(
-        run=RunMetadata(
-            model="233541",
-            run_type=RunType.PUBLISH,
-            status=RunStatus.FAILED,
-            warnings=["OpenCart publish failed during image_upload: exit=12"],
-            error_code=ServiceErrorCode.PUBLISH_FAILURE.value,
-            error_detail="OpenCart publish failed during image_upload: exit=12",
-        ),
-        artifacts=RunArtifacts(
-            model_root=tmp_path / "work" / "233541",
-            published_csv_path=tmp_path / "products" / "233541.csv",
-            metadata_path=tmp_path / "work" / "233541" / "publish.run.json",
-        ),
-        details={
-            "publish_attempted": True,
-            "publish_status": "failed",
-            "publish_stage": "image_upload",
-            "publish_message": "OpenCart publish failed during image_upload: exit=12",
-            "upload_report_path": str(tmp_path / "work" / "233541" / "upload.opencart.json"),
-            "import_report_path": str(tmp_path / "work" / "233541" / "import.opencart.json"),
-        },
-    )
-
-    def fake_prepare(request: PrepareRequest) -> ServiceResult:
-        call_order.append("prepare")
-        assert request.model == "233541"
-        return prepare_result
-
-    def fake_render(request: RenderRequest) -> ServiceResult:
-        call_order.append("render")
-        assert request.model == "233541"
-        return render_result
-
-    def fake_publish(request: PublishRequest) -> ServiceResult:
-        call_order.append("publish")
-        assert request.model == "233541"
-        assert request.current_job_product_file == tmp_path / "products" / "233541.csv"
-        return publish_result
-
-    monkeypatch.setattr(run_execution, "prepare_product", fake_prepare)
-    monkeypatch.setattr(run_execution, "render_product", fake_render)
-    monkeypatch.setattr(run_execution, "publish_product", fake_publish)
-
-    result = run_execution.execute_run_workflow(FullRunRequest(model="233541", url="https://www.electronet.gr/example"))
-
-    assert call_order == ["prepare", "render", "publish"]
-    assert result.run.run_type == RunType.FULL
-    assert result.run.status == RunStatus.COMPLETED
-    assert result.run.warnings == ["prepare warning", "render warning", "OpenCart publish failed during image_upload: exit=12"]
-    assert result.artifacts.llm_dir == tmp_path / "work" / "233541" / "llm"
-    assert result.artifacts.llm_task_manifest_path == tmp_path / "work" / "233541" / "llm" / "task_manifest.json"
-    assert result.artifacts.candidate_csv_path == tmp_path / "work" / "233541" / "candidate" / "233541.csv"
-    assert result.details["prepare_metadata_path"] == str(tmp_path / "work" / "233541" / "prepare.run.json")
-    assert result.details["render_metadata_path"] == str(tmp_path / "work" / "233541" / "render.run.json")
-    assert result.details["validation_ok"] is True
-    assert result.details["product_name"] == "LG Example"
-    assert result.details["publish_status"] == "failed"
-    assert result.details["publish_stage"] == "image_upload"
-    assert result.details["publish_metadata_path"] == str(tmp_path / "work" / "233541" / "publish.run.json")
-
-
-def test_run_product_delegates_to_service_owned_execution(monkeypatch) -> None:
-    from pipeline.services import run_service
-
-    expected = ServiceResult(
-        run=RunMetadata(model="233541", run_type=RunType.FULL, status=RunStatus.COMPLETED),
-        artifacts=RunArtifacts(),
-        details={},
-    )
-
-    def fake_execute_run_workflow(request: FullRunRequest) -> ServiceResult:
-        assert request.model == "233541"
-        assert request.url == "https://www.electronet.gr/example"
-        return expected
-
-    monkeypatch.setattr(run_service, "execute_run_workflow", fake_execute_run_workflow)
-
-    assert run_product(FullRunRequest(model="233541", url="https://www.electronet.gr/example")) is expected
-
-
-def test_run_product_wraps_execution_errors(monkeypatch) -> None:
-    from pipeline.services import run_service
-
-    def fake_execute_run_workflow(_request: FullRunRequest) -> ServiceResult:
-        raise RuntimeError("full run exploded")
-
-    monkeypatch.setattr(run_service, "execute_run_workflow", fake_execute_run_workflow)
-
-    with pytest.raises(ServiceError) as excinfo:
-        run_product(FullRunRequest(model="233541", url="https://www.electronet.gr/example"))
-
-    assert excinfo.value.code == ServiceErrorCode.UNEXPECTED_FAILURE.value
-    assert excinfo.value.message == "full run exploded"
-    assert excinfo.value.retryable is False
 

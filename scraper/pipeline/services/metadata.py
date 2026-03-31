@@ -12,7 +12,6 @@ _METADATA_FILENAMES = {
     RunType.PREPARE: "prepare.run.json",
     RunType.RENDER: "render.run.json",
     RunType.PUBLISH: "publish.run.json",
-    RunType.FULL: "full.run.json",
 }
 
 
