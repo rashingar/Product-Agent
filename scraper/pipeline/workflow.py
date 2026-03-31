@@ -92,8 +92,17 @@ def main(argv: list[str] | None = None) -> int:
         model = resolve_model_for_render(args)
         result = render_product(RenderRequest(model=model))
         print(f"Candidate CSV: {result.artifacts.candidate_csv_path}")
+        if result.artifacts.published_csv_path is not None:
+            print(f"Published CSV: {result.artifacts.published_csv_path}")
         print(f"Validation report: {result.artifacts.validation_report_path}")
         print(f"Validation ok: {bool(result.details.get('validation_ok', False))}")
+        if result.artifacts.published_csv_path is not None:
+            print(f"OpenCart upload attempted: {bool(result.details.get('upload_attempted', False))}")
+            print(f"OpenCart upload ok: {bool(result.details.get('upload_ok', False))}")
+            if result.details.get("upload_report_path"):
+                print(f"OpenCart upload report: {result.details.get('upload_report_path')}")
+            if result.details.get("upload_warning"):
+                print(f"OpenCart upload warning: {result.details.get('upload_warning')}")
         print(f"Run status: {result.run.status.value}")
         print(f"Metadata path: {result.artifacts.metadata_path}")
         return 0 if bool(result.details.get("validation_ok", False)) else exit_code_for_service_error(result.run.error_code)

@@ -34,10 +34,20 @@ Supported runtime URL scope is determined by the code-supported source-detection
 ## Default Flow
 
 1. Run `python -m pipeline.workflow prepare ...` from `scraper/`.
-2. Read `work/{model}/llm_context.json` and `work/{model}/prompt.txt`.
-3. Produce `work/{model}/llm_output.json` using the reduced response contract.
+2. Read:
+   - `work/{model}/llm/task_manifest.json`
+   - `work/{model}/llm/intro_text.context.json`
+   - `work/{model}/llm/intro_text.prompt.txt`
+   - `work/{model}/llm/seo_meta.context.json`
+   - `work/{model}/llm/seo_meta.prompt.txt`
+3. Produce:
+   - `work/{model}/llm/intro_text.output.txt`
+   - `work/{model}/llm/seo_meta.output.json`
 4. Run `python -m pipeline.workflow render --model {model}` from `scraper/`.
-5. Inspect `work/{model}/candidate/{model}.validation.json`.
+5. When render publishes `products/{model}.csv`, the runtime must then attempt OpenCart image upload through `tools/run_opencart_image_upload.sh` from repo root with `CURRENT_JOB_PRODUCT_FILE` set to that exact published CSV path.
+6. Inspect:
+   - `work/{model}/candidate/{model}.validation.json`
+   - `work/{model}/upload.opencart.json`
 
 ## Source Of Truth
 
@@ -66,13 +76,10 @@ Local code owns:
 
 ## LLM Responsibilities
 
-The LLM stage returns JSON only for:
+The LLM stage writes only:
+- `intro_text`
 - `product.meta_description`
 - `product.meta_keywords`
-- `presentation.intro_html`
-- `presentation.cta_text`
-- `presentation.sections[].title`
-- `presentation.sections[].body_html`
 
 ## Outputs
 
@@ -81,8 +88,11 @@ Prepare stage writes:
 - `work/{model}/scrape/{model}.source.json`
 - `work/{model}/scrape/{model}.normalized.json`
 - `work/{model}/scrape/{model}.report.json`
-- `work/{model}/llm_context.json`
-- `work/{model}/prompt.txt`
+- `work/{model}/llm/task_manifest.json`
+- `work/{model}/llm/intro_text.context.json`
+- `work/{model}/llm/intro_text.prompt.txt`
+- `work/{model}/llm/seo_meta.context.json`
+- `work/{model}/llm/seo_meta.prompt.txt`
 
 Render stage writes:
 - `work/{model}/candidate/{model}.csv`
@@ -90,11 +100,14 @@ Render stage writes:
 - `work/{model}/candidate/{model}.validation.json`
 - `work/{model}/candidate/description.html`
 - `work/{model}/candidate/characteristics.html`
+- `products/{model}.csv` when validation passes
+- `work/{model}/upload.opencart.json` when the post-render OpenCart image upload runs
 
 ## Validation
 
 - `work/{model}/candidate/{model}.validation.json` is the final machine-readable health report.
 - If `products/{model}.csv` exists, compare candidate output against it field by field.
+- OpenCart image upload is post-render and warning-only; a successful render/publish remains valid if upload later fails.
 - Prefer fixing pipeline behavior instead of patching generated files by hand.
 
 ## Legacy Workflow

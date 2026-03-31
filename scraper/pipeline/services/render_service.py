@@ -24,6 +24,11 @@ def render_product(request: RenderRequest) -> ServiceResult:
     scrape_dir = model_root / "scrape"
     validation_report = result["validation_report"]
     validation_ok = bool(validation_report.get("ok", False))
+    run_warnings = list(validation_report.get("warnings", []))
+    upload_warning_value = result.get("upload_warning")
+    upload_warning = str(upload_warning_value) if upload_warning_value else None
+    if upload_warning:
+        run_warnings.append(upload_warning)
     error_code = None if validation_ok else ServiceErrorCode.VALIDATION_FAILURE.value
     error_detail = None if validation_ok else "Candidate validation failed"
     return ServiceResult(
@@ -31,7 +36,7 @@ def render_product(request: RenderRequest) -> ServiceResult:
             model=request.model,
             run_type=RunType.RENDER,
             status=RunStatus(result["run_status"]),
-            warnings=list(validation_report.get("warnings", [])),
+            warnings=run_warnings,
             error_code=error_code,
             error_detail=error_detail,
         ),
@@ -55,6 +60,10 @@ def render_product(request: RenderRequest) -> ServiceResult:
         ),
         details={
             "validation_ok": validation_ok,
+            "upload_attempted": bool(result.get("upload_attempted", False)),
+            "upload_ok": result.get("upload_ok"),
+            "upload_report_path": str(result["upload_report_path"]) if result.get("upload_report_path") else None,
+            "upload_warning": upload_warning,
         },
     )
 

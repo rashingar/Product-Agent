@@ -14,6 +14,7 @@ Phase 2: architecture foundation is complete through M29. Phase 3 completed the 
 - Current runtime documentation treats several support files as source-of-truth inputs and now reads them from `resources/` through the centralized path layer.
 - `products/` and `work/` must remain stable during early cleanup.
 - `work/{model}/...` is reserved for runtime artifacts.
+- Successful render publish now continues with a warning-only OpenCart image upload attempt through `tools/run_opencart_image_upload.sh`, using `CURRENT_JOB_PRODUCT_FILE` for the exact current-job published CSV path.
 - Legacy historical references exist and must be archived, not deleted casually.
 - Historical milestone evidence below may still mention `scrapper/` and `electronet_single_import` as pre-M23 names.
 

@@ -76,6 +76,9 @@ For milestone commits:
 - Treat current runtime support assets as sensitive until path resolution is centralized.
 - Treat `products/` as final deliverable storage.
 - Treat `work/{model}/...` as runtime artifact storage.
+- After a successful render publish to `products/{model}.csv`, invoke `tools/run_opencart_image_upload.sh` from repo root and pass the exact published path through `CURRENT_JOB_PRODUCT_FILE`.
+- Keep OpenCart image upload warning-only: upload failures must not invalidate a successful render/publish result or remove generated files.
+- Preserve the uploader default admin path at `/ipadmin/index.php` unless `OPENCART_ADMIN_PATH` is already provided by the environment.
 - Keep committed fixtures and regression samples under `scraper/pipeline/tests/fixtures/...`; treat `work/` and `scraper/work/` as runtime/debug only.
 - Do not place planning docs inside model runtime folders.
 - Do not reintroduce the old script-driven workflow implicitly.

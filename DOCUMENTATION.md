@@ -2699,3 +2699,104 @@ No cleanup follow-up is scheduled by default. If approved, open a narrowly scope
 - `work/229957_skroutz_debug.html` exists only as an ignored local file and was intentionally left untracked
 - no `.gitignore` change was needed or made
 - the remaining test failures are outside this migration's edit scope; the fixture path migration stopped at test-layer changes and the minimal allowed control-file updates
+
+## 2026-03-31 - Warning-only OpenCart image upload after render publish
+
+Goal:
+- update the active control-docs in the requested order before code changes
+- wire the single repo-native OpenCart image upload shell entrypoint after successful `products/{model}.csv` publish
+- keep upload warning-only so successful render/publish outputs remain valid
+
+Files changed:
+- `PLAN.md`
+- `IMPLEMENT.md`
+- `AGENTS.md`
+- `RULES.md`
+- `README.md`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `scraper/pipeline/tests/test_services.py`
+- `DOCUMENTATION.md`
+
+Commands run:
+- `Get-Content` inspection for `PLAN.md`, `IMPLEMENT.md`, `AGENTS.md`, `RULES.md`, `README.md`, `scraper/pipeline/services/render_execution.py`, `scraper/pipeline/services/render_service.py`, `scraper/pipeline/workflow.py`, `scraper/pipeline/tests/test_workflow.py`, and `scraper/pipeline/tests/test_services.py`
+- `python -m pytest -q scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_services.py` from repo root
+- `python -m pytest -q` from `scraper/`
+
+Implementation notes:
+- updated the control-docs first to state that successful render publish now attempts OpenCart image upload through `tools/run_opencart_image_upload.sh`
+- kept `tools/run_opencart_image_upload.sh` as the only shell entrypoint and reused `tools/opencart_upload_images.py` unchanged
+- wired the upload stage in `scraper/pipeline/services/render_execution.py` immediately after `shutil.copyfile(candidate_csv_path, published_csv_path)`
+- passed the exact current-job published CSV path through `CURRENT_JOB_PRODUCT_FILE`
+- preserved the uploader default admin path by not overriding `OPENCART_ADMIN_PATH` in the runtime integration
+- captured upload status, report path, and warning details in render metadata/service details while keeping upload failures warning-only
+- extended workflow CLI output to print publish and upload status lines
+
+Validation:
+- targeted touched tests passed: `37 passed`
+- full suite passed from `scraper/`: `138 passed`
+
+Risks, blockers, or skipped items:
+- the shell upload stage now depends on `bash` being available in the runtime environment; when unavailable or when upload exits non-zero, the render run stays successful and records a warning
+- no changes were made to the uploader resolver order, path conventions, or default admin path
+
+## 2026-03-31 - Pipeline run for model 123456 (Skroutz TCL 115C7K)
+
+Goal:
+- run the full Product-Agent pipeline for the provided filled template
+- generate only the LLM-owned intro and SEO outputs
+- render and validate the final candidate bundle and deliverable CSV
+
+Files changed:
+- `work/123456/llm/intro_text.output.txt`
+- `work/123456/llm/seo_meta.output.json`
+- `work/123456/candidate/123456.csv`
+- `work/123456/candidate/123456.validation.json`
+- `work/123456/candidate/description.html`
+- `work/123456/candidate/characteristics.html`
+- `products/123456.csv`
+- `DOCUMENTATION.md`
+
+Commands run:
+- `python -m pipeline.workflow prepare --model 123456 --url "https://www.skroutz.gr/s/60276903/tcl-smart-tileorasi-115-4k-uhd-mini-led-c7k-hdr-2025-115c7k.html" --photos 7 --sections 7 --skroutz-status 1 --boxnow 0 --price 9999` from `scraper/`
+- inspected:
+  - `work/123456/llm/task_manifest.json`
+  - `work/123456/llm/intro_text.context.json`
+  - `work/123456/llm/intro_text.prompt.txt`
+  - `work/123456/llm/seo_meta.context.json`
+  - `work/123456/llm/seo_meta.prompt.txt`
+  - `work/123456/scrape/123456.source.json`
+  - `work/123456/scrape/123456.report.json`
+- wrote:
+  - `work/123456/llm/intro_text.output.txt`
+  - `work/123456/llm/seo_meta.output.json`
+- `python -m pipeline.workflow render --model 123456` from `scraper/`
+- inspected:
+  - `work/123456/candidate/123456.csv`
+  - `work/123456/candidate/123456.validation.json`
+  - `work/123456/candidate/description.html`
+  - `work/123456/candidate/characteristics.html`
+  - `resources/mappings/filter_map.json`
+
+Validation:
+- render completed successfully with `Validation ok: True`
+- final machine-readable report: `work/123456/candidate/123456.validation.json`
+- final deliverable path exists: `products/123456.csv`
+- validation warnings only:
+  - `characteristics_template_used:schema:sha1:954c8413f2da941e78f3ddce65df522654336c8c`
+  - `characteristics_template_unresolved_fields:12`
+
+Notes:
+- taxonomy resolved to `ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω`
+- category filters for that taxonomy were resolved from `resources/mappings/filter_map.json` as:
+  - `Τεχνολογία Οθόνης`
+  - `Smart Tv`
+  - `Ανάλυση`
+  - `Μέγεθος Οθόνης`
+- resolved filter values from source/spec evidence:
+  - `Τεχνολογία Οθόνης`: `Mini LED`
+  - `Smart Tv`: `Google TV`
+  - `Ανάλυση`: `ULTRA HD (4K)`
+  - `Μέγεθος Οθόνης`: `115"`

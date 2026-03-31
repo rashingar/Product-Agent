@@ -85,6 +85,9 @@ After `render`, inspect:
 - `work/{model}/candidate/description.html`
 - `work/{model}/candidate/characteristics.html`
 - `products/{model}.csv` when validation passes
+- `work/{model}/upload.opencart.json` after the post-render OpenCart image upload step runs
+
+On successful validation, `render` publishes `products/{model}.csv` and then attempts the repo-native OpenCart image upload step through `tools/run_opencart_image_upload.sh`. The runtime passes the exact current-job published CSV path through `CURRENT_JOB_PRODUCT_FILE`. Upload failures are warning-only and do not invalidate the successful render/publish result.
 
 ## Deterministic Description Rendering
 
