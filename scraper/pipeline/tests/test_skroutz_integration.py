@@ -5,7 +5,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from pipeline.cli import validate_input
+from pipeline.input_validation import validate_input
 from pipeline.mapping import build_row, derive_seo_keyword
 from pipeline.models import CLIInput, FetchResult, ParsedProduct, SchemaMatchResult, SourceProductData, TaxonomyResolution
 from pipeline.parser_product_skroutz import SkroutzProductParser

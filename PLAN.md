@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. Post-split execution seam cleanup and service/workflow error hardening are now complete through M36. Phase 4 remains pending.
+Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. Post-split execution seam cleanup, service/workflow error hardening, and the workflow-only public-entrypoint cleanup are now complete through M37. Phase 4 remains pending.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -17,6 +17,7 @@ Phase 2: architecture foundation is complete through M29. Phase 3 completed the 
 - Successful render publish now continues with a warning-only OpenCart image upload attempt through `tools/run_opencart_image_upload.sh`, using `CURRENT_JOB_PRODUCT_FILE` for the exact current-job published CSV path.
 - Legacy historical references exist and must be archived, not deleted casually.
 - Historical milestone evidence below may still mention `scrapper/` and `electronet_single_import` as pre-M23 names.
+- Historical milestone evidence below may also mention removed pre-M37 runtime surfaces such as `pipeline.cli`, `full_run.py`, `run_service.py`, and `run_execution.py`.
 
 ## Cleanup goals
 1. Reduce root clutter safely.
@@ -57,20 +58,20 @@ Hard rule:
 Phase 2 milestones:
 - M15 — define run contract (completed; import-safe run contract models added under `scraper/pipeline/services/` and not wired into runtime behavior)
 - M16 — write structured run metadata alongside current files (completed; `prepare.run.json` and `render.run.json` are now emitted under `work/{model}/`)
-- M17 — make CLI/workflow emit metadata (completed; standalone CLI now emits `full.run.json`, and workflow prepare/render now surface run status plus metadata path)
-- M18 — add service layer models/errors/wrappers (completed; thin internal prepare/render wrappers and full-run composition now live under `scraper/pipeline/services/` without rerouting CLI/workflow behavior or adding new runtime metadata files)
-- M19 — route CLI through the service layer (completed; standalone `cli.py` is now a thin adapter over the full-run service, workflow `prepare`/`render` entrypoints call the stage service wrappers, and a lower-layer full-run executor was extracted so services no longer depend on `cli.py`)
-- M19a — remove remaining cross-layer imports after service routing (completed; shared input validation now lives in a neutral module, `cli.py` no longer imports non-execution helpers from `full_run.py`, and `workflow.py` no longer imports from `cli.py` without changing runtime behavior)
+- M17 — make CLI/workflow emit metadata (completed; historical pre-M37 state added `full.run.json` for the legacy standalone CLI while workflow prepare/render surfaced run status plus metadata path)
+- M18 — add service layer models/errors/wrappers (completed; thin internal prepare/render wrappers and a historical pre-M37 full-run composition lived under `scraper/pipeline/services/` without rerouting prepare/render behavior or adding new stage metadata files)
+- M19 — route CLI through the service layer (completed; historical pre-M37 state routed the removed `cli.py` adapter through the full-run service while workflow `prepare`/`render` entrypoints continued to call the stage service wrappers)
+- M19a — remove remaining cross-layer imports after service routing (completed; shared input validation moved to a neutral module, and the now-removed `cli.py` / `full_run.py` cross-layer imports were reduced without changing runtime behavior at the time)
 - M20 — define provider contract and registry (completed; standalone typed provider models, base contract, and registry now exist under `scraper/pipeline/providers/` without wiring runtime behavior or extracting current adapters)
 - M21 — extract the current primary source into a provider adapter (completed; the Electronet primary source path now runs through a concrete provider adapter while preserving the existing runtime outputs and leaving other sources on their current execution branches)
 - M22 — add provider selection and one second provider proof (completed; `full_run.py` now has a minimal private provider-selection seam, Electronet remains the only production-selected provider, and a fixture-backed `SkroutzProvider` is proven through test-injected routing without changing default Skroutz runtime behavior)
-- M23 — rename the active runtime package and directory layout (completed; the runtime now lives under `scraper/pipeline`, active invocation runs from `scraper/` via `python -m pipeline.workflow ...` and `python -m pipeline.cli ...`, and runtime behavior remains unchanged)
+- M23 — rename the active runtime package and directory layout (completed; the runtime moved under `scraper/pipeline`; historical pre-M37 invocation included both `python -m pipeline.workflow ...` and the now-removed `python -m pipeline.cli ...`)
 - M24 — stabilize the post-workdir test baseline (completed; touched workflow and Skroutz tests now read committed golden CSV baselines from `scraper/pipeline/tests/fixtures/golden_outputs/skroutz/` and assert the live render contract where candidate bundles can exist while publish is skipped on failed validation)
 - M25 — route Skroutz through the provider seam in production (completed; supported Skroutz product URLs now select `SkroutzProvider` through `_resolve_provider_for_source(...)`, the provider supports live fetch plus fixture overrides, and prepare/render artifact shapes plus validation semantics remain unchanged)
 - M26 — migrate supported manufacturer flows behind provider adapters (completed; the current supported manufacturer runtime flow now selects `ManufacturerTefalProvider` through `_resolve_provider_for_source(...)`, the provider preserves the existing HTTPX-then-Playwright fetch order plus optional fixtures, and prepare/render contracts remain unchanged while manufacturer enrichment regressions are resolved)
-- M27 — retire legacy runtime source branches and close the migration phase (completed; `execute_full_run(...)` now fails fast when a supported source lacks a provider instead of falling back to legacy fetch/parser branches, the remaining dead pre-migration source-routing duplication in `full_run.py` was removed, and runtime tests now lock provider-based execution as the single active internal seam for supported sources)
+- M27 — retire legacy runtime source branches and close the migration phase (completed; historical pre-M37 `execute_full_run(...)` failed fast when a supported source lacked a provider instead of falling back to legacy fetch/parser branches, and provider-based execution became the active internal seam for supported sources)
 - M28 — make services the true owner of prepare/render orchestration (completed; the real prepare/render orchestration now lives under `scraper/pipeline/services/prepare_execution.py` and `scraper/pipeline/services/render_execution.py`, `prepare_service.py` and `render_service.py` call those service-owned executors directly without importing `workflow.py`, and `workflow.py` remains a thin CLI/adapter layer with unchanged runtime behavior)
-- M29 — make `run_service` the true owner of full-run orchestration (completed; the real full-run composition now lives under `scraper/pipeline/services/run_execution.py`, `run_service.py` calls that service-owned executor directly, and CLI/workflow adapter behavior plus runtime outputs remain unchanged)
+- M29 — make `run_service` the true owner of full-run orchestration (completed; historical pre-M37 full-run composition lived under `scraper/pipeline/services/run_execution.py` and `run_service.py` before those legacy surfaces were removed)
 
 ### Phase 3 — Split-LLM `intro_text` and deterministic presentation refactor
 
@@ -146,6 +147,33 @@ Hard rules:
 
 Milestone:
 - M36 — add stable service error taxonomy and workflow exit mapping (completed; `scraper/pipeline/services/errors.py` now defines stable semantic error codes plus a boundary mapper, prepare/render/full-run services wrap low-level failures into those codes, workflow exit behavior is driven by an explicit code-to-exit matrix, and prepare/render metadata now persist stable semantic `error_code` values including validation failures)
+
+### Workflow-only public entrypoint cleanup
+
+Status: completed
+
+Goals:
+1. Make `python -m pipeline.workflow ...` the only public CLI entrypoint.
+2. Remove the remaining legacy public-entrypoint and full-run compatibility surfaces:
+   - `scraper/pipeline/cli.py`
+   - `scraper/pipeline/full_run.py`
+   - `scraper/pipeline/services/run_service.py`
+   - `scraper/pipeline/services/run_execution.py`
+3. Move provider-selection and supported-source regression coverage off `execute_full_run(...)` and onto the surviving workflow, prepare-stage, provider-registry, and provider-adapter seams.
+4. Update active runtime docs so they present only the surviving workflow entrypoint.
+
+Hard rules:
+- Keep active usage docs aligned with the surviving runtime surface only.
+- Do not broaden this cleanup into provider fetch/normalize changes, LLM contract changes, or unrelated service-boundary refactors.
+
+Milestone:
+- M37 — make `pipeline.workflow` the only public CLI entrypoint (completed; `pipeline.workflow` is now the sole public command surface, `pipeline.cli` plus the legacy full-run compatibility stack have been removed, provider-selection coverage no longer anchors on `execute_full_run(...)`, and active docs no longer advertise removed entrypoints as runnable)
+
+Acceptance criteria:
+1. `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...` remain the only documented public runtime commands.
+2. `scraper/pipeline/cli.py`, `scraper/pipeline/full_run.py`, `scraper/pipeline/services/run_service.py`, and `scraper/pipeline/services/run_execution.py` are removed.
+3. Provider-selection and supported-source coverage no longer calls `execute_full_run(...)` and instead asserts the surviving workflow/prepare/provider seams directly.
+4. Active docs present only the workflow prepare/render interface as runnable.
 
 ### Phase 4 — Hybrid RAG foundation
 
@@ -290,7 +318,7 @@ Evidence:
 
 Cleanup is complete through M14.
 
-New implementation work starts at M30 and now continues through the completed post-split M36 error-hardening milestone before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
+New implementation work starts at M30 and now continues through the completed post-split M37 workflow-only public-entrypoint cleanup before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
 
 ## Validation rules
 After each milestone:

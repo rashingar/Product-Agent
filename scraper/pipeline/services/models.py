@@ -9,7 +9,6 @@ class RunType(str, Enum):
     PREPARE = "prepare"
     RENDER = "render"
     PUBLISH = "publish"
-    FULL = "full"
 
 
 class RunStatus(str, Enum):
@@ -39,18 +38,6 @@ class RenderRequest:
 class PublishRequest:
     model: str
     current_job_product_file: Path | None = None
-
-
-@dataclass(slots=True)
-class FullRunRequest:
-    model: str
-    url: str
-    photos: int = 1
-    sections: int = 0
-    skroutz_status: int = 0
-    boxnow: int = 0
-    price: str | float | int = 0
-    out: str = "out"
 
 
 @dataclass(slots=True)

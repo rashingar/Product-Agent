@@ -1,7 +1,120 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M36 completed, and the repo now also has a minimal GitHub Actions workflow that installs dependencies from `requirements.txt`, installs Playwright Chromium, and runs `python -m pytest -q` from `scraper/` on push and pull request events without changing runtime code.
+M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
+
+## 2026-03-31 - Align active docs with workflow-only runtime
+
+Goal:
+- make active documentation describe only the surviving workflow-only runtime after the legacy entrypoints were removed
+- keep historical pre-cleanup references available only as clearly historical engineering-log evidence
+- avoid changing runtime code in the same commit
+
+Files edited:
+- `README.md`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- updated `README.md` so install, prepare, render, and test guidance all describe the workflow-only runtime
+- added an explicit active-runtime note in `README.md` that `python -m pipeline.workflow` is the only public entrypoint
+- named the removed legacy runtime surfaces in `README.md` as removed, not runnable
+- updated `PLAN.md` so M37 is now completed
+- updated `PLAN.md` top-level and milestone wording so removed `pipeline.cli`, `full_run.py`, `run_service.py`, and `run_execution.py` are treated as historical pre-M37 state rather than active runtime truth
+- replaced the old planned M37 scope wording in `DOCUMENTATION.md` with completion wording for the workflow-only runtime and docs alignment
+- clarified that any mentions below of removed legacy entrypoints remain only as historical engineering-log evidence
+
+Active runtime truth after M37:
+- public runtime entrypoint:
+  - `python -m pipeline.workflow`
+- public workflow commands:
+  - `python -m pipeline.workflow prepare ...`
+  - `python -m pipeline.workflow render --model {model}`
+- active test command:
+  - `cd scraper && python -m pytest -q`
+- removed legacy runtime surfaces:
+  - `python -m pipeline.cli`
+  - `scraper/pipeline/full_run.py`
+  - `scraper/pipeline/services/run_service.py`
+  - `scraper/pipeline/services/run_execution.py`
+
+Historical note:
+- references below to `pipeline.cli`, `execute_full_run(...)`, `run_service.py`, or `run_execution.py` are retained only as historical pre-M37 execution evidence unless a section explicitly states current guidance
+
+Commands run:
+- `rg -n "python -m pipeline\\.cli|execute_full_run|run_service|run_execution|pipeline\\.workflow|prepare|render|pytest -q" README.md PLAN.md DOCUMENTATION.md docs archive -S`
+- `Get-Content README.md`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 260`
+
+Validation:
+- active docs now describe only the surviving workflow prepare/render interface
+- historical references to removed entrypoints remain only in clearly historical milestone/context wording
+
+## 2026-03-31 - Freeze workflow-only cleanup branch scope (historical pre-completion note)
+
+Goal:
+- record the exact branch cleanup scope for making `pipeline.workflow` the only public entrypoint
+- keep this commit documentation-only and avoid changing active runtime truth before the cleanup lands
+- leave `README.md` untouched until the runtime deletion commit makes the new entrypoint story true
+
+Scope framing:
+- this section records planned cleanup work for branch `cleanup/workflow-single-entrypoint`
+- it is not a statement that the current runtime already removed `pipeline.cli`, `full_run.py`, `run_service.py`, or `run_execution.py`
+- active runtime guidance remains unchanged in this commit so docs do not get ahead of code
+
+Files planned for deletion when the cleanup lands:
+- `scraper/pipeline/cli.py`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/services/run_service.py`
+- `scraper/pipeline/services/run_execution.py`
+
+Files planned for rewrite when the cleanup lands:
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/services/__init__.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `README.md`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Tests planned for migration when the cleanup lands:
+- `scraper/pipeline/tests/test_workflow.py`
+  - migrate `execute_full_run(...)` coverage to the surviving `pipeline.workflow` prepare/render entrypoints and their direct orchestration seams
+- `scraper/pipeline/tests/test_provider_selection.py`
+  - move supported-source and injected-provider assertions off `execute_full_run(...)` and onto provider-registry bootstrap plus prepare-stage/workflow execution
+- `scraper/pipeline/tests/test_services.py`
+  - drop `run_service` / `run_execution` ownership checks and keep coverage focused on the surviving prepare, render, and publish service layers
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+  - replace the direct `pipeline.cli` validation dependency with whichever validation seam survives under the workflow-only entrypoint
+
+README timing rule:
+- runtime instructions in `README.md` must be updated only after the deletion lands, in the same implementation window or immediately after, so active docs never present a non-existent or not-yet-true workflow-only state
+
+Branch acceptance checks:
+- this scope-freeze commit must remain docs-only:
+  - `git diff --stat` shows only `PLAN.md` and `DOCUMENTATION.md`
+- cleanup implementation acceptance after the deletion lands:
+  - `python -m pipeline.workflow prepare --help` and `python -m pipeline.workflow render --help` remain the public runtime help surfaces
+  - no active runtime docs present `python -m pipeline.cli ...` as runnable
+  - provider-selection and supported-source coverage no longer calls `execute_full_run(...)`
+  - the legacy files listed above are removed rather than left as alternate public entrypoints
+
+Commands run:
+- `git status --short`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "pipeline\\.cli|execute_full_run|run_service|run_execution|workflow-only|branch scope|cleanup scope|M36|Phase 4" PLAN.md DOCUMENTATION.md -S`
+- `Get-Content PLAN.md | Select-Object -Last 220`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 220`
+- `rg -n "pipeline\\.cli|execute_full_run|run_service|run_execution|full_run\\.py" scraper/pipeline/tests scraper/pipeline README.md -S`
+- `rg --files scraper/pipeline/tests`
+
+Validation:
+- documented the future workflow-only cleanup scope without changing runtime code, imports, tests, or active README instructions
+- kept the scope explicitly framed as planned branch work instead of current runtime truth at the time
 
 ## 2026-03-30 - Add minimal GitHub Actions scraper test workflow
 
@@ -3026,3 +3139,312 @@ Validation:
 Risks, blockers, or skipped items:
 - `csv_import` is still failing after login for a separate reason: the Playwright importer times out waiting for `select[name="profile_id"]`
 - no deeper importer UI fix was included in this image-upload diagnostic pass
+
+## 2026-03-31 - Add Skroutz air-conditioner taxonomy support and run model 000001
+
+Goal:
+- run the full template-triggered pipeline for model `000001` from a Skroutz air-conditioner URL
+- resolve `Unsupported Skroutz page type` caused by missing air-conditioner taxonomy handling
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/parser_product_skroutz.py`
+- `scraper/pipeline/skroutz_taxonomy.py`
+- `work/000001/llm/intro_text.output.txt`
+- `work/000001/llm/seo_meta.output.json`
+
+Commands run:
+- `..\.venv\Scripts\python.exe -m pipeline.workflow prepare --help` from `scraper/`
+- `..\.venv\Scripts\python.exe -m pipeline.workflow prepare --model 000001 --url "https://www.skroutz.gr/s/54974577/Inventor-Emperor-Klimatistiko-Inverter-24000-BTU-A-A-me-Ionisti-kai-WiFi.html" --photos 7 --sections 5 --skroutz-status 1 --boxnow 0 --price 1050` from `scraper/`
+- `..\.venv\Scripts\python.exe -m pipeline.workflow render --model 000001` from `scraper/`
+- `$env:CURRENT_JOB_PRODUCT_FILE = "products/000001.csv"; bash tools/run_opencart_pipeline.sh` from repo root
+
+Implementation notes:
+- added `air_conditioner` family detection in Skroutz parser family rules
+- added air-conditioner helper taxonomy classification in `skroutz_taxonomy.py`:
+  - parent: `ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ`
+  - leaf: `Κλιματιστικά`
+  - sub-category heuristic: `Τοίχου` / `Φορητά` / `Ντουλάπες`
+- kept deterministic field ownership unchanged and authored only LLM-owned outputs:
+  - `intro_text`
+  - `product.meta_description`
+  - `product.meta_keywords`
+
+Validation:
+- initial prepare failure reproduced: `Unsupported Skroutz page type: unsupported_skroutz_page_type`
+- after taxonomy patch, prepare succeeded and produced scrape + llm task artifacts under `work/000001/`
+- render succeeded:
+  - `products/000001.csv` created
+  - `work/000001/candidate/000001.validation.json` reports `"ok": true`
+- publish phase failed before upload/import stage due local Bash/WSL startup error:
+  - `Bash/Service/CreateInstance/0xd0000022`
+  - status captured in `work/000001/publish.run.json`
+
+Risks, blockers, or skipped items:
+- OpenCart publish could not proceed in this environment because Bash/WSL failed to start, so `upload.opencart.json` and `import.opencart.json` were not produced for this run
+- characteristics mapping still reports unresolved template fields (`characteristics_template_unresolved_fields:13`) inherited from current schema matching
+
+## 2026-03-31 - Pipeline run for model 000002 (Skroutz television)
+
+Goal:
+- execute the full template-triggered pipeline for model `000002`
+
+Files changed:
+- `DOCUMENTATION.md`
+- `work/000002/llm/intro_text.output.txt`
+- `work/000002/llm/seo_meta.output.json`
+- generated runtime artifacts under `work/000002/` and `products/000002.csv`
+
+Commands run:
+- `..\.venv\Scripts\python.exe -m pipeline.workflow prepare --model 000002 --url "https://www.skroutz.gr/s/60276903/tcl-smart-tileorasi-115-4k-uhd-mini-led-c7k-hdr-2025-115c7k.html" --photos 7 --sections 7 --skroutz-status 1 --boxnow 0 --price 9999` from `scraper/`
+- `..\.venv\Scripts\python.exe -m pipeline.workflow render --model 000002` from `scraper/`
+- `$env:CURRENT_JOB_PRODUCT_FILE = "products/000002.csv"; bash tools/run_opencart_pipeline.sh` from repo root
+
+Implementation notes:
+- `boxnow` was provided blank in the template; runtime CLI requires integer, so execution used `--boxnow 0`
+- authored only LLM-owned fields:
+  - `intro_text`
+  - `product.meta_description`
+  - `product.meta_keywords`
+
+Validation:
+- `prepare` succeeded and produced scrape/llm artifacts for `000002`
+- `render` succeeded and published `products/000002.csv`
+- `work/000002/candidate/000002.validation.json` reports `"ok": true`
+
+Risks, blockers, or skipped items:
+- post-render OpenCart publish failed at shell startup with `Bash/Service/CreateInstance/0xd0000022`
+- `work/000002/upload.opencart.json` and `work/000002/import.opencart.json` were not generated because publish failed before those stages
+- characteristics diagnostics report unresolved fields: `characteristics_template_unresolved_fields:12`
+
+## 2026-03-31 - Improve OpenCart publish diagnostics for Bash/WSL and preflight failures
+
+Goal:
+- make publish-phase failures explainable when the shell wrapper never starts
+- replace opaque `publish_stage: unknown` cases with preflight diagnostics for common environment and artifact failures
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/publish_execution.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Commands run:
+- `.\\.venv\\Scripts\\python.exe -m pytest -q scraper/pipeline/tests/test_workflow.py -k "publish_workflow or workflow_main_render_routes_through_render_service"`
+
+Implementation notes:
+- added Python-side preflight checks in `publish_execution.py` before invoking `bash`:
+  - shell entrypoint exists
+  - published CSV exists
+  - main gallery image exists
+  - `bash` is present on `PATH`
+  - `bash --version` can start successfully
+- added launcher failure classification for common shell startup issues:
+  - `bash_or_wsl_startup_failure`
+  - `bash_access_denied`
+  - `bash_not_available`
+- when Bash/WSL fails before the wrapper script starts, publish now reports `publish_stage = preflight` instead of `unknown`
+
+Validation:
+- targeted workflow tests passed: `5 passed`
+- covered cases include:
+  - successful publish wrapper invocation with Bash probe
+  - missing `bash` on `PATH`
+  - broken WSL/Bash launcher with `CreateInstance/0xd0000022`
+  - missing main gallery image preflight failure
+
+Risks, blockers, or skipped items:
+- diagnostics are improved only in the Python publish layer; shell wrapper exit codes remain the source of truth once the wrapper actually starts
+- no broader full-run regression suite was executed beyond the targeted workflow tests
+
+## 2026-03-31 - Repair OpenCart publish execution on Windows Bash/WSL and verify end-to-end success
+
+Goal:
+- fix the actual publish execution path for Windows so the pipeline can invoke the native OpenCart Bash wrappers reliably
+- remove the original `Bash/Service/CreateInstance/0xd0000022` blocker and the follow-on Windows-path invocation failure
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/publish_execution.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `tools/run_opencart_pipeline.sh`
+- `tools/run_opencart_image_upload.sh`
+- `tools/run_opencart_import_csv.sh`
+
+Commands run:
+- `wsl -l -v`
+- `wsl.exe --set-default Ubuntu`
+- `bash --version`
+- `bash -lc "echo pipeline-bash-ok"`
+- `wsl.exe -d Ubuntu bash -lc "echo from-ubuntu"`
+- `bash -n tools/run_opencart_pipeline.sh`
+- `bash -n tools/run_opencart_image_upload.sh`
+- `bash -n tools/run_opencart_import_csv.sh`
+- `bash -lc "python3 -m pip install --break-system-packages playwright"`
+- `bash -lc "python3 -m playwright install chromium"`
+- `bash -lc "python3 -m playwright install chromium-headless-shell"`
+- `bash -lc "python3 -m playwright install-deps chromium-headless-shell"`
+- `.\\.venv\\Scripts\\python.exe -m pytest -q scraper/pipeline/tests/test_workflow.py -k "publish_workflow or workflow_main_render_routes_through_render_service or test_execute_publish_workflow_passes_model_and_current_job_product_file or test_execute_publish_workflow_fails_preflight_when_bash_is_missing or test_execute_publish_workflow_classifies_wsl_launcher_probe_failures or test_execute_publish_workflow_fails_preflight_when_main_image_is_missing"`
+- `.\\.venv\\Scripts\\python.exe -m pytest -q scraper/pipeline/tests/test_services.py -k "publish_product_maps_execution_result or execute_run_workflow_composes_prepare_and_render_results"`
+- `..\.venv\Scripts\python.exe -m pipeline.workflow render --model 000002` from `scraper/`
+
+Implementation notes:
+- system diagnosis showed two separate failures:
+  - Windows `bash.exe` initially targeted the default WSL distro `Ubuntu-22.04`, which could not create an instance and returned `CreateInstance/0xd0000022`
+  - after switching the default distro to working `Ubuntu`, the Python publish layer still passed Windows-only absolute paths into Bash, causing `/bin/bash: D:...run_opencart_pipeline.sh: No such file or directory`
+- fixed the host environment by switching the default WSL distro to `Ubuntu`, which restored `bash --version` and direct wrapper execution
+- updated `publish_execution.py` so the Bash invocation uses repo-relative shell paths for:
+  - `tools/run_opencart_pipeline.sh`
+  - `CURRENT_JOB_PRODUCT_FILE`
+- stopped forcing `REPO_ROOT` into the shell environment from Windows Python; the wrapper now resolves repo root from its own script path as intended
+- normalized the OpenCart shell wrappers to LF line endings and made env loading tolerant of CRLF `.secrets/opencart.env` files by sourcing through `tr -d '\r'`
+- installed missing Playwright runtime pieces inside the working WSL distro so the CSV import stage could launch Chromium successfully
+
+Validation:
+- direct native publish wrapper run completed successfully for model `000002`:
+  - image upload wrote `work/000002/upload.opencart.json`
+  - CSV import wrote `work/000002/import.opencart.json`
+- targeted workflow tests passed: `5 passed`
+- targeted service tests passed: `2 passed`
+- rerun through the actual pipeline entrypoint succeeded:
+  - `render` exit code `0`
+  - `work/000002/candidate/000002.validation.json` still reports `"ok": true`
+  - `work/000002/publish.run.json` now reports:
+    - `"publish_status": "success"`
+    - `"publish_stage": "csv_import"`
+    - `"publish_message": "OpenCart publish completed successfully."`
+
+Risks, blockers, or skipped items:
+- `Ubuntu-22.04` still appears broken independently of the pipeline and may need separate repair or removal if you intend to use that distro again
+- the pipeline now works through the active default distro, but WSL-level distro hygiene is still an operator concern outside repo code
+
+## 2026-03-31 - Run full Product-Agent pipeline for model 000003 (TCL 115C7K)
+
+Goal:
+- execute the template-triggered end-to-end pipeline for model `000003`
+- prepare scrape artifacts, write the LLM-owned intro and SEO fields, render the candidate and published CSV, and complete the native OpenCart publish phase
+
+Files changed:
+- `DOCUMENTATION.md`
+- `work/000003/llm/intro_text.output.txt`
+- `work/000003/llm/seo_meta.output.json`
+- `work/000003/candidate/000003.csv`
+- `work/000003/candidate/000003.normalized.json`
+- `work/000003/candidate/000003.validation.json`
+- `work/000003/candidate/description.html`
+- `work/000003/candidate/characteristics.html`
+- `products/000003.csv`
+- `work/000003/publish.run.json`
+- `work/000003/upload.opencart.json`
+- `work/000003/import.opencart.json`
+
+Commands run:
+- `python -m pipeline.workflow prepare --model 000003 --url "https://www.skroutz.gr/s/60276903/tcl-smart-tileorasi-115-4k-uhd-mini-led-c7k-hdr-2025-115c7k.html" --photos 7 --sections 7 --skroutz-status 1 --boxnow 0 --price 9999` from `scraper/`
+- `python -m pipeline.workflow render --model 000003` from `scraper/`
+
+Implementation notes:
+- generated the required LLM outputs only for `intro_text`, `product.meta_description`, and `product.meta_keywords`
+- kept the intro text to one Greek paragraph within the configured word-count range
+- render completed with taxonomy `ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω`
+- native OpenCart publish completed successfully after render, including image upload and CSV import
+
+Validation:
+- `work/000003/candidate/000003.validation.json` reports `"ok": true`
+- `products/000003.csv` was published successfully
+- `work/000003/publish.run.json` reports:
+  - `publish_status = success`
+  - `publish_stage = csv_import`
+  - `publish_message = OpenCart publish completed successfully.`
+- `work/000003/import.opencart.json` reports `Products Created: 1`
+
+Risks, blockers, or skipped items:
+- validation still carries the existing template warning `characteristics_template_unresolved_fields:12`
+- unresolved characteristic fields are source-null/template-null gaps, not render blockers for this product
+
+## 2026-03-31 - Fix Skroutz washing machine characteristics template routing
+
+Goal:
+- fix the pipeline so Skroutz washing machines do not inherit unrelated schema-based characteristics layouts
+- verify the fix against the live regression sample `000007` through the actual workflow
+
+Files changed:
+- `DOCUMENTATION.md`
+- `resources/templates/characteristics_templates.json`
+- `scraper/pipeline/tests/test_characteristics_pipeline.py`
+- `work/000007/scrape/000007.report.json`
+- `work/000007/candidate/000007.normalized.json`
+- `work/000007/candidate/000007.validation.json`
+- `work/000007/candidate/characteristics.html`
+- `work/000007/candidate/000007.csv`
+- `products/000007.csv`
+- `work/000007/publish.run.json`
+- `work/000007/upload.opencart.json`
+- `work/000007/import.opencart.json`
+
+Commands run:
+- `python -m pytest scraper/pipeline/tests/test_characteristics_pipeline.py -k "washing_machine or ice_cream_maker or soundbar or built_in_hob or fridge_freezer"`
+- `python -m pipeline.workflow prepare --model 000007 --url "https://www.skroutz.gr/s/55224637/Samsung-Plyntirio-Rouchon-9kg-me-Technologia-Atmou-1400-Strofon-Ecobubble-Mayro-WW90DB7U94GBU3.html" --photos 5 --sections 14 --skroutz-status 1 --boxnow 0 --price 900` from `scraper/`
+- `python -m pipeline.workflow render --model 000007` from `scraper/`
+
+Implementation notes:
+- added taxonomy-specific Skroutz templates for freestanding and built-in washing machines
+- configured those templates to prefer the correct schema source files while rendering raw verified spec sections instead of forcing an Electronet-shaped layout onto mismatched Skroutz specs
+- added regression coverage to ensure washing machines keep the raw-spec characteristics path and select `plyntiria_rouxwn.json` as the preferred schema family
+- reran the actual product workflow for model `000007` after the code change
+
+Validation:
+- targeted characteristics tests passed: `9 passed`
+- `work/000007/candidate/characteristics.html` now contains washing-machine spec sections instead of meat-mincer fields
+- `work/000007/candidate/000007.validation.json` reports `"ok": true`
+- validation warnings no longer include `characteristics_template_used` or `characteristics_template_unresolved_fields`
+- `work/000007/publish.run.json` reports:
+  - `publish_status = success`
+  - `publish_stage = csv_import`
+  - `publish_message = OpenCart publish completed successfully.`
+
+Risks, blockers, or skipped items:
+- the selected washing-machine template currently preserves raw Skroutz section naming and ordering; that is intentional to avoid inventing or partially mapping fields until a complete cross-source washing-machine template is defined
+- remaining validation warnings for `000007` are presentation-related (`presentation_sections_weak:3`, `requested_sections_reduced:11`) and are unrelated to the characteristics fix
+
+## 2026-03-31 - Runtime pipeline run for model `000006`
+
+What changed:
+- ran the full prepare -> LLM -> render -> OpenCart publish workflow for model `000006` using the live Skroutz washing-machine URL
+- authored the LLM-owned outputs `intro_text.output.txt` and `seo_meta.output.json` under `work/000006/llm/`
+- corrected an initial intro-text validation failure by expanding the Greek intro from `106` to `121` words and reran render successfully
+
+Files changed:
+- `DOCUMENTATION.md`
+- `work/000006/llm/intro_text.output.txt`
+- `work/000006/llm/seo_meta.output.json`
+- `work/000006/candidate/000006.csv`
+- `work/000006/candidate/000006.validation.json`
+- `work/000006/candidate/description.html`
+- `work/000006/candidate/characteristics.html`
+- `work/000006/render.run.json`
+- `products/000006.csv`
+- `work/000006/publish.run.json`
+- `work/000006/upload.opencart.json`
+- `work/000006/import.opencart.json`
+
+Commands run:
+- `python -m pipeline.workflow prepare --model 000006 --url "https://www.skroutz.gr/s/55224637/Samsung-Plyntirio-Rouchon-9kg-me-Technologia-Atmou-1400-Strofon-Ecobubble-Mayro-WW90DB7U94GBU3.html" --photos 5 --sections 14 --skroutz-status 1 --boxnow 0 --price 900` from `scraper/`
+- `python -m pipeline.workflow render --model 000006` from `scraper/` (first run failed validation on intro word count)
+- `python -m pipeline.workflow render --model 000006` from `scraper/` (rerun succeeded and triggered publish)
+
+Implementation notes:
+- kept LLM generation constrained to the runtime-owned fields: `intro_text`, `product.meta_description`, and `product.meta_keywords`
+- used only verified source evidence from the generated LLM context for the Greek intro and SEO metadata
+- preserved deterministic section/body rendering and characteristics generation from the local pipeline
+
+Validation:
+- first render failed with `llm_intro_text_word_count_invalid`
+- final `work/000006/candidate/000006.validation.json` reports `"ok": true`
+- `products/000006.csv` was published successfully
+- `work/000006/publish.run.json` reports:
+  - `publish_status = success`
+  - `publish_stage = csv_import`
+  - `publish_message = OpenCart publish completed successfully.`
+- `work/000006/import.opencart.json` reports `Products Updated = 1`
+
+Risks, blockers, or skipped items:
+- validation still reports presentation warnings `presentation_sections_weak:3` and `requested_sections_reduced:11`, but these are warnings only and did not block render or publish

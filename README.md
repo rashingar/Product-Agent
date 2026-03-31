@@ -30,6 +30,14 @@ python -m playwright install chromium
 
 ## Current Scraper Workflow
 
+`python -m pipeline.workflow` is the only public runtime entrypoint.
+
+Removed legacy runtime entrypoints:
+- `python -m pipeline.cli`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/services/run_service.py`
+- `scraper/pipeline/services/run_execution.py`
+
 Run the current prepare/render workflow from `scraper/`.
 
 Prepare:
@@ -136,5 +144,5 @@ python -m pytest -q
 ## Notes
 
 - Shared support files are read from `resources/`.
-- The old local `scripts/` entrypoints are no longer the active workflow.
-- If you want the old script-driven workflow back as runnable code, it would need to be restored explicitly from git rather than inferred from the current layout.
+- Old script-driven or compatibility-wrapper entrypoints are not active in the current runtime.
+- If you want removed legacy entrypoints back as runnable code, they would need to be restored explicitly from git rather than inferred from the current layout.

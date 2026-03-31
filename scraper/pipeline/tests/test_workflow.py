@@ -5,9 +5,8 @@ from pathlib import Path
 import pytest
 
 from pipeline.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
-from pipeline.providers import ProviderRegistry
 from pipeline.services import PrepareRequest, PublishRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceError, ServiceErrorCode, ServiceResult
-from pipeline.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
+from pipeline.workflow import build_cli_input_from_args, build_parser, prepare_workflow, render_workflow, resolve_model_for_render
 
 
 def build_intro(words: int = 120) -> str:
@@ -56,6 +55,45 @@ def test_build_cli_input_from_template_file(tmp_path: Path, monkeypatch) -> None
     assert cli.photos == 6
     assert cli.sections == 5
     assert str(cli.price) == "2099"
+
+
+def test_build_parser_pins_supported_workflow_cli_surface() -> None:
+    parser = build_parser()
+    subparsers_action = next(action for action in parser._actions if isinstance(action, argparse._SubParsersAction))
+
+    assert parser.prog == "python -m pipeline.workflow"
+    assert set(subparsers_action.choices) == {"prepare", "render"}
+
+    with pytest.raises(SystemExit) as excinfo:
+        parser.parse_args(["run"])
+
+    assert excinfo.value.code == 2
+
+
+def test_resolve_model_for_render_accepts_explicit_model_argument() -> None:
+    args = argparse.Namespace(model="233541", template_file=None, stdin=False)
+
+    assert resolve_model_for_render(args) == "233541"
+
+
+def test_resolve_model_for_render_reads_model_from_template_file(tmp_path: Path) -> None:
+    template = tmp_path / "render-input.txt"
+    template.write_text("model: 233541\n", encoding="utf-8")
+    args = argparse.Namespace(model=None, template_file=str(template), stdin=False)
+
+    assert resolve_model_for_render(args) == "233541"
+
+
+@pytest.mark.parametrize("model", [None, "", "23354", "233541a", "abc123", "2335417"])
+def test_resolve_model_for_render_rejects_missing_or_invalid_model(model: str | None) -> None:
+    from pipeline import workflow
+
+    args = argparse.Namespace(model=model, template_file=None, stdin=False)
+
+    with pytest.raises(ValueError) as excinfo:
+        resolve_model_for_render(args)
+
+    assert str(excinfo.value) == workflow.FAIL_MESSAGE
 
 
 def test_prepare_workflow_delegates_to_service_execution(tmp_path: Path, monkeypatch) -> None:
@@ -176,484 +214,6 @@ def test_render_workflow_delegates_to_service_execution(tmp_path: Path, monkeypa
     monkeypatch.setattr(workflow, "execute_render_workflow", fake_execute_render_workflow)
 
     assert workflow.render_workflow("233541") == {"delegated": True}
-
-
-def test_execute_full_run_allows_electronet_product_code_mismatch(monkeypatch, tmp_path: Path) -> None:
-    from pipeline import full_run as run_module
-    from pipeline.models import FetchResult
-    from pipeline.providers.models import (
-        ProviderCapability,
-        ProviderDefinition,
-        ProviderInputIdentity,
-        ProviderKind,
-        ProviderResult,
-        ProviderSnapshot,
-        ProviderSnapshotKind,
-    )
-
-    cli = CLIInput(
-        model="229957",
-        url="https://www.electronet.gr/example",
-        photos=2,
-        sections=0,
-        skroutz_status=1,
-        boxnow=0,
-        price="599",
-        out=str(tmp_path),
-    )
-    parsed = ParsedProduct(
-        source=SourceProductData(
-            url=cli.url,
-            canonical_url=cli.url,
-            product_code="235370",
-            brand="LG",
-            name="LG RHX5009TWB",
-        ),
-    )
-
-    class DummyFetcher:
-        def fetch_httpx(self, _url):
-            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="httpx", fallback_used=False, response_headers={})
-
-        def fetch_playwright(self, _url):
-            return FetchResult(url=cli.url, final_url=cli.url, html="<html></html>", status_code=200, method="playwright", fallback_used=True, response_headers={})
-
-        def download_gallery_images(self, **_kwargs):
-            return [], [], []
-
-        def download_besco_images(self, **_kwargs):
-            return [], [], []
-
-    class DummyResolver:
-        def resolve(self, **_kwargs):
-            return TaxonomyResolution(parent_category="A", leaf_category="B", sub_category="C"), []
-
-    class DummySchemaMatcher:
-        known_section_titles = set()
-
-        def __init__(self, *_args, **_kwargs):
-            pass
-
-        def match(self, *_args, **_kwargs):
-            return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
-
-    provider_calls: list[ProviderInputIdentity] = []
-
-    class UnexpectedParser:
-        def parse(self, *_args, **_kwargs):
-            raise AssertionError("Electronet parser should not be called directly")
-
-    class DummyElectronetProvider:
-        definition = ProviderDefinition(
-            provider_id="electronet",
-            source_name="electronet",
-            kind=ProviderKind.VENDOR_SITE,
-            capabilities=frozenset(
-                {
-                    ProviderCapability.URL_INPUT,
-                    ProviderCapability.LIVE_FETCH,
-                    ProviderCapability.HTML_SNAPSHOT,
-                    ProviderCapability.NORMALIZED_PRODUCT,
-                }
-            ),
-        )
-
-        @property
-        def provider_id(self) -> str:
-            return self.definition.provider_id
-
-        def __init__(self, *, fetcher, parser):
-            assert isinstance(fetcher, DummyFetcher)
-            assert isinstance(parser, UnexpectedParser)
-
-        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
-            provider_calls.append(identity)
-            return ProviderSnapshot(
-                provider_id="electronet",
-                identity=identity,
-                snapshot_kind=ProviderSnapshotKind.HTML,
-                requested_url=identity.url,
-                final_url=identity.url,
-                content_type="text/html",
-                status_code=200,
-                body_text="<html></html>",
-                metadata={"fetch_method": "httpx", "fallback_used": False},
-            )
-
-        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
-            assert snapshot.requested_url == identity.url
-            return ProviderResult(
-                provider=self.definition,
-                identity=identity,
-                snapshot=snapshot,
-                product=parsed.source,
-                provenance=dict(parsed.provenance),
-                field_diagnostics=dict(parsed.field_diagnostics),
-                warnings=list(parsed.warnings),
-                missing_fields=list(parsed.missing_fields),
-                critical_missing=list(parsed.critical_missing),
-            )
-
-    monkeypatch.setattr(run_module, "detect_source", lambda _url: "electronet")
-    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("electronet", True, ""))
-    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
-    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {})
-    registry = ProviderRegistry()
-    registry.register(DummyElectronetProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
-    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
-
-    result = run_module.execute_full_run(cli)
-
-    assert provider_calls == [ProviderInputIdentity(model="229957", url="https://www.electronet.gr/example")]
-    assert result["parsed"].warnings == ["source_product_code_mismatch:input=229957:page=235370"]
-    assert result["report"]["source"] == "electronet"
-    assert result["report"]["identity_checks"]["source"] == "electronet"
-
-
-def test_execute_full_run_routes_skroutz_through_provider_by_default(monkeypatch, tmp_path: Path) -> None:
-    from pipeline import full_run as run_module
-    from pipeline.providers.models import (
-        ProviderCapability,
-        ProviderDefinition,
-        ProviderInputIdentity,
-        ProviderKind,
-        ProviderResult,
-        ProviderSnapshot,
-        ProviderSnapshotKind,
-    )
-
-    cli = CLIInput(
-        model="341490",
-        url="https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html",
-        photos=2,
-        sections=0,
-        skroutz_status=0,
-        boxnow=1,
-        price="19",
-        out=str(tmp_path),
-    )
-    parsed = ParsedProduct(
-        source=SourceProductData(
-            source_name="skroutz",
-            page_type="product",
-            url=cli.url,
-            canonical_url=cli.url,
-            product_code=cli.model,
-            brand="Estia",
-            mpn="06-24567",
-            name="Estia 06-24567",
-            breadcrumbs=["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Συσκευές Κουζίνας", "Βραστήρες"],
-            taxonomy_source_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::Συσκευές Κουζίνας///Βραστήρες",
-            taxonomy_match_type="exact_category",
-            taxonomy_rule_id="family:kettle",
-            price_text="19,00 €",
-            price_value=19.0,
-            key_specs=[SpecItem(label="Ισχύς", value="2200 W")],
-            spec_sections=[SpecSection(section="Χαρακτηριστικά", items=[SpecItem(label="Ισχύς", value="2200 W")])],
-        ),
-    )
-    provider_calls: list[ProviderInputIdentity] = []
-
-    class DummyFetcher:
-        def download_gallery_images(self, **_kwargs):
-            return [], [], []
-
-        def download_besco_images(self, **_kwargs):
-            return [], [], []
-
-    class DummyResolver:
-        def resolve(self, **_kwargs):
-            return TaxonomyResolution(parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", leaf_category="Συσκευές Κουζίνας", sub_category="Βραστήρες"), []
-
-    class DummySchemaMatcher:
-        known_section_titles = set()
-
-        def __init__(self, *_args, **_kwargs):
-            pass
-
-        def match(self, *_args, **_kwargs):
-            return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
-
-    class UnexpectedParser:
-        def parse(self, *_args, **_kwargs):
-            raise AssertionError("Skroutz parser should not be called directly outside the provider seam")
-
-    class UnexpectedElectronetProvider:
-        def __init__(self, **_kwargs):
-            raise AssertionError("Electronet provider should not be selected for Skroutz by default")
-
-    class DummySkroutzProvider:
-        definition = ProviderDefinition(
-            provider_id="skroutz",
-            source_name="skroutz",
-            kind=ProviderKind.VENDOR_SITE,
-            capabilities=frozenset(
-                {
-                    ProviderCapability.URL_INPUT,
-                    ProviderCapability.LIVE_FETCH,
-                    ProviderCapability.HTML_SNAPSHOT,
-                    ProviderCapability.NORMALIZED_PRODUCT,
-                }
-            ),
-        )
-
-        @property
-        def provider_id(self) -> str:
-            return self.definition.provider_id
-
-        def __init__(self, *, fetcher, parser):
-            assert isinstance(fetcher, DummyFetcher)
-            assert isinstance(parser, UnexpectedParser)
-
-        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
-            provider_calls.append(identity)
-            return ProviderSnapshot(
-                provider_id="skroutz",
-                identity=identity,
-                snapshot_kind=ProviderSnapshotKind.HTML,
-                requested_url=identity.url,
-                final_url=identity.url,
-                content_type="text/html",
-                status_code=200,
-                body_text="<html></html>",
-                metadata={"fetch_method": "playwright", "fallback_used": True},
-            )
-
-        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
-            assert snapshot.requested_url == identity.url
-            return ProviderResult(
-                provider=self.definition,
-                identity=identity,
-                snapshot=snapshot,
-                product=parsed.source,
-                provenance=dict(parsed.provenance),
-                field_diagnostics=dict(parsed.field_diagnostics),
-                warnings=list(parsed.warnings),
-                missing_fields=list(parsed.missing_fields),
-                critical_missing=list(parsed.critical_missing),
-            )
-
-    monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
-    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("skroutz", True, "skroutz_product_path"))
-    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
-    monkeypatch.setattr(
-        run_module,
-        "enrich_source_from_manufacturer_docs",
-        lambda **_kwargs: {
-            "applied": False,
-            "provider": "",
-            "providers_considered": [],
-            "matched_providers": [],
-            "documents": [],
-            "documents_discovered": 0,
-            "documents_parsed": 0,
-            "warnings": [],
-            "section_count": 0,
-            "field_count": 0,
-            "hero_summary_applied": False,
-            "presentation_applied": False,
-            "presentation_block_count": 0,
-            "fallback_reason": "test_stub",
-        },
-    )
-    registry = ProviderRegistry()
-    registry.register(DummySkroutzProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
-    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
-
-    result = run_module.execute_full_run(cli)
-
-    assert provider_calls == [ProviderInputIdentity(model="341490", url=cli.url)]
-    assert result["report"]["source"] == "skroutz"
-    assert result["report"]["fetch_mode"] == "playwright"
-    assert result["fetch"].method == "playwright"
-
-
-def test_execute_full_run_routes_manufacturer_tefal_through_provider_by_default(monkeypatch, tmp_path: Path) -> None:
-    from pipeline import full_run as run_module
-    from pipeline.providers.models import (
-        ProviderCapability,
-        ProviderDefinition,
-        ProviderInputIdentity,
-        ProviderKind,
-        ProviderResult,
-        ProviderSnapshot,
-        ProviderSnapshotKind,
-    )
-
-    cli = CLIInput(
-        model="344709",
-        url="https://shop.tefal.gr/products/dolci-%CF%80%CE%B1%CE%B3%CF%89%CF%84%CE%BF%CE%BC%CE%B7%CF%87%CE%B1%CE%BD%CE%AE-ig602a",
-        photos=3,
-        sections=0,
-        skroutz_status=0,
-        boxnow=1,
-        price="219",
-        out=str(tmp_path),
-    )
-    parsed = ParsedProduct(
-        source=SourceProductData(
-            source_name="manufacturer_tefal",
-            page_type="product",
-            url=cli.url,
-            canonical_url=cli.url,
-            product_code="IG602A",
-            brand="Tefal",
-            mpn="IG602A",
-            name="Tefal Dolci Παγωτομηχανή IG602A",
-            breadcrumbs=["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Μικροί Μάγειρες", "Παγωτομηχανές"],
-            taxonomy_source_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες///Παγωτομηχανές",
-            taxonomy_match_type="exact_category",
-            taxonomy_rule_id="manufacturer_tefal:ice_cream_maker",
-            price_text="229,90 €",
-            price_value=229.9,
-            key_specs=[
-                SpecItem(label="Χωρητικότητα", value="1.4 lt"),
-                SpecItem(label="Αριθμός Προγραμμάτων", value="10"),
-                SpecItem(label="Αριθμός Δοχείων", value="3"),
-            ],
-            spec_sections=[
-                SpecSection(
-                    section="Παραγωγή & Δυνατότητες",
-                    items=[
-                        SpecItem(label="Χωρητικότητα", value="1.4 lt"),
-                        SpecItem(label="Αριθμός Προγραμμάτων", value="10"),
-                        SpecItem(label="Αριθμός Δοχείων", value="3"),
-                    ],
-                )
-            ],
-            manufacturer_spec_sections=[
-                SpecSection(
-                    section="Χαρακτηριστικά Κατασκευαστή",
-                    items=[SpecItem(label="Τάση", value="220-240 V")],
-                )
-            ],
-        ),
-    )
-    provider_calls: list[ProviderInputIdentity] = []
-
-    class DummyFetcher:
-        def download_gallery_images(self, **_kwargs):
-            return [], [], []
-
-        def download_besco_images(self, **_kwargs):
-            return [], [], []
-
-    class DummyResolver:
-        def resolve(self, **_kwargs):
-            return TaxonomyResolution(parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", leaf_category="Μικροί Μάγειρες", sub_category="Παγωτομηχανές"), []
-
-    class DummySchemaMatcher:
-        known_section_titles = set()
-
-        def __init__(self, *_args, **_kwargs):
-            pass
-
-        def match(self, *_args, **_kwargs):
-            return SchemaMatchResult(matched_schema_id="schema-1", score=0.9), []
-
-    class UnexpectedParser:
-        def parse(self, *_args, **_kwargs):
-            raise AssertionError("Manufacturer parser should not be called directly outside the provider seam")
-
-    class DummyManufacturerTefalProvider:
-        definition = ProviderDefinition(
-            provider_id="manufacturer_tefal",
-            source_name="manufacturer_tefal",
-            kind=ProviderKind.MANUFACTURER_SITE,
-            capabilities=frozenset(
-                {
-                    ProviderCapability.URL_INPUT,
-                    ProviderCapability.LIVE_FETCH,
-                    ProviderCapability.HTML_SNAPSHOT,
-                    ProviderCapability.NORMALIZED_PRODUCT,
-                }
-            ),
-        )
-
-        @property
-        def provider_id(self) -> str:
-            return self.definition.provider_id
-
-        def __init__(self, *, fetcher, parser):
-            assert isinstance(fetcher, DummyFetcher)
-            assert isinstance(parser, UnexpectedParser)
-
-        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
-            provider_calls.append(identity)
-            return ProviderSnapshot(
-                provider_id="manufacturer_tefal",
-                identity=identity,
-                snapshot_kind=ProviderSnapshotKind.HTML,
-                requested_url=identity.url,
-                final_url=identity.url,
-                content_type="text/html",
-                status_code=200,
-                body_text="<html></html>",
-                metadata={"fetch_method": "httpx", "fallback_used": False},
-            )
-
-        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
-            assert snapshot.requested_url == identity.url
-            return ProviderResult(
-                provider=self.definition,
-                identity=identity,
-                snapshot=snapshot,
-                product=parsed.source,
-                provenance=dict(parsed.provenance),
-                field_diagnostics=dict(parsed.field_diagnostics),
-                warnings=list(parsed.warnings),
-                missing_fields=list(parsed.missing_fields),
-                critical_missing=list(parsed.critical_missing),
-            )
-
-    monkeypatch.setattr(run_module, "detect_source", lambda _url: "manufacturer_tefal")
-    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"))
-    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
-    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False})
-    registry = ProviderRegistry()
-    registry.register(DummyManufacturerTefalProvider(fetcher=DummyFetcher(), parser=UnexpectedParser()))
-    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
-
-    result = run_module.execute_full_run(cli)
-
-    assert provider_calls == [ProviderInputIdentity(model="344709", url=cli.url)]
-    assert result["parsed"].source.source_name == "manufacturer_tefal"
-    assert result["report"]["fetch_mode"] == "httpx"
-    assert result["fetch"].method == "httpx"
-    assert result["normalized"]["deterministic_product"]["mpn"] == "IG602A"
-
-
-def test_execute_full_run_fails_fast_when_supported_source_has_no_provider(monkeypatch, tmp_path: Path) -> None:
-    from pipeline import full_run as run_module
-
-    cli = CLIInput(
-        model="341490",
-        url="https://www.skroutz.gr/s/51055155/Estia-Intense-Vrastiras-1-7lt-2200W-Luminus-Mat.html",
-        photos=2,
-        sections=0,
-        skroutz_status=0,
-        boxnow=1,
-        price="19",
-        out=str(tmp_path),
-    )
-
-    class DummySchemaMatcher:
-        known_section_titles = set()
-
-        def __init__(self, *_args, **_kwargs):
-            pass
-
-    monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
-    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: object())
-    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: ProviderRegistry())
-
-    with pytest.raises(RuntimeError, match="Provider 'skroutz' is not registered"):
-        run_module.execute_full_run(cli)
 
 
 def test_prepare_workflow_keeps_prepare_scrape_only_without_candidate_csv(tmp_path: Path, monkeypatch) -> None:
@@ -1161,27 +721,36 @@ def test_execute_publish_workflow_passes_model_and_current_job_product_file(tmp_
     model = "233541"
     script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
     current_job_product_file = repo_root / "products" / "233541.csv"
+    main_image_path = repo_root / "work" / model / "scrape" / "gallery" / f"{model}-1.jpg"
     (repo_root / "work" / model).mkdir(parents=True)
     script_path.parent.mkdir(parents=True)
     current_job_product_file.parent.mkdir(parents=True)
+    main_image_path.parent.mkdir(parents=True)
     script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
     current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+    main_image_path.write_text("image", encoding="utf-8")
     captured: dict[str, object] = {}
+    calls: list[list[str]] = []
 
     class DummyCompleted:
-        returncode = 0
-        stdout = "[opencart-publish] ok\n"
-        stderr = ""
+        def __init__(self, returncode: int, stdout: str, stderr: str) -> None:
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
 
-    def fake_run(cmd, *, cwd, env, capture_output, text, check):
-        captured["cmd"] = cmd
+    def fake_run(cmd, *, cwd, capture_output, text, check, env=None):
+        calls.append(cmd)
         captured["cwd"] = cwd
         captured["env"] = env
         captured["capture_output"] = capture_output
         captured["text"] = text
         captured["check"] = check
-        return DummyCompleted()
+        if cmd[-1] == "--version":
+            return DummyCompleted(0, "GNU bash, version 5.2.0\n", "")
+        captured["cmd"] = cmd
+        return DummyCompleted(0, "[opencart-publish] ok\n", "")
 
+    monkeypatch.setattr(publish_execution.shutil, "which", lambda name: "/usr/bin/bash" if name == "bash" else None)
     monkeypatch.setattr(publish_execution.subprocess, "run", fake_run)
 
     result = publish_execution.execute_publish_workflow(
@@ -1192,13 +761,17 @@ def test_execute_publish_workflow_passes_model_and_current_job_product_file(tmp_
         current_job_product_file=current_job_product_file,
     )
 
-    assert captured["cmd"] == ["bash", str(script_path), model]
+    assert calls == [
+        ["/usr/bin/bash", "--version"],
+        ["/usr/bin/bash", "tools/run_opencart_pipeline.sh", model],
+    ]
+    assert captured["cmd"] == ["/usr/bin/bash", "tools/run_opencart_pipeline.sh", model]
     assert captured["cwd"] == repo_root
     assert captured["capture_output"] is True
     assert captured["text"] is True
     assert captured["check"] is False
-    assert captured["env"]["CURRENT_JOB_PRODUCT_FILE"] == str(current_job_product_file)
-    assert captured["env"]["REPO_ROOT"] == str(repo_root)
+    assert captured["env"]["CURRENT_JOB_PRODUCT_FILE"] == "products/233541.csv"
+    assert "REPO_ROOT" not in captured["env"]
     assert result["publish_attempted"] is True
     assert result["publish_status"] == "warning"
     assert result["publish_stage"] == "csv_import"
@@ -1248,6 +821,102 @@ def test_execute_publish_workflow_passes_model_and_current_job_product_file(tmp_
     assert result["upload_ok"] is True
     assert result["upload_report_path"] == repo_root / "work" / "233541" / "upload.opencart.json"
     assert result["upload_warning"] is None
+
+
+def test_execute_publish_workflow_fails_preflight_when_bash_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import publish_execution
+
+    repo_root = tmp_path
+    model = "233541"
+    script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
+    current_job_product_file = repo_root / "products" / "233541.csv"
+    main_image_path = repo_root / "work" / model / "scrape" / "gallery" / f"{model}-1.jpg"
+    script_path.parent.mkdir(parents=True)
+    current_job_product_file.parent.mkdir(parents=True)
+    main_image_path.parent.mkdir(parents=True)
+    script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+    main_image_path.write_text("image", encoding="utf-8")
+
+    monkeypatch.setattr(publish_execution.shutil, "which", lambda _name: None)
+
+    result = publish_execution.execute_publish_workflow(
+        repo_root=repo_root,
+        work_root=repo_root / "work",
+        products_root=repo_root / "products",
+        model=model,
+        current_job_product_file=current_job_product_file,
+    )
+
+    assert result["publish_status"] == "failed"
+    assert result["publish_stage"] == "preflight"
+    assert result["publish_message"] == "OpenCart publish failed during preflight: bash executable not found on PATH"
+
+
+def test_execute_publish_workflow_classifies_wsl_launcher_probe_failures(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import publish_execution
+
+    repo_root = tmp_path
+    model = "233541"
+    script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
+    current_job_product_file = repo_root / "products" / "233541.csv"
+    main_image_path = repo_root / "work" / model / "scrape" / "gallery" / f"{model}-1.jpg"
+    script_path.parent.mkdir(parents=True)
+    current_job_product_file.parent.mkdir(parents=True)
+    main_image_path.parent.mkdir(parents=True)
+    script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+    main_image_path.write_text("image", encoding="utf-8")
+
+    class DummyCompleted:
+        returncode = 1
+        stdout = "Error code: Wsl/Service/CreateInstance/0xd0000022\n"
+        stderr = ""
+
+    monkeypatch.setattr(publish_execution.shutil, "which", lambda name: "/usr/bin/bash" if name == "bash" else None)
+    monkeypatch.setattr(publish_execution.subprocess, "run", lambda *args, **kwargs: DummyCompleted())
+
+    result = publish_execution.execute_publish_workflow(
+        repo_root=repo_root,
+        work_root=repo_root / "work",
+        products_root=repo_root / "products",
+        model=model,
+        current_job_product_file=current_job_product_file,
+    )
+
+    assert result["publish_status"] == "failed"
+    assert result["publish_stage"] == "preflight"
+    assert "bash_or_wsl_startup_failure" in str(result["publish_message"])
+    assert "CreateInstance/0xd0000022" in str(result["publish_message"])
+
+
+def test_execute_publish_workflow_fails_preflight_when_main_image_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import publish_execution
+
+    repo_root = tmp_path
+    model = "233541"
+    script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
+    current_job_product_file = repo_root / "products" / "233541.csv"
+    script_path.parent.mkdir(parents=True)
+    current_job_product_file.parent.mkdir(parents=True)
+    (repo_root / "work" / model / "scrape").mkdir(parents=True)
+    script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+
+    # Missing gallery/<model>-1.jpg should be reported before shell invocation.
+    monkeypatch.setattr(publish_execution.shutil, "which", lambda name: "/usr/bin/bash" if name == "bash" else None)
+
+    result = publish_execution.execute_publish_workflow(
+        repo_root=repo_root,
+        work_root=repo_root / "work",
+        products_root=repo_root / "products",
+        model=model,
+        current_job_product_file=current_job_product_file,
+    )
+
+    assert result["publish_status"] == "failed"
+    assert result["publish_stage"] == "preflight"
+    assert "missing gallery image" in str(result["publish_message"])
 
 def test_render_workflow_fails_when_source_sections_are_missing_entirely(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
@@ -1369,6 +1038,11 @@ def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsy
     def fake_prepare_product(request: PrepareRequest) -> ServiceResult:
         assert request.model == cli.model
         assert request.url == cli.url
+        assert request.photos == cli.photos
+        assert request.sections == cli.sections
+        assert request.skroutz_status == cli.skroutz_status
+        assert request.boxnow == cli.boxnow
+        assert request.price == cli.price
         return ServiceResult(
             run=RunMetadata(model=cli.model, run_type=RunType.PREPARE, status=RunStatus.COMPLETED),
             artifacts=RunArtifacts(
@@ -1390,6 +1064,12 @@ def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsy
 
     assert exit_code == 0
     assert f"Scrape artifacts: {tmp_path / 'work' / cli.model / 'scrape'}" in captured.out
+    assert f"LLM task manifest: {tmp_path / 'work' / cli.model / 'llm' / 'task_manifest.json'}" in captured.out
+    assert f"Intro task context: {tmp_path / 'work' / cli.model / 'llm' / 'intro_text.context.json'}" in captured.out
+    assert f"Intro task prompt: {tmp_path / 'work' / cli.model / 'llm' / 'intro_text.prompt.txt'}" in captured.out
+    assert f"SEO task context: {tmp_path / 'work' / cli.model / 'llm' / 'seo_meta.context.json'}" in captured.out
+    assert f"SEO task prompt: {tmp_path / 'work' / cli.model / 'llm' / 'seo_meta.prompt.txt'}" in captured.out
+    assert "Run status: completed" in captured.out
     assert f"Metadata path: {tmp_path / 'work' / cli.model / 'prepare.run.json'}" in captured.out
 
 
@@ -1438,6 +1118,7 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
     assert exit_code == 0
     assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
     assert f"Published CSV: {tmp_path / 'products' / '233541.csv'}" in captured.out
+    assert f"Validation report: {tmp_path / 'work' / '233541' / 'candidate' / '233541.validation.json'}" in captured.out
     assert "Validation ok: True" in captured.out
     assert "Render status: success" in captured.out
     assert "Publish status: success" in captured.out
@@ -1445,6 +1126,9 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
     assert "Publish message: OpenCart publish completed successfully." in captured.out
     assert f"OpenCart upload report: {tmp_path / 'work' / '233541' / 'upload.opencart.json'}" in captured.out
     assert f"OpenCart import report: {tmp_path / 'work' / '233541' / 'import.opencart.json'}" in captured.out
+    assert "Run status: completed" in captured.out
+    assert f"Metadata path: {tmp_path / 'work' / '233541' / 'render.run.json'}" in captured.out
+    assert f"Publish metadata path: {tmp_path / 'work' / '233541' / 'publish.run.json'}" in captured.out
 
 
 @pytest.mark.parametrize(
@@ -1517,34 +1201,4 @@ def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, cap
 
     assert exit_code == 5
     assert "Validation ok: False" in captured.out
-
-
-def test_run_cli_input_calls_service_layer(monkeypatch) -> None:
-    from pipeline import cli as cli_module
-
-    cli = CLIInput(
-        model="233541",
-        url="https://www.electronet.gr/example",
-        photos=2,
-        sections=1,
-        skroutz_status=1,
-        boxnow=0,
-        price="2099",
-        out="out",
-    )
-    expected = ServiceResult(
-        run=RunMetadata(model="233541", run_type=RunType.FULL, status=RunStatus.COMPLETED),
-        artifacts=RunArtifacts(),
-        details={},
-    )
-
-    def fake_run_product(request):
-        assert request.model == cli.model
-        assert request.url == cli.url
-        assert request.out == cli.out
-        return expected
-
-    monkeypatch.setattr(cli_module, "run_product", fake_run_product)
-
-    assert cli_module.run_cli_input(cli) is expected
 

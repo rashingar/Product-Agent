@@ -10,9 +10,10 @@ REPO_ROOT="${REPO_ROOT:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 ENV_FILE="${ENV_FILE:-${REPO_ROOT}/.secrets/opencart.env}"
 
 if [[ -f "${ENV_FILE}" ]]; then
+  # Accept CRLF-formatted env files from Windows editors.
   # shellcheck disable=SC1090
   set -a
-  source "${ENV_FILE}"
+  source <(tr -d '\r' < "${ENV_FILE}")
   set +a
 fi
 

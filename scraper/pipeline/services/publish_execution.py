@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -21,6 +22,11 @@ PUBLISH_STAGE_EXIT_CODES = {
     12: "image_upload",
     13: "csv_import",
 }
+WSL_LAUNCH_MARKERS = (
+    "Bash/Service/CreateInstance",
+    "Wsl/Service/CreateInstance",
+    "CreateInstance/0xd0000022",
+)
 
 
 def _report_paths(repo_root: Path, model: str) -> tuple[Path, Path]:
@@ -36,6 +42,73 @@ def _summarize_command_output(stdout: str, stderr: str) -> str:
     if not lines:
         return ""
     return " | ".join(lines[-3:])
+
+
+def _classify_bash_probe_failure(stdout: str, stderr: str) -> str | None:
+    summary = _summarize_command_output(stdout, stderr)
+    if not summary:
+        return None
+    if any(marker in summary for marker in WSL_LAUNCH_MARKERS):
+        return "bash_or_wsl_startup_failure"
+    lowered = summary.lower()
+    if "access is denied" in lowered:
+        return "bash_access_denied"
+    if "cannot find" in lowered or "not recognized" in lowered:
+        return "bash_not_available"
+    return None
+
+
+def _shell_path_from_repo(path: Path, *, repo_root: Path) -> str:
+    try:
+        return path.relative_to(repo_root).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def _preflight_publish_environment(
+    *,
+    model: str,
+    script_path: Path,
+    published_csv_path: Path,
+    work_root: Path,
+    repo_root: Path,
+) -> tuple[str | None, str | None, str | None]:
+    if not script_path.exists():
+        return "preflight", f"OpenCart publish failed during preflight: shell entrypoint not found at {script_path}", None
+    if not published_csv_path.exists():
+        return "preflight", f"OpenCart publish failed during preflight: missing published CSV: {published_csv_path}", None
+
+    main_image_path = work_root / model / "scrape" / "gallery" / f"{model}-1.jpg"
+    if not main_image_path.exists():
+        return "preflight", f"OpenCart publish failed during preflight: missing gallery image: {main_image_path}", None
+
+    bash_path = shutil.which("bash")
+    if not bash_path:
+        return "preflight", "OpenCart publish failed during preflight: bash executable not found on PATH", None
+
+    try:
+        completed = subprocess.run(
+            [bash_path, "--version"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        return "preflight", f"OpenCart publish failed during preflight: {exc}", None
+
+    if completed.returncode == 0:
+        return None, None, bash_path
+
+    summary = _summarize_command_output(completed.stdout, completed.stderr)
+    failure_class = _classify_bash_probe_failure(completed.stdout, completed.stderr)
+    message = "OpenCart publish failed during preflight: bash launcher probe failed"
+    if failure_class:
+        message = f"{message} ({failure_class})"
+    message = f"{message}: exit={completed.returncode}"
+    if summary:
+        message = f"{message}: {summary}"
+    return "preflight", message, bash_path
 
 
 def execute_publish_workflow(
@@ -83,14 +156,28 @@ def execute_publish_workflow(
     run_status = RunStatus.FAILED
 
     try:
-        if not script_path.exists():
-            publish_message = f"OpenCart publish failed during preflight: shell entrypoint not found at {script_path}"
+        preflight_stage, preflight_message, bash_path = _preflight_publish_environment(
+            model=model,
+            script_path=script_path,
+            published_csv_path=published_csv_path,
+            work_root=work_root,
+            repo_root=repo_root,
+        )
+        if preflight_message is not None:
+            publish_stage = str(preflight_stage or "preflight")
+            publish_message = preflight_message
         else:
             env = os.environ.copy()
-            env["CURRENT_JOB_PRODUCT_FILE"] = str(published_csv_path)
-            env.setdefault("REPO_ROOT", str(repo_root))
+            env["CURRENT_JOB_PRODUCT_FILE"] = _shell_path_from_repo(
+                published_csv_path,
+                repo_root=repo_root,
+            )
             completed = subprocess.run(
-                ["bash", str(script_path), model],
+                [
+                    str(bash_path),
+                    _shell_path_from_repo(script_path, repo_root=repo_root),
+                    model,
+                ],
                 cwd=repo_root,
                 env=env,
                 capture_output=True,
@@ -120,9 +207,12 @@ def execute_publish_workflow(
                     publish_message = "OpenCart publish completed successfully."
                 run_status = RunStatus.COMPLETED
             else:
-                publish_stage = PUBLISH_STAGE_EXIT_CODES.get(completed.returncode, "unknown")
+                launcher_failure = _classify_bash_probe_failure(completed.stdout, completed.stderr)
+                publish_stage = "preflight" if launcher_failure else PUBLISH_STAGE_EXIT_CODES.get(completed.returncode, "unknown")
                 summary = _summarize_command_output(completed.stdout, completed.stderr)
                 publish_message = f"OpenCart publish failed during {publish_stage}: exit={completed.returncode}"
+                if launcher_failure:
+                    publish_message = f"{publish_message} ({launcher_failure})"
                 if summary:
                     publish_message = f"{publish_message}: {summary}"
     except FileNotFoundError as exc:

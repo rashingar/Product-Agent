@@ -2,10 +2,19 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pipeline import full_run as run_module
-from pipeline.models import CLIInput, SchemaMatchResult, TaxonomyResolution
+import pytest
+
+from pipeline.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.prepare_stage import execute_prepare_stage
 from pipeline.providers import ProviderInputIdentity, ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
-from pipeline.providers.models import ProviderKind, ProviderSnapshotKind
+from pipeline.providers.models import (
+    ProviderCapability,
+    ProviderDefinition,
+    ProviderKind,
+    ProviderResult,
+    ProviderSnapshot,
+    ProviderSnapshotKind,
+)
 from pipeline.providers.manufacturer_tefal_provider import ManufacturerTefalProvider
 from pipeline.providers.skroutz_provider import SkroutzProvider
 
@@ -57,12 +66,6 @@ class DummySchemaMatcher:
 
 
 class DummyFetcher:
-    def fetch_httpx(self, _url):
-        raise AssertionError("Legacy Skroutz fetch should not be used when a test-injected provider is selected")
-
-    def fetch_playwright(self, _url):
-        raise AssertionError("Legacy Skroutz fetch should not be used when a test-injected provider is selected")
-
     def download_gallery_images(self, **_kwargs):
         return [], [], []
 
@@ -208,7 +211,7 @@ def test_manufacturer_tefal_provider_normalize_returns_provider_result(
     assert "name" in result.field_diagnostics
 
 
-def test_execute_full_run_uses_test_injected_skroutz_provider(monkeypatch, tmp_path: Path, skroutz_fixtures_root: Path) -> None:
+def test_execute_prepare_stage_uses_test_injected_skroutz_provider(tmp_path: Path, skroutz_fixtures_root: Path) -> None:
     cli = CLIInput(
         model=SAMPLE_MODEL,
         url=SAMPLE_URL,
@@ -220,22 +223,389 @@ def test_execute_full_run_uses_test_injected_skroutz_provider(monkeypatch, tmp_p
         out=str(tmp_path),
     )
     provider = build_provider(skroutz_fixtures_root)
-
-    monkeypatch.setattr(run_module, "detect_source", lambda _url: "skroutz")
-    monkeypatch.setattr(run_module, "validate_url_scope", lambda _url: ("skroutz", True, "skroutz_product_path"))
-    monkeypatch.setattr(run_module, "ElectronetFetcher", lambda: DummyFetcher())
-    monkeypatch.setattr(run_module, "SchemaMatcher", DummySchemaMatcher)
-    monkeypatch.setattr(run_module, "TaxonomyResolver", lambda: DummyResolver())
-    monkeypatch.setattr(run_module, "enrich_source_from_manufacturer_docs", lambda **_kwargs: _build_manufacturer_enrichment_stub())
     registry = ProviderRegistry()
     registry.register(provider)
-    monkeypatch.setattr(run_module, "bootstrap_runtime_provider_registry", lambda **_kwargs: registry)
 
-    result = run_module.execute_full_run(cli)
+    result = execute_prepare_stage(
+        cli,
+        model_dir=tmp_path / SAMPLE_MODEL,
+        detect_source_fn=lambda _url: "skroutz",
+        validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
+        schema_matcher_factory=DummySchemaMatcher,
+        electronet_parser_factory=lambda **_kwargs: object(),
+        skroutz_parser_factory=lambda: object(),
+        manufacturer_parser_factory=lambda: object(),
+        fetcher_factory=DummyFetcher,
+        taxonomy_resolver_factory=DummyResolver,
+        bootstrap_provider_registry_fn=lambda **_kwargs: registry,
+        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
+    )
 
     assert result["report"]["source"] == "skroutz"
     assert result["report"]["fetch_mode"] == "fixture"
     assert result["fetch"].method == "fixture"
     assert result["parsed"].source.source_name == "skroutz"
     assert result["source_json_path"].exists()
+
+
+def test_execute_prepare_stage_allows_electronet_product_code_mismatch(tmp_path: Path) -> None:
+    cli = CLIInput(
+        model="229957",
+        url="https://www.electronet.gr/example",
+        photos=2,
+        sections=0,
+        skroutz_status=1,
+        boxnow=0,
+        price="599",
+        out=str(tmp_path),
+    )
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            url=cli.url,
+            canonical_url=cli.url,
+            product_code="235370",
+            brand="LG",
+            name="LG RHX5009TWB",
+        ),
+    )
+    provider_calls: list[ProviderInputIdentity] = []
+
+    class DummyElectronetProvider:
+        definition = ProviderDefinition(
+            provider_id="electronet",
+            source_name="electronet",
+            kind=ProviderKind.VENDOR_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="electronet",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "httpx", "fallback_used": False},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=self.definition,
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
+
+    registry = ProviderRegistry()
+    registry.register(DummyElectronetProvider())
+
+    result = execute_prepare_stage(
+        cli,
+        model_dir=tmp_path / cli.model,
+        detect_source_fn=lambda _url: "electronet",
+        validate_url_scope_fn=lambda _url: ("electronet", True, ""),
+        schema_matcher_factory=DummySchemaMatcher,
+        electronet_parser_factory=lambda **_kwargs: object(),
+        skroutz_parser_factory=lambda: object(),
+        manufacturer_parser_factory=lambda: object(),
+        fetcher_factory=DummyFetcher,
+        taxonomy_resolver_factory=DummyResolver,
+        bootstrap_provider_registry_fn=lambda **_kwargs: registry,
+        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {},
+    )
+
+    assert provider_calls == [ProviderInputIdentity(model="229957", url="https://www.electronet.gr/example")]
+    assert result["parsed"].warnings == ["source_product_code_mismatch:input=229957:page=235370"]
+    assert result["report"]["source"] == "electronet"
+    assert result["report"]["identity_checks"]["source"] == "electronet"
+
+
+def test_execute_prepare_stage_routes_skroutz_through_provider_by_default(tmp_path: Path) -> None:
+    cli = CLIInput(
+        model=SAMPLE_MODEL,
+        url=SAMPLE_URL,
+        photos=2,
+        sections=0,
+        skroutz_status=0,
+        boxnow=1,
+        price="19",
+        out=str(tmp_path),
+    )
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            source_name="skroutz",
+            page_type="product",
+            url=cli.url,
+            canonical_url=cli.url,
+            product_code=cli.model,
+            brand="Estia",
+            mpn="06-24567",
+            name="Estia 06-24567",
+            breadcrumbs=["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Συσκευές Κουζίνας", "Βραστήρες"],
+            taxonomy_source_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::Συσκευές Κουζίνας///Βραστήρες",
+            taxonomy_match_type="exact_category",
+            taxonomy_rule_id="family:kettle",
+            price_text="19,00 €",
+            price_value=19.0,
+            key_specs=[SpecItem(label="Ισχύς", value="2200 W")],
+            spec_sections=[SpecSection(section="Χαρακτηριστικά", items=[SpecItem(label="Ισχύς", value="2200 W")])],
+        ),
+    )
+    provider_calls: list[ProviderInputIdentity] = []
+
+    class DummySkroutzProvider:
+        definition = ProviderDefinition(
+            provider_id="skroutz",
+            source_name="skroutz",
+            kind=ProviderKind.VENDOR_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="skroutz",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "playwright", "fallback_used": True},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=self.definition,
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
+
+    registry = ProviderRegistry()
+    registry.register(DummySkroutzProvider())
+
+    result = execute_prepare_stage(
+        cli,
+        model_dir=tmp_path / cli.model,
+        detect_source_fn=lambda _url: "skroutz",
+        validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
+        schema_matcher_factory=DummySchemaMatcher,
+        electronet_parser_factory=lambda **_kwargs: object(),
+        skroutz_parser_factory=lambda: object(),
+        manufacturer_parser_factory=lambda: object(),
+        fetcher_factory=DummyFetcher,
+        taxonomy_resolver_factory=DummyResolver,
+        bootstrap_provider_registry_fn=lambda **_kwargs: registry,
+        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
+    )
+
+    assert provider_calls == [ProviderInputIdentity(model=SAMPLE_MODEL, url=cli.url)]
+    assert result["report"]["source"] == "skroutz"
+    assert result["report"]["fetch_mode"] == "playwright"
+    assert result["fetch"].method == "playwright"
+    assert result["parsed"].source.source_name == "skroutz"
+
+
+def test_execute_prepare_stage_routes_manufacturer_tefal_through_provider_by_default(tmp_path: Path) -> None:
+    cli = CLIInput(
+        model=MANUFACTURER_MODEL,
+        url=MANUFACTURER_URL,
+        photos=3,
+        sections=0,
+        skroutz_status=0,
+        boxnow=1,
+        price="219",
+        out=str(tmp_path),
+    )
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            source_name="manufacturer_tefal",
+            page_type="product",
+            url=cli.url,
+            canonical_url=cli.url,
+            product_code="IG602A",
+            brand="Tefal",
+            mpn="IG602A",
+            name="Tefal Dolci Παγωτομηχανή IG602A",
+            breadcrumbs=["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Μικροί Μάγειρες", "Παγωτομηχανές"],
+            taxonomy_source_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ:::ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ///Μικροί Μάγειρες///Παγωτομηχανές",
+            taxonomy_match_type="exact_category",
+            taxonomy_rule_id="manufacturer_tefal:ice_cream_maker",
+            price_text="229,90 €",
+            price_value=229.9,
+            key_specs=[
+                SpecItem(label="Χωρητικότητα", value="1.4 lt"),
+                SpecItem(label="Αριθμός Προγραμμάτων", value="10"),
+                SpecItem(label="Αριθμός Δοχείων", value="3"),
+            ],
+            spec_sections=[
+                SpecSection(
+                    section="Παραγωγή & Δυνατότητες",
+                    items=[
+                        SpecItem(label="Χωρητικότητα", value="1.4 lt"),
+                        SpecItem(label="Αριθμός Προγραμμάτων", value="10"),
+                        SpecItem(label="Αριθμός Δοχείων", value="3"),
+                    ],
+                )
+            ],
+            manufacturer_spec_sections=[
+                SpecSection(
+                    section="Χαρακτηριστικά Κατασκευαστή",
+                    items=[SpecItem(label="Τάση", value="220-240 V")],
+                )
+            ],
+        ),
+    )
+    provider_calls: list[ProviderInputIdentity] = []
+
+    class DummyManufacturerResolver:
+        def resolve(self, **_kwargs):
+            return (
+                TaxonomyResolution(
+                    parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+                    leaf_category="Μικροί Μάγειρες",
+                    sub_category="Παγωτομηχανές",
+                ),
+                [],
+            )
+
+    class DummyManufacturerTefalProvider:
+        definition = ProviderDefinition(
+            provider_id="manufacturer_tefal",
+            source_name="manufacturer_tefal",
+            kind=ProviderKind.MANUFACTURER_SITE,
+            capabilities=frozenset(
+                {
+                    ProviderCapability.URL_INPUT,
+                    ProviderCapability.LIVE_FETCH,
+                    ProviderCapability.HTML_SNAPSHOT,
+                    ProviderCapability.NORMALIZED_PRODUCT,
+                }
+            ),
+        )
+
+        @property
+        def provider_id(self) -> str:
+            return self.definition.provider_id
+
+        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
+            provider_calls.append(identity)
+            return ProviderSnapshot(
+                provider_id="manufacturer_tefal",
+                identity=identity,
+                snapshot_kind=ProviderSnapshotKind.HTML,
+                requested_url=identity.url,
+                final_url=identity.url,
+                content_type="text/html",
+                status_code=200,
+                body_text="<html></html>",
+                metadata={"fetch_method": "httpx", "fallback_used": False},
+            )
+
+        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
+            assert snapshot.requested_url == identity.url
+            return ProviderResult(
+                provider=self.definition,
+                identity=identity,
+                snapshot=snapshot,
+                product=parsed.source,
+                provenance=dict(parsed.provenance),
+                field_diagnostics=dict(parsed.field_diagnostics),
+                warnings=list(parsed.warnings),
+                missing_fields=list(parsed.missing_fields),
+                critical_missing=list(parsed.critical_missing),
+            )
+
+    registry = ProviderRegistry()
+    registry.register(DummyManufacturerTefalProvider())
+
+    result = execute_prepare_stage(
+        cli,
+        model_dir=tmp_path / cli.model,
+        detect_source_fn=lambda _url: "manufacturer_tefal",
+        validate_url_scope_fn=lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"),
+        schema_matcher_factory=DummySchemaMatcher,
+        electronet_parser_factory=lambda **_kwargs: object(),
+        skroutz_parser_factory=lambda: object(),
+        manufacturer_parser_factory=lambda: object(),
+        fetcher_factory=DummyFetcher,
+        taxonomy_resolver_factory=DummyManufacturerResolver,
+        bootstrap_provider_registry_fn=lambda **_kwargs: registry,
+        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False},
+    )
+
+    assert provider_calls == [ProviderInputIdentity(model=MANUFACTURER_MODEL, url=cli.url)]
+    assert result["parsed"].source.source_name == "manufacturer_tefal"
+    assert result["report"]["fetch_mode"] == "httpx"
+    assert result["fetch"].method == "httpx"
+    assert result["normalized"]["deterministic_product"]["mpn"] == "IG602A"
+
+
+def test_execute_prepare_stage_fails_fast_when_supported_source_has_no_provider(tmp_path: Path) -> None:
+    cli = CLIInput(
+        model=SAMPLE_MODEL,
+        url=SAMPLE_URL,
+        photos=2,
+        sections=0,
+        skroutz_status=0,
+        boxnow=1,
+        price="19",
+        out=str(tmp_path),
+    )
+
+    with pytest.raises(RuntimeError, match="Provider 'skroutz' is not registered"):
+        execute_prepare_stage(
+            cli,
+            model_dir=tmp_path / SAMPLE_MODEL,
+            detect_source_fn=lambda _url: "skroutz",
+            validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
+            schema_matcher_factory=DummySchemaMatcher,
+            electronet_parser_factory=lambda **_kwargs: object(),
+            skroutz_parser_factory=lambda: object(),
+            manufacturer_parser_factory=lambda: object(),
+            fetcher_factory=DummyFetcher,
+            taxonomy_resolver_factory=DummyResolver,
+            bootstrap_provider_registry_fn=lambda **_kwargs: ProviderRegistry(),
+            enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
+        )
 

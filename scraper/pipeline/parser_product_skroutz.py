@@ -166,6 +166,15 @@ SKROUTZ_FAMILIES: dict[str, dict[str, Any]] = {
         "spec_mode": "raw",
         "taxonomy_mode": "helper",
     },
+    "air_conditioner": {
+        "category_labels": {"Κλιματιστικά"},
+        "category_href_tokens": {"klimatistika", "air condition"},
+        "title_tokens": {"klimatist", "air condition", "btu", "inverter"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
     "robot_vacuum": {
         "category_labels": {"Σκούπες Ρομπότ"},
         "category_href_tokens": {"skoypa rompot", "skoupa rompot"},
