@@ -1195,6 +1195,38 @@ def test_workflow_main_maps_service_error_codes_to_explicit_exit_codes(monkeypat
     assert f"{service_code} message" in captured.err
 
 
+def test_workflow_main_prepare_surfaces_metadata_write_failure(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_build_cli_input_from_args(_args):
+        return CLIInput(
+            model="233541",
+            url="https://www.electronet.gr/example",
+            photos=2,
+            sections=1,
+            skroutz_status=1,
+            boxnow=0,
+            price="2099",
+            out="out",
+        )
+
+    def fake_prepare_product(_request: PrepareRequest) -> ServiceResult:
+        raise ServiceError(
+            ServiceErrorCode.UNEXPECTED_FAILURE.value,
+            f"Failed to write prepare run metadata at {tmp_path / 'work' / '233541' / 'prepare.run.json'}: disk full",
+        )
+
+    monkeypatch.setattr(workflow, "build_cli_input_from_args", fake_build_cli_input_from_args)
+    monkeypatch.setattr(workflow, "prepare_product", fake_prepare_product)
+
+    exit_code = workflow.main(["prepare"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 8
+    assert captured.out == ""
+    assert f"Failed to write prepare run metadata at {tmp_path / 'work' / '233541' / 'prepare.run.json'}: disk full" in captured.err
+
+
 def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, capsys, tmp_path: Path) -> None:
     from pipeline import workflow
 

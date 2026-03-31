@@ -12,6 +12,7 @@ from pipeline.services.execution_models import (
     RenderExecutionResult,
     RenderExecutionValidationReport,
 )
+from pipeline.services.metadata import MetadataWriteError
 from pipeline.services import (
     PrepareRequest,
     PublishRequest,
@@ -272,6 +273,44 @@ def test_prepare_product_wraps_execution_errors(monkeypatch) -> None:
     assert isinstance(excinfo.value.cause, RuntimeError)
 
 
+def test_prepare_product_surfaces_metadata_write_failures_explicitly(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import prepare_service
+
+    metadata_path = tmp_path / "work" / "233541" / "prepare.run.json"
+
+    def fake_execute_prepare_workflow(_cli, *, work_root):
+        raise MetadataWriteError(
+            metadata_path=metadata_path,
+            payload=ServiceResult(
+                run=RunMetadata(
+                    model="233541",
+                    run_type=RunType.PREPARE,
+                    status=RunStatus.COMPLETED,
+                ),
+                artifacts=RunArtifacts(metadata_path=metadata_path),
+                details={"llm_prepare_mode": "split_tasks"},
+            ),
+            cause=OSError("disk full"),
+        )
+
+    monkeypatch.setattr(prepare_service, "execute_prepare_workflow", fake_execute_prepare_workflow)
+
+    with pytest.raises(ServiceError) as excinfo:
+        prepare_product(PrepareRequest(model="233541", url="https://www.electronet.gr/example"))
+
+    assert excinfo.value.code == ServiceErrorCode.UNEXPECTED_FAILURE.value
+    assert excinfo.value.message == f"Failed to write prepare run metadata at {metadata_path}: disk full"
+    assert excinfo.value.retryable is False
+    assert excinfo.value.details == {
+        "metadata_path": str(metadata_path),
+        "metadata_run_type": "prepare",
+        "metadata_run_status": "completed",
+        "metadata_error_code": None,
+        "metadata_error_detail": None,
+    }
+    assert isinstance(excinfo.value.cause, MetadataWriteError)
+
+
 def test_render_product_maps_execution_result(tmp_path: Path, monkeypatch) -> None:
     from pipeline.services import render_service
 
@@ -413,6 +452,46 @@ def test_render_product_wraps_execution_errors(monkeypatch) -> None:
     assert excinfo.value.message == "Missing LLM output"
     assert excinfo.value.retryable is False
     assert isinstance(excinfo.value.cause, FileNotFoundError)
+
+
+def test_render_product_surfaces_metadata_write_failures_explicitly(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_service
+
+    metadata_path = tmp_path / "work" / "233541" / "render.run.json"
+
+    def fake_execute_render_workflow(_model: str):
+        raise MetadataWriteError(
+            metadata_path=metadata_path,
+            payload=ServiceResult(
+                run=RunMetadata(
+                    model="233541",
+                    run_type=RunType.RENDER,
+                    status=RunStatus.FAILED,
+                    error_code=ServiceErrorCode.VALIDATION_FAILURE.value,
+                    error_detail="Candidate validation failed",
+                ),
+                artifacts=RunArtifacts(metadata_path=metadata_path),
+                details={"validation_ok": False},
+            ),
+            cause=OSError("disk full"),
+        )
+
+    monkeypatch.setattr(render_service, "execute_render_workflow", fake_execute_render_workflow)
+
+    with pytest.raises(ServiceError) as excinfo:
+        render_product(RenderRequest(model="233541"))
+
+    assert excinfo.value.code == ServiceErrorCode.UNEXPECTED_FAILURE.value
+    assert excinfo.value.message == f"Failed to write render run metadata at {metadata_path}: disk full"
+    assert excinfo.value.retryable is False
+    assert excinfo.value.details == {
+        "metadata_path": str(metadata_path),
+        "metadata_run_type": "render",
+        "metadata_run_status": "failed",
+        "metadata_error_code": ServiceErrorCode.VALIDATION_FAILURE.value,
+        "metadata_error_detail": "Candidate validation failed",
+    }
+    assert isinstance(excinfo.value.cause, MetadataWriteError)
 
 
 def test_prepare_product_maps_provider_failures_to_stable_service_codes(monkeypatch) -> None:
