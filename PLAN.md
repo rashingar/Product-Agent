@@ -175,6 +175,43 @@ Acceptance criteria:
 3. Provider-selection and supported-source coverage no longer calls `execute_full_run(...)` and instead asserts the surviving workflow/prepare/provider seams directly.
 4. Active docs present only the workflow prepare/render interface as runnable.
 
+### Branch scope — typed execution results
+
+Status: completed
+
+Purpose:
+1. Freeze the exact branch scope for converting prepare/render execution outputs from ad hoc dict payloads into typed execution result objects.
+2. Keep this work limited to the execution-result seam between `execute_prepare_workflow(...)` / `execute_render_workflow(...)` and the service wrappers that consume them.
+3. Preserve current runtime behavior, current workflow commands, and the outward service-layer contract while this internal typing cleanup lands.
+
+Target end state:
+1. `execute_prepare_workflow(...)` returns a typed `PrepareExecutionResult`.
+2. `execute_render_workflow(...)` returns a typed `RenderExecutionResult`.
+3. `scraper/pipeline/services/prepare_service.py` stops indexing prepare execution payloads through `result["..."]` keys and consumes typed fields instead.
+4. `scraper/pipeline/services/render_service.py` stops indexing render execution payloads through `result["..."]` keys and consumes typed fields instead.
+5. The outward `ServiceResult` contract exposed by `prepare_product(...)` and `render_product(...)` remains stable for callers.
+
+In scope:
+1. Introduce typed execution result objects for the prepare and render execution seams.
+2. Update the prepare/render service wrappers to map from typed execution result objects into the existing outward `ServiceResult`.
+3. Keep artifact paths, run-status values, warnings, validation handling, and current workflow-facing behavior unchanged.
+
+Explicit non-goals:
+1. No `prepare_stage.py` decomposition.
+2. No metadata semantics redesign.
+3. No workflow CLI behavior changes.
+4. No provider behavior changes.
+5. No service error-policy redesign.
+
+Acceptance criteria:
+1. `prepare_service.py` and `render_service.py` no longer depend on `dict.get(...)` / `result["..."]` access against execution results.
+2. `execute_prepare_workflow(...)` and `execute_render_workflow(...)` own the typed execution result shapes directly.
+3. The outward `ServiceResult` shape, meaning, and artifact contract remain stable.
+4. This branch does not expand into stage decomposition, metadata redesign, CLI changes, or provider changes.
+
+Completion note:
+- completed; `scraper/pipeline/services/execution_models.py` now owns typed `PrepareExecutionResult` and `RenderExecutionResult` models, `prepare_execution.py` and `render_execution.py` return those typed results directly, and `prepare_service.py` / `render_service.py` consume typed attributes while preserving the outward `ServiceResult` contract
+
 ### Phase 4 — Hybrid RAG foundation
 
 Status: pending

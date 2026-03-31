@@ -3,6 +3,95 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-03-31 - Complete typed execution results migration
+
+Goal:
+- finish the `refactor/typed-execution-results` branch by removing the old prepare/render execution-result dict contract from the execution-to-service seam
+- keep public workflow and service behavior unchanged while finalizing the internal typed execution models
+- close the planning/docs loop for the completed branch scope
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/execution_models.py`
+- `scraper/pipeline/services/prepare_execution.py`
+- `scraper/pipeline/services/prepare_service.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Changes:
+- completed the typed execution seam:
+  - `execute_prepare_workflow(...)` now returns `PrepareExecutionResult`
+  - `execute_render_workflow(...)` now returns `RenderExecutionResult`
+- updated `prepare_service.py` and `render_service.py` to consume typed result attributes instead of the old execution-result dict contract
+- removed the obsolete prepare/render execution-result dict assembly from the execution functions
+- updated workflow and integration tests so the prepare/render execution seam is asserted through typed results only
+- marked the `PLAN.md` typed-execution-results branch scope as completed
+
+Intentionally retained untyped internals:
+- `execute_prepare_stage(...)` still returns a mapping-like stage payload; the prepare executor preserves that as internal stage data because typing the stage itself is outside this branch scope
+- render-side LLM input payloads, validation payloads, and normalized/extracted section payloads remain mapping/list structures inside `render_execution.py`; those are internal content payloads rather than the outward execution-result seam
+- provider and publish execution payloads remain on their current contracts in this branch
+
+Commands run:
+- `Select-String -Path scraper\\pipeline\\**\\*.py -Pattern 'dict\\[str, Any\\]|result\\[\"'`
+- `python -m compileall scraper/pipeline`
+- `python -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `python -m pytest -q` from `scraper/`
+
+Validation:
+- prepare/render execution functions now return typed execution models directly
+- prepare/render services no longer depend on the old execution-result dict contract
+- full scraper test suite passed with no public workflow/service behavior changes
+
+## 2026-03-31 - Freeze typed execution results branch scope
+
+Goal:
+- document the exact branch scope for converting prepare/render execution outputs from dict payloads into typed execution result objects
+- keep this commit docs-only and avoid any runtime, import, or test changes
+- preserve the current outward `ServiceResult` contract while scoping the internal execution typing work
+
+Scope framing:
+- this section records planned branch work for `refactor/typed-execution-results`
+- it is not a statement that `execute_prepare_workflow(...)` or `execute_render_workflow(...)` already return typed result objects today
+- active runtime behavior and runtime instructions remain unchanged in this commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- added a `PLAN.md` branch-scope section for `typed execution results`
+- recorded the target end state:
+  - `execute_prepare_workflow(...)` returns `PrepareExecutionResult`
+  - `execute_render_workflow(...)` returns `RenderExecutionResult`
+  - `prepare_service.py` and `render_service.py` stop indexing execution results through `result["..."]` keys
+  - the outward `ServiceResult` contract remains stable
+- recorded the explicit non-goals:
+  - no `prepare_stage.py` decomposition
+  - no metadata semantics redesign
+  - no workflow CLI behavior changes
+  - no provider behavior changes
+  - no service error-policy redesign
+
+Commands run:
+- `git status --short`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "typed execution results|PrepareExecutionResult|RenderExecutionResult|prepare_service.py|render_service.py|ServiceResult|branch scope|non-goals" PLAN.md DOCUMENTATION.md`
+- `rg -n "execute_prepare_workflow|execute_render_workflow|PrepareExecutionResult|RenderExecutionResult" scraper PLAN.md DOCUMENTATION.md`
+- `Get-Content scraper/pipeline/services/prepare_service.py`
+- `Get-Content scraper/pipeline/services/render_service.py`
+
+Validation:
+- scope is now documented in `PLAN.md` without changing active runtime instructions
+- this commit remains docs-only and does not modify Python files, tests, imports, or runtime behavior
+
 ## 2026-03-31 - Align active docs with workflow-only runtime
 
 Goal:

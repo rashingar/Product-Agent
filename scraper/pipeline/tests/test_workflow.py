@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from pipeline.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.services.execution_models import PrepareExecutionResult, RenderExecutionResult, RenderExecutionValidationReport
 from pipeline.services import PrepareRequest, PublishRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceError, ServiceErrorCode, ServiceResult
 from pipeline.workflow import build_cli_input_from_args, build_parser, prepare_workflow, render_workflow, resolve_model_for_render
 
@@ -100,6 +101,23 @@ def test_prepare_workflow_delegates_to_service_execution(tmp_path: Path, monkeyp
     from pipeline import workflow
 
     cli = CLIInput(model="233541", url="https://www.electronet.gr/example", photos=6, sections=2, skroutz_status=1, boxnow=0, price="2099", out=str(tmp_path))
+    expected_result = PrepareExecutionResult.from_mapping(
+        {
+            "model_root": tmp_path / "work" / "233541",
+            "scrape_dir": tmp_path / "work" / "233541" / "scrape",
+            "llm_dir": tmp_path / "work" / "233541" / "llm",
+            "task_manifest_path": tmp_path / "work" / "233541" / "llm" / "task_manifest.json",
+            "intro_text_context_path": tmp_path / "work" / "233541" / "llm" / "intro_text.context.json",
+            "intro_text_prompt_path": tmp_path / "work" / "233541" / "llm" / "intro_text.prompt.txt",
+            "intro_text_output_path": tmp_path / "work" / "233541" / "llm" / "intro_text.output.txt",
+            "seo_meta_context_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json",
+            "seo_meta_prompt_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.prompt.txt",
+            "seo_meta_output_path": tmp_path / "work" / "233541" / "llm" / "seo_meta.output.json",
+            "run_status": "completed",
+            "metadata_path": tmp_path / "work" / "233541" / "prepare.run.json",
+            "scrape_result": {"report": {"warnings": []}},
+        }
+    )
 
     def fake_execute_prepare_stage(_cli, *, model_dir):
         assert model_dir == tmp_path / "work" / "233541" / "scrape"
@@ -109,13 +127,13 @@ def test_prepare_workflow_delegates_to_service_execution(tmp_path: Path, monkeyp
         assert cli_arg is cli
         assert work_root == tmp_path / "work"
         assert execute_prepare_stage_fn is fake_execute_prepare_stage
-        return {"delegated": True}
+        return expected_result
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
     monkeypatch.setattr(workflow, "execute_prepare_workflow", fake_execute_prepare_workflow)
 
-    assert workflow.prepare_workflow(cli) == {"delegated": True}
+    assert workflow.prepare_workflow(cli) == expected_result
 
 
 def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -> None:
@@ -161,22 +179,22 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
 
     result = prepare_workflow(cli)
 
-    assert result["llm_dir"].exists()
-    assert result["task_manifest_path"].exists()
-    assert result["intro_text_context_path"].exists()
-    assert result["intro_text_prompt_path"].exists()
-    assert result["seo_meta_context_path"].exists()
-    assert result["seo_meta_prompt_path"].exists()
-    assert result["metadata_path"].exists()
-    task_manifest = json.loads(result["task_manifest_path"].read_text(encoding="utf-8"))
-    intro_text_context = json.loads(result["intro_text_context_path"].read_text(encoding="utf-8"))
-    seo_meta_context = json.loads(result["seo_meta_context_path"].read_text(encoding="utf-8"))
-    intro_text_prompt = result["intro_text_prompt_path"].read_text(encoding="utf-8")
-    seo_meta_prompt = result["seo_meta_prompt_path"].read_text(encoding="utf-8")
-    metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
+    assert result.llm_dir.exists()
+    assert result.task_manifest_path.exists()
+    assert result.intro_text_context_path.exists()
+    assert result.intro_text_prompt_path.exists()
+    assert result.seo_meta_context_path.exists()
+    assert result.seo_meta_prompt_path.exists()
+    assert result.metadata_path.exists()
+    task_manifest = json.loads(result.task_manifest_path.read_text(encoding="utf-8"))
+    intro_text_context = json.loads(result.intro_text_context_path.read_text(encoding="utf-8"))
+    seo_meta_context = json.loads(result.seo_meta_context_path.read_text(encoding="utf-8"))
+    intro_text_prompt = result.intro_text_prompt_path.read_text(encoding="utf-8")
+    seo_meta_prompt = result.seo_meta_prompt_path.read_text(encoding="utf-8")
+    metadata = json.loads(result.metadata_path.read_text(encoding="utf-8"))
     assert task_manifest["prepare_mode"] == "split_tasks"
-    assert task_manifest["primary_outputs"]["tasks"]["intro_text"]["context_path"] == str(result["intro_text_context_path"])
-    assert task_manifest["primary_outputs"]["tasks"]["seo_meta"]["prompt_path"] == str(result["seo_meta_prompt_path"])
+    assert task_manifest["primary_outputs"]["tasks"]["intro_text"]["context_path"] == str(result.intro_text_context_path)
+    assert task_manifest["primary_outputs"]["tasks"]["seo_meta"]["prompt_path"] == str(result.seo_meta_prompt_path)
     assert intro_text_context["task"] == "intro_text"
     assert intro_text_context["writer_rules"]["plain_text_only"] is True
     assert intro_text_context["writer_rules"]["llm_owned_fields"] == ["intro_text"]
@@ -187,33 +205,44 @@ def test_prepare_workflow_writes_prompt_artifacts(tmp_path: Path, monkeypatch) -
     assert seo_meta_context["writer_rules"]["required_keywords"] == ["LG", "GSGV80PYLL"]
     assert seo_meta_context["product"]["meta_title"] == "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt | eTranoulis"
     assert "always include the provided brand and mpn/model values" in seo_meta_prompt
-    assert result["metadata_path"].name == "prepare.run.json"
+    assert result.metadata_path.name == "prepare.run.json"
     assert metadata["run"]["model"] == "233541"
     assert metadata["run"]["run_type"] == "prepare"
     assert metadata["run"]["status"] == "completed"
-    assert metadata["artifacts"]["llm_dir"] == str(result["llm_dir"])
-    assert metadata["artifacts"]["llm_task_manifest_path"] == str(result["task_manifest_path"])
-    assert metadata["artifacts"]["intro_text_context_path"] == str(result["intro_text_context_path"])
-    assert metadata["artifacts"]["seo_meta_context_path"] == str(result["seo_meta_context_path"])
-    assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
+    assert metadata["artifacts"]["llm_dir"] == str(result.llm_dir)
+    assert metadata["artifacts"]["llm_task_manifest_path"] == str(result.task_manifest_path)
+    assert metadata["artifacts"]["intro_text_context_path"] == str(result.intro_text_context_path)
+    assert metadata["artifacts"]["seo_meta_context_path"] == str(result.seo_meta_context_path)
+    assert metadata["artifacts"]["metadata_path"] == str(result.metadata_path)
     assert metadata["details"]["llm_prepare_mode"] == "split_tasks"
     assert metadata["details"]["source"] == ""
 
 
 def test_render_workflow_delegates_to_service_execution(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
+    expected_result = RenderExecutionResult(
+        candidate_dir=tmp_path / "work" / "233541" / "candidate",
+        candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+        published_csv_path=tmp_path / "products" / "233541.csv",
+        description_path=tmp_path / "work" / "233541" / "candidate" / "description.html",
+        characteristics_path=tmp_path / "work" / "233541" / "candidate" / "characteristics.html",
+        validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+        run_status=RunStatus.COMPLETED,
+        metadata_path=tmp_path / "work" / "233541" / "render.run.json",
+        validation_report=RenderExecutionValidationReport(ok=True, warnings=[]),
+    )
 
     def fake_execute_render_workflow(model, *, work_root, products_root):
         assert model == "233541"
         assert work_root == tmp_path / "work"
         assert products_root == tmp_path / "products"
-        return {"delegated": True}
+        return expected_result
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
     monkeypatch.setattr(workflow, "execute_render_workflow", fake_execute_render_workflow)
 
-    assert workflow.render_workflow("233541") == {"delegated": True}
+    assert workflow.render_workflow("233541") == expected_result
 
 
 def test_prepare_workflow_keeps_prepare_scrape_only_without_candidate_csv(tmp_path: Path, monkeypatch) -> None:
@@ -299,7 +328,7 @@ def test_prepare_workflow_keeps_prepare_scrape_only_without_candidate_csv(tmp_pa
     monkeypatch.setattr(workflow, "execute_prepare_stage", fake_execute_prepare_stage)
 
     result = prepare_workflow(cli)
-    assert result["scrape_result"]["model_dir"] == scrape_dir
+    assert result.scrape_result.payload["model_dir"] == scrape_dir
     assert (scrape_dir / f"{model}.source.json").exists()
     assert (scrape_dir / f"{model}.normalized.json").exists()
     assert (scrape_dir / f"{model}.report.json").exists()
@@ -405,26 +434,26 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
 
     result = render_workflow(model)
 
-    assert result["candidate_csv_path"].exists()
-    assert result["published_csv_path"] is None
-    assert result["validation_report_path"].exists()
-    assert result["metadata_path"].exists()
-    assert result["run_status"] == "failed"
-    assert result["validation_report"]["ok"] is False
-    assert "field_health" in result["validation_report"]
-    assert result["validation_report"]["errors"] == ["llm_intro_text_word_count_invalid"]
-    assert "Candidate failed validation; skipping publish to products/." in result["validation_report"]["warnings"]
-    metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
-    assert result["metadata_path"].name == "render.run.json"
+    assert result.candidate_csv_path.exists()
+    assert result.published_csv_path is None
+    assert result.validation_report_path.exists()
+    assert result.metadata_path.exists()
+    assert result.run_status == RunStatus.FAILED
+    assert result.validation_report.ok is False
+    assert "field_health" in result.validation_report.payload
+    assert result.validation_report.payload["errors"] == ["llm_intro_text_word_count_invalid"]
+    assert "Candidate failed validation; skipping publish to products/." in result.validation_report.warnings
+    metadata = json.loads(result.metadata_path.read_text(encoding="utf-8"))
+    assert result.metadata_path.name == "render.run.json"
     assert metadata["run"]["model"] == model
     assert metadata["run"]["run_type"] == "render"
     assert metadata["run"]["status"] == "failed"
     assert metadata["run"]["error_code"] == ServiceErrorCode.VALIDATION_FAILURE.value
     assert metadata["run"]["error_detail"] == "Candidate validation failed"
-    assert metadata["artifacts"]["candidate_csv_path"] == str(result["candidate_csv_path"])
+    assert metadata["artifacts"]["candidate_csv_path"] == str(result.candidate_csv_path)
     assert metadata["artifacts"]["published_csv_path"] is None
-    assert metadata["artifacts"]["validation_report_path"] == str(result["validation_report_path"])
-    assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
+    assert metadata["artifacts"]["validation_report_path"] == str(result.validation_report_path)
+    assert metadata["artifacts"]["metadata_path"] == str(result.metadata_path)
     assert metadata["details"]["validation_ok"] is False
     assert metadata["details"]["published"] is False
     assert "upload_attempted" not in metadata["details"]
@@ -556,18 +585,18 @@ def test_render_workflow_builds_description_from_split_outputs_and_deterministic
     )
 
     result = render_workflow(model)
-    description = result["description_path"].read_text(encoding="utf-8")
-    candidate_row = next(__import__("csv").DictReader(result["candidate_csv_path"].open("r", encoding="utf-8-sig", newline="")))
+    description = result.description_path.read_text(encoding="utf-8")
+    candidate_row = next(__import__("csv").DictReader(result.candidate_csv_path.open("r", encoding="utf-8-sig", newline="")))
 
-    assert result["run_status"] == "completed"
-    assert result["published_csv_path"] == tmp_path / "products" / f"{model}.csv"
+    assert result.run_status == RunStatus.COMPLETED
+    assert result.published_csv_path == tmp_path / "products" / f"{model}.csv"
     assert "NatureFRESH για καθημερινή φρεσκάδα" in description
     assert "DoorCooling+ για ομοιόμορφη ψύξη" in description
     assert "λέξη λέξη λέξη" in description
     assert candidate_row["meta_keyword"].startswith("LG, GSGV80PYLL")
     assert candidate_row["meta_keyword"].count("Ψυγ") == 1
 
-    metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
+    metadata = json.loads(result.metadata_path.read_text(encoding="utf-8"))
     assert metadata["details"]["validation_ok"] is True
     assert metadata["details"]["published"] is True
     assert "upload_attempted" not in metadata["details"]
@@ -701,12 +730,9 @@ def test_workflow_main_render_reports_publish_failure_without_failing_render(mon
 
     result = render_workflow(model)
 
-    assert result["run_status"] == "completed"
-    assert result["published_csv_path"] == tmp_path / "products" / f"{model}.csv"
-    assert result["upload_attempted"] is True
-    assert result["upload_ok"] is False
-    assert result["upload_warning"] == "opencart_image_upload_failed: exit=1: upload failed"
-    metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
+    assert result.run_status == RunStatus.COMPLETED
+    assert result.published_csv_path == tmp_path / "products" / f"{model}.csv"
+    metadata = json.loads(result.metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "completed"
     assert "opencart_image_upload_failed: exit=1: upload failed" in metadata["run"]["warnings"]
     assert metadata["details"]["upload_attempted"] is True
@@ -1009,13 +1035,13 @@ def test_render_workflow_warns_and_continues_when_one_requested_section_is_missi
     )
 
     result = render_workflow(model)
-    description = result["description_path"].read_text(encoding="utf-8")
+    description = result.description_path.read_text(encoding="utf-8")
 
-    assert result["run_status"] == "completed"
+    assert result.run_status == RunStatus.COMPLETED
     assert "Κανονική ενότητα" in description
-    assert result["validation_report"]["ok"] is True
-    assert "presentation_sections_missing:1" in result["validation_report"]["warnings"]
-    assert "requested_sections_reduced:1" in result["validation_report"]["warnings"]
+    assert result.validation_report.ok is True
+    assert "presentation_sections_missing:1" in result.validation_report.warnings
+    assert "requested_sections_reduced:1" in result.validation_report.warnings
 
 
 def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsys, tmp_path: Path) -> None:
