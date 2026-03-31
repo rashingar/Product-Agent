@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Repo-native wrapper for pipeline usage.
-# Place this file in your repo, e.g. scripts/run_opencart_image_upload.sh
-# Secrets are loaded from .secrets/opencart.env if present.
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 ENV_FILE="${ENV_FILE:-${REPO_ROOT}/.secrets/opencart.env}"
@@ -17,13 +13,15 @@ if [[ -f "${ENV_FILE}" ]]; then
 fi
 
 MODEL="${1:-${MODEL:-}}"
+PROFILE="${OPENCART_IMPORT_PROFILE:-product_new}"
 STORE_BASE="${OPENCART_STORE_BASE:-https://www.etranoulis.gr}"
 ADMIN_PATH="${OPENCART_ADMIN_PATH:-/ipadmin/index.php}"
 ADMIN_USER="${OPENCART_ADMIN_USER:-}"
 ADMIN_PASS="${OPENCART_ADMIN_PASS:-}"
 DRY_RUN="${DRY_RUN:-0}"
+HEADED="${HEADED:-0}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-PYTHON_SCRIPT="${PYTHON_SCRIPT:-${SCRIPT_DIR}/opencart_upload_images.py}"
+PYTHON_SCRIPT="${PYTHON_SCRIPT:-${SCRIPT_DIR}/opencart_import_csv_playwright.py}"
 
 if [[ -z "${MODEL}" ]]; then
   echo "ERROR: missing model. Usage: $0 123456" >&2
@@ -43,11 +41,16 @@ CMD=(
   --admin-path "${ADMIN_PATH}"
   --username "${ADMIN_USER}"
   --password "${ADMIN_PASS}"
+  --profile "${PROFILE}"
 )
 
 if [[ "${DRY_RUN}" == "1" ]]; then
   CMD+=(--dry-run)
 fi
 
-echo "[opencart-upload] repo_root=${REPO_ROOT} model=${MODEL} admin_path=${ADMIN_PATH} dry_run=${DRY_RUN}"
+if [[ "${HEADED}" == "1" ]]; then
+  CMD+=(--headed)
+fi
+
+echo "[opencart-csv-import] repo_root=${REPO_ROOT} model=${MODEL} profile=${PROFILE} admin_path=${ADMIN_PATH} dry_run=${DRY_RUN}"
 "${CMD[@]}"
