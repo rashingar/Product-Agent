@@ -23,6 +23,23 @@ from pipeline.services import (
 )
 
 
+def test_run_type_matches_workflow_only_service_surface() -> None:
+    assert tuple(run_type.value for run_type in RunType) == ("prepare", "render", "publish")
+
+
+def test_services_package_no_longer_exports_full_run_contract() -> None:
+    import pipeline.services as services
+
+    legacy_request_name = "Full" + "RunRequest"
+    legacy_runner_name = "run_" + "product"
+
+    assert hasattr(services, "PrepareRequest")
+    assert hasattr(services, "RenderRequest")
+    assert hasattr(services, "PublishRequest")
+    assert not hasattr(services, legacy_request_name)
+    assert not hasattr(services, legacy_runner_name)
+
+
 def test_service_modules_do_not_import_workflow() -> None:
     from pipeline.services import prepare_service, render_service
 
