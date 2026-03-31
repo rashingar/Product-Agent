@@ -214,17 +214,17 @@ Completion note:
 
 ### Branch scope — metadata and error semantics hardening
 
-Status: planned
+Status: completed
 
 Purpose:
 1. Freeze the exact branch scope for hardening metadata persistence and prepare/render error semantics without changing runtime behavior in the scope-freeze commit.
 2. Keep this work limited to the existing metadata-write path plus the prepare/render service-to-workflow reporting seam.
 3. Build on the existing `RunMetadata`, `RunArtifacts`, and `ServiceResult` models instead of broadening the branch into new runtime architecture work.
 
-Current state to preserve while hardening:
-1. `metadata.py` currently swallows metadata write exceptions.
-2. `workflow.py` already prints metadata path and validation/candidate artifact paths for operators.
-3. The service layer already exposes `RunMetadata`, `RunArtifacts`, and `ServiceResult`.
+Historical starting point for this branch:
+1. `metadata.py` previously swallowed metadata write exceptions.
+2. `workflow.py` already printed metadata path and validation/candidate artifact paths for operators.
+3. The service layer already exposed `RunMetadata`, `RunArtifacts`, and `ServiceResult`.
 
 Target end state:
 1. No silent metadata write failure remains in the active prepare/render paths.
@@ -251,6 +251,9 @@ Acceptance criteria:
 3. Missing expected artifacts are surfaced consistently to callers and operators instead of being silently omitted.
 4. Existing workflow-facing operator output remains stable unless the underlying run truly fails.
 5. This branch does not expand into stage decomposition, typed-result redesign, workflow parser/CLI work, or provider routing changes.
+
+Completion note:
+- completed; `scraper/pipeline/services/metadata.py` now raises structured metadata-write failures instead of silently ignoring them, `prepare_service.py` and `render_service.py` now distinguish degraded known-outcome results from hard failures when metadata or required artifacts are missing, and workflow-facing prepare/render summaries keep the same public command shape while showing `Metadata path: None` when degraded results do not have a persisted metadata file
 
 ### Phase 4 — Hybrid RAG foundation
 
