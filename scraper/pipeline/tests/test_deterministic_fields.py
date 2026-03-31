@@ -1,4 +1,4 @@
-from pipeline.deterministic_fields import build_deterministic_product_fields
+from pipeline.deterministic_fields import apply_name_rule, build_deterministic_product_fields, compose_name
 from pipeline.mapping import derive_seo_keyword
 from pipeline.models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 
@@ -181,4 +181,67 @@ def test_skroutz_name_prefers_manufacturer_evidence_when_specs_conflict() -> Non
     assert "60 cm" not in fields["name"]
     assert fields["meta_title"] == "Bosch KGN36NLEA Ψυγειοκαταψύκτης Total No Frost 305 lt | eTranoulis"
     assert fields["seo_keyword"] == "bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305-lt-inox-70-cm-e"
+
+
+def test_tv_name_rule_uses_resolution_from_eukrineia_in_final_name() -> None:
+    source = SourceProductData(
+        brand="TCL",
+        mpn="115C7K",
+        name='TCL 115C7K Smart Τηλεόραση 115" Mini LED',
+        key_specs=[
+            SpecItem(label="Τεχνολογία Οθόνης", value="Mini LED"),
+            SpecItem(label="Διαγώνιος", value="115 ''"),
+            SpecItem(label="Ευκρίνεια", value="ULTRA HD ( 4K )"),
+            SpecItem(label="Smart Platform", value="Google TV"),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+        leaf_category="Τηλεοράσεις",
+        sub_category="50'' & άνω",
+    )
+
+    fields = build_deterministic_product_fields(source, taxonomy, "142677", derive_seo_keyword)
+
+    assert fields["name"] == 'TCL 115C7K – Τηλεόραση Mini LED 115" 4K Google TV'
+
+
+def test_apply_name_rule_dedupes_tv_resolution_and_prefers_concrete_platform_from_analysi_othonis() -> None:
+    source = SourceProductData(
+        brand="TCL",
+        mpn="115C7K",
+        name='TCL 115C7K Smart Τηλεόραση 115" Mini LED',
+        key_specs=[
+            SpecItem(label="Τεχνολογία Οθόνης", value="Mini LED"),
+            SpecItem(label="Διαγώνιος Οθόνης", value='115 "'),
+            SpecItem(label="Ανάλυση Οθόνης", value="8K UHD"),
+            SpecItem(label="Ευκρίνεια", value="ULTRA HD ( 8K )"),
+            SpecItem(label="Λειτουργικό Σύστημα", value="Smart TV"),
+            SpecItem(label="Smart Platform", value="Google TV"),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+        leaf_category="Τηλεοράσεις",
+        sub_category="50'' & άνω",
+    )
+    rule = {
+        "category_phrase": "Τηλεόραση",
+        "differentiator_specs": [
+            [["Τεχνολογία Οθόνης"]],
+            [["Διαγώνιος Οθόνης"]],
+            [["Ανάλυση Οθόνης"]],
+            [["Ευκρίνεια"]],
+            [["Λειτουργικό Σύστημα"]],
+            [["Smart Platform"]],
+        ],
+        "max_differentiators": 6,
+        "_matched_exact": True,
+    }
+
+    category_phrase, differentiators = apply_name_rule(rule, source, "TCL", "115C7K", taxonomy)
+
+    assert category_phrase == "Τηλεόραση"
+    assert differentiators == ["Mini LED", '115"', "8K", "Google TV"]
+    assert compose_name("TCL", "115C7K", category_phrase, differentiators) == 'TCL 115C7K – Τηλεόραση Mini LED 115" 8K Google TV'
 

@@ -65,7 +65,9 @@ def build_characteristics_html(spec_sections: list[SpecSection]) -> str:
 def _normalize_characteristics_label(label: str) -> str:
     normalized = normalize_whitespace(label)
     if normalized.startswith("Υψος "):
-        return normalized.replace("Υψος ", "Ύψος ", 1)
+        normalized = normalized.replace("Υψος ", "Ύψος ", 1)
+    if normalized.count("(") == normalized.count(")") + 1:
+        normalized += ")"
     return normalized
 
 

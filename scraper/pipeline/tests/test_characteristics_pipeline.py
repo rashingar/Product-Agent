@@ -7,6 +7,7 @@ from pipeline.characteristics_pipeline import (
     _labels_related,
     build_characteristics_for_product,
 )
+from pipeline.html_builders import _normalize_characteristics_label
 from pipeline.mapping import build_row
 from pipeline.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.normalize import normalize_for_match
@@ -18,6 +19,18 @@ HOOD_SCHEMA_ID = "sha1:0afca19ffd5ea62d89eedacca3c889e8d0e67b37"
 BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
 FRIDGE_FREEZER_SCHEMA_ID = "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b"
 ICE_CREAM_MAKER_SCHEMA_ID = "sha1:fb24efeacf0495fc3359e8528122e32ba3f7ec00"
+
+
+def test_normalize_characteristics_label_keeps_balanced_parentheses_unchanged() -> None:
+    assert _normalize_characteristics_label("Μέγιστη Ονομαστική Ισχύς (W)") == "Μέγιστη Ονομαστική Ισχύς (W)"
+
+
+def test_normalize_characteristics_label_repairs_single_unmatched_open_parenthesis() -> None:
+    assert _normalize_characteristics_label("Μέγιστη Ονομαστική Ισχύς (W") == "Μέγιστη Ονομαστική Ισχύς (W)"
+
+
+def test_normalize_characteristics_label_leaves_multiple_unmatched_open_parentheses_unchanged() -> None:
+    assert _normalize_characteristics_label("Διαστάσεις (Υ x Π x Β (cm") == "Διαστάσεις (Υ x Π x Β (cm"
 
 
 def test_skroutz_fridge_freezer_characteristics_keep_electronet_shape() -> None:

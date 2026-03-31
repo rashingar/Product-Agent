@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pipeline.llm_contract import (
     INTRO_MAX_WORDS,
     INTRO_MIN_WORDS,
@@ -7,6 +9,7 @@ from pipeline.llm_contract import (
     validate_seo_meta_output,
 )
 from pipeline.models import CLIInput, ParsedProduct, SourceProductData, SpecItem, TaxonomyResolution
+from pipeline.repo_paths import REPO_ROOT
 
 
 def build_intro(words: int = INTRO_MIN_WORDS) -> str:
@@ -72,8 +75,17 @@ def test_build_seo_meta_context_includes_required_keyword_evidence() -> None:
     assert context["task"] == "seo_meta"
     assert context["writer_rules"]["llm_owned_fields"] == ["product.meta_description", "product.meta_keywords"]
     assert context["writer_rules"]["required_keywords"] == ["LG", "GSGV80PYLL"]
+    assert set(context["evidence"]) >= {
+        "meta_description_draft",
+        "hero_summary",
+        "key_specs",
+        "deterministic_differentiators",
+    }
     assert context["product"]["meta_title"] == "LG GSGV80PYLL Ψυγείο Ντουλάπα 635Lt | eTranoulis"
     assert context["evidence"]["meta_description_draft"] == "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα με 635Lt."
+    assert "2 natural Greek sentences" in context["writer_rules"]["meta_description_rule"]
+    assert "Exactly one sentence" not in context["writer_rules"]["meta_description_rule"]
+    assert "Smooth the Greek grammar" not in context["writer_rules"]["meta_description_rule"]
 
 
 def test_validate_intro_text_output_accepts_plain_text_only() -> None:
@@ -109,6 +121,23 @@ def test_validate_seo_meta_output_accepts_product_meta_only_shape() -> None:
     assert normalized["product"]["meta_keywords"] == ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα"]
 
 
+def test_validate_seo_meta_output_accepts_two_sentence_meta_description() -> None:
+    normalized, errors = validate_seo_meta_output(
+        {
+            "product": {
+                "meta_description": (
+                    "Το TCL 115C7K είναι τηλεόραση Mini LED 115 ιντσών με 4K Ultra HD ανάλυση και Google TV. "
+                    "Προσφέρει verified χαρακτηριστικά εικόνας και συνδεσιμότητας από τα διαθέσιμα στοιχεία."
+                ),
+                "meta_keywords": ["TCL", "115C7K", "Τηλεόραση"],
+            }
+        }
+    )
+
+    assert errors == []
+    assert normalized["product"]["meta_description"].count(".") >= 2
+
+
 def test_validate_seo_meta_output_rejects_legacy_presentation_shape() -> None:
     _, errors = validate_seo_meta_output(
         {
@@ -123,4 +152,15 @@ def test_validate_seo_meta_output_rejects_legacy_presentation_shape() -> None:
     )
 
     assert errors == ["llm_seo_meta_root_shape_invalid"]
+
+
+def test_seo_meta_prompt_source_uses_repo_root_relative_path_and_updated_guidance() -> None:
+    prompt_path = REPO_ROOT / "resources" / "prompts" / "seo_meta_prompt.txt"
+    prompt = Path(prompt_path).read_text(encoding="utf-8")
+    lowered = prompt.casefold()
+
+    assert prompt_path.is_file()
+    assert "exactly one sentence" not in lowered
+    assert "verified evidence" in lowered
+    assert "return json only" in lowered
 

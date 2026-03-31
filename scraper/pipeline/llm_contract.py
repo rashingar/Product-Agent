@@ -85,7 +85,14 @@ def build_seo_meta_context(
         "writer_rules": {
             "language": "Greek",
             "llm_owned_fields": ["product.meta_description", "product.meta_keywords"],
-            "meta_description_rule": "Smooth the Greek grammar of `evidence.meta_description_draft`. Keep all verified facts. Exactly one sentence. No HTML.",
+            "meta_description_rule": (
+                "Prefer 2 natural Greek sentences using verified evidence only and no HTML. "
+                "Sentence 1 identifies the product using brand + mpn + category + strongest verified differentiators. "
+                "Sentence 2 adds 2-4 verified features/benefits only from evidence already present in context, with evidence priority: "
+                "1. `hero_summary` 2. `key_specs` 3. `deterministic_differentiators`. "
+                "For TVs prefer `115 ιντσών` rather than `115\"`; if `4K` is verified, prefer `4K Ultra HD ανάλυση`; if `8K` is verified, prefer `8K Ultra HD ανάλυση`. "
+                "Aim for roughly `160-260` characters unless verified detail clearly justifies somewhat more."
+            ),
             "meta_keywords_rule": "Return a structured JSON array of verified keywords only. Do not serialize as CSV. Always include brand and mpn/model.",
             "required_keywords": [value for value in [brand, mpn] if value],
         },

@@ -100,6 +100,7 @@ def apply_name_rule(
     if not exact_match:
         category_phrase = derive_category_phrase(source.name, brand, taxonomy) or category_phrase
     differentiators: list[str] = []
+    is_tv_rule = _is_tv_scope(category_phrase, taxonomy)
     for label_group in spec_labels:
         value = resolve_name_rule_value(
             source=source,
@@ -108,7 +109,12 @@ def apply_name_rule(
             category_phrase=category_phrase,
             taxonomy=taxonomy,
         )
-        if value and len(differentiators) < max_differentiators:
+        if not value:
+            continue
+        if is_tv_rule:
+            differentiators = _append_tv_differentiator(differentiators, value, max_differentiators)
+            continue
+        if len(differentiators) < max_differentiators:
             differentiators.append(value)
     if not differentiators:
         differentiators = derive_name_differentiators(source, category_phrase, taxonomy, brand, mpn)
@@ -495,6 +501,8 @@ def normalize_name_rule_value(value: str, aliases: list[str], category_phrase: s
     if not normalized:
         return ""
     alias_keys = {normalize_for_match(alias) for alias in aliases}
+    if _is_tv_scope(category_phrase, taxonomy):
+        normalized = _normalize_tv_name_rule_value(normalized, alias_keys) or normalized
     if any("ψυξης" in key for key in alias_keys):
         normalized = re.sub(r"\bNoFrost\b", "No Frost", normalized, flags=re.IGNORECASE)
     if any("χωρητικοτητα" in key or "κιλα" in key for key in alias_keys):
@@ -505,6 +513,141 @@ def normalize_name_rule_value(value: str, aliases: list[str], category_phrase: s
         if numeric and unit == "Lt":
             return f"{numeric}Lt"
     return normalized
+
+
+def _is_tv_scope(category_phrase: str, taxonomy: TaxonomyResolution) -> bool:
+    haystack = normalize_for_match(" ".join([category_phrase, taxonomy.sub_category or "", taxonomy.leaf_category]))
+    return "τηλεορασ" in haystack
+
+
+def _normalize_tv_name_rule_value(value: str, alias_keys: set[str]) -> str:
+    normalized_value = normalize_whitespace(value)
+    if not normalized_value:
+        return ""
+    alias_text = " ".join(sorted(alias_keys))
+    if any(token in alias_text for token in ("διαγων", "μεγεθοσ οθον", "μεγεθος οθον")):
+        inches = extract_numeric(normalized_value)
+        if inches:
+            return f'{inches}"'
+    if any(token in alias_text for token in ("αναλυση", "ευκριν")):
+        return _normalize_tv_resolution(normalized_value)
+    if any(token in alias_text for token in ("λειτουργικ", "πλατφορμ", "smart platform", "google tv", "webos", "tizen", "android tv", "smart tv")):
+        return _normalize_tv_platform(normalized_value)
+    return normalized_value
+
+
+def _normalize_tv_resolution(value: str) -> str:
+    normalized = normalize_for_match(value)
+    if "full hd" in normalized:
+        return "Full HD"
+    if "hd ready" in normalized:
+        return "HD Ready"
+    if "8k" in normalized:
+        return "8K"
+    if "4k" in normalized:
+        return "4K"
+    return normalize_whitespace(value)
+
+
+def _normalize_tv_platform(value: str) -> str:
+    normalized = normalize_for_match(value)
+    if "google tv" in normalized:
+        return "Google TV"
+    if "android tv" in normalized:
+        return "Android TV"
+    if "webos" in normalized:
+        return "webOS"
+    if "tizen" in normalized:
+        return "Tizen"
+    if "smart tv" in normalized:
+        return "Smart TV"
+    return normalize_whitespace(value)
+
+
+def _tv_differentiator_key(value: str) -> str:
+    normalized = normalize_whitespace(value)
+    if not normalized:
+        return ""
+    platform_key = _tv_platform_key(normalized)
+    if platform_key:
+        return f"platform:{platform_key}"
+    resolution_key = _tv_resolution_key(normalized)
+    if resolution_key:
+        return f"resolution:{resolution_key}"
+    return normalize_for_match(normalized)
+
+
+def _tv_platform_key(value: str) -> str:
+    normalized = normalize_for_match(value)
+    if "google tv" in normalized:
+        return "google_tv"
+    if "android tv" in normalized:
+        return "android_tv"
+    if "webos" in normalized:
+        return "webos"
+    if "tizen" in normalized:
+        return "tizen"
+    if "smart tv" in normalized:
+        return "smart_tv"
+    return ""
+
+
+def _tv_resolution_key(value: str) -> str:
+    normalized = normalize_for_match(value)
+    if "8k" in normalized:
+        return "8k"
+    if "4k" in normalized:
+        return "4k"
+    if "full hd" in normalized:
+        return "full_hd"
+    if "hd ready" in normalized:
+        return "hd_ready"
+    return ""
+
+
+def _is_generic_tv_platform(value: str) -> bool:
+    return _tv_platform_key(value) == "smart_tv"
+
+
+def _is_concrete_tv_platform(value: str) -> bool:
+    platform_key = _tv_platform_key(value)
+    return bool(platform_key) and platform_key != "smart_tv"
+
+
+def _append_tv_differentiator(differentiators: list[str], value: str, max_differentiators: int) -> list[str]:
+    candidate = normalize_whitespace(value)
+    if not candidate:
+        return differentiators
+
+    candidate_key = _tv_differentiator_key(candidate)
+    if not candidate_key:
+        return differentiators
+
+    if _is_generic_tv_platform(candidate):
+        if any(_is_concrete_tv_platform(existing) for existing in differentiators):
+            return differentiators
+        if any(_tv_differentiator_key(existing) == candidate_key for existing in differentiators):
+            return differentiators
+        if len(differentiators) < max_differentiators:
+            differentiators.append(candidate)
+        return differentiators
+
+    if _is_concrete_tv_platform(candidate):
+        for index, existing in enumerate(differentiators):
+            if _is_generic_tv_platform(existing):
+                differentiators[index] = candidate
+                return differentiators
+        if any(_tv_differentiator_key(existing) == candidate_key for existing in differentiators):
+            return differentiators
+        if len(differentiators) < max_differentiators:
+            differentiators.append(candidate)
+        return differentiators
+
+    if any(_tv_differentiator_key(existing) == candidate_key for existing in differentiators):
+        return differentiators
+    if len(differentiators) < max_differentiators:
+        differentiators.append(candidate)
+    return differentiators
 
 
 def extract_alias_value_from_evidence(source: SourceProductData, aliases: list[str]) -> str:
