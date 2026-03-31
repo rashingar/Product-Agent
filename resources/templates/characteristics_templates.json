@@ -2,6 +2,32 @@
   "version": "2026-03-21",
   "templates": [
     {
+      "template_id": "skroutz_washing_machine_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_leaf": "Πλυντήρια-Στεγνωτήρια",
+        "taxonomy_sub": "Πλυντήρια Ρούχων"
+      },
+      "preferred_schema_source_files": [
+        "plyntiria_rouxwn.json"
+      ],
+      "render_mode": "raw_spec_sections",
+      "sections": []
+    },
+    {
+      "template_id": "skroutz_built_in_washing_machine_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_leaf": "Εντοιχιζόμενες Συσκευές",
+        "taxonomy_sub": "Πλυντήρια Ρούχων"
+      },
+      "preferred_schema_source_files": [
+        "entoixizomena_plyntiria_royxon.json"
+      ],
+      "render_mode": "raw_spec_sections",
+      "sections": []
+    },
+    {
       "template_id": "skroutz_fridge_freezer_v1",
       "match": {
         "source_name": "skroutz",

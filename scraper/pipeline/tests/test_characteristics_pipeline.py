@@ -19,6 +19,7 @@ HOOD_SCHEMA_ID = "sha1:0afca19ffd5ea62d89eedacca3c889e8d0e67b37"
 BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
 FRIDGE_FREEZER_SCHEMA_ID = "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b"
 ICE_CREAM_MAKER_SCHEMA_ID = "sha1:fb24efeacf0495fc3359e8528122e32ba3f7ec00"
+WASHING_MACHINE_SCHEMA_ID = "sha1:5dd5b1d1398630b950232cbf39069774fbf003cc"
 
 
 def test_normalize_characteristics_label_keeps_balanced_parentheses_unchanged() -> None:
@@ -476,6 +477,92 @@ def test_characteristics_registry_prefers_soundbar_schema_for_skroutz() -> None:
     assert template["preferred_schema_source_files"] == ["sound_bars.json"]
     assert template["template_source"] == "schema_library_with_custom_overrides"
     assert template["custom_template_id"] == "skroutz_soundbar_v1"
+
+
+def test_characteristics_registry_prefers_washing_machine_schema_for_skroutz() -> None:
+    registry = CharacteristicsTemplateRegistry()
+    source = SourceProductData(source_name="skroutz", name="Samsung Washing Machine")
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        leaf_category="Πλυντήρια-Στεγνωτήρια",
+        sub_category="Πλυντήρια Ρούχων",
+    )
+
+    preferred_source_files = registry.preferred_schema_source_files(source, taxonomy)
+    template = registry.select_template(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=WASHING_MACHINE_SCHEMA_ID, score=0.9),
+    )
+
+    assert preferred_source_files == ["plyntiria_rouxwn.json"]
+    assert template is not None
+    assert template["template_id"] == "skroutz_washing_machine_v1"
+    assert template["matched_schema_id"] == WASHING_MACHINE_SCHEMA_ID
+    assert template["template_source"] == "custom"
+
+
+def test_characteristics_pipeline_uses_raw_sections_for_skroutz_washing_machines() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="Samsung",
+        mpn="WW90DB7U94GBU3",
+        name="Samsung Πλυντήριο Ρούχων 9kg WW90DB7U94GBU3",
+        spec_sections=[
+            SpecSection(
+                section="Χαρακτηριστικά",
+                items=[
+                    SpecItem(label="Χωρητικότητα", value="9 kg"),
+                    SpecItem(label="Τύπος", value="Εμπρόσθιας Φόρτωσης"),
+                    SpecItem(label="Στροφές", value="1400 /λεπτό"),
+                    SpecItem(label="Χρώμα", value="Μαύρο"),
+                ],
+            ),
+            SpecSection(
+                section="Νέα Ενεργειακή Ετικέτα",
+                items=[
+                    SpecItem(label="Ενεργειακή Κλάση", value="A"),
+                    SpecItem(label="Κατανάλωση Ενέργειας", value="40 kwh/100 κύκλους"),
+                ],
+            ),
+            SpecSection(
+                section="Smart Ιδιότητες",
+                items=[
+                    SpecItem(label="Λειτουργίες Smart", value="Ναι"),
+                    SpecItem(label="Συνδεσιμότητα", value="Wi-Fi"),
+                ],
+            ),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        leaf_category="Πλυντήρια-Στεγνωτήρια",
+        sub_category="Πλυντήρια Ρούχων",
+    )
+
+    html, diagnostics, warnings = build_characteristics_for_product(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=WASHING_MACHINE_SCHEMA_ID, score=0.91),
+    )
+
+    soup = BeautifulSoup(html, "lxml")
+    section_titles = [normalize_for_match(node.get_text(" ", strip=True)) for node in soup.select("thead strong")]
+    labels = [normalize_for_match(node.get_text(" ", strip=True)) for node in soup.select("tbody tr td:first-child")]
+    values = [node.get_text(" ", strip=True) for node in soup.select("tbody tr td strong")]
+
+    assert diagnostics["mode"] == "raw_spec_sections"
+    assert diagnostics["template_id"] == "skroutz_washing_machine_v1"
+    assert diagnostics["selection_reason"] == "taxonomy_template_raw_spec_sections"
+    assert diagnostics["preferred_schema_source_files"] == ["plyntiria_rouxwn.json"]
+    assert warnings == []
+    assert normalize_for_match("Χαρακτηριστικά") in section_titles
+    assert normalize_for_match("Νέα Ενεργειακή Ετικέτα") in section_titles
+    assert normalize_for_match("Smart Ιδιότητες") in section_titles
+    assert normalize_for_match("Χωρητικότητα") in labels
+    assert normalize_for_match("Συνδεσιμότητα") in labels
+    assert "9 kg" in values
+    assert "Wi-Fi" in values
 
 
 def test_characteristics_pipeline_uses_raw_sections_for_skroutz_ice_cream_makers() -> None:

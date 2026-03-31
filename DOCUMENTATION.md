@@ -3246,3 +3246,92 @@ Validation:
 Risks, blockers, or skipped items:
 - validation still carries the existing template warning `characteristics_template_unresolved_fields:12`
 - unresolved characteristic fields are source-null/template-null gaps, not render blockers for this product
+
+## 2026-03-31 - Fix Skroutz washing machine characteristics template routing
+
+Goal:
+- fix the pipeline so Skroutz washing machines do not inherit unrelated schema-based characteristics layouts
+- verify the fix against the live regression sample `000007` through the actual workflow
+
+Files changed:
+- `DOCUMENTATION.md`
+- `resources/templates/characteristics_templates.json`
+- `scraper/pipeline/tests/test_characteristics_pipeline.py`
+- `work/000007/scrape/000007.report.json`
+- `work/000007/candidate/000007.normalized.json`
+- `work/000007/candidate/000007.validation.json`
+- `work/000007/candidate/characteristics.html`
+- `work/000007/candidate/000007.csv`
+- `products/000007.csv`
+- `work/000007/publish.run.json`
+- `work/000007/upload.opencart.json`
+- `work/000007/import.opencart.json`
+
+Commands run:
+- `python -m pytest scraper/pipeline/tests/test_characteristics_pipeline.py -k "washing_machine or ice_cream_maker or soundbar or built_in_hob or fridge_freezer"`
+- `python -m pipeline.workflow prepare --model 000007 --url "https://www.skroutz.gr/s/55224637/Samsung-Plyntirio-Rouchon-9kg-me-Technologia-Atmou-1400-Strofon-Ecobubble-Mayro-WW90DB7U94GBU3.html" --photos 5 --sections 14 --skroutz-status 1 --boxnow 0 --price 900` from `scraper/`
+- `python -m pipeline.workflow render --model 000007` from `scraper/`
+
+Implementation notes:
+- added taxonomy-specific Skroutz templates for freestanding and built-in washing machines
+- configured those templates to prefer the correct schema source files while rendering raw verified spec sections instead of forcing an Electronet-shaped layout onto mismatched Skroutz specs
+- added regression coverage to ensure washing machines keep the raw-spec characteristics path and select `plyntiria_rouxwn.json` as the preferred schema family
+- reran the actual product workflow for model `000007` after the code change
+
+Validation:
+- targeted characteristics tests passed: `9 passed`
+- `work/000007/candidate/characteristics.html` now contains washing-machine spec sections instead of meat-mincer fields
+- `work/000007/candidate/000007.validation.json` reports `"ok": true`
+- validation warnings no longer include `characteristics_template_used` or `characteristics_template_unresolved_fields`
+- `work/000007/publish.run.json` reports:
+  - `publish_status = success`
+  - `publish_stage = csv_import`
+  - `publish_message = OpenCart publish completed successfully.`
+
+Risks, blockers, or skipped items:
+- the selected washing-machine template currently preserves raw Skroutz section naming and ordering; that is intentional to avoid inventing or partially mapping fields until a complete cross-source washing-machine template is defined
+- remaining validation warnings for `000007` are presentation-related (`presentation_sections_weak:3`, `requested_sections_reduced:11`) and are unrelated to the characteristics fix
+
+## 2026-03-31 - Runtime pipeline run for model `000006`
+
+What changed:
+- ran the full prepare -> LLM -> render -> OpenCart publish workflow for model `000006` using the live Skroutz washing-machine URL
+- authored the LLM-owned outputs `intro_text.output.txt` and `seo_meta.output.json` under `work/000006/llm/`
+- corrected an initial intro-text validation failure by expanding the Greek intro from `106` to `121` words and reran render successfully
+
+Files changed:
+- `DOCUMENTATION.md`
+- `work/000006/llm/intro_text.output.txt`
+- `work/000006/llm/seo_meta.output.json`
+- `work/000006/candidate/000006.csv`
+- `work/000006/candidate/000006.validation.json`
+- `work/000006/candidate/description.html`
+- `work/000006/candidate/characteristics.html`
+- `work/000006/render.run.json`
+- `products/000006.csv`
+- `work/000006/publish.run.json`
+- `work/000006/upload.opencart.json`
+- `work/000006/import.opencart.json`
+
+Commands run:
+- `python -m pipeline.workflow prepare --model 000006 --url "https://www.skroutz.gr/s/55224637/Samsung-Plyntirio-Rouchon-9kg-me-Technologia-Atmou-1400-Strofon-Ecobubble-Mayro-WW90DB7U94GBU3.html" --photos 5 --sections 14 --skroutz-status 1 --boxnow 0 --price 900` from `scraper/`
+- `python -m pipeline.workflow render --model 000006` from `scraper/` (first run failed validation on intro word count)
+- `python -m pipeline.workflow render --model 000006` from `scraper/` (rerun succeeded and triggered publish)
+
+Implementation notes:
+- kept LLM generation constrained to the runtime-owned fields: `intro_text`, `product.meta_description`, and `product.meta_keywords`
+- used only verified source evidence from the generated LLM context for the Greek intro and SEO metadata
+- preserved deterministic section/body rendering and characteristics generation from the local pipeline
+
+Validation:
+- first render failed with `llm_intro_text_word_count_invalid`
+- final `work/000006/candidate/000006.validation.json` reports `"ok": true`
+- `products/000006.csv` was published successfully
+- `work/000006/publish.run.json` reports:
+  - `publish_status = success`
+  - `publish_stage = csv_import`
+  - `publish_message = OpenCart publish completed successfully.`
+- `work/000006/import.opencart.json` reports `Products Updated = 1`
+
+Risks, blockers, or skipped items:
+- validation still reports presentation warnings `presentation_sections_weak:3` and `requested_sections_reduced:11`, but these are warnings only and did not block render or publish
