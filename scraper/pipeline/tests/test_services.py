@@ -324,6 +324,31 @@ def test_prepare_product_preserves_execution_run_status_without_setting_error_fi
     assert result.artifacts.source_report_json_path == tmp_path / "work" / "233541" / "scrape" / "233541.report.json"
 
 
+def test_prepare_product_degrades_when_metadata_artifact_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import prepare_service
+
+    monkeypatch.setattr(prepare_service, "WORK_ROOT", tmp_path / "work")
+
+    def fake_execute_prepare_workflow(_cli, *, work_root):
+        assert work_root == tmp_path / "work"
+        return _build_prepare_execution_result(tmp_path, missing_artifacts={"metadata_path"})
+
+    monkeypatch.setattr(prepare_service, "execute_prepare_workflow", fake_execute_prepare_workflow)
+
+    result = prepare_product(PrepareRequest(model="233541", url="https://www.electronet.gr/example"))
+
+    assert result.run.status == RunStatus.COMPLETED
+    assert result.run.warnings == [
+        "prepare warning",
+        f"Prepare metadata artifact is missing: {tmp_path / 'work' / '233541' / 'prepare.run.json'}",
+    ]
+    assert result.run.error_code == ServiceErrorCode.MISSING_ARTIFACT.value
+    assert result.run.error_detail == f"Prepare metadata artifact is missing: {tmp_path / 'work' / '233541' / 'prepare.run.json'}"
+    assert result.artifacts.metadata_path is None
+    assert result.artifacts.scrape_dir == tmp_path / "work" / "233541" / "scrape"
+    assert result.artifacts.llm_task_manifest_path == tmp_path / "work" / "233541" / "llm" / "task_manifest.json"
+
+
 def test_prepare_product_wraps_execution_errors(monkeypatch) -> None:
     from pipeline.services import prepare_service
 
@@ -513,6 +538,29 @@ def test_render_product_allows_missing_published_csv_path(tmp_path: Path, monkey
     )
 
 
+def test_render_product_degrades_when_metadata_artifact_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_service
+
+    def fake_execute_render_workflow(model: str):
+        assert model == "233541"
+        return _build_render_execution_result(tmp_path, missing_artifacts={"metadata_path"})
+
+    monkeypatch.setattr(render_service, "execute_render_workflow", fake_execute_render_workflow)
+
+    result = render_product(RenderRequest(model="233541"))
+
+    assert result.run.status == RunStatus.COMPLETED
+    assert result.run.warnings == [
+        "render warning",
+        f"Render metadata artifact is missing: {tmp_path / 'work' / '233541' / 'render.run.json'}",
+    ]
+    assert result.run.error_code == ServiceErrorCode.MISSING_ARTIFACT.value
+    assert result.run.error_detail == f"Render metadata artifact is missing: {tmp_path / 'work' / '233541' / 'render.run.json'}"
+    assert result.artifacts.metadata_path is None
+    assert result.artifacts.candidate_csv_path == tmp_path / "work" / "233541" / "candidate" / "233541.csv"
+    assert result.artifacts.validation_report_path == tmp_path / "work" / "233541" / "candidate" / "233541.validation.json"
+
+
 def test_publish_product_maps_execution_result(tmp_path: Path, monkeypatch) -> None:
     from pipeline.services import publish_service
 
@@ -699,6 +747,22 @@ def test_render_product_raises_when_validation_artifact_is_missing(tmp_path: Pat
 
     assert excinfo.value.code == ServiceErrorCode.MISSING_ARTIFACT.value
     assert "validation_report_path=" in excinfo.value.message
+
+
+def test_render_product_raises_when_candidate_csv_artifact_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_service
+
+    def fake_execute_render_workflow(model: str):
+        assert model == "233541"
+        return _build_render_execution_result(tmp_path, missing_artifacts={"candidate_csv_path"})
+
+    monkeypatch.setattr(render_service, "execute_render_workflow", fake_execute_render_workflow)
+
+    with pytest.raises(ServiceError) as excinfo:
+        render_product(RenderRequest(model="233541"))
+
+    assert excinfo.value.code == ServiceErrorCode.MISSING_ARTIFACT.value
+    assert "candidate_csv_path=" in excinfo.value.message
 
 
 def test_prepare_product_maps_provider_failures_to_stable_service_codes(monkeypatch) -> None:
