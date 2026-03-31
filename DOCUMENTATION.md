@@ -2907,3 +2907,51 @@ Validation:
 Risks, blockers, or skipped items:
 - `publish_status=warning` is currently used when the publish wrapper exits `0` but one or both expected report files are missing
 - `scraper/pipeline/tests/test_workflow.py` still contains a small amount of unreachable legacy test code below early returns from targeted patching; the behavior is validated, but that cleanup was not expanded beyond the minimal integration scope
+
+## 2026-03-31 - Restore OpenCart image upload login hardening
+
+Goal:
+- diagnose the `image_upload` regression for model `123456`
+- restore the earlier working OpenCart admin login flow inside the repo-native uploader path
+
+Files changed:
+- `DOCUMENTATION.md`
+- `tools/opencart_upload_images.py`
+- `tools/run_opencart_image_upload.sh`
+- `tools/run_opencart_import_csv.sh`
+
+Commands run:
+- `git status --short`
+- `rg -n "opencart|image_upload|user_token|admin_path|STORE_BASE|OPENCART" tools scraper -S`
+- `git log --oneline -- tools/run_opencart_image_upload.sh tools/opencart_upload_images.py tools/run_opencart_pipeline.sh`
+- `git show 295201e:tools/opencart_upload_images.py`
+- `bash -lc 'source .secrets/opencart.env && python tools/opencart_upload_images.py --model 123456 --repo-root "$(pwd)" --store-base "$OPENCART_STORE_BASE" --admin-path "$OPENCART_ADMIN_PATH" --username "$OPENCART_ADMIN_USER" --password "$OPENCART_ADMIN_PASS" --dry-run'`
+- direct PowerShell/Python HTTP probe against `https://www.etranoulis.gr/ipadmin/index.php?route=common/login`
+- `bash -lc 'source .secrets/opencart.env && DRY_RUN=1 bash tools/run_opencart_image_upload.sh 123456'`
+- `bash -lc 'source .secrets/opencart.env && bash tools/run_opencart_image_upload.sh 123456'`
+- `bash -lc 'source .secrets/opencart.env && CURRENT_JOB_PRODUCT_FILE="$(pwd)/products/123456.csv" bash tools/run_opencart_pipeline.sh 123456'`
+
+Implementation notes:
+- confirmed the current uploader had regressed from the earlier hardened login logic in commit `295201e`
+- restored the warm-session + browser-like header + redirect-follow fallback login flow in `tools/opencart_upload_images.py`
+- restored localized helper checks for permission-denied, missing-directory, and already-exists responses
+- added `MSYS2_ARG_CONV_EXCL` protection to `tools/run_opencart_image_upload.sh` so Git Bash does not rewrite `/ipadmin/index.php` into a Windows path
+- applied the same shell-side admin path protection to `tools/run_opencart_import_csv.sh` after the full pipeline exposed the same wrapper issue in `csv_import`
+
+Validation:
+- direct HTTP probe showed the admin endpoint is healthy when called correctly:
+  - warm login page `200`
+  - login POST `302`
+  - redirect contains `user_token`
+- standalone wrapper dry run now succeeds and writes `work/123456/upload.opencart.json`
+- standalone live image upload now succeeds for model `123456`
+- full `tools/run_opencart_pipeline.sh 123456` run now passes `image_upload` and reaches `csv_import`
+- upload report confirms:
+  - `login.ok = true`
+  - `permission_probe.can_modify = true`
+  - gallery upload success
+  - besco upload success
+
+Risks, blockers, or skipped items:
+- `csv_import` is still failing after login for a separate reason: the Playwright importer times out waiting for `select[name="profile_id"]`
+- no deeper importer UI fix was included in this image-upload diagnostic pass

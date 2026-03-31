@@ -53,4 +53,9 @@ if [[ "${HEADED}" == "1" ]]; then
 fi
 
 echo "[opencart-csv-import] repo_root=${REPO_ROOT} model=${MODEL} profile=${PROFILE} admin_path=${ADMIN_PATH} dry_run=${DRY_RUN}"
-"${CMD[@]}"
+
+# Prevent Git Bash / MSYS from rewriting web paths such as
+# `/ipadmin/index.php` into local Windows filesystem paths.
+export MSYS2_ARG_CONV_EXCL="${ADMIN_PATH}"
+
+exec "${CMD[@]}"

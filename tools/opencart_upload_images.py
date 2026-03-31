@@ -21,6 +21,10 @@ class UploadError(RuntimeError):
     pass
 
 
+def eprint(*args: Any) -> None:
+    print(*args, file=sys.stderr)
+
+
 def natural_key(name: str) -> list[Any]:
     return [int(tok) if tok.isdigit() else tok.lower() for tok in re.split(r'(\d+)', name)]
 
@@ -130,12 +134,106 @@ def build_plan(repo_root: Path, model: str) -> dict[str, Any]:
     }
 
 
+def _extract_user_token_from_url(url: str) -> str | None:
+    if not url:
+        return None
+    return parse_qs(urlparse(url).query).get('user_token', [None])[0]
+
+
+def _is_permission_denied_error(error_text: str) -> bool:
+    lowered = (error_text or '').lower()
+    markers = [
+        'permission',
+        'denied',
+        'δεν έχετε άδεια',
+        'δεν εχετε αδεια',
+        'άδεια',
+        'αδεια',
+        'permission denied',
+    ]
+    return any(marker in lowered for marker in markers)
+
+
+def _is_missing_directory_error(error_text: str) -> bool:
+    lowered = (error_text or '').lower()
+    markers = [
+        'directory',
+        'folder',
+        'does not exist',
+        'not found',
+        'δεν υπάρχει ο φάκελος',
+        'δεν υπαρχει ο φακελος',
+        'φάκελος',
+        'φακελος',
+    ]
+    return any(marker in lowered for marker in markers)
+
+
+def _is_already_exists_error(error_text: str) -> bool:
+    lowered = (error_text or '').lower()
+    markers = [
+        'already exists',
+        'exists',
+        'υπάρχει ήδη',
+        'υπαρχει ηδη',
+        'ίδιο όνομα',
+        'ιδιο ονομα',
+    ]
+    return any(marker in lowered for marker in markers)
+
+
 def login(session: requests.Session, admin_index: str, username: str, password: str) -> str:
-    resp = session.post(f'{admin_index}?route=common/login', data={'username': username, 'password': password}, allow_redirects=False, timeout=TIMEOUT)
+    login_url = f'{admin_index}?route=common/login'
+
+    session.headers.update(
+        {
+            'User-Agent': (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/122.0.0.0 Safari/537.36'
+            ),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        }
+    )
+
+    warm = session.get(login_url, allow_redirects=True, timeout=TIMEOUT)
+    token = _extract_user_token_from_url(str(warm.url))
+    if token:
+        return token
+
+    resp = session.post(
+        login_url,
+        data={'username': username, 'password': password},
+        headers={
+            'Referer': login_url,
+            'Origin': admin_index.rsplit('/index.php', 1)[0],
+        },
+        allow_redirects=False,
+        timeout=TIMEOUT,
+    )
     location = resp.headers.get('Location', '')
-    if 'user_token=' not in location:
-        raise UploadError(f'Login failed. HTTP {resp.status_code}. Redirect missing user_token. Location={location!r}')
-    token = parse_qs(urlparse(location).query).get('user_token', [None])[0]
+    token = _extract_user_token_from_url(location)
+    if token:
+        return token
+
+    if resp.is_redirect and location:
+        follow = session.get(location, allow_redirects=True, timeout=TIMEOUT)
+        token = _extract_user_token_from_url(str(follow.url))
+        if token:
+            return token
+
+    body_preview = (resp.text or '')[:800].replace('\n', ' ')
+    cookie_names = sorted(session.cookies.keys())
+    raise UploadError(
+        'Login failed: no user_token returned.\n'
+        f'POST {login_url}\n'
+        f'HTTP={resp.status_code}\n'
+        f'Location={location!r}\n'
+        f'ResponseURL={resp.url!r}\n'
+        f'Cookies={cookie_names}\n'
+        f'BodyPreview={body_preview!r}'
+    )
+
     if not token:
         raise UploadError('Login failed: could not extract user_token.')
     return token
@@ -145,13 +243,17 @@ def permission_probe(session: requests.Session, admin_index: str, user_token: st
     url = f"{admin_index}?route=common/filemanager/folder&user_token={quote(user_token)}&directory=__dryrun_invalid_directory__"
     resp = session.post(url, data={'folder': 'dryrunprobe'}, timeout=TIMEOUT)
     resp.raise_for_status()
-    data = resp.json()
-    error_text = str(data.get('error', '')).lower()
+    try:
+        data = resp.json()
+    except Exception as exc:
+        raise UploadError(f'Permission probe did not return JSON: {exc}') from exc
+
+    error_text = str(data.get('error', ''))
     return {
         'raw': data,
-        'permission_denied': 'permission' in error_text,
-        'directory_probe_hit': 'directory' in error_text,
-        'can_modify': ('permission' not in error_text) and ('directory' in error_text),
+        'permission_denied': _is_permission_denied_error(error_text),
+        'directory_probe_hit': _is_missing_directory_error(error_text),
+        'can_modify': (not _is_permission_denied_error(error_text)) and _is_missing_directory_error(error_text),
     }
 
 
@@ -161,8 +263,8 @@ def create_folder(session: requests.Session, admin_index: str, user_token: str, 
     resp.raise_for_status()
     data = resp.json()
     if data.get('error'):
-        err = str(data['error']).lower()
-        if 'already exists' in err or 'exists' in err:
+        err = str(data['error'])
+        if _is_already_exists_error(err):
             return
         raise UploadError(f'Folder create failed. parent={parent_dir!r}, folder={folder_name!r}, response={data}')
 
@@ -275,5 +377,5 @@ if __name__ == '__main__':
     try:
         raise SystemExit(main())
     except UploadError as exc:
-        print(f'ERROR: {exc}', file=sys.stderr)
+        eprint(f'ERROR: {exc}')
         raise SystemExit(1)
