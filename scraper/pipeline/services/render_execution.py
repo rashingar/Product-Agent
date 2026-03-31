@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import shutil
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
 
 from ..csv_writer import write_csv_row
 from ..html_builders import extract_presentation_blocks
@@ -13,6 +13,7 @@ from ..presentation_sections import normalize_presentation_sections
 from ..repo_paths import REPO_ROOT
 from ..utils import ensure_directory, read_json, utcnow_iso, write_json, write_text
 from ..validator import validate_candidate_csv, write_validation_report
+from .execution_models import RenderExecutionResult, RenderExecutionValidationReport
 from .errors import ServiceErrorCode, service_error_from_exception
 from .metadata import maybe_write_run_metadata
 from .models import RunArtifacts, RunStatus, RunType
@@ -26,7 +27,7 @@ def execute_render_workflow(
     *,
     work_root: Path = WORK_ROOT,
     products_root: Path = PRODUCTS_ROOT,
-) -> dict[str, Any]:
+) -> RenderExecutionResult:
     model_root = work_root / model
     scrape_dir = model_root / "scrape"
     llm_dir = model_root / "llm"
@@ -169,17 +170,17 @@ def execute_render_workflow(
             },
         )
 
-        return {
-            "candidate_dir": candidate_dir,
-            "candidate_csv_path": candidate_csv_path,
-            "published_csv_path": published_csv_result_path,
-            "description_path": description_path,
-            "characteristics_path": characteristics_path,
-            "validation_report_path": validation_report_path,
-            "run_status": run_status.value,
-            "metadata_path": metadata_path,
-            "validation_report": validation_report,
-        }
+        return RenderExecutionResult(
+            candidate_dir=candidate_dir,
+            candidate_csv_path=candidate_csv_path,
+            published_csv_path=published_csv_result_path,
+            description_path=description_path,
+            characteristics_path=characteristics_path,
+            validation_report_path=validation_report_path,
+            run_status=run_status,
+            metadata_path=metadata_path,
+            validation_report=RenderExecutionValidationReport.from_mapping(validation_report),
+        )
     except Exception as exc:
         finished_at = utcnow_iso()
         if model_root.exists():
@@ -275,7 +276,7 @@ def _load_render_llm_inputs(
     model_root: Path,
     llm_dir: Path,
     task_manifest_path: Path,
-) -> dict[str, Any]:
+) -> dict[str, object]:
     intro_text_output_path = llm_dir / "intro_text.output.txt"
     seo_meta_output_path = llm_dir / "seo_meta.output.json"
     manifest = read_json(task_manifest_path) if task_manifest_path.exists() else {}
@@ -295,7 +296,7 @@ def _load_render_llm_inputs(
     }
 
 
-def _normalize_render_llm_inputs(inputs: dict[str, Any]) -> tuple[dict[str, Any], str, list[str], str, dict[str, Path]]:
+def _normalize_render_llm_inputs(inputs: Mapping[str, object]) -> tuple[dict[str, object], str, list[str], str, dict[str, Path]]:
     intro_text, intro_errors = validate_intro_text_output(inputs.get("intro_text_payload", ""))
     normalized_seo, seo_errors = validate_seo_meta_output(inputs.get("seo_meta_payload", {}))
     return (
@@ -312,9 +313,9 @@ def _normalize_render_llm_inputs(inputs: dict[str, Any]) -> tuple[dict[str, Any]
 
 def _resolve_render_sections(
     *,
-    extracted_sections: list[dict[str, Any]],
+    extracted_sections: list[dict[str, object]],
     sections_requested: int,
-) -> tuple[list[dict[str, Any]], list[str]]:
+) -> tuple[list[dict[str, object]], list[str]]:
     if sections_requested <= 0:
         return [], []
     if not extracted_sections:

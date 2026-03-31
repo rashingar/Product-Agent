@@ -320,18 +320,18 @@ def test_143481_rendered_description_preserves_locked_wrappers(
         out="unused",
     )
     prepare_result = prepare_workflow(cli)
-    write_split_llm_outputs_from_baseline(prepare_result["model_root"], skroutz_golden_outputs_root / "143481.csv")
+    write_split_llm_outputs_from_baseline(prepare_result.model_root, skroutz_golden_outputs_root / "143481.csv")
 
     render_result = render_workflow("143481")
-    description = render_result["description_path"].read_text(encoding="utf-8")
+    description = render_result.description_path.read_text(encoding="utf-8")
     soup = BeautifulSoup(description, "lxml")
     section_nodes = soup.select("div.etr-sec, div.etr-sec.rev")
-    besco_dir = prepare_result["scrape_dir"] / "bescos"
+    besco_dir = prepare_result.scrape_dir / "bescos"
     rendered_besco_indexes = [1, 2, 5, 6, 7, 8, 9]
 
-    assert render_result["run_status"] == "completed"
-    assert "presentation_sections_weak:2" in render_result["validation_report"]["warnings"]
-    assert "requested_sections_reduced:7" in render_result["validation_report"]["warnings"]
+    assert render_result.run_status.value == "completed"
+    assert "presentation_sections_weak:2" in render_result.validation_report.warnings
+    assert "requested_sections_reduced:7" in render_result.validation_report.warnings
     assert description.count('class="etr-sec"') == 4
     assert description.count('class="etr-sec rev"') == 3
     assert description.count("<!-- SECTION ") == 7

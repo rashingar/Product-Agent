@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from ..models import CLIInput
 from .errors import service_error_from_exception
 from .prepare_execution import WORK_ROOT, execute_prepare_workflow
@@ -24,40 +22,40 @@ def prepare_product(request: PrepareRequest) -> ServiceResult:
     except Exception as exc:
         raise service_error_from_exception(exc, operation="prepare") from exc
 
-    scrape_result = result.get("scrape_result", {})
-    parsed = scrape_result.get("parsed")
-    taxonomy = scrape_result.get("taxonomy")
-    schema_match = scrape_result.get("schema_match")
-    model_root = Path(result["model_root"])
-    scrape_dir = Path(result["scrape_dir"])
-    metadata_path = Path(result["metadata_path"])
-    warnings = list(scrape_result.get("report", {}).get("warnings", []))
+    scrape_result = result.scrape_result
+    parsed = scrape_result.parsed
+    taxonomy = scrape_result.taxonomy
+    schema_match = scrape_result.schema_match
+    model_root = result.model_root
+    scrape_dir = result.scrape_dir
+    metadata_path = result.metadata_path
+    warnings = list(scrape_result.report_warnings)
     return ServiceResult(
         run=RunMetadata(
             model=request.model,
             run_type=RunType.PREPARE,
-            status=RunStatus(result["run_status"]),
+            status=result.run_status,
             warnings=warnings,
         ),
         artifacts=RunArtifacts(
             model_root=model_root,
             scrape_dir=scrape_dir,
-            llm_dir=Path(result["llm_dir"]),
+            llm_dir=result.llm_dir,
             raw_html_path=scrape_dir / f"{request.model}.raw.html",
             source_json_path=scrape_dir / f"{request.model}.source.json",
             scrape_normalized_json_path=scrape_dir / f"{request.model}.normalized.json",
             source_report_json_path=scrape_dir / f"{request.model}.report.json",
-            llm_task_manifest_path=Path(result["task_manifest_path"]),
-            intro_text_context_path=Path(result["intro_text_context_path"]),
-            intro_text_prompt_path=Path(result["intro_text_prompt_path"]),
-            intro_text_output_path=Path(result["intro_text_output_path"]),
-            seo_meta_context_path=Path(result["seo_meta_context_path"]),
-            seo_meta_prompt_path=Path(result["seo_meta_prompt_path"]),
-            seo_meta_output_path=Path(result["seo_meta_output_path"]),
+            llm_task_manifest_path=result.task_manifest_path,
+            intro_text_context_path=result.intro_text_context_path,
+            intro_text_prompt_path=result.intro_text_prompt_path,
+            intro_text_output_path=result.intro_text_output_path,
+            seo_meta_context_path=result.seo_meta_context_path,
+            seo_meta_prompt_path=result.seo_meta_prompt_path,
+            seo_meta_output_path=result.seo_meta_output_path,
             metadata_path=metadata_path,
         ),
         details={
-            "source": str(scrape_result.get("source", "")),
+            "source": scrape_result.source,
             "product_name": str(getattr(getattr(parsed, "source", None), "name", "") or ""),
             "product_code": str(getattr(getattr(parsed, "source", None), "product_code", "") or ""),
             "brand": str(getattr(getattr(parsed, "source", None), "brand", "") or ""),

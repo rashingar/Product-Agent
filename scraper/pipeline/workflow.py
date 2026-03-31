@@ -3,13 +3,13 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Any
 
 from .input_validation import FAIL_MESSAGE, validate_input
 from .models import CLIInput
 from .prepare_stage import execute_prepare_stage
 from .repo_paths import REPO_ROOT
 from .services.errors import ServiceError, ServiceErrorCode
+from .services.execution_models import PrepareExecutionResult, RenderExecutionResult
 from .services.models import PrepareRequest, PublishRequest, RenderRequest, ServiceResult
 from .services.prepare_execution import execute_prepare_workflow
 from .services.prepare_service import prepare_product
@@ -175,7 +175,7 @@ def parse_template_text(text: str) -> dict[str, str]:
     return values
 
 
-def prepare_workflow(cli: CLIInput) -> dict[str, Any]:
+def prepare_workflow(cli: CLIInput) -> PrepareExecutionResult:
     return execute_prepare_workflow(cli, work_root=WORK_ROOT, execute_prepare_stage_fn=execute_prepare_stage)
 
 
@@ -189,7 +189,7 @@ def resolve_model_for_render(args: argparse.Namespace) -> str:
     return model
 
 
-def render_workflow(model: str) -> dict[str, Any]:
+def render_workflow(model: str) -> RenderExecutionResult:
     return execute_render_workflow(model, work_root=WORK_ROOT, products_root=PRODUCTS_ROOT)
 
 

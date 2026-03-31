@@ -245,15 +245,15 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
 
     for model in SAMPLES:
         prepare_result = prepare_workflow(make_cli(model))
-        source_payload = json.loads((prepare_result["scrape_dir"] / f"{model}.source.json").read_text(encoding="utf-8"))
-        report = json.loads((prepare_result["scrape_dir"] / f"{model}.report.json").read_text(encoding="utf-8"))
+        source_payload = json.loads((prepare_result.scrape_dir / f"{model}.source.json").read_text(encoding="utf-8"))
+        report = json.loads((prepare_result.scrape_dir / f"{model}.report.json").read_text(encoding="utf-8"))
         taxonomy_diagnostics = report["skroutz_taxonomy_diagnostics"]
         characteristics_diagnostics = report["characteristics_diagnostics"]
         assert source_payload["source_name"] == "skroutz"
-        assert prepare_result["scrape_result"]["fetch"].method == "playwright"
+        assert prepare_result.scrape_result.payload["fetch"].method == "playwright"
         assert report["fetch_mode"] == "playwright"
-        assert not (prepare_result["scrape_dir"] / f"{model}.csv").exists()
-        assert not (prepare_result["model_root"] / "candidate" / f"{model}.csv").exists()
+        assert not (prepare_result.scrape_dir / f"{model}.csv").exists()
+        assert not (prepare_result.model_root / "candidate" / f"{model}.csv").exists()
         assert len(source_payload["gallery_images"]) == SAMPLES[model]["photos"]
         assert taxonomy_diagnostics["raw_category_tag"] == source_payload["category_tag_text"]
         assert taxonomy_diagnostics["raw_category_href"] == source_payload["category_tag_href"]
@@ -274,16 +274,16 @@ def test_prepare_and_render_workflow_with_skroutz_fixtures(
             assert report["section_extraction_window"]["stop_anchor"] == "Κατασκευαστής"
             assert len(report["section_image_urls_resolved"]) == SAMPLES[model]["sections"]
 
-        write_split_llm_outputs_from_baseline(prepare_result["model_root"], skroutz_golden_outputs_root / f"{model}.csv")
+        write_split_llm_outputs_from_baseline(prepare_result.model_root, skroutz_golden_outputs_root / f"{model}.csv")
         baseline_row = read_csv_row(skroutz_golden_outputs_root / f"{model}.csv")
 
         render_result = render_workflow(model)
-        candidate_row = read_csv_row(render_result["candidate_csv_path"])
-        validation = render_result["validation_report"]
+        candidate_row = read_csv_row(render_result.candidate_csv_path)
+        validation = render_result.validation_report.payload
 
-        assert render_result["candidate_csv_path"].exists()
-        assert render_result["published_csv_path"] == tmp_path / "products" / f"{model}.csv"
-        assert render_result["run_status"] == "completed"
+        assert render_result.candidate_csv_path.exists()
+        assert render_result.published_csv_path == tmp_path / "products" / f"{model}.csv"
+        assert render_result.run_status.value == "completed"
         assert validation["ok"] is True
         assert validation["errors"] == []
         assert validation["summary"]["missing"] == 0

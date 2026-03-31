@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Callable
 
@@ -13,6 +14,7 @@ from ..models import CLIInput
 from ..prepare_stage import execute_prepare_stage
 from ..repo_paths import INTRO_TEXT_PROMPT_PATH, REPO_ROOT, SEO_META_PROMPT_PATH
 from ..utils import ensure_directory, utcnow_iso, write_json, write_text
+from .execution_models import PrepareExecutionResult, PrepareExecutionScrapeResult
 from .errors import service_error_from_exception
 from .metadata import maybe_write_run_metadata
 from .models import RunArtifacts, RunStatus, RunType
@@ -30,8 +32,8 @@ def execute_prepare_workflow(
     cli: CLIInput,
     *,
     work_root: Path = WORK_ROOT,
-    execute_prepare_stage_fn: Callable[..., dict[str, Any]] = execute_prepare_stage,
-) -> dict[str, Any]:
+    execute_prepare_stage_fn: Callable[..., Mapping[str, object]] = execute_prepare_stage,
+) -> PrepareExecutionResult:
     requested_at = utcnow_iso()
     started_at = requested_at
     model_root = ensure_directory(work_root / cli.model)
@@ -46,18 +48,23 @@ def execute_prepare_workflow(
     seo_meta_output_path = llm_dir / "seo_meta.output.json"
     scrape_cli = CLIInput(**{**cli.to_dict(), "out": str(scrape_dir)})
     try:
-        result = execute_prepare_stage_fn(scrape_cli, model_dir=scrape_dir)
-        deterministic_product = result["normalized"].get("deterministic_product", {})
+        stage_result = execute_prepare_stage_fn(scrape_cli, model_dir=scrape_dir)
+        normalized_payload = stage_result.get("normalized")
+        normalized_dict = normalized_payload if isinstance(normalized_payload, Mapping) else {}
+        deterministic_product_payload = normalized_dict.get("deterministic_product")
+        deterministic_product = deterministic_product_payload if isinstance(deterministic_product_payload, Mapping) else {}
+        parsed = stage_result["parsed"]
+        taxonomy = stage_result["taxonomy"]
         intro_text_context = build_intro_text_context(
             cli=scrape_cli,
-            parsed=result["parsed"],
-            taxonomy=result["taxonomy"],
+            parsed=parsed,
+            taxonomy=taxonomy,
             deterministic_product=deterministic_product,
         )
         seo_meta_context = build_seo_meta_context(
             cli=scrape_cli,
-            parsed=result["parsed"],
-            taxonomy=result["taxonomy"],
+            parsed=parsed,
+            taxonomy=taxonomy,
             deterministic_product=deterministic_product,
         )
         intro_text_prompt = INTRO_TEXT_PROMPT_PATH.read_text(encoding="utf-8").replace(
@@ -92,10 +99,10 @@ def execute_prepare_workflow(
                 model_root=model_root,
                 scrape_dir=scrape_dir,
                 llm_dir=llm_dir,
-                raw_html_path=_path_or_none(result.get("raw_html_path")),
-                source_json_path=_path_or_none(result.get("source_json_path")),
-                scrape_normalized_json_path=_path_or_none(result.get("normalized_json_path")),
-                source_report_json_path=_path_or_none(result.get("report_json_path")),
+                raw_html_path=_path_or_none(stage_result.get("raw_html_path")),
+                source_json_path=_path_or_none(stage_result.get("source_json_path")),
+                scrape_normalized_json_path=_path_or_none(stage_result.get("normalized_json_path")),
+                source_report_json_path=_path_or_none(stage_result.get("report_json_path")),
                 llm_task_manifest_path=task_manifest_path,
                 intro_text_context_path=intro_text_context_path,
                 intro_text_prompt_path=intro_text_prompt_path,
@@ -107,28 +114,28 @@ def execute_prepare_workflow(
             requested_at=requested_at,
             started_at=started_at,
             finished_at=finished_at,
-            warnings=list(result.get("report", {}).get("warnings", [])),
+            warnings=PrepareExecutionScrapeResult.from_mapping(stage_result).report_warnings,
             details={
-                "source": str(result.get("source", "")),
+                "source": str(stage_result.get("source", "")),
                 "llm_prepare_mode": "split_tasks",
                 "llm_primary_outputs_dir": str(llm_dir),
             },
         )
-        return {
-            "model_root": model_root,
-            "scrape_dir": scrape_dir,
-            "llm_dir": llm_dir,
-            "task_manifest_path": task_manifest_path,
-            "intro_text_context_path": intro_text_context_path,
-            "intro_text_prompt_path": intro_text_prompt_path,
-            "intro_text_output_path": intro_text_output_path,
-            "seo_meta_context_path": seo_meta_context_path,
-            "seo_meta_prompt_path": seo_meta_prompt_path,
-            "seo_meta_output_path": seo_meta_output_path,
-            "run_status": RunStatus.COMPLETED.value,
-            "metadata_path": metadata_path,
-            "scrape_result": result,
-        }
+        return PrepareExecutionResult(
+            model_root=model_root,
+            scrape_dir=scrape_dir,
+            llm_dir=llm_dir,
+            task_manifest_path=task_manifest_path,
+            intro_text_context_path=intro_text_context_path,
+            intro_text_prompt_path=intro_text_prompt_path,
+            intro_text_output_path=intro_text_output_path,
+            seo_meta_context_path=seo_meta_context_path,
+            seo_meta_prompt_path=seo_meta_prompt_path,
+            seo_meta_output_path=seo_meta_output_path,
+            run_status=RunStatus.COMPLETED,
+            metadata_path=metadata_path,
+            scrape_result=PrepareExecutionScrapeResult.from_mapping(stage_result),
+        )
     except Exception as exc:
         finished_at = utcnow_iso()
         service_error = service_error_from_exception(exc, operation="prepare")
