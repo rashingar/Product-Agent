@@ -3,6 +3,71 @@
 ## Current milestone
 M36 completed, and the repo now also has a minimal GitHub Actions workflow that installs dependencies from `requirements.txt`, installs Playwright Chromium, and runs `python -m pytest -q` from `scraper/` on push and pull request events without changing runtime code.
 
+## 2026-03-31 - Freeze workflow-only cleanup branch scope (planned docs-only)
+
+Goal:
+- record the exact branch cleanup scope for making `pipeline.workflow` the only public entrypoint
+- keep this commit documentation-only and avoid changing active runtime truth before the cleanup lands
+- leave `README.md` untouched until the runtime deletion commit makes the new entrypoint story true
+
+Scope framing:
+- this section records planned cleanup work for branch `cleanup/workflow-single-entrypoint`
+- it is not a statement that the current runtime already removed `pipeline.cli`, `full_run.py`, `run_service.py`, or `run_execution.py`
+- active runtime guidance remains unchanged in this commit so docs do not get ahead of code
+
+Files planned for deletion when the cleanup lands:
+- `scraper/pipeline/cli.py`
+- `scraper/pipeline/full_run.py`
+- `scraper/pipeline/services/run_service.py`
+- `scraper/pipeline/services/run_execution.py`
+
+Files planned for rewrite when the cleanup lands:
+- `scraper/pipeline/workflow.py`
+- `scraper/pipeline/services/__init__.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+- `README.md`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Tests planned for migration when the cleanup lands:
+- `scraper/pipeline/tests/test_workflow.py`
+  - migrate `execute_full_run(...)` coverage to the surviving `pipeline.workflow` prepare/render entrypoints and their direct orchestration seams
+- `scraper/pipeline/tests/test_provider_selection.py`
+  - move supported-source and injected-provider assertions off `execute_full_run(...)` and onto provider-registry bootstrap plus prepare-stage/workflow execution
+- `scraper/pipeline/tests/test_services.py`
+  - drop `run_service` / `run_execution` ownership checks and keep coverage focused on the surviving prepare, render, and publish service layers
+- `scraper/pipeline/tests/test_skroutz_integration.py`
+  - replace the direct `pipeline.cli` validation dependency with whichever validation seam survives under the workflow-only entrypoint
+
+README timing rule:
+- runtime instructions in `README.md` must be updated only after the deletion lands, in the same implementation window or immediately after, so active docs never present a non-existent or not-yet-true workflow-only state
+
+Branch acceptance checks:
+- this scope-freeze commit must remain docs-only:
+  - `git diff --stat` shows only `PLAN.md` and `DOCUMENTATION.md`
+- cleanup implementation acceptance after the deletion lands:
+  - `python -m pipeline.workflow prepare --help` and `python -m pipeline.workflow render --help` remain the public runtime help surfaces
+  - no active runtime docs present `python -m pipeline.cli ...` as runnable
+  - provider-selection and supported-source coverage no longer calls `execute_full_run(...)`
+  - the legacy files listed above are removed rather than left as alternate public entrypoints
+
+Commands run:
+- `git status --short`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `rg -n "pipeline\\.cli|execute_full_run|run_service|run_execution|workflow-only|branch scope|cleanup scope|M36|Phase 4" PLAN.md DOCUMENTATION.md -S`
+- `Get-Content PLAN.md | Select-Object -Last 220`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 220`
+- `rg -n "pipeline\\.cli|execute_full_run|run_service|run_execution|full_run\\.py" scraper/pipeline/tests scraper/pipeline README.md -S`
+- `rg --files scraper/pipeline/tests`
+
+Validation:
+- documented the future workflow-only cleanup scope without changing runtime code, imports, tests, or active README instructions
+- kept the scope explicitly framed as planned branch work instead of current runtime truth
+
 ## 2026-03-30 - Add minimal GitHub Actions scraper test workflow
 
 Goal:

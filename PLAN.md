@@ -6,7 +6,7 @@ This file is the source of truth for staged repository changes.
 
 Phase 1 cleanup milestones (M1-M14) are complete and remain preserved below as historical record.
 
-Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. Post-split execution seam cleanup and service/workflow error hardening are now complete through M36. Phase 4 remains pending.
+Phase 2: architecture foundation is complete through M29. Phase 3 completed the split-LLM deterministic-presentation refactor through M34. Post-split execution seam cleanup and service/workflow error hardening are now complete through M36. A planned M37 branch cleanup now freezes the workflow-only public-entrypoint target state before any runtime deletion lands. Phase 4 remains pending after that cleanup.
 
 ## Current repo facts
 - The active runnable code lives under `scraper/pipeline/`.
@@ -146,6 +146,34 @@ Hard rules:
 
 Milestone:
 - M36 — add stable service error taxonomy and workflow exit mapping (completed; `scraper/pipeline/services/errors.py` now defines stable semantic error codes plus a boundary mapper, prepare/render/full-run services wrap low-level failures into those codes, workflow exit behavior is driven by an explicit code-to-exit matrix, and prepare/render metadata now persist stable semantic `error_code` values including validation failures)
+
+### Workflow-only public entrypoint cleanup
+
+Status: planned
+
+Goals:
+1. Make `python -m pipeline.workflow ...` the only public CLI entrypoint after the cleanup lands.
+2. Remove the remaining legacy public-entrypoint and full-run compatibility surfaces:
+   - `scraper/pipeline/cli.py`
+   - `scraper/pipeline/full_run.py`
+   - `scraper/pipeline/services/run_service.py`
+   - `scraper/pipeline/services/run_execution.py`
+3. Move provider-selection and supported-source regression coverage off `execute_full_run(...)` and onto the surviving workflow, prepare-stage, provider-registry, and provider-adapter seams.
+4. Update active runtime docs so they stop presenting `pipeline.cli` as a runnable operator path after the legacy entrypoint deletion lands.
+
+Hard rules:
+- This milestone definition records planned cleanup scope only; it does not change the current runtime contract in this docs-only commit.
+- Do not make active usage docs inaccurate before the runtime deletion lands.
+- Do not broaden this cleanup into provider fetch/normalize changes, LLM contract changes, or unrelated service-boundary refactors.
+
+Milestone:
+- M37 — make `pipeline.workflow` the only public CLI entrypoint (planned; after the cleanup lands, `pipeline.workflow` remains the sole public command surface, `pipeline.cli` plus the legacy full-run compatibility stack are removed, provider-selection coverage no longer anchors on `execute_full_run(...)`, and active docs stop advertising `pipeline.cli` as runnable)
+
+Acceptance criteria:
+1. `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...` remain the only documented public runtime commands.
+2. `scraper/pipeline/cli.py`, `scraper/pipeline/full_run.py`, `scraper/pipeline/services/run_service.py`, and `scraper/pipeline/services/run_execution.py` are removed once the cleanup implementation lands.
+3. Provider-selection and supported-source coverage no longer calls `execute_full_run(...)` and instead asserts the surviving workflow/prepare/provider seams directly.
+4. Active docs stop presenting `python -m pipeline.cli ...` as runnable only after the deletion commit lands, so runtime guidance never gets ahead of the code.
 
 ### Phase 4 — Hybrid RAG foundation
 
@@ -290,7 +318,7 @@ Evidence:
 
 Cleanup is complete through M14.
 
-New implementation work starts at M30 and now continues through the completed post-split M36 error-hardening milestone before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
+New implementation work starts at M30 and now continues through the completed post-split M36 error-hardening milestone plus the planned M37 workflow-only public-entrypoint cleanup before Phase 4. Cleanup history remains preserved for auditability and should not be rewritten unless a historical correction is needed.
 
 ## Validation rules
 After each milestone:

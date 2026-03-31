@@ -7,7 +7,7 @@ import pytest
 from pipeline.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.providers import ProviderRegistry
 from pipeline.services import PrepareRequest, PublishRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceError, ServiceErrorCode, ServiceResult
-from pipeline.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
+from pipeline.workflow import build_cli_input_from_args, build_parser, prepare_workflow, render_workflow, resolve_model_for_render
 
 
 def build_intro(words: int = 120) -> str:
@@ -56,6 +56,45 @@ def test_build_cli_input_from_template_file(tmp_path: Path, monkeypatch) -> None
     assert cli.photos == 6
     assert cli.sections == 5
     assert str(cli.price) == "2099"
+
+
+def test_build_parser_pins_supported_workflow_cli_surface() -> None:
+    parser = build_parser()
+    subparsers_action = next(action for action in parser._actions if isinstance(action, argparse._SubParsersAction))
+
+    assert parser.prog == "python -m pipeline.workflow"
+    assert set(subparsers_action.choices) == {"prepare", "render"}
+
+    with pytest.raises(SystemExit) as excinfo:
+        parser.parse_args(["run"])
+
+    assert excinfo.value.code == 2
+
+
+def test_resolve_model_for_render_accepts_explicit_model_argument() -> None:
+    args = argparse.Namespace(model="233541", template_file=None, stdin=False)
+
+    assert resolve_model_for_render(args) == "233541"
+
+
+def test_resolve_model_for_render_reads_model_from_template_file(tmp_path: Path) -> None:
+    template = tmp_path / "render-input.txt"
+    template.write_text("model: 233541\n", encoding="utf-8")
+    args = argparse.Namespace(model=None, template_file=str(template), stdin=False)
+
+    assert resolve_model_for_render(args) == "233541"
+
+
+@pytest.mark.parametrize("model", [None, "", "23354", "233541a", "abc123", "2335417"])
+def test_resolve_model_for_render_rejects_missing_or_invalid_model(model: str | None) -> None:
+    from pipeline import workflow
+
+    args = argparse.Namespace(model=model, template_file=None, stdin=False)
+
+    with pytest.raises(ValueError) as excinfo:
+        resolve_model_for_render(args)
+
+    assert str(excinfo.value) == workflow.FAIL_MESSAGE
 
 
 def test_prepare_workflow_delegates_to_service_execution(tmp_path: Path, monkeypatch) -> None:
@@ -1478,6 +1517,11 @@ def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsy
     def fake_prepare_product(request: PrepareRequest) -> ServiceResult:
         assert request.model == cli.model
         assert request.url == cli.url
+        assert request.photos == cli.photos
+        assert request.sections == cli.sections
+        assert request.skroutz_status == cli.skroutz_status
+        assert request.boxnow == cli.boxnow
+        assert request.price == cli.price
         return ServiceResult(
             run=RunMetadata(model=cli.model, run_type=RunType.PREPARE, status=RunStatus.COMPLETED),
             artifacts=RunArtifacts(
@@ -1499,6 +1543,12 @@ def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsy
 
     assert exit_code == 0
     assert f"Scrape artifacts: {tmp_path / 'work' / cli.model / 'scrape'}" in captured.out
+    assert f"LLM task manifest: {tmp_path / 'work' / cli.model / 'llm' / 'task_manifest.json'}" in captured.out
+    assert f"Intro task context: {tmp_path / 'work' / cli.model / 'llm' / 'intro_text.context.json'}" in captured.out
+    assert f"Intro task prompt: {tmp_path / 'work' / cli.model / 'llm' / 'intro_text.prompt.txt'}" in captured.out
+    assert f"SEO task context: {tmp_path / 'work' / cli.model / 'llm' / 'seo_meta.context.json'}" in captured.out
+    assert f"SEO task prompt: {tmp_path / 'work' / cli.model / 'llm' / 'seo_meta.prompt.txt'}" in captured.out
+    assert "Run status: completed" in captured.out
     assert f"Metadata path: {tmp_path / 'work' / cli.model / 'prepare.run.json'}" in captured.out
 
 
@@ -1547,6 +1597,7 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
     assert exit_code == 0
     assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
     assert f"Published CSV: {tmp_path / 'products' / '233541.csv'}" in captured.out
+    assert f"Validation report: {tmp_path / 'work' / '233541' / 'candidate' / '233541.validation.json'}" in captured.out
     assert "Validation ok: True" in captured.out
     assert "Render status: success" in captured.out
     assert "Publish status: success" in captured.out
@@ -1554,6 +1605,9 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
     assert "Publish message: OpenCart publish completed successfully." in captured.out
     assert f"OpenCart upload report: {tmp_path / 'work' / '233541' / 'upload.opencart.json'}" in captured.out
     assert f"OpenCart import report: {tmp_path / 'work' / '233541' / 'import.opencart.json'}" in captured.out
+    assert "Run status: completed" in captured.out
+    assert f"Metadata path: {tmp_path / 'work' / '233541' / 'render.run.json'}" in captured.out
+    assert f"Publish metadata path: {tmp_path / 'work' / '233541' / 'publish.run.json'}" in captured.out
 
 
 @pytest.mark.parametrize(
@@ -1626,34 +1680,4 @@ def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, cap
 
     assert exit_code == 5
     assert "Validation ok: False" in captured.out
-
-
-def test_run_cli_input_calls_service_layer(monkeypatch) -> None:
-    from pipeline import cli as cli_module
-
-    cli = CLIInput(
-        model="233541",
-        url="https://www.electronet.gr/example",
-        photos=2,
-        sections=1,
-        skroutz_status=1,
-        boxnow=0,
-        price="2099",
-        out="out",
-    )
-    expected = ServiceResult(
-        run=RunMetadata(model="233541", run_type=RunType.FULL, status=RunStatus.COMPLETED),
-        artifacts=RunArtifacts(),
-        details={},
-    )
-
-    def fake_run_product(request):
-        assert request.model == cli.model
-        assert request.url == cli.url
-        assert request.out == cli.out
-        return expected
-
-    monkeypatch.setattr(cli_module, "run_product", fake_run_product)
-
-    assert cli_module.run_cli_input(cli) is expected
 
