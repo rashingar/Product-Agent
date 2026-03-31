@@ -4,6 +4,7 @@ from enum import Enum
 
 from ..providers.base import ProviderError
 from ..providers.models import ProviderStage
+from .metadata import MetadataWriteError
 
 
 class ServiceErrorCode(str, Enum):
@@ -75,6 +76,21 @@ def service_error_from_exception(exc: BaseException, *, operation: str) -> Servi
                 "provider_code": provider_error.error.code.value,
                 "provider_stage": provider_error.error.stage.value,
                 **provider_error.error.details,
+            },
+        )
+
+    metadata_error = next((item for item in chain if isinstance(item, MetadataWriteError)), None)
+    if metadata_error is not None:
+        return ServiceError(
+            ServiceErrorCode.UNEXPECTED_FAILURE.value,
+            str(metadata_error),
+            cause=exc,
+            details={
+                "metadata_path": str(metadata_error.metadata_path),
+                "metadata_run_type": metadata_error.payload.run.run_type.value,
+                "metadata_run_status": metadata_error.payload.run.status.value,
+                "metadata_error_code": metadata_error.payload.run.error_code,
+                "metadata_error_detail": metadata_error.payload.run.error_detail,
             },
         )
 

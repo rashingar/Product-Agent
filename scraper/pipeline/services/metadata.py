@@ -15,6 +15,21 @@ _METADATA_FILENAMES = {
 }
 
 
+class MetadataWriteError(RuntimeError):
+    def __init__(
+        self,
+        *,
+        metadata_path: Path,
+        payload: ServiceResult,
+        cause: BaseException,
+    ) -> None:
+        message = f"Failed to write {payload.run.run_type.value} run metadata at {metadata_path}: {cause}"
+        super().__init__(message)
+        self.metadata_path = metadata_path
+        self.payload = payload
+        self.cause = cause
+
+
 def metadata_path_for(model_root: Path, run_type: RunType) -> Path:
     return model_root / _METADATA_FILENAMES[run_type]
 
@@ -75,6 +90,10 @@ def maybe_write_run_metadata(
     )
     try:
         write_run_metadata(payload)
-    except Exception:
-        pass
+    except Exception as exc:
+        raise MetadataWriteError(
+            metadata_path=metadata_path,
+            payload=payload,
+            cause=exc,
+        ) from exc
     return metadata_path

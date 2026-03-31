@@ -212,6 +212,49 @@ Acceptance criteria:
 Completion note:
 - completed; `scraper/pipeline/services/execution_models.py` now owns typed `PrepareExecutionResult` and `RenderExecutionResult` models, `prepare_execution.py` and `render_execution.py` return those typed results directly, and `prepare_service.py` / `render_service.py` consume typed attributes while preserving the outward `ServiceResult` contract
 
+### Branch scope — metadata and error semantics hardening
+
+Status: completed
+
+Purpose:
+1. Freeze the exact branch scope for hardening metadata persistence and prepare/render error semantics without changing runtime behavior in the scope-freeze commit.
+2. Keep this work limited to the existing metadata-write path plus the prepare/render service-to-workflow reporting seam.
+3. Build on the existing `RunMetadata`, `RunArtifacts`, and `ServiceResult` models instead of broadening the branch into new runtime architecture work.
+
+Historical starting point for this branch:
+1. `metadata.py` previously swallowed metadata write exceptions.
+2. `workflow.py` already printed metadata path and validation/candidate artifact paths for operators.
+3. The service layer already exposed `RunMetadata`, `RunArtifacts`, and `ServiceResult`.
+
+Target end state:
+1. No silent metadata write failure remains in the active prepare/render paths.
+2. `prepare` and `render` expose consistent partial-failure semantics when the main stage result is known but metadata or artifact-side effects fail.
+3. Artifact absence is surfaced consistently across prepare/render service results and workflow-facing reporting.
+4. Workflow-facing behavior remains stable unless the run truly fails.
+
+In scope:
+1. Harden metadata write semantics around the existing prepare/render metadata persistence path.
+2. Align prepare/render handling so metadata-write and artifact-surfacing problems follow the same partial-failure policy.
+3. Normalize how missing expected artifacts are represented through the existing `RunArtifacts` and `ServiceResult` contracts.
+4. Preserve current operator-facing metadata-path and candidate/validation-path reporting on successful runs.
+
+Explicit non-goals:
+1. No `prepare_stage.py` decomposition.
+2. No typed-result redesign beyond the existing `RunMetadata`, `RunArtifacts`, and `ServiceResult` models.
+3. No workflow parser or CLI changes.
+4. No provider routing changes.
+5. No broader runtime-behavior changes outside metadata and error semantics hardening.
+
+Acceptance criteria:
+1. No silent metadata write failures remain on the active prepare/render paths.
+2. Prepare and render expose the same partial-failure semantics for metadata-write and artifact-availability problems.
+3. Missing expected artifacts are surfaced consistently to callers and operators instead of being silently omitted.
+4. Existing workflow-facing operator output remains stable unless the underlying run truly fails.
+5. This branch does not expand into stage decomposition, typed-result redesign, workflow parser/CLI work, or provider routing changes.
+
+Completion note:
+- completed; `scraper/pipeline/services/metadata.py` now raises structured metadata-write failures instead of silently ignoring them, `prepare_service.py` and `render_service.py` now distinguish degraded known-outcome results from hard failures when metadata or required artifacts are missing, and workflow-facing prepare/render summaries keep the same public command shape while showing `Metadata path: None` when degraded results do not have a persisted metadata file
+
 ### Phase 4 — Hybrid RAG foundation
 
 Status: pending

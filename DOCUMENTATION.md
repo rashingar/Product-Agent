@@ -3,6 +3,86 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Finalize metadata and error semantics hardening docs
+
+Goal:
+- update active project docs after the landed metadata/error hardening work
+- mark the `hardening/metadata-and-error-semantics` branch scope complete
+- record the current runtime behavior for degraded prepare/render outcomes without changing runtime code in the same commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Current-state guidance added:
+- no silent metadata write failures remain in active prepare/render paths
+- prepare/render now distinguish:
+  - full success: core stage result is known and required primary artifacts exist
+  - degraded success / partial failure: core stage result is known, but metadata persistence or another secondary artifact/reporting side effect is missing
+  - hard failure: the core stage outcome is not trustworthy or a required primary artifact is missing
+- prepare degraded behavior:
+  - metadata write failure after a known successful prepare returns a degraded `ServiceResult`
+  - missing persisted metadata after an otherwise successful prepare is surfaced through `run.warnings`, `run.error_code`, `run.error_detail`, and `artifacts.metadata_path = None`
+- render degraded behavior:
+  - metadata write failure after a known successful render returns a degraded `ServiceResult`
+  - validation failure remains the primary render failure when known, and any metadata-write problem is added as a warning rather than replacing the validation semantics
+  - missing persisted metadata after an otherwise known render result is surfaced through `run.warnings`, `run.error_code`, `run.error_detail`, and `artifacts.metadata_path = None`
+- operator-visible workflow behavior under degraded conditions remains stable:
+  - workflow prepare/render keep the same public command surface
+  - operator summaries still print candidate/validation/artifact paths when those artifacts exist
+  - when metadata is unavailable on a degraded result, workflow output shows `Metadata path: None` instead of silently implying the file exists
+- artifact absence rules now distinguish:
+  - missing primary prepare/render artifacts -> hard failure
+  - missing metadata artifact after a known core outcome -> degraded result
+
+Commands run:
+- `rg -n "silent metadata|partial failure|degraded success|metadata path" PLAN.md DOCUMENTATION.md`
+- `python -m pytest -q` from `scraper/`
+
+Validation:
+- active docs now reflect the landed metadata/error semantics rather than the old planned branch state
+- this commit is docs-only and does not modify runtime code
+
+## 2026-03-31 - Freeze metadata and error semantics hardening scope
+
+Goal:
+- document the exact scope for `hardening/metadata-and-error-semantics`
+- keep this commit docs-only and avoid any runtime, import, parser, CLI, provider, or test changes
+- preserve current workflow-facing behavior while scoping the future metadata/error hardening work
+
+Scope framing:
+- this section records planned branch work for metadata and error semantics hardening
+- it is not a statement that the hardening is already implemented in the current runtime
+- active runtime behavior remains unchanged in this commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- added a `PLAN.md` branch-scope section for `metadata and error semantics hardening`
+- recorded the target end state:
+  - no silent metadata write failure
+  - prepare/render expose consistent partial-failure semantics
+  - artifact absence is surfaced consistently
+  - workflow-facing behavior remains stable unless the run truly fails
+- recorded the explicit non-goals:
+  - no `prepare_stage.py` decomposition
+  - no typed-result redesign beyond the existing `RunMetadata`, `RunArtifacts`, and `ServiceResult` models
+  - no workflow parser or CLI changes
+  - no provider routing changes
+
+Commands run:
+- `git status --short`
+- `Get-Content -Raw PLAN.md`
+- `Get-Content -Raw DOCUMENTATION.md`
+- `rg -n "metadata and error semantics|silent metadata|partial-failure|non-goals" PLAN.md DOCUMENTATION.md`
+- `git diff --stat`
+
+Validation:
+- scope is now documented in `PLAN.md` and logged in `DOCUMENTATION.md`
+- this commit remains docs-only and does not modify Python files, tests, imports, or runtime behavior
+
 ## 2026-03-31 - Complete typed execution results migration
 
 Goal:

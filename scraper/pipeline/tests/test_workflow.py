@@ -1195,6 +1195,87 @@ def test_workflow_main_maps_service_error_codes_to_explicit_exit_codes(monkeypat
     assert f"{service_code} message" in captured.err
 
 
+def test_workflow_main_prepare_keeps_cli_shape_for_degraded_metadata_result(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_build_cli_input_from_args(_args):
+        return CLIInput(
+            model="233541",
+            url="https://www.electronet.gr/example",
+            photos=2,
+            sections=1,
+            skroutz_status=1,
+            boxnow=0,
+            price="2099",
+            out="out",
+        )
+
+    def fake_prepare_product(_request: PrepareRequest) -> ServiceResult:
+        return ServiceResult(
+            run=RunMetadata(
+                model="233541",
+                run_type=RunType.PREPARE,
+                status=RunStatus.COMPLETED,
+                warnings=[f"Failed to write prepare run metadata at {tmp_path / 'work' / '233541' / 'prepare.run.json'}: disk full"],
+                error_code=ServiceErrorCode.UNEXPECTED_FAILURE.value,
+                error_detail=f"Failed to write prepare run metadata at {tmp_path / 'work' / '233541' / 'prepare.run.json'}: disk full",
+            ),
+            artifacts=RunArtifacts(
+                scrape_dir=tmp_path / "work" / "233541" / "scrape",
+                llm_task_manifest_path=tmp_path / "work" / "233541" / "llm" / "task_manifest.json",
+                intro_text_context_path=tmp_path / "work" / "233541" / "llm" / "intro_text.context.json",
+                intro_text_prompt_path=tmp_path / "work" / "233541" / "llm" / "intro_text.prompt.txt",
+                seo_meta_context_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json",
+                seo_meta_prompt_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.prompt.txt",
+                metadata_path=None,
+            ),
+        )
+
+    monkeypatch.setattr(workflow, "build_cli_input_from_args", fake_build_cli_input_from_args)
+    monkeypatch.setattr(workflow, "prepare_product", fake_prepare_product)
+
+    exit_code = workflow.main(["prepare"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert f"Scrape artifacts: {tmp_path / 'work' / '233541' / 'scrape'}" in captured.out
+    assert "Run status: completed" in captured.out
+    assert "Metadata path: None" in captured.out
+
+
+def test_workflow_main_prepare_hard_failure_prints_service_error_only(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_build_cli_input_from_args(_args):
+        return CLIInput(
+            model="233541",
+            url="https://www.electronet.gr/example",
+            photos=2,
+            sections=1,
+            skroutz_status=1,
+            boxnow=0,
+            price="2099",
+            out="out",
+        )
+
+    def fake_prepare_product(_request: PrepareRequest) -> ServiceResult:
+        raise ServiceError(
+            ServiceErrorCode.MISSING_ARTIFACT.value,
+            f"Prepare completed but required artifacts are missing: llm_task_manifest_path={tmp_path / 'work' / '233541' / 'llm' / 'task_manifest.json'}",
+        )
+
+    monkeypatch.setattr(workflow, "build_cli_input_from_args", fake_build_cli_input_from_args)
+    monkeypatch.setattr(workflow, "prepare_product", fake_prepare_product)
+
+    exit_code = workflow.main(["prepare"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 3
+    assert captured.out == ""
+    assert "Prepare completed but required artifacts are missing: llm_task_manifest_path=" in captured.err
+
+
 def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, capsys, tmp_path: Path) -> None:
     from pipeline import workflow
 
@@ -1227,4 +1308,112 @@ def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, cap
 
     assert exit_code == 5
     assert "Validation ok: False" in captured.out
+
+
+def test_workflow_main_render_keeps_cli_shape_for_degraded_metadata_result(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        assert request.model == "233541"
+        return ServiceResult(
+            run=RunMetadata(
+                model="233541",
+                run_type=RunType.RENDER,
+                status=RunStatus.COMPLETED,
+                warnings=[f"Render metadata artifact is missing: {tmp_path / 'work' / '233541' / 'render.run.json'}"],
+                error_code=ServiceErrorCode.MISSING_ARTIFACT.value,
+                error_detail=f"Render metadata artifact is missing: {tmp_path / 'work' / '233541' / 'render.run.json'}",
+            ),
+            artifacts=RunArtifacts(
+                candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+                validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+                metadata_path=None,
+            ),
+            details={"validation_ok": True, "published": False},
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
+    assert f"Validation report: {tmp_path / 'work' / '233541' / 'candidate' / '233541.validation.json'}" in captured.out
+    assert "Validation ok: True" in captured.out
+    assert "Render status: success" in captured.out
+    assert "Publish status: not_attempted" in captured.out
+    assert "Run status: completed" in captured.out
+    assert "Metadata path: None" in captured.out
+
+
+def test_workflow_main_render_validation_failure_still_prints_operator_paths(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        assert request.model == "233541"
+        return ServiceResult(
+            run=RunMetadata(
+                model="233541",
+                run_type=RunType.RENDER,
+                status=RunStatus.FAILED,
+                warnings=["Candidate failed validation; skipping publish to products/."],
+                error_code=ServiceErrorCode.VALIDATION_FAILURE.value,
+                error_detail="Candidate validation failed",
+            ),
+            artifacts=RunArtifacts(
+                candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+                validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+                metadata_path=tmp_path / "work" / "233541" / "render.run.json",
+            ),
+            details={"validation_ok": False, "published": False},
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 5
+    assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
+    assert f"Validation report: {tmp_path / 'work' / '233541' / 'candidate' / '233541.validation.json'}" in captured.out
+    assert "Validation ok: False" in captured.out
+    assert "Render status: failure" in captured.out
+    assert "Publish status: not_attempted" in captured.out
+    assert "Publish stage: -" in captured.out
+    assert "Publish message: Publish skipped because render did not publish products/233541.csv." in captured.out
+    assert "Run status: failed" in captured.out
+    assert f"Metadata path: {tmp_path / 'work' / '233541' / 'render.run.json'}" in captured.out
+
+
+def test_workflow_main_render_hard_failure_prints_service_error_only(monkeypatch, capsys, tmp_path: Path) -> None:
+    from pipeline import workflow
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(_request: RenderRequest) -> ServiceResult:
+        raise ServiceError(
+            ServiceErrorCode.MISSING_ARTIFACT.value,
+            f"Render completed but required artifacts are missing: validation_report_path={tmp_path / 'work' / '233541' / 'candidate' / '233541.validation.json'}",
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 3
+    assert captured.out == ""
+    assert "Render completed but required artifacts are missing: validation_report_path=" in captured.err
 
