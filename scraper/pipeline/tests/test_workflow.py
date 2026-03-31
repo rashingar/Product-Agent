@@ -1195,7 +1195,7 @@ def test_workflow_main_maps_service_error_codes_to_explicit_exit_codes(monkeypat
     assert f"{service_code} message" in captured.err
 
 
-def test_workflow_main_prepare_surfaces_metadata_write_failure(monkeypatch, capsys, tmp_path: Path) -> None:
+def test_workflow_main_prepare_keeps_cli_shape_for_degraded_metadata_result(monkeypatch, capsys, tmp_path: Path) -> None:
     from pipeline import workflow
 
     def fake_build_cli_input_from_args(_args):
@@ -1211,9 +1211,24 @@ def test_workflow_main_prepare_surfaces_metadata_write_failure(monkeypatch, caps
         )
 
     def fake_prepare_product(_request: PrepareRequest) -> ServiceResult:
-        raise ServiceError(
-            ServiceErrorCode.UNEXPECTED_FAILURE.value,
-            f"Failed to write prepare run metadata at {tmp_path / 'work' / '233541' / 'prepare.run.json'}: disk full",
+        return ServiceResult(
+            run=RunMetadata(
+                model="233541",
+                run_type=RunType.PREPARE,
+                status=RunStatus.COMPLETED,
+                warnings=[f"Failed to write prepare run metadata at {tmp_path / 'work' / '233541' / 'prepare.run.json'}: disk full"],
+                error_code=ServiceErrorCode.UNEXPECTED_FAILURE.value,
+                error_detail=f"Failed to write prepare run metadata at {tmp_path / 'work' / '233541' / 'prepare.run.json'}: disk full",
+            ),
+            artifacts=RunArtifacts(
+                scrape_dir=tmp_path / "work" / "233541" / "scrape",
+                llm_task_manifest_path=tmp_path / "work" / "233541" / "llm" / "task_manifest.json",
+                intro_text_context_path=tmp_path / "work" / "233541" / "llm" / "intro_text.context.json",
+                intro_text_prompt_path=tmp_path / "work" / "233541" / "llm" / "intro_text.prompt.txt",
+                seo_meta_context_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.context.json",
+                seo_meta_prompt_path=tmp_path / "work" / "233541" / "llm" / "seo_meta.prompt.txt",
+                metadata_path=None,
+            ),
         )
 
     monkeypatch.setattr(workflow, "build_cli_input_from_args", fake_build_cli_input_from_args)
@@ -1222,9 +1237,11 @@ def test_workflow_main_prepare_surfaces_metadata_write_failure(monkeypatch, caps
     exit_code = workflow.main(["prepare"])
     captured = capsys.readouterr()
 
-    assert exit_code == 8
-    assert captured.out == ""
-    assert f"Failed to write prepare run metadata at {tmp_path / 'work' / '233541' / 'prepare.run.json'}: disk full" in captured.err
+    assert exit_code == 0
+    assert captured.err == ""
+    assert f"Scrape artifacts: {tmp_path / 'work' / '233541' / 'scrape'}" in captured.out
+    assert "Run status: completed" in captured.out
+    assert "Metadata path: None" in captured.out
 
 
 def test_workflow_main_render_uses_validation_failure_exit_code(monkeypatch, capsys, tmp_path: Path) -> None:
