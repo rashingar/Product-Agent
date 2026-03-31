@@ -1,9 +1,57 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M36 completed, and the repo now also has a minimal GitHub Actions workflow that installs dependencies from `requirements.txt`, installs Playwright Chromium, and runs `python -m pytest -q` from `scraper/` on push and pull request events without changing runtime code.
+M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
-## 2026-03-31 - Freeze workflow-only cleanup branch scope (planned docs-only)
+## 2026-03-31 - Align active docs with workflow-only runtime
+
+Goal:
+- make active documentation describe only the surviving workflow-only runtime after the legacy entrypoints were removed
+- keep historical pre-cleanup references available only as clearly historical engineering-log evidence
+- avoid changing runtime code in the same commit
+
+Files edited:
+- `README.md`
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- updated `README.md` so install, prepare, render, and test guidance all describe the workflow-only runtime
+- added an explicit active-runtime note in `README.md` that `python -m pipeline.workflow` is the only public entrypoint
+- named the removed legacy runtime surfaces in `README.md` as removed, not runnable
+- updated `PLAN.md` so M37 is now completed
+- updated `PLAN.md` top-level and milestone wording so removed `pipeline.cli`, `full_run.py`, `run_service.py`, and `run_execution.py` are treated as historical pre-M37 state rather than active runtime truth
+- replaced the old planned M37 scope wording in `DOCUMENTATION.md` with completion wording for the workflow-only runtime and docs alignment
+- clarified that any mentions below of removed legacy entrypoints remain only as historical engineering-log evidence
+
+Active runtime truth after M37:
+- public runtime entrypoint:
+  - `python -m pipeline.workflow`
+- public workflow commands:
+  - `python -m pipeline.workflow prepare ...`
+  - `python -m pipeline.workflow render --model {model}`
+- active test command:
+  - `cd scraper && python -m pytest -q`
+- removed legacy runtime surfaces:
+  - `python -m pipeline.cli`
+  - `scraper/pipeline/full_run.py`
+  - `scraper/pipeline/services/run_service.py`
+  - `scraper/pipeline/services/run_execution.py`
+
+Historical note:
+- references below to `pipeline.cli`, `execute_full_run(...)`, `run_service.py`, or `run_execution.py` are retained only as historical pre-M37 execution evidence unless a section explicitly states current guidance
+
+Commands run:
+- `rg -n "python -m pipeline\\.cli|execute_full_run|run_service|run_execution|pipeline\\.workflow|prepare|render|pytest -q" README.md PLAN.md DOCUMENTATION.md docs archive -S`
+- `Get-Content README.md`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 260`
+
+Validation:
+- active docs now describe only the surviving workflow prepare/render interface
+- historical references to removed entrypoints remain only in clearly historical milestone/context wording
+
+## 2026-03-31 - Freeze workflow-only cleanup branch scope (historical pre-completion note)
 
 Goal:
 - record the exact branch cleanup scope for making `pipeline.workflow` the only public entrypoint
@@ -66,7 +114,7 @@ Commands run:
 
 Validation:
 - documented the future workflow-only cleanup scope without changing runtime code, imports, tests, or active README instructions
-- kept the scope explicitly framed as planned branch work instead of current runtime truth
+- kept the scope explicitly framed as planned branch work instead of current runtime truth at the time
 
 ## 2026-03-30 - Add minimal GitHub Actions scraper test workflow
 
