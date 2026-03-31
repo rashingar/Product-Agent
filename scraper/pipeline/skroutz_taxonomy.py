@@ -143,6 +143,8 @@ def classify_skroutz_taxonomy(
             sub=None,
             matched_rule_id="heat_pump:leaf_only",
         )
+    if family_key == "air_conditioner":
+        return _classify_air_conditioner(context)
     if family_key == "lpg_heater":
         return _build_hint(
             context=context,
@@ -185,6 +187,8 @@ def classify_skroutz_taxonomy(
             sub=None,
             matched_rule_id="heat_pump:leaf_only",
         )
+    if _has_any(context, "klimatist", "κλιματισ", "air condition", "btu", "inverter"):
+        return _classify_air_conditioner(context)
     if _has_any(context, "ygraeri", "υγραερι", "soba"):
         return _build_hint(
             context=context,
@@ -252,6 +256,25 @@ def _classify_dishwasher(context: dict[str, str]) -> SkroutzTaxonomyHint:
         leaf="Πλυντήρια Πιάτων",
         sub=sub,
         matched_rule_id="dishwasher:width_bucket",
+    )
+
+
+def _classify_air_conditioner(context: dict[str, str]) -> SkroutzTaxonomyHint:
+    if _has_any(context, "forito", "portable", "φορητ"):
+        sub = "Φορητά"
+        rule_id = "air_conditioner:portable"
+    elif _has_any(context, "ntoulap", "ντουλαπ"):
+        sub = "Ντουλάπες"
+        rule_id = "air_conditioner:cabinet"
+    else:
+        sub = "Τοίχου"
+        rule_id = "air_conditioner:wall"
+    return _build_hint(
+        context=context,
+        parent="ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+        leaf="Κλιματιστικά",
+        sub=sub,
+        matched_rule_id=rule_id,
     )
 
 

@@ -3026,3 +3026,223 @@ Validation:
 Risks, blockers, or skipped items:
 - `csv_import` is still failing after login for a separate reason: the Playwright importer times out waiting for `select[name="profile_id"]`
 - no deeper importer UI fix was included in this image-upload diagnostic pass
+
+## 2026-03-31 - Add Skroutz air-conditioner taxonomy support and run model 000001
+
+Goal:
+- run the full template-triggered pipeline for model `000001` from a Skroutz air-conditioner URL
+- resolve `Unsupported Skroutz page type` caused by missing air-conditioner taxonomy handling
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/parser_product_skroutz.py`
+- `scraper/pipeline/skroutz_taxonomy.py`
+- `work/000001/llm/intro_text.output.txt`
+- `work/000001/llm/seo_meta.output.json`
+
+Commands run:
+- `..\.venv\Scripts\python.exe -m pipeline.workflow prepare --help` from `scraper/`
+- `..\.venv\Scripts\python.exe -m pipeline.workflow prepare --model 000001 --url "https://www.skroutz.gr/s/54974577/Inventor-Emperor-Klimatistiko-Inverter-24000-BTU-A-A-me-Ionisti-kai-WiFi.html" --photos 7 --sections 5 --skroutz-status 1 --boxnow 0 --price 1050` from `scraper/`
+- `..\.venv\Scripts\python.exe -m pipeline.workflow render --model 000001` from `scraper/`
+- `$env:CURRENT_JOB_PRODUCT_FILE = "products/000001.csv"; bash tools/run_opencart_pipeline.sh` from repo root
+
+Implementation notes:
+- added `air_conditioner` family detection in Skroutz parser family rules
+- added air-conditioner helper taxonomy classification in `skroutz_taxonomy.py`:
+  - parent: `ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ`
+  - leaf: `Κλιματιστικά`
+  - sub-category heuristic: `Τοίχου` / `Φορητά` / `Ντουλάπες`
+- kept deterministic field ownership unchanged and authored only LLM-owned outputs:
+  - `intro_text`
+  - `product.meta_description`
+  - `product.meta_keywords`
+
+Validation:
+- initial prepare failure reproduced: `Unsupported Skroutz page type: unsupported_skroutz_page_type`
+- after taxonomy patch, prepare succeeded and produced scrape + llm task artifacts under `work/000001/`
+- render succeeded:
+  - `products/000001.csv` created
+  - `work/000001/candidate/000001.validation.json` reports `"ok": true`
+- publish phase failed before upload/import stage due local Bash/WSL startup error:
+  - `Bash/Service/CreateInstance/0xd0000022`
+  - status captured in `work/000001/publish.run.json`
+
+Risks, blockers, or skipped items:
+- OpenCart publish could not proceed in this environment because Bash/WSL failed to start, so `upload.opencart.json` and `import.opencart.json` were not produced for this run
+- characteristics mapping still reports unresolved template fields (`characteristics_template_unresolved_fields:13`) inherited from current schema matching
+
+## 2026-03-31 - Pipeline run for model 000002 (Skroutz television)
+
+Goal:
+- execute the full template-triggered pipeline for model `000002`
+
+Files changed:
+- `DOCUMENTATION.md`
+- `work/000002/llm/intro_text.output.txt`
+- `work/000002/llm/seo_meta.output.json`
+- generated runtime artifacts under `work/000002/` and `products/000002.csv`
+
+Commands run:
+- `..\.venv\Scripts\python.exe -m pipeline.workflow prepare --model 000002 --url "https://www.skroutz.gr/s/60276903/tcl-smart-tileorasi-115-4k-uhd-mini-led-c7k-hdr-2025-115c7k.html" --photos 7 --sections 7 --skroutz-status 1 --boxnow 0 --price 9999` from `scraper/`
+- `..\.venv\Scripts\python.exe -m pipeline.workflow render --model 000002` from `scraper/`
+- `$env:CURRENT_JOB_PRODUCT_FILE = "products/000002.csv"; bash tools/run_opencart_pipeline.sh` from repo root
+
+Implementation notes:
+- `boxnow` was provided blank in the template; runtime CLI requires integer, so execution used `--boxnow 0`
+- authored only LLM-owned fields:
+  - `intro_text`
+  - `product.meta_description`
+  - `product.meta_keywords`
+
+Validation:
+- `prepare` succeeded and produced scrape/llm artifacts for `000002`
+- `render` succeeded and published `products/000002.csv`
+- `work/000002/candidate/000002.validation.json` reports `"ok": true`
+
+Risks, blockers, or skipped items:
+- post-render OpenCart publish failed at shell startup with `Bash/Service/CreateInstance/0xd0000022`
+- `work/000002/upload.opencart.json` and `work/000002/import.opencart.json` were not generated because publish failed before those stages
+- characteristics diagnostics report unresolved fields: `characteristics_template_unresolved_fields:12`
+
+## 2026-03-31 - Improve OpenCart publish diagnostics for Bash/WSL and preflight failures
+
+Goal:
+- make publish-phase failures explainable when the shell wrapper never starts
+- replace opaque `publish_stage: unknown` cases with preflight diagnostics for common environment and artifact failures
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/publish_execution.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Commands run:
+- `.\\.venv\\Scripts\\python.exe -m pytest -q scraper/pipeline/tests/test_workflow.py -k "publish_workflow or workflow_main_render_routes_through_render_service"`
+
+Implementation notes:
+- added Python-side preflight checks in `publish_execution.py` before invoking `bash`:
+  - shell entrypoint exists
+  - published CSV exists
+  - main gallery image exists
+  - `bash` is present on `PATH`
+  - `bash --version` can start successfully
+- added launcher failure classification for common shell startup issues:
+  - `bash_or_wsl_startup_failure`
+  - `bash_access_denied`
+  - `bash_not_available`
+- when Bash/WSL fails before the wrapper script starts, publish now reports `publish_stage = preflight` instead of `unknown`
+
+Validation:
+- targeted workflow tests passed: `5 passed`
+- covered cases include:
+  - successful publish wrapper invocation with Bash probe
+  - missing `bash` on `PATH`
+  - broken WSL/Bash launcher with `CreateInstance/0xd0000022`
+  - missing main gallery image preflight failure
+
+Risks, blockers, or skipped items:
+- diagnostics are improved only in the Python publish layer; shell wrapper exit codes remain the source of truth once the wrapper actually starts
+- no broader full-run regression suite was executed beyond the targeted workflow tests
+
+## 2026-03-31 - Repair OpenCart publish execution on Windows Bash/WSL and verify end-to-end success
+
+Goal:
+- fix the actual publish execution path for Windows so the pipeline can invoke the native OpenCart Bash wrappers reliably
+- remove the original `Bash/Service/CreateInstance/0xd0000022` blocker and the follow-on Windows-path invocation failure
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/publish_execution.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `tools/run_opencart_pipeline.sh`
+- `tools/run_opencart_image_upload.sh`
+- `tools/run_opencart_import_csv.sh`
+
+Commands run:
+- `wsl -l -v`
+- `wsl.exe --set-default Ubuntu`
+- `bash --version`
+- `bash -lc "echo pipeline-bash-ok"`
+- `wsl.exe -d Ubuntu bash -lc "echo from-ubuntu"`
+- `bash -n tools/run_opencart_pipeline.sh`
+- `bash -n tools/run_opencart_image_upload.sh`
+- `bash -n tools/run_opencart_import_csv.sh`
+- `bash -lc "python3 -m pip install --break-system-packages playwright"`
+- `bash -lc "python3 -m playwright install chromium"`
+- `bash -lc "python3 -m playwright install chromium-headless-shell"`
+- `bash -lc "python3 -m playwright install-deps chromium-headless-shell"`
+- `.\\.venv\\Scripts\\python.exe -m pytest -q scraper/pipeline/tests/test_workflow.py -k "publish_workflow or workflow_main_render_routes_through_render_service or test_execute_publish_workflow_passes_model_and_current_job_product_file or test_execute_publish_workflow_fails_preflight_when_bash_is_missing or test_execute_publish_workflow_classifies_wsl_launcher_probe_failures or test_execute_publish_workflow_fails_preflight_when_main_image_is_missing"`
+- `.\\.venv\\Scripts\\python.exe -m pytest -q scraper/pipeline/tests/test_services.py -k "publish_product_maps_execution_result or execute_run_workflow_composes_prepare_and_render_results"`
+- `..\.venv\Scripts\python.exe -m pipeline.workflow render --model 000002` from `scraper/`
+
+Implementation notes:
+- system diagnosis showed two separate failures:
+  - Windows `bash.exe` initially targeted the default WSL distro `Ubuntu-22.04`, which could not create an instance and returned `CreateInstance/0xd0000022`
+  - after switching the default distro to working `Ubuntu`, the Python publish layer still passed Windows-only absolute paths into Bash, causing `/bin/bash: D:...run_opencart_pipeline.sh: No such file or directory`
+- fixed the host environment by switching the default WSL distro to `Ubuntu`, which restored `bash --version` and direct wrapper execution
+- updated `publish_execution.py` so the Bash invocation uses repo-relative shell paths for:
+  - `tools/run_opencart_pipeline.sh`
+  - `CURRENT_JOB_PRODUCT_FILE`
+- stopped forcing `REPO_ROOT` into the shell environment from Windows Python; the wrapper now resolves repo root from its own script path as intended
+- normalized the OpenCart shell wrappers to LF line endings and made env loading tolerant of CRLF `.secrets/opencart.env` files by sourcing through `tr -d '\r'`
+- installed missing Playwright runtime pieces inside the working WSL distro so the CSV import stage could launch Chromium successfully
+
+Validation:
+- direct native publish wrapper run completed successfully for model `000002`:
+  - image upload wrote `work/000002/upload.opencart.json`
+  - CSV import wrote `work/000002/import.opencart.json`
+- targeted workflow tests passed: `5 passed`
+- targeted service tests passed: `2 passed`
+- rerun through the actual pipeline entrypoint succeeded:
+  - `render` exit code `0`
+  - `work/000002/candidate/000002.validation.json` still reports `"ok": true`
+  - `work/000002/publish.run.json` now reports:
+    - `"publish_status": "success"`
+    - `"publish_stage": "csv_import"`
+    - `"publish_message": "OpenCart publish completed successfully."`
+
+Risks, blockers, or skipped items:
+- `Ubuntu-22.04` still appears broken independently of the pipeline and may need separate repair or removal if you intend to use that distro again
+- the pipeline now works through the active default distro, but WSL-level distro hygiene is still an operator concern outside repo code
+
+## 2026-03-31 - Run full Product-Agent pipeline for model 000003 (TCL 115C7K)
+
+Goal:
+- execute the template-triggered end-to-end pipeline for model `000003`
+- prepare scrape artifacts, write the LLM-owned intro and SEO fields, render the candidate and published CSV, and complete the native OpenCart publish phase
+
+Files changed:
+- `DOCUMENTATION.md`
+- `work/000003/llm/intro_text.output.txt`
+- `work/000003/llm/seo_meta.output.json`
+- `work/000003/candidate/000003.csv`
+- `work/000003/candidate/000003.normalized.json`
+- `work/000003/candidate/000003.validation.json`
+- `work/000003/candidate/description.html`
+- `work/000003/candidate/characteristics.html`
+- `products/000003.csv`
+- `work/000003/publish.run.json`
+- `work/000003/upload.opencart.json`
+- `work/000003/import.opencart.json`
+
+Commands run:
+- `python -m pipeline.workflow prepare --model 000003 --url "https://www.skroutz.gr/s/60276903/tcl-smart-tileorasi-115-4k-uhd-mini-led-c7k-hdr-2025-115c7k.html" --photos 7 --sections 7 --skroutz-status 1 --boxnow 0 --price 9999` from `scraper/`
+- `python -m pipeline.workflow render --model 000003` from `scraper/`
+
+Implementation notes:
+- generated the required LLM outputs only for `intro_text`, `product.meta_description`, and `product.meta_keywords`
+- kept the intro text to one Greek paragraph within the configured word-count range
+- render completed with taxonomy `ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω`
+- native OpenCart publish completed successfully after render, including image upload and CSV import
+
+Validation:
+- `work/000003/candidate/000003.validation.json` reports `"ok": true`
+- `products/000003.csv` was published successfully
+- `work/000003/publish.run.json` reports:
+  - `publish_status = success`
+  - `publish_stage = csv_import`
+  - `publish_message = OpenCart publish completed successfully.`
+- `work/000003/import.opencart.json` reports `Products Created: 1`
+
+Risks, blockers, or skipped items:
+- validation still carries the existing template warning `characteristics_template_unresolved_fields:12`
+- unresolved characteristic fields are source-null/template-null gaps, not render blockers for this product

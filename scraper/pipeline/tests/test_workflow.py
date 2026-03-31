@@ -1161,27 +1161,36 @@ def test_execute_publish_workflow_passes_model_and_current_job_product_file(tmp_
     model = "233541"
     script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
     current_job_product_file = repo_root / "products" / "233541.csv"
+    main_image_path = repo_root / "work" / model / "scrape" / "gallery" / f"{model}-1.jpg"
     (repo_root / "work" / model).mkdir(parents=True)
     script_path.parent.mkdir(parents=True)
     current_job_product_file.parent.mkdir(parents=True)
+    main_image_path.parent.mkdir(parents=True)
     script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
     current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+    main_image_path.write_text("image", encoding="utf-8")
     captured: dict[str, object] = {}
+    calls: list[list[str]] = []
 
     class DummyCompleted:
-        returncode = 0
-        stdout = "[opencart-publish] ok\n"
-        stderr = ""
+        def __init__(self, returncode: int, stdout: str, stderr: str) -> None:
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
 
-    def fake_run(cmd, *, cwd, env, capture_output, text, check):
-        captured["cmd"] = cmd
+    def fake_run(cmd, *, cwd, capture_output, text, check, env=None):
+        calls.append(cmd)
         captured["cwd"] = cwd
         captured["env"] = env
         captured["capture_output"] = capture_output
         captured["text"] = text
         captured["check"] = check
-        return DummyCompleted()
+        if cmd[-1] == "--version":
+            return DummyCompleted(0, "GNU bash, version 5.2.0\n", "")
+        captured["cmd"] = cmd
+        return DummyCompleted(0, "[opencart-publish] ok\n", "")
 
+    monkeypatch.setattr(publish_execution.shutil, "which", lambda name: "/usr/bin/bash" if name == "bash" else None)
     monkeypatch.setattr(publish_execution.subprocess, "run", fake_run)
 
     result = publish_execution.execute_publish_workflow(
@@ -1192,13 +1201,17 @@ def test_execute_publish_workflow_passes_model_and_current_job_product_file(tmp_
         current_job_product_file=current_job_product_file,
     )
 
-    assert captured["cmd"] == ["bash", str(script_path), model]
+    assert calls == [
+        ["/usr/bin/bash", "--version"],
+        ["/usr/bin/bash", "tools/run_opencart_pipeline.sh", model],
+    ]
+    assert captured["cmd"] == ["/usr/bin/bash", "tools/run_opencart_pipeline.sh", model]
     assert captured["cwd"] == repo_root
     assert captured["capture_output"] is True
     assert captured["text"] is True
     assert captured["check"] is False
-    assert captured["env"]["CURRENT_JOB_PRODUCT_FILE"] == str(current_job_product_file)
-    assert captured["env"]["REPO_ROOT"] == str(repo_root)
+    assert captured["env"]["CURRENT_JOB_PRODUCT_FILE"] == "products/233541.csv"
+    assert "REPO_ROOT" not in captured["env"]
     assert result["publish_attempted"] is True
     assert result["publish_status"] == "warning"
     assert result["publish_stage"] == "csv_import"
@@ -1248,6 +1261,102 @@ def test_execute_publish_workflow_passes_model_and_current_job_product_file(tmp_
     assert result["upload_ok"] is True
     assert result["upload_report_path"] == repo_root / "work" / "233541" / "upload.opencart.json"
     assert result["upload_warning"] is None
+
+
+def test_execute_publish_workflow_fails_preflight_when_bash_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import publish_execution
+
+    repo_root = tmp_path
+    model = "233541"
+    script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
+    current_job_product_file = repo_root / "products" / "233541.csv"
+    main_image_path = repo_root / "work" / model / "scrape" / "gallery" / f"{model}-1.jpg"
+    script_path.parent.mkdir(parents=True)
+    current_job_product_file.parent.mkdir(parents=True)
+    main_image_path.parent.mkdir(parents=True)
+    script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+    main_image_path.write_text("image", encoding="utf-8")
+
+    monkeypatch.setattr(publish_execution.shutil, "which", lambda _name: None)
+
+    result = publish_execution.execute_publish_workflow(
+        repo_root=repo_root,
+        work_root=repo_root / "work",
+        products_root=repo_root / "products",
+        model=model,
+        current_job_product_file=current_job_product_file,
+    )
+
+    assert result["publish_status"] == "failed"
+    assert result["publish_stage"] == "preflight"
+    assert result["publish_message"] == "OpenCart publish failed during preflight: bash executable not found on PATH"
+
+
+def test_execute_publish_workflow_classifies_wsl_launcher_probe_failures(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import publish_execution
+
+    repo_root = tmp_path
+    model = "233541"
+    script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
+    current_job_product_file = repo_root / "products" / "233541.csv"
+    main_image_path = repo_root / "work" / model / "scrape" / "gallery" / f"{model}-1.jpg"
+    script_path.parent.mkdir(parents=True)
+    current_job_product_file.parent.mkdir(parents=True)
+    main_image_path.parent.mkdir(parents=True)
+    script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+    main_image_path.write_text("image", encoding="utf-8")
+
+    class DummyCompleted:
+        returncode = 1
+        stdout = "Error code: Wsl/Service/CreateInstance/0xd0000022\n"
+        stderr = ""
+
+    monkeypatch.setattr(publish_execution.shutil, "which", lambda name: "/usr/bin/bash" if name == "bash" else None)
+    monkeypatch.setattr(publish_execution.subprocess, "run", lambda *args, **kwargs: DummyCompleted())
+
+    result = publish_execution.execute_publish_workflow(
+        repo_root=repo_root,
+        work_root=repo_root / "work",
+        products_root=repo_root / "products",
+        model=model,
+        current_job_product_file=current_job_product_file,
+    )
+
+    assert result["publish_status"] == "failed"
+    assert result["publish_stage"] == "preflight"
+    assert "bash_or_wsl_startup_failure" in str(result["publish_message"])
+    assert "CreateInstance/0xd0000022" in str(result["publish_message"])
+
+
+def test_execute_publish_workflow_fails_preflight_when_main_image_is_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import publish_execution
+
+    repo_root = tmp_path
+    model = "233541"
+    script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
+    current_job_product_file = repo_root / "products" / "233541.csv"
+    script_path.parent.mkdir(parents=True)
+    current_job_product_file.parent.mkdir(parents=True)
+    (repo_root / "work" / model / "scrape").mkdir(parents=True)
+    script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+
+    # Missing gallery/<model>-1.jpg should be reported before shell invocation.
+    monkeypatch.setattr(publish_execution.shutil, "which", lambda name: "/usr/bin/bash" if name == "bash" else None)
+
+    result = publish_execution.execute_publish_workflow(
+        repo_root=repo_root,
+        work_root=repo_root / "work",
+        products_root=repo_root / "products",
+        model=model,
+        current_job_product_file=current_job_product_file,
+    )
+
+    assert result["publish_status"] == "failed"
+    assert result["publish_stage"] == "preflight"
+    assert "missing gallery image" in str(result["publish_message"])
 
 def test_render_workflow_fails_when_source_sections_are_missing_entirely(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
