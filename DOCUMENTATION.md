@@ -2847,3 +2847,63 @@ Validation:
 Risks, blockers, or skipped items:
 - the uploader still depends on recognizable localized admin error strings; if the store theme/module changes those strings, the permission probe or duplicate-folder handling may need another localization update
 - no backfill was done for older render metadata that referenced a missing upload report before this fix
+
+## 2026-03-31 - Separate render and publish phases for OpenCart automation
+
+Goal:
+- split OpenCart automation into a true post-render publish phase
+- keep render success tied only to render artifacts and validation
+- run image upload before CSV import through one repo-native wrapper
+
+Files changed:
+- `AGENTS.md`
+- `DOCUMENTATION.md`
+- `IMPLEMENT.md`
+- `README.md`
+- `RULES.md`
+- `scraper/pipeline/services/__init__.py`
+- `scraper/pipeline/services/metadata.py`
+- `scraper/pipeline/services/models.py`
+- `scraper/pipeline/services/publish_execution.py`
+- `scraper/pipeline/services/publish_service.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/services/render_service.py`
+- `scraper/pipeline/services/run_execution.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_workflow.py`
+- `scraper/pipeline/workflow.py`
+- `tools/run_opencart_image_upload.sh`
+- `tools/run_opencart_pipeline.sh`
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_services.py pipeline/tests/test_workflow.py` from `scraper/`
+- `bash -n tools/run_opencart_pipeline.sh`
+- `bash -n tools/run_opencart_image_upload.sh`
+- `bash -n tools/run_opencart_import_csv.sh`
+- `rg -n "scripts/run_opencart|scripts/.*opencart|run_opencart_image_upload\.sh|run_opencart_import_csv\.sh|run_opencart_pipeline\.sh" README.md AGENTS.md RULES.md IMPLEMENT.md tools scraper -S`
+- `Test-Path tools/run_opencart_pipeline.sh`
+- `Test-Path tools/run_opencart_image_upload.sh`
+- `Test-Path tools/run_opencart_import_csv.sh`
+- `Test-Path tools/opencart_upload_images.py`
+- `Test-Path tools/opencart_import_csv_playwright.py`
+- `Test-Path .secrets/opencart.env`
+
+Implementation notes:
+- removed the inline OpenCart upload call from render execution so `render_execution.py` and `render_service.py` are render-only
+- added `RunType.PUBLISH`, `PublishRequest`, `publish_execution.py`, and `publish_service.py` for a separate publish phase with `publish.run.json`
+- moved render -> publish sequencing up to `workflow.py` for the render CLI path and `run_execution.py` for the full-run path
+- added `tools/run_opencart_pipeline.sh` to perform preflight checks, image upload, then CSV import with stage-specific exit codes:
+  - `11` preflight
+  - `12` image_upload
+  - `13` csv_import
+- updated operator-facing docs to point to `tools/run_opencart_pipeline.sh` and the new publish-phase reports
+
+Validation:
+- targeted tests passed: `37 passed`
+- shell syntax checks passed for `tools/run_opencart_pipeline.sh`, `tools/run_opencart_image_upload.sh`, and `tools/run_opencart_import_csv.sh`
+- all referenced OpenCart tool files and `.secrets/opencart.env` exist
+- no incorrect `scripts/` references remain for these OpenCart entrypoints
+
+Risks, blockers, or skipped items:
+- `publish_status=warning` is currently used when the publish wrapper exits `0` but one or both expected report files are missing
+- `scraper/pipeline/tests/test_workflow.py` still contains a small amount of unreachable legacy test code below early returns from targeted patching; the behavior is validated, but that cleanup was not expanded beyond the minimal integration scope

@@ -76,24 +76,27 @@ treat it as a request to run the full pipeline.
 10. After both task outputs are written, run:
    `python -m pipeline.workflow render --model {model}`
    Run from `scraper/`.
-11. After a successful render publish to `products/{model}.csv`, the runtime must attempt the repo-native OpenCart image upload step by invoking:
-   `tools/run_opencart_image_upload.sh`
+11. After a successful render publish to `products/{model}.csv`, the runtime must start the repo-native OpenCart publish phase by invoking:
+   `tools/run_opencart_pipeline.sh`
    Run from repo root with `CURRENT_JOB_PRODUCT_FILE` set to the exact `products/{model}.csv` path created in the current job.
 12. Inspect:
    - `work/{model}/candidate/{model}.csv`
    - `work/{model}/candidate/{model}.validation.json`
    - `work/{model}/candidate/description.html`
    - `work/{model}/candidate/characteristics.html`
+   - `work/{model}/publish.run.json`
    - `work/{model}/upload.opencart.json`
+   - `work/{model}/import.opencart.json`
 13. If validation fails, debug the pipeline and rerun until the output is complete and the failure cause is understood.
-14. If the OpenCart image upload fails after publish, treat it as a warning-only post-publish issue: keep the successful render/publish outputs, report the warning clearly, and debug the upload separately.
+14. If the OpenCart publish phase warns or fails after render succeeds, keep the successful render outputs, report the publish status/stage/message clearly, and debug the publish phase separately.
 
 ## Validation Expectations
 
 - Treat `work/{model}/candidate/{model}.validation.json` as the final machine-readable health report.
 - Treat `products/{model}.csv` as the final deliverable path for the user, not as a baseline for comparison.
-- Treat `work/{model}/upload.opencart.json` as the upload-stage report when the post-render OpenCart image upload runs.
-- Do not invalidate a successful render/publish because the post-render OpenCart image upload warned or failed.
+- Treat `work/{model}/publish.run.json` as the publish-phase status report.
+- Treat `work/{model}/upload.opencart.json` and `work/{model}/import.opencart.json` as the stage reports when the post-render publish phase runs.
+- Do not invalidate a successful render result because the post-render publish phase warned or failed.
 - Prefer fixing pipeline issues over hand-editing generated output files.
 
 ## Completion Message

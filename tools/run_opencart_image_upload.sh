@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Repo-native wrapper for pipeline usage.
-# Place this file in your repo, e.g. scripts/run_opencart_image_upload.sh
+# Place this file in your repo, e.g. tools/run_opencart_image_upload.sh
 # Secrets are loaded from .secrets/opencart.env if present.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

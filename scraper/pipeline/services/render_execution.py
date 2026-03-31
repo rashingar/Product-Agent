@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import os
-import subprocess
 import shutil
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -22,66 +19,6 @@ from .models import RunArtifacts, RunStatus, RunType
 
 WORK_ROOT = REPO_ROOT / "work"
 PRODUCTS_ROOT = REPO_ROOT / "products"
-OPENCART_UPLOAD_ENTRYPOINT = Path("tools") / "run_opencart_image_upload.sh"
-OPENCART_UPLOAD_REPORT_NAME = "upload.opencart.json"
-
-
-def _summarize_upload_output(stdout: str, stderr: str) -> str:
-    lines = [line.strip() for line in [*stdout.splitlines(), *stderr.splitlines()] if line.strip()]
-    if not lines:
-        return ""
-    return " | ".join(lines[-2:])
-
-
-def _run_opencart_image_upload(*, repo_root: Path, model: str, current_job_product_file: Path) -> dict[str, Any]:
-    script_path = repo_root / OPENCART_UPLOAD_ENTRYPOINT
-    report_path = repo_root / "work" / model / OPENCART_UPLOAD_REPORT_NAME
-    result: dict[str, Any] = {
-        "upload_attempted": True,
-        "upload_ok": False,
-        "upload_report_path": report_path,
-        "upload_warning": None,
-    }
-
-    if not script_path.exists():
-        result["upload_warning"] = f"opencart_image_upload_failed: shell entrypoint not found at {script_path}"
-        return result
-
-    env = os.environ.copy()
-    env["CURRENT_JOB_PRODUCT_FILE"] = str(current_job_product_file)
-    env.setdefault("REPO_ROOT", str(repo_root))
-
-    try:
-        completed = subprocess.run(
-            ["bash", str(script_path)],
-            cwd=repo_root,
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except FileNotFoundError as exc:
-        result["upload_warning"] = f"opencart_image_upload_failed: {exc}"
-        return result
-    except Exception as exc:
-        result["upload_warning"] = f"opencart_image_upload_failed: {exc}"
-        return result
-
-    if completed.stdout:
-        print(completed.stdout.rstrip())
-    if completed.stderr:
-        print(completed.stderr.rstrip(), file=sys.stderr)
-
-    if completed.returncode != 0:
-        summary = _summarize_upload_output(completed.stdout, completed.stderr)
-        warning = f"opencart_image_upload_failed: exit={completed.returncode}"
-        if summary:
-            warning = f"{warning}: {summary}"
-        result["upload_warning"] = warning
-        return result
-
-    result["upload_ok"] = True
-    return result
 
 
 def execute_render_workflow(
@@ -190,30 +127,13 @@ def execute_render_workflow(
         write_validation_report(validation_report, validation_report_path)
 
         published_csv_result_path: Path | None = None
-        upload_attempted = False
-        upload_ok: bool | None = None
-        upload_report_path: Path | None = None
-        upload_warning: str | None = None
         if validation_ok:
             ensure_directory(products_root)
             shutil.copyfile(candidate_csv_path, published_csv_path)
             published_csv_result_path = published_csv_path
-            upload_result = _run_opencart_image_upload(
-                repo_root=REPO_ROOT,
-                model=model,
-                current_job_product_file=published_csv_result_path,
-            )
-            upload_attempted = bool(upload_result.get("upload_attempted", False))
-            upload_ok = bool(upload_result.get("upload_ok", False))
-            upload_report_value = upload_result.get("upload_report_path")
-            upload_report_path = Path(upload_report_value) if upload_report_value else None
-            upload_warning_value = upload_result.get("upload_warning")
-            upload_warning = str(upload_warning_value) if upload_warning_value else None
         run_status = RunStatus.COMPLETED if validation_ok else RunStatus.FAILED
         finished_at = utcnow_iso()
         run_warnings = list(validation_report.get("warnings", []))
-        if upload_warning:
-            run_warnings.append(upload_warning)
         metadata_path = maybe_write_run_metadata(
             model=model,
             run_type=RunType.RENDER,
@@ -246,10 +166,6 @@ def execute_render_workflow(
                 "validation_ok": validation_ok,
                 "published": validation_ok,
                 "llm_mode": llm_mode,
-                "upload_attempted": upload_attempted,
-                "upload_ok": upload_ok,
-                "upload_report_path": str(upload_report_path) if upload_report_path else None,
-                "upload_warning": upload_warning,
             },
         )
 
@@ -263,10 +179,6 @@ def execute_render_workflow(
             "run_status": run_status.value,
             "metadata_path": metadata_path,
             "validation_report": validation_report,
-            "upload_attempted": upload_attempted,
-            "upload_ok": upload_ok,
-            "upload_report_path": upload_report_path,
-            "upload_warning": upload_warning,
         }
     except Exception as exc:
         finished_at = utcnow_iso()

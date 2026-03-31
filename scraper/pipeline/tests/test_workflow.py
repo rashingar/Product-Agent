@@ -6,7 +6,7 @@ import pytest
 
 from pipeline.models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.providers import ProviderRegistry
-from pipeline.services import PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceError, ServiceErrorCode, ServiceResult
+from pipeline.services import PrepareRequest, PublishRequest, RenderRequest, RunArtifacts, RunMetadata, RunStatus, RunType, ServiceError, ServiceErrorCode, ServiceResult
 from pipeline.workflow import build_cli_input_from_args, prepare_workflow, render_workflow
 
 
@@ -775,15 +775,9 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
 
 def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
-    from pipeline.services import render_execution
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
-    monkeypatch.setattr(
-        render_execution,
-        "_run_opencart_image_upload",
-        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("upload should not run when publish is skipped")),
-    )
 
     model = "233541"
     scrape_dir = tmp_path / "work" / model / "scrape"
@@ -873,10 +867,10 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
     assert metadata["artifacts"]["metadata_path"] == str(result["metadata_path"])
     assert metadata["details"]["validation_ok"] is False
     assert metadata["details"]["published"] is False
-    assert metadata["details"]["upload_attempted"] is False
-    assert metadata["details"]["upload_ok"] is None
-    assert metadata["details"]["upload_report_path"] is None
-    assert metadata["details"]["upload_warning"] is None
+    assert "upload_attempted" not in metadata["details"]
+    assert "upload_ok" not in metadata["details"]
+    assert "upload_report_path" not in metadata["details"]
+    assert "upload_warning" not in metadata["details"]
 
 
 def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_path: Path, monkeypatch) -> None:
@@ -926,23 +920,9 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
 
 def test_render_workflow_builds_description_from_split_outputs_and_deterministic_sections(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
-    from pipeline.services import render_execution
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
-    upload_call: dict[str, Path] = {}
-
-    def fake_run_opencart_image_upload(*, repo_root: Path, model: str, current_job_product_file: Path):
-        upload_call["repo_root"] = repo_root
-        upload_call["current_job_product_file"] = current_job_product_file
-        return {
-            "upload_attempted": True,
-            "upload_ok": True,
-            "upload_report_path": repo_root / "work" / model / "upload.opencart.json",
-            "upload_warning": None,
-        }
-
-    monkeypatch.setattr(render_execution, "_run_opencart_image_upload", fake_run_opencart_image_upload)
 
     model = "233541"
     scrape_dir = tmp_path / "work" / model / "scrape"
@@ -1021,11 +1001,6 @@ def test_render_workflow_builds_description_from_split_outputs_and_deterministic
 
     assert result["run_status"] == "completed"
     assert result["published_csv_path"] == tmp_path / "products" / f"{model}.csv"
-    assert upload_call["current_job_product_file"] == tmp_path / "products" / f"{model}.csv"
-    assert result["upload_attempted"] is True
-    assert result["upload_ok"] is True
-    assert result["upload_report_path"] == render_execution.REPO_ROOT / "work" / model / "upload.opencart.json"
-    assert result["upload_warning"] is None
     assert "NatureFRESH για καθημερινή φρεσκάδα" in description
     assert "DoorCooling+ για ομοιόμορφη ψύξη" in description
     assert "λέξη λέξη λέξη" in description
@@ -1033,14 +1008,66 @@ def test_render_workflow_builds_description_from_split_outputs_and_deterministic
     assert candidate_row["meta_keyword"].count("Ψυγ") == 1
 
     metadata = json.loads(result["metadata_path"].read_text(encoding="utf-8"))
-    assert metadata["details"]["upload_attempted"] is True
-    assert metadata["details"]["upload_ok"] is True
-    assert metadata["details"]["upload_report_path"] == str(render_execution.REPO_ROOT / "work" / model / "upload.opencart.json")
-    assert metadata["details"]["upload_warning"] is None
+    assert metadata["details"]["validation_ok"] is True
+    assert metadata["details"]["published"] is True
+    assert "upload_attempted" not in metadata["details"]
 
-def test_render_workflow_keeps_publish_when_opencart_upload_warns(tmp_path: Path, monkeypatch) -> None:
+def test_workflow_main_render_reports_publish_failure_without_failing_render(monkeypatch, capsys, tmp_path: Path) -> None:
     from pipeline import workflow
-    from pipeline.services import render_execution
+
+    def fake_resolve_model_for_render(_args) -> str:
+        return "233541"
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        assert request.model == "233541"
+        return ServiceResult(
+            run=RunMetadata(model="233541", run_type=RunType.RENDER, status=RunStatus.COMPLETED),
+            artifacts=RunArtifacts(
+                candidate_csv_path=tmp_path / "work" / "233541" / "candidate" / "233541.csv",
+                published_csv_path=tmp_path / "products" / "233541.csv",
+                validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
+                metadata_path=tmp_path / "work" / "233541" / "render.run.json",
+            ),
+            details={"validation_ok": True, "published": True},
+        )
+
+    def fake_publish_product(request: PublishRequest) -> ServiceResult:
+        assert request.model == "233541"
+        assert request.current_job_product_file == tmp_path / "products" / "233541.csv"
+        return ServiceResult(
+            run=RunMetadata(
+                model="233541",
+                run_type=RunType.PUBLISH,
+                status=RunStatus.FAILED,
+                warnings=["OpenCart publish failed during image_upload: exit=12"],
+            ),
+            artifacts=RunArtifacts(metadata_path=tmp_path / "work" / "233541" / "publish.run.json"),
+            details={
+                "publish_attempted": True,
+                "publish_status": "failed",
+                "publish_stage": "image_upload",
+                "publish_message": "OpenCart publish failed during image_upload: exit=12",
+                "upload_report_path": str(tmp_path / "work" / "233541" / "upload.opencart.json"),
+                "import_report_path": str(tmp_path / "work" / "233541" / "import.opencart.json"),
+            },
+        )
+
+    monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
+    monkeypatch.setattr(workflow, "render_product", fake_render_product)
+    monkeypatch.setattr(workflow, "publish_product", fake_publish_product)
+
+    exit_code = workflow.main(["render"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Render status: success" in captured.out
+    assert "Publish status: failed" in captured.out
+    assert "Publish stage: image_upload" in captured.out
+    assert "Publish message: OpenCart publish failed during image_upload: exit=12" in captured.out
+    assert f"OpenCart upload report: {tmp_path / 'work' / '233541' / 'upload.opencart.json'}" in captured.out
+    assert f"OpenCart import report: {tmp_path / 'work' / '233541' / 'import.opencart.json'}" in captured.out
+    assert f"Publish metadata path: {tmp_path / 'work' / '233541' / 'publish.run.json'}" in captured.out
+    return
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
     monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
@@ -1127,8 +1154,57 @@ def test_render_workflow_keeps_publish_when_opencart_upload_warns(tmp_path: Path
     assert metadata["details"]["upload_warning"] == "opencart_image_upload_failed: exit=1: upload failed"
 
 
-def test_run_opencart_image_upload_passes_current_job_product_file(tmp_path: Path, monkeypatch) -> None:
-    from pipeline.services import render_execution
+def test_execute_publish_workflow_passes_model_and_current_job_product_file(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import publish_execution
+
+    repo_root = tmp_path
+    model = "233541"
+    script_path = repo_root / "tools" / "run_opencart_pipeline.sh"
+    current_job_product_file = repo_root / "products" / "233541.csv"
+    (repo_root / "work" / model).mkdir(parents=True)
+    script_path.parent.mkdir(parents=True)
+    current_job_product_file.parent.mkdir(parents=True)
+    script_path.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    current_job_product_file.write_text("header\nvalue\n", encoding="utf-8")
+    captured: dict[str, object] = {}
+
+    class DummyCompleted:
+        returncode = 0
+        stdout = "[opencart-publish] ok\n"
+        stderr = ""
+
+    def fake_run(cmd, *, cwd, env, capture_output, text, check):
+        captured["cmd"] = cmd
+        captured["cwd"] = cwd
+        captured["env"] = env
+        captured["capture_output"] = capture_output
+        captured["text"] = text
+        captured["check"] = check
+        return DummyCompleted()
+
+    monkeypatch.setattr(publish_execution.subprocess, "run", fake_run)
+
+    result = publish_execution.execute_publish_workflow(
+        repo_root=repo_root,
+        work_root=repo_root / "work",
+        products_root=repo_root / "products",
+        model=model,
+        current_job_product_file=current_job_product_file,
+    )
+
+    assert captured["cmd"] == ["bash", str(script_path), model]
+    assert captured["cwd"] == repo_root
+    assert captured["capture_output"] is True
+    assert captured["text"] is True
+    assert captured["check"] is False
+    assert captured["env"]["CURRENT_JOB_PRODUCT_FILE"] == str(current_job_product_file)
+    assert captured["env"]["REPO_ROOT"] == str(repo_root)
+    assert result["publish_attempted"] is True
+    assert result["publish_status"] == "warning"
+    assert result["publish_stage"] == "csv_import"
+    assert result["upload_report_path"] == repo_root / "work" / model / "upload.opencart.json"
+    assert result["import_report_path"] == repo_root / "work" / model / "import.opencart.json"
+    return
 
     repo_root = tmp_path
     script_path = repo_root / "tools" / "run_opencart_image_upload.sh"
@@ -1333,17 +1409,28 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
                 validation_report_path=tmp_path / "work" / "233541" / "candidate" / "233541.validation.json",
                 metadata_path=tmp_path / "work" / "233541" / "render.run.json",
             ),
+            details={"validation_ok": True, "published": True},
+        )
+
+    def fake_publish_product(request: PublishRequest) -> ServiceResult:
+        assert request.model == "233541"
+        assert request.current_job_product_file == tmp_path / "products" / "233541.csv"
+        return ServiceResult(
+            run=RunMetadata(model="233541", run_type=RunType.PUBLISH, status=RunStatus.COMPLETED),
+            artifacts=RunArtifacts(metadata_path=tmp_path / "work" / "233541" / "publish.run.json"),
             details={
-                "validation_ok": True,
-                "upload_attempted": True,
-                "upload_ok": False,
+                "publish_attempted": True,
+                "publish_status": "success",
+                "publish_stage": "csv_import",
+                "publish_message": "OpenCart publish completed successfully.",
                 "upload_report_path": str(tmp_path / "work" / "233541" / "upload.opencart.json"),
-                "upload_warning": "opencart_image_upload_failed: exit=1",
+                "import_report_path": str(tmp_path / "work" / "233541" / "import.opencart.json"),
             },
         )
 
     monkeypatch.setattr(workflow, "resolve_model_for_render", fake_resolve_model_for_render)
     monkeypatch.setattr(workflow, "render_product", fake_render_product)
+    monkeypatch.setattr(workflow, "publish_product", fake_publish_product)
 
     exit_code = workflow.main(["render"])
     captured = capsys.readouterr()
@@ -1352,10 +1439,12 @@ def test_workflow_main_render_routes_through_render_service(monkeypatch, capsys,
     assert f"Candidate CSV: {tmp_path / 'work' / '233541' / 'candidate' / '233541.csv'}" in captured.out
     assert f"Published CSV: {tmp_path / 'products' / '233541.csv'}" in captured.out
     assert "Validation ok: True" in captured.out
-    assert "OpenCart upload attempted: True" in captured.out
-    assert "OpenCart upload ok: False" in captured.out
+    assert "Render status: success" in captured.out
+    assert "Publish status: success" in captured.out
+    assert "Publish stage: csv_import" in captured.out
+    assert "Publish message: OpenCart publish completed successfully." in captured.out
     assert f"OpenCart upload report: {tmp_path / 'work' / '233541' / 'upload.opencart.json'}" in captured.out
-    assert "OpenCart upload warning: opencart_image_upload_failed: exit=1" in captured.out
+    assert f"OpenCart import report: {tmp_path / 'work' / '233541' / 'import.opencart.json'}" in captured.out
 
 
 @pytest.mark.parametrize(

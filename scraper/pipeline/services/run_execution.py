@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from .models import FullRunRequest, PrepareRequest, RenderRequest, RunArtifacts, RunMetadata, RunType, ServiceResult
+from .models import FullRunRequest, PrepareRequest, PublishRequest, RenderRequest, RunArtifacts, RunMetadata, RunType, ServiceResult
 from .prepare_service import prepare_product
+from .publish_service import build_publish_phase_details, publish_product
 from .render_service import render_product
 
 
@@ -18,13 +19,28 @@ def execute_run_workflow(request: FullRunRequest) -> ServiceResult:
         )
     )
     render_result = render_product(RenderRequest(model=request.model))
+    publish_result = (
+        publish_product(
+            PublishRequest(
+                model=request.model,
+                current_job_product_file=render_result.artifacts.published_csv_path,
+            )
+        )
+        if render_result.artifacts.published_csv_path is not None
+        else None
+    )
+    publish_details = build_publish_phase_details(request.model, publish_result)
 
     return ServiceResult(
         run=RunMetadata(
             model=request.model,
             run_type=RunType.FULL,
             status=render_result.run.status,
-            warnings=[*prepare_result.run.warnings, *render_result.run.warnings],
+            warnings=[
+                *prepare_result.run.warnings,
+                *render_result.run.warnings,
+                *(publish_result.run.warnings if publish_result is not None else []),
+            ],
             error_code=render_result.run.error_code or prepare_result.run.error_code,
             error_detail=render_result.run.error_detail or prepare_result.run.error_detail,
         ),
@@ -58,6 +74,7 @@ def execute_run_workflow(request: FullRunRequest) -> ServiceResult:
             "render_status": render_result.run.status.value,
             "render_metadata_path": str(render_result.artifacts.metadata_path) if render_result.artifacts.metadata_path else None,
             "validation_ok": bool(render_result.details.get("validation_ok", False)),
+            "published": bool(render_result.details.get("published", False)),
             "source": str(prepare_result.details.get("source", "")),
             "product_name": str(prepare_result.details.get("product_name", "")),
             "product_code": str(prepare_result.details.get("product_code", "")),
@@ -65,6 +82,15 @@ def execute_run_workflow(request: FullRunRequest) -> ServiceResult:
             "taxonomy_path": str(prepare_result.details.get("taxonomy_path", "")),
             "matched_schema_id": str(prepare_result.details.get("matched_schema_id", "")),
             "schema_score": float(prepare_result.details.get("schema_score", 0.0) or 0.0),
-            "warnings_count": len(prepare_result.run.warnings) + len(render_result.run.warnings),
+            "publish_attempted": bool(publish_details.get("publish_attempted", False)),
+            "publish_status": str(publish_details.get("publish_status", "not_attempted")),
+            "publish_stage": str(publish_details.get("publish_stage", "-")),
+            "publish_message": str(publish_details["publish_message"]) if publish_details.get("publish_message") is not None else None,
+            "upload_report_path": str(publish_details["upload_report_path"]) if publish_details.get("upload_report_path") is not None else None,
+            "import_report_path": str(publish_details["import_report_path"]) if publish_details.get("import_report_path") is not None else None,
+            "publish_metadata_path": str(publish_details["publish_metadata_path"]) if publish_details.get("publish_metadata_path") is not None else None,
+            "warnings_count": len(prepare_result.run.warnings)
+            + len(render_result.run.warnings)
+            + (len(publish_result.run.warnings) if publish_result is not None else 0),
         },
     )

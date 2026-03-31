@@ -44,10 +44,12 @@ Supported runtime URL scope is determined by the code-supported source-detection
    - `work/{model}/llm/intro_text.output.txt`
    - `work/{model}/llm/seo_meta.output.json`
 4. Run `python -m pipeline.workflow render --model {model}` from `scraper/`.
-5. When render publishes `products/{model}.csv`, the runtime must then attempt OpenCart image upload through `tools/run_opencart_image_upload.sh` from repo root with `CURRENT_JOB_PRODUCT_FILE` set to that exact published CSV path.
+5. When render publishes `products/{model}.csv`, the runtime must then start a separate OpenCart publish phase through `tools/run_opencart_pipeline.sh` from repo root with `CURRENT_JOB_PRODUCT_FILE` set to that exact published CSV path.
 6. Inspect:
    - `work/{model}/candidate/{model}.validation.json`
+   - `work/{model}/publish.run.json`
    - `work/{model}/upload.opencart.json`
+   - `work/{model}/import.opencart.json`
 
 ## Source Of Truth
 
@@ -101,13 +103,15 @@ Render stage writes:
 - `work/{model}/candidate/description.html`
 - `work/{model}/candidate/characteristics.html`
 - `products/{model}.csv` when validation passes
-- `work/{model}/upload.opencart.json` when the post-render OpenCart image upload runs
+- `work/{model}/publish.run.json` when the post-render publish phase runs
+- `work/{model}/upload.opencart.json` when the publish phase reaches image upload
+- `work/{model}/import.opencart.json` when the publish phase reaches CSV import
 
 ## Validation
 
 - `work/{model}/candidate/{model}.validation.json` is the final machine-readable health report.
 - If `products/{model}.csv` exists, compare candidate output against it field by field.
-- OpenCart image upload is post-render and warning-only; a successful render/publish remains valid if upload later fails.
+- Render success is owned only by render; the post-render publish phase reports its own status and does not flip render to failed.
 - Prefer fixing pipeline behavior instead of patching generated files by hand.
 
 ## Legacy Workflow

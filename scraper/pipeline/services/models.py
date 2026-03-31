@@ -8,6 +8,7 @@ from pathlib import Path
 class RunType(str, Enum):
     PREPARE = "prepare"
     RENDER = "render"
+    PUBLISH = "publish"
     FULL = "full"
 
 
@@ -32,6 +33,12 @@ class PrepareRequest:
 @dataclass(slots=True)
 class RenderRequest:
     model: str
+
+
+@dataclass(slots=True)
+class PublishRequest:
+    model: str
+    current_job_product_file: Path | None = None
 
 
 @dataclass(slots=True)

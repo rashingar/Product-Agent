@@ -10,9 +10,10 @@ from .models import CLIInput
 from .prepare_stage import execute_prepare_stage
 from .repo_paths import REPO_ROOT
 from .services.errors import ServiceError, ServiceErrorCode
-from .services.models import PrepareRequest, RenderRequest
+from .services.models import PrepareRequest, PublishRequest, RenderRequest, ServiceResult
 from .services.prepare_execution import execute_prepare_workflow
 from .services.prepare_service import prepare_product
+from .services.publish_service import build_publish_phase_details, publish_product
 from .services.render_execution import execute_render_workflow
 from .services.render_service import render_product
 
@@ -90,22 +91,20 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         model = resolve_model_for_render(args)
-        result = render_product(RenderRequest(model=model))
-        print(f"Candidate CSV: {result.artifacts.candidate_csv_path}")
-        if result.artifacts.published_csv_path is not None:
-            print(f"Published CSV: {result.artifacts.published_csv_path}")
-        print(f"Validation report: {result.artifacts.validation_report_path}")
-        print(f"Validation ok: {bool(result.details.get('validation_ok', False))}")
-        if result.artifacts.published_csv_path is not None:
-            print(f"OpenCart upload attempted: {bool(result.details.get('upload_attempted', False))}")
-            print(f"OpenCart upload ok: {bool(result.details.get('upload_ok', False))}")
-            if result.details.get("upload_report_path"):
-                print(f"OpenCart upload report: {result.details.get('upload_report_path')}")
-            if result.details.get("upload_warning"):
-                print(f"OpenCart upload warning: {result.details.get('upload_warning')}")
-        print(f"Run status: {result.run.status.value}")
-        print(f"Metadata path: {result.artifacts.metadata_path}")
-        return 0 if bool(result.details.get("validation_ok", False)) else exit_code_for_service_error(result.run.error_code)
+        render_result = render_product(RenderRequest(model=model))
+        publish_result = (
+            publish_product(
+                PublishRequest(
+                    model=model,
+                    current_job_product_file=render_result.artifacts.published_csv_path,
+                )
+            )
+            if render_result.artifacts.published_csv_path is not None
+            else None
+        )
+        publish_details = build_publish_phase_details(model, publish_result)
+        _print_render_cli_summary(render_result, publish_details)
+        return 0 if bool(render_result.details.get("validation_ok", False)) else exit_code_for_service_error(render_result.run.error_code)
     except ValueError as exc:
         message = str(exc)
         print(message)
@@ -192,6 +191,30 @@ def resolve_model_for_render(args: argparse.Namespace) -> str:
 
 def render_workflow(model: str) -> dict[str, Any]:
     return execute_render_workflow(model, work_root=WORK_ROOT, products_root=PRODUCTS_ROOT)
+
+
+def _print_render_cli_summary(
+    render_result: ServiceResult,
+    publish_details: dict[str, str | int | float | bool | None],
+) -> None:
+    print(f"Candidate CSV: {render_result.artifacts.candidate_csv_path}")
+    if render_result.artifacts.published_csv_path is not None:
+        print(f"Published CSV: {render_result.artifacts.published_csv_path}")
+    print(f"Validation report: {render_result.artifacts.validation_report_path}")
+    print(f"Validation ok: {bool(render_result.details.get('validation_ok', False))}")
+    print(f"Render status: {'success' if bool(render_result.details.get('validation_ok', False)) else 'failure'}")
+    print(f"Publish status: {publish_details.get('publish_status')}")
+    print(f"Publish stage: {publish_details.get('publish_stage')}")
+    if publish_details.get("publish_message") is not None:
+        print(f"Publish message: {publish_details.get('publish_message')}")
+    if publish_details.get("upload_report_path"):
+        print(f"OpenCart upload report: {publish_details.get('upload_report_path')}")
+    if publish_details.get("import_report_path"):
+        print(f"OpenCart import report: {publish_details.get('import_report_path')}")
+    print(f"Run status: {render_result.run.status.value}")
+    print(f"Metadata path: {render_result.artifacts.metadata_path}")
+    if publish_details.get("publish_metadata_path"):
+        print(f"Publish metadata path: {publish_details.get('publish_metadata_path')}")
 
 
 if __name__ == "__main__":  # pragma: no cover
