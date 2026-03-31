@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from pipeline.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.models import CLIInput, FetchResult, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.prepare_provider_resolution import PrepareProviderResolutionResult
 from pipeline.prepare_stage import execute_prepare_stage
 from pipeline.providers import ProviderInputIdentity, ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
 from pipeline.providers.models import (
@@ -80,6 +81,29 @@ def build_provider(skroutz_fixtures_root: Path) -> SkroutzProvider:
 def build_manufacturer_provider(manufacturer_tefal_provider_fixtures_root: Path) -> ManufacturerTefalProvider:
     return ManufacturerTefalProvider(
         fixture_html_by_url={MANUFACTURER_URL: manufacturer_tefal_provider_fixtures_root / MANUFACTURER_MODEL / "product.html"}
+    )
+
+
+def build_prepare_provider_resolution_result(
+    *,
+    source: str,
+    url: str,
+    parsed: ParsedProduct,
+    fetch_method: str,
+    fallback_used: bool = False,
+) -> PrepareProviderResolutionResult:
+    return PrepareProviderResolutionResult(
+        source=source,
+        provider_id=source,
+        fetch=FetchResult(
+            url=url,
+            final_url=url,
+            html="<html></html>",
+            status_code=200,
+            method=fetch_method,
+            fallback_used=fallback_used,
+        ),
+        parsed=parsed,
     )
 
 
@@ -223,24 +247,31 @@ def test_execute_prepare_stage_uses_test_injected_skroutz_provider(tmp_path: Pat
         out=str(tmp_path),
     )
     provider = build_provider(skroutz_fixtures_root)
-    registry = ProviderRegistry()
-    registry.register(provider)
+    identity_calls: list[ProviderInputIdentity] = []
 
     result = execute_prepare_stage(
         cli,
         model_dir=tmp_path / SAMPLE_MODEL,
-        detect_source_fn=lambda _url: "skroutz",
         validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
         schema_matcher_factory=DummySchemaMatcher,
-        electronet_parser_factory=lambda **_kwargs: object(),
-        skroutz_parser_factory=lambda: object(),
-        manufacturer_parser_factory=lambda: object(),
         fetcher_factory=DummyFetcher,
         taxonomy_resolver_factory=DummyResolver,
-        bootstrap_provider_registry_fn=lambda **_kwargs: registry,
+        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: (
+            identity_calls.append(ProviderInputIdentity(model=cli_arg.model, url=cli_arg.url))
+            or build_prepare_provider_resolution_result(
+                source="skroutz",
+                url=cli_arg.url,
+                parsed=ParsedProduct(source=provider.normalize(
+                    provider.fetch_snapshot(ProviderInputIdentity(model=cli_arg.model, url=cli_arg.url)),
+                    ProviderInputIdentity(model=cli_arg.model, url=cli_arg.url),
+                ).product),
+                fetch_method="fixture",
+            )
+        ),
         enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
     )
 
+    assert identity_calls == [ProviderInputIdentity(model=SAMPLE_MODEL, url=SAMPLE_URL)]
     assert result["report"]["source"] == "skroutz"
     assert result["report"]["fetch_mode"] == "fixture"
     assert result["fetch"].method == "fixture"
@@ -248,7 +279,7 @@ def test_execute_prepare_stage_uses_test_injected_skroutz_provider(tmp_path: Pat
     assert result["source_json_path"].exists()
 
 
-def test_execute_prepare_stage_allows_electronet_product_code_mismatch(tmp_path: Path) -> None:
+def test_execute_prepare_stage_reuses_injected_provider_resolution_payload(tmp_path: Path) -> None:
     cli = CLIInput(
         model="229957",
         url="https://www.electronet.gr/example",
@@ -268,75 +299,30 @@ def test_execute_prepare_stage_allows_electronet_product_code_mismatch(tmp_path:
             name="LG RHX5009TWB",
         ),
     )
-    provider_calls: list[ProviderInputIdentity] = []
-
-    class DummyElectronetProvider:
-        definition = ProviderDefinition(
-            provider_id="electronet",
-            source_name="electronet",
-            kind=ProviderKind.VENDOR_SITE,
-            capabilities=frozenset(
-                {
-                    ProviderCapability.URL_INPUT,
-                    ProviderCapability.LIVE_FETCH,
-                    ProviderCapability.HTML_SNAPSHOT,
-                    ProviderCapability.NORMALIZED_PRODUCT,
-                }
-            ),
-        )
-
-        @property
-        def provider_id(self) -> str:
-            return self.definition.provider_id
-
-        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
-            provider_calls.append(identity)
-            return ProviderSnapshot(
-                provider_id="electronet",
-                identity=identity,
-                snapshot_kind=ProviderSnapshotKind.HTML,
-                requested_url=identity.url,
-                final_url=identity.url,
-                content_type="text/html",
-                status_code=200,
-                body_text="<html></html>",
-                metadata={"fetch_method": "httpx", "fallback_used": False},
-            )
-
-        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
-            assert snapshot.requested_url == identity.url
-            return ProviderResult(
-                provider=self.definition,
-                identity=identity,
-                snapshot=snapshot,
-                product=parsed.source,
-                provenance=dict(parsed.provenance),
-                field_diagnostics=dict(parsed.field_diagnostics),
-                warnings=list(parsed.warnings),
-                missing_fields=list(parsed.missing_fields),
-                critical_missing=list(parsed.critical_missing),
-            )
-
-    registry = ProviderRegistry()
-    registry.register(DummyElectronetProvider())
+    seam_calls: list[tuple[CLIInput, dict[str, object]]] = []
 
     result = execute_prepare_stage(
         cli,
         model_dir=tmp_path / cli.model,
-        detect_source_fn=lambda _url: "electronet",
         validate_url_scope_fn=lambda _url: ("electronet", True, ""),
         schema_matcher_factory=DummySchemaMatcher,
-        electronet_parser_factory=lambda **_kwargs: object(),
-        skroutz_parser_factory=lambda: object(),
-        manufacturer_parser_factory=lambda: object(),
         fetcher_factory=DummyFetcher,
         taxonomy_resolver_factory=DummyResolver,
-        bootstrap_provider_registry_fn=lambda **_kwargs: registry,
+        resolve_prepare_provider_input_fn=lambda cli_arg, **kwargs: (
+            seam_calls.append((cli_arg, kwargs))
+            or build_prepare_provider_resolution_result(
+                source="electronet",
+                url=cli_arg.url,
+                parsed=parsed,
+                fetch_method="httpx",
+            )
+        ),
         enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {},
     )
 
-    assert provider_calls == [ProviderInputIdentity(model="229957", url="https://www.electronet.gr/example")]
-    assert result["parsed"].warnings == ["source_product_code_mismatch:input=229957:page=235370"]
+    assert seam_calls and seam_calls[0][0] is cli
+    assert result["parsed"] is parsed
+    assert result["parsed"].warnings == []
     assert result["report"]["source"] == "electronet"
     assert result["report"]["identity_checks"]["source"] == "electronet"
 
@@ -372,74 +358,29 @@ def test_execute_prepare_stage_routes_skroutz_through_provider_by_default(tmp_pa
             spec_sections=[SpecSection(section="Χαρακτηριστικά", items=[SpecItem(label="Ισχύς", value="2200 W")])],
         ),
     )
-    provider_calls: list[ProviderInputIdentity] = []
-
-    class DummySkroutzProvider:
-        definition = ProviderDefinition(
-            provider_id="skroutz",
-            source_name="skroutz",
-            kind=ProviderKind.VENDOR_SITE,
-            capabilities=frozenset(
-                {
-                    ProviderCapability.URL_INPUT,
-                    ProviderCapability.LIVE_FETCH,
-                    ProviderCapability.HTML_SNAPSHOT,
-                    ProviderCapability.NORMALIZED_PRODUCT,
-                }
-            ),
-        )
-
-        @property
-        def provider_id(self) -> str:
-            return self.definition.provider_id
-
-        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
-            provider_calls.append(identity)
-            return ProviderSnapshot(
-                provider_id="skroutz",
-                identity=identity,
-                snapshot_kind=ProviderSnapshotKind.HTML,
-                requested_url=identity.url,
-                final_url=identity.url,
-                content_type="text/html",
-                status_code=200,
-                body_text="<html></html>",
-                metadata={"fetch_method": "playwright", "fallback_used": True},
-            )
-
-        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
-            assert snapshot.requested_url == identity.url
-            return ProviderResult(
-                provider=self.definition,
-                identity=identity,
-                snapshot=snapshot,
-                product=parsed.source,
-                provenance=dict(parsed.provenance),
-                field_diagnostics=dict(parsed.field_diagnostics),
-                warnings=list(parsed.warnings),
-                missing_fields=list(parsed.missing_fields),
-                critical_missing=list(parsed.critical_missing),
-            )
-
-    registry = ProviderRegistry()
-    registry.register(DummySkroutzProvider())
+    seam_calls: list[CLIInput] = []
 
     result = execute_prepare_stage(
         cli,
         model_dir=tmp_path / cli.model,
-        detect_source_fn=lambda _url: "skroutz",
         validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
         schema_matcher_factory=DummySchemaMatcher,
-        electronet_parser_factory=lambda **_kwargs: object(),
-        skroutz_parser_factory=lambda: object(),
-        manufacturer_parser_factory=lambda: object(),
         fetcher_factory=DummyFetcher,
         taxonomy_resolver_factory=DummyResolver,
-        bootstrap_provider_registry_fn=lambda **_kwargs: registry,
+        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: (
+            seam_calls.append(cli_arg)
+            or build_prepare_provider_resolution_result(
+                source="skroutz",
+                url=cli_arg.url,
+                parsed=parsed,
+                fetch_method="playwright",
+                fallback_used=True,
+            )
+        ),
         enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
     )
 
-    assert provider_calls == [ProviderInputIdentity(model=SAMPLE_MODEL, url=cli.url)]
+    assert seam_calls == [cli]
     assert result["report"]["source"] == "skroutz"
     assert result["report"]["fetch_mode"] == "playwright"
     assert result["fetch"].method == "playwright"
@@ -496,8 +437,6 @@ def test_execute_prepare_stage_routes_manufacturer_tefal_through_provider_by_def
             ],
         ),
     )
-    provider_calls: list[ProviderInputIdentity] = []
-
     class DummyManufacturerResolver:
         def resolve(self, **_kwargs):
             return (
@@ -508,73 +447,28 @@ def test_execute_prepare_stage_routes_manufacturer_tefal_through_provider_by_def
                 ),
                 [],
             )
-
-    class DummyManufacturerTefalProvider:
-        definition = ProviderDefinition(
-            provider_id="manufacturer_tefal",
-            source_name="manufacturer_tefal",
-            kind=ProviderKind.MANUFACTURER_SITE,
-            capabilities=frozenset(
-                {
-                    ProviderCapability.URL_INPUT,
-                    ProviderCapability.LIVE_FETCH,
-                    ProviderCapability.HTML_SNAPSHOT,
-                    ProviderCapability.NORMALIZED_PRODUCT,
-                }
-            ),
-        )
-
-        @property
-        def provider_id(self) -> str:
-            return self.definition.provider_id
-
-        def fetch_snapshot(self, identity: ProviderInputIdentity) -> ProviderSnapshot:
-            provider_calls.append(identity)
-            return ProviderSnapshot(
-                provider_id="manufacturer_tefal",
-                identity=identity,
-                snapshot_kind=ProviderSnapshotKind.HTML,
-                requested_url=identity.url,
-                final_url=identity.url,
-                content_type="text/html",
-                status_code=200,
-                body_text="<html></html>",
-                metadata={"fetch_method": "httpx", "fallback_used": False},
-            )
-
-        def normalize(self, snapshot: ProviderSnapshot, identity: ProviderInputIdentity) -> ProviderResult:
-            assert snapshot.requested_url == identity.url
-            return ProviderResult(
-                provider=self.definition,
-                identity=identity,
-                snapshot=snapshot,
-                product=parsed.source,
-                provenance=dict(parsed.provenance),
-                field_diagnostics=dict(parsed.field_diagnostics),
-                warnings=list(parsed.warnings),
-                missing_fields=list(parsed.missing_fields),
-                critical_missing=list(parsed.critical_missing),
-            )
-
-    registry = ProviderRegistry()
-    registry.register(DummyManufacturerTefalProvider())
+    seam_calls: list[CLIInput] = []
 
     result = execute_prepare_stage(
         cli,
         model_dir=tmp_path / cli.model,
-        detect_source_fn=lambda _url: "manufacturer_tefal",
         validate_url_scope_fn=lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"),
         schema_matcher_factory=DummySchemaMatcher,
-        electronet_parser_factory=lambda **_kwargs: object(),
-        skroutz_parser_factory=lambda: object(),
-        manufacturer_parser_factory=lambda: object(),
         fetcher_factory=DummyFetcher,
         taxonomy_resolver_factory=DummyManufacturerResolver,
-        bootstrap_provider_registry_fn=lambda **_kwargs: registry,
+        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: (
+            seam_calls.append(cli_arg)
+            or build_prepare_provider_resolution_result(
+                source="manufacturer_tefal",
+                url=cli_arg.url,
+                parsed=parsed,
+                fetch_method="httpx",
+            )
+        ),
         enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False},
     )
 
-    assert provider_calls == [ProviderInputIdentity(model=MANUFACTURER_MODEL, url=cli.url)]
+    assert seam_calls == [cli]
     assert result["parsed"].source.source_name == "manufacturer_tefal"
     assert result["report"]["fetch_mode"] == "httpx"
     assert result["fetch"].method == "httpx"
@@ -597,15 +491,13 @@ def test_execute_prepare_stage_fails_fast_when_supported_source_has_no_provider(
         execute_prepare_stage(
             cli,
             model_dir=tmp_path / SAMPLE_MODEL,
-            detect_source_fn=lambda _url: "skroutz",
             validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
             schema_matcher_factory=DummySchemaMatcher,
-            electronet_parser_factory=lambda **_kwargs: object(),
-            skroutz_parser_factory=lambda: object(),
-            manufacturer_parser_factory=lambda: object(),
             fetcher_factory=DummyFetcher,
             taxonomy_resolver_factory=DummyResolver,
-            bootstrap_provider_registry_fn=lambda **_kwargs: ProviderRegistry(),
+            resolve_prepare_provider_input_fn=lambda _cli, **_kwargs: (_ for _ in ()).throw(
+                RuntimeError("Provider 'skroutz' is not registered")
+            ),
             enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
         )
 

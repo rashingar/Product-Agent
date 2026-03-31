@@ -267,8 +267,8 @@ Purpose:
 Branch goal:
 1. Move the provider-resolution decision path behind a dedicated internal seam while keeping `python -m pipeline.workflow prepare ...` behavior unchanged.
 
-Proposed extracted module:
-1. `scraper/pipeline/provider_resolution.py`
+Landed extracted module:
+1. `scraper/pipeline/prepare_provider_resolution.py`
 
 Proposed seam responsibilities:
 1. Source detection.
@@ -281,21 +281,18 @@ Proposed seam responsibilities:
 8. Final URL scope validation.
 9. Source-specific product-page checks and operator hints that currently run before gallery, taxonomy, and schema work.
 
-Proposed seam result type:
-1. `PrepareStageProviderResolutionResult`
+Landed seam result type:
+1. `PrepareProviderResolutionResult`
 
-Proposed result fields:
-1. `source_type`
+Landed result fields:
+1. `source`
 2. `provider_id`
-3. `final_url`
-4. `fetch_result`
-5. `parsed_payload`
-6. `normalization_result`
-7. `warnings`
+3. `fetch`
+4. `parsed`
 
 Result contract notes:
-1. `fetch_result`, `parsed_payload`, and `normalization_result` are intentionally existing local shapes reused by `prepare_stage.py`; this branch does not redesign persistence payloads or schema-matching inputs.
-2. `warnings` must preserve current warning text, ordering, and emission points as observed by the active runtime.
+1. `fetch` and `parsed` are intentionally existing local shapes reused by `prepare_stage.py`; this branch does not redesign persistence payloads or schema-matching inputs.
+2. Warning text, ordering, and emission points must remain behaviorally unchanged even though warning ownership now sits inside the extracted seam.
 
 Invariants that must not change:
 1. Public workflow entrypoint and CLI flags remain unchanged.
@@ -321,6 +318,9 @@ Test strategy for the next commits:
 2. Keep prepare-stage and workflow regression coverage unchanged in meaning so the refactor proves no observable behavior change for Electronet, Skroutz, and currently supported manufacturer flows.
 3. Reuse committed fixtures and current workflow-oriented tests rather than introducing a new runtime path.
 4. Run targeted provider-selection and prepare/workflow tests during each extraction step, then run the full scraper test suite before closing the branch.
+
+Landed injection boundary:
+1. `execute_prepare_stage(...)` should keep only one provider-resolution seam injection, `resolve_prepare_provider_input_fn`, instead of exposing the provider-specific bootstrap/mapping/parser injection surface directly.
 
 Planned sequencing after this branch:
 1. The next follow-up branch after this provider-resolution extraction should isolate artifact persistence out of `prepare_stage.py`.

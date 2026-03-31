@@ -11,16 +11,12 @@ from .mapping import build_row
 from .manufacturer_enrichment import enrich_source_from_manufacturer_docs
 from .models import CLIInput, GalleryImage, ParsedProduct
 from .normalize import normalize_for_match
-from .prepare_provider_resolution import resolve_prepare_provider_resolution
-from .parser_product_electronet import ElectronetProductParser
-from .parser_product_manufacturer import ManufacturerProductParser
-from .parser_product_skroutz import SkroutzProductParser
-from .providers.registry import ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
+from .prepare_provider_resolution import PrepareProviderResolutionResult, resolve_prepare_provider_resolution
 from .repo_paths import SCHEMA_LIBRARY_PATH
 from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .skroutz_taxonomy import serialize_source_category
-from .source_detection import detect_source, validate_url_scope
+from .source_detection import validate_url_scope
 from .taxonomy import TaxonomyResolver
 from .utils import ensure_directory, write_json, write_text
 
@@ -66,31 +62,19 @@ def execute_prepare_stage(
     cli: CLIInput,
     *,
     model_dir: Path | None = None,
-    detect_source_fn: Callable[[str], str] = detect_source,
     validate_url_scope_fn: Callable[[str], tuple[str, bool, str]] = validate_url_scope,
     schema_matcher_factory: Callable[..., SchemaMatcher] = SchemaMatcher,
-    electronet_parser_factory: Callable[..., ElectronetProductParser] = ElectronetProductParser,
-    skroutz_parser_factory: Callable[[], SkroutzProductParser] = SkroutzProductParser,
-    manufacturer_parser_factory: Callable[[], ManufacturerProductParser] = ManufacturerProductParser,
     fetcher_factory: Callable[[], ElectronetFetcher] = ElectronetFetcher,
     taxonomy_resolver_factory: Callable[[], TaxonomyResolver] = TaxonomyResolver,
-    bootstrap_provider_registry_fn: Callable[..., ProviderRegistry] = bootstrap_runtime_provider_registry,
-    source_to_provider_id_fn: Callable[[str], str | None] = source_to_provider_id,
+    resolve_prepare_provider_input_fn: Callable[..., PrepareProviderResolutionResult] = resolve_prepare_provider_resolution,
     enrich_source_from_manufacturer_docs_fn: Callable[..., dict[str, Any]] = enrich_source_from_manufacturer_docs,
 ) -> dict[str, Any]:
     schema_matcher = schema_matcher_factory(str(SCHEMA_LIBRARY_PATH))
     fetcher = fetcher_factory()
-    provider_resolution = resolve_prepare_provider_resolution(
+    provider_resolution = resolve_prepare_provider_input_fn(
         cli,
-        detect_source_fn=detect_source_fn,
         validate_url_scope_fn=validate_url_scope_fn,
-        schema_matcher_factory=schema_matcher_factory,
-        electronet_parser_factory=electronet_parser_factory,
-        skroutz_parser_factory=skroutz_parser_factory,
-        manufacturer_parser_factory=manufacturer_parser_factory,
         fetcher_factory=lambda: fetcher,
-        bootstrap_provider_registry_fn=bootstrap_provider_registry_fn,
-        source_to_provider_id_fn=source_to_provider_id_fn,
     )
     source = provider_resolution.source
     fetch = provider_resolution.fetch

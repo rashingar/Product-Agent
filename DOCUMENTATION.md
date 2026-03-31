@@ -32,11 +32,11 @@ Recorded scope:
   - conversion from `ProviderResult` into the existing local fetch/parsed shape
   - final URL scope validation
   - source-specific product-page checks and operator hints that currently run before gallery/taxonomy/schema work
-- proposed extracted module:
-  - `scraper/pipeline/provider_resolution.py`
-- proposed seam result type:
-  - `PrepareStageProviderResolutionResult`
-  - planned fields: `source_type`, `provider_id`, `final_url`, `fetch_result`, `parsed_payload`, `normalization_result`, `warnings`
+- landed extracted module name:
+  - `scraper/pipeline/prepare_provider_resolution.py`
+- landed seam result type:
+  - `PrepareProviderResolutionResult`
+  - landed fields: `source`, `provider_id`, `fetch`, `parsed`
 - invariants recorded in `PLAN.md`:
   - public workflow entrypoint and CLI behavior stay unchanged
   - prepare/render ownership boundaries stay unchanged
@@ -66,6 +66,48 @@ Validation:
 - scope is now documented in `PLAN.md` and logged in `DOCUMENTATION.md`
 - this commit remains docs-only and does not modify Python files, tests, imports, or runtime behavior
 - `README.md` did not require changes for this scope-freeze commit
+
+## 2026-04-01 - Collapse prepare-stage provider injection surface
+
+Goal:
+- reduce `execute_prepare_stage(...)` to one provider-resolution seam injection
+- align prepare-stage tests with the extracted seam instead of the old wide provider bootstrap injection surface
+- reconcile the control docs with the landed module/type names from the earlier extraction commits
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+
+Changes:
+- collapsed `execute_prepare_stage(...)` provider-resolution dependency injection to one callable:
+  - old provider-resolution DI surface included:
+    - `detect_source_fn`
+    - `electronet_parser_factory`
+    - `skroutz_parser_factory`
+    - `manufacturer_parser_factory`
+    - `bootstrap_provider_registry_fn`
+    - `source_to_provider_id_fn`
+  - new prepare-stage seam:
+    - `resolve_prepare_provider_input_fn`
+- kept `validate_url_scope_fn` in `execute_prepare_stage(...)` because the existing scrape report still records final URL scope validation details after the seam returns
+- updated prepare-stage tests so stage-level stubbing now happens through `resolve_prepare_provider_input_fn` instead of stubbing provider bootstrap details directly
+- reconciled branch-scope docs to the landed extraction names:
+  - module: `scraper/pipeline/prepare_provider_resolution.py`
+  - result type: `PrepareProviderResolutionResult`
+- removed stale prepare-stage imports tied only to the old inline provider-resolution surface
+
+Commands run:
+- `rg -n "execute_prepare_stage\\(|resolve_prepare_provider_resolution|bootstrap_provider_registry_fn|source_to_provider_id_fn|detect_source_fn|validate_url_scope_fn|electronet_parser_factory|skroutz_parser_factory|manufacturer_parser_factory" scraper/pipeline/tests scraper/pipeline PLAN.md DOCUMENTATION.md README.md`
+- `python -m pytest -q pipeline/tests/test_prepare_provider_resolution.py pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare_workflow or workflow_main_prepare or render_workflow_delegates_to_service_execution or workflow_main_render_routes_through_render_service"` from `scraper/`
+
+Validation:
+- extracted provider-resolution unit tests still exercise the dedicated module directly
+- prepare-stage tests now stub only the single provider-resolution seam where stage isolation is needed
+- workflow-facing behavior remains unchanged in the targeted regression coverage
+- no public workflow entrypoint or artifact path changed in this commit
 
 ## 2026-04-01 - Finalize metadata and error semantics hardening docs
 
