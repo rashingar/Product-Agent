@@ -69,7 +69,7 @@ def maybe_write_run_metadata(
     warnings: list[str] | None = None,
     error_code: str | None = None,
     error_detail: str | None = None,
-    details: dict[str, str | int | float | bool | None] | None = None,
+    details: dict[str, Any] | None = None,
 ) -> Path:
     metadata_path = metadata_path_for(model_root, run_type)
     artifacts.metadata_path = metadata_path

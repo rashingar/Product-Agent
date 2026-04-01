@@ -480,6 +480,47 @@ Entry handoff:
 4. Preserve the completed split-task steady-state contract while starting retrieval-layer work; do not reintroduce combined LLM artifacts.
 5. Do not reintroduce source-specific routing below the provider boundary.
 
+### Branch scope — split-LLM intro validation timing and intro-only retry
+
+Status: completed on dedicated follow-up branch `feat/split-llm-intro-retry`
+
+Purpose:
+1. Move split-LLM orchestration to `seo_meta` generation first, then `intro_text` generation, then immediate intro validation, then intro-only retry on `llm_intro_text_word_count_invalid`, and only after that continue into the existing render/validation/publish flow.
+2. Keep this branch limited to the internal split-LLM execution seam plus the render-stage gating point where intro validation must now happen before candidate build starts.
+3. Preserve the public workflow surface so `prepare` remains scrape-only plus prompt/context artifact generation and `render` remains the owner of candidate/render/publish work.
+
+Target internal seam:
+1. Add a narrow helper module under `scraper/pipeline/services/` for split-LLM stage execution.
+2. Introduce:
+   - `run_intro_text_with_retry(...)`
+   - `execute_split_llm_stage(...)`
+3. Keep any new generation/resolution callables optional and internal-facing so tests can inject them without a broader runtime redesign.
+
+Required execution order:
+1. Resolve or generate `seo_meta` first.
+2. Keep `seo_meta` single-pass in this branch.
+3. Resolve or generate `intro_text` second.
+4. Validate `intro_text` immediately after each generation/resolution attempt.
+5. Retry only `intro_text` when validation returns `llm_intro_text_word_count_invalid`, with at most 3 total intro attempts.
+6. Do not enter candidate build, final render assembly, CSV publish copy, or OpenCart publish until intro validation succeeds.
+7. Keep later candidate validation as a safety backstop, not the first intro word-count enforcement point.
+
+Behavior rules:
+1. `seo_meta` may complete before intro validation succeeds and may remain on disk for inspection if intro later fails.
+2. Intro retries must rewrite only `intro_text.output.txt`.
+3. Intro retries must not regenerate or mutate `seo_meta.output.json`.
+4. Non-word-count intro failures still fail once with no retry and no downstream render/candidate/publish work.
+5. A successful intro retry must unlock the downstream render/candidate/publish path exactly once.
+
+Explicit non-goals:
+1. No new public CLI command.
+2. No prompt/context artifact shape change unless a test strictly requires it.
+3. No broad service/model redesign.
+4. No change to the existing render/candidate/publish ownership boundary after the intro gate passes.
+
+Completion note:
+1. completed; `scraper/pipeline/services/llm_stage_execution.py` now owns `execute_split_llm_stage(...)` plus `run_intro_text_with_retry(...)`, intro retry exhaustion is raised as a typed intro-specific validation error with structured `stage` / `code` / `attempts` data plus persisted per-attempt trace output, intro rewrites now use atomic replace semantics, `scraper/pipeline/services/render_execution.py` resolves `seo_meta` before intro, retries only intro on `llm_intro_text_word_count_invalid`, blocks candidate/render/publish work until intro succeeds, and the new workflow/service regressions prove `seo_meta` remains single-pass while downstream work runs exactly once only after intro validation passes
+
 ### Branch scope — prepare-stage taxonomy enrichment refactor
 
 Status: completed
