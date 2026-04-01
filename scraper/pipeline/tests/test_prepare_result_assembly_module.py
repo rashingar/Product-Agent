@@ -83,6 +83,7 @@ def _build_tv_taxonomy() -> TaxonomyResolution:
         parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
         leaf_category="Τηλεοράσεις",
         sub_category="50'' & άνω",
+        taxonomy_path="ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
         cta_url="https://www.etranoulis.gr/eikona-hxos/thleoraseis/50-anw",
     )
 
@@ -258,15 +259,33 @@ def test_assemble_prepare_result_passes_effective_sections_and_schema_preference
             self._matcher = SchemaMatcher(*args, **kwargs)
             self.known_section_titles = self._matcher.known_section_titles
 
-        def match(self, spec_sections, taxonomy_sub_category=None, preferred_source_files=None):
+        def match(
+            self,
+            spec_sections,
+            taxonomy_sub_category=None,
+            preferred_source_files=None,
+            taxonomy_path=None,
+            taxonomy_parent_category=None,
+            taxonomy_leaf_category=None,
+        ):
             matcher_calls.append(
                 {
                     "section_titles": [section.section for section in spec_sections],
                     "taxonomy_sub_category": taxonomy_sub_category,
                     "preferred_source_files": list(preferred_source_files or []),
+                    "taxonomy_path": taxonomy_path,
+                    "taxonomy_parent_category": taxonomy_parent_category,
+                    "taxonomy_leaf_category": taxonomy_leaf_category,
                 }
             )
-            return self._matcher.match(spec_sections, taxonomy_sub_category, preferred_source_files)
+            return self._matcher.match(
+                spec_sections,
+                taxonomy_sub_category,
+                preferred_source_files,
+                taxonomy_path=taxonomy_path,
+                taxonomy_parent_category=taxonomy_parent_category,
+                taxonomy_leaf_category=taxonomy_leaf_category,
+            )
 
     result = assemble_prepare_result(
         cli=cli,
@@ -309,6 +328,9 @@ def test_assemble_prepare_result_passes_effective_sections_and_schema_preference
             ],
             "taxonomy_sub_category": "Εστίες",
             "preferred_source_files": ["esties.json"],
+            "taxonomy_path": "",
+            "taxonomy_parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+            "taxonomy_leaf_category": "Εντοιχιζόμενες Συσκευές",
         }
     ]
     assert result.schema_match.matched_schema_id == BUILT_IN_HOB_SCHEMA_ID
@@ -349,14 +371,14 @@ def test_assemble_prepare_result_pins_normalized_and_report_payloads(tmp_path: P
     )
 
     assert result.schema_match.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
-    assert 0.0 < result.schema_match.score < 0.35
-    assert "weak_schema_match" in result.schema_match.warnings
+    assert result.schema_match.score == 1.0
+    assert "weak_schema_match" not in result.schema_match.warnings
     assert result.normalized["llm_product"] == {"meta_keywords": ["Hisense", "55A6Q"]}
     assert result.normalized["csv_row"] == result.row
     assert result.normalized["characteristics_diagnostics"]["matched_schema_id"] == TV_TEMPLATE_SCHEMA_ID
     assert result.report["schema_resolution"] == result.schema_match.to_dict()
-    assert result.report["critical_extractors"]["schema_match"] == "weak"
-    assert "weak_schema_match" in result.report["warnings"]
+    assert result.report["critical_extractors"]["schema_match"] == "matched"
+    assert "weak_schema_match" not in result.report["warnings"]
     assert result.report["schema_candidates"][0]["matched_schema_id"] == TV_TEMPLATE_SCHEMA_ID
     assert result.report["files_written"] == [
         str(tmp_path / cli.model / f"{cli.model}.raw.html"),

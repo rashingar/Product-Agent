@@ -1,7 +1,79 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-Category-scoped schema matching contract is now frozen in the control docs. This is a docs-only scope update; runtime schema selection behavior has not changed yet.
+Category-scoped runtime schema selection is now implemented and validated. The matcher now builds bounded candidate pools from resolved category metadata and fails closed with `no_safe_template_match` instead of drifting globally.
+
+## 2026-04-01 - Implement category-scoped runtime schema selection with fail-closed sibling matching
+
+Goal:
+- replace the old global schema scoring path with category-scoped runtime selection that consumes the richer compiled metadata
+- keep category resolution unchanged while ensuring unrelated categories can never win once taxonomy resolution is correct
+- make direct-single categories deterministic and make sibling categories compete only inside their resolved category pool
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_result_assembly.py`
+- `scraper/pipeline/schema_matcher.py`
+- `scraper/pipeline/tests/test_characteristics_pipeline.py`
+- `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `scraper/pipeline/tests/test_schema_matcher.py`
+
+What changed:
+- `SchemaMatcher` no longer scores across the full schema library
+- runtime candidate pools are now built from the resolved category binding using compiled `category_path`, `parent_category`, `leaf_category`, and `sub_category` metadata
+- if a resolved category path has no exact compiled schema entry but the family resolves to a leaf-only compiled template, the matcher falls back only to leaf-only templates in that same parent/leaf family
+- non-active templates are excluded from auto-selection by treating `template_status != active` as unsafe for runtime matching
+- categories with exactly one active safe template now select that schema directly with deterministic score `1.0`
+- sibling categories now apply hard gates before scoring:
+  - `required_labels_any`
+  - `required_labels_all`
+  - `forbidden_labels`
+  - `min_section_overlap`
+  - `min_label_overlap`
+- only candidates that survive those gates are scored, and scoring is bounded to the resolved sibling pool using:
+  - normalized section overlap
+  - normalized label overlap
+  - normalized section-label pair overlap
+  - discriminator-label overlap
+- when no safe category-scoped candidate survives, the matcher now returns `no_safe_template_match` instead of borrowing another category
+- `assemble_prepare_result()` now passes `taxonomy_path`, `parent_category`, and `leaf_category` into the matcher so runtime selection can scope itself without changing taxonomy resolution
+
+Test coverage added/updated:
+- direct deterministic selection when one active safe template remains in the resolved category
+- sibling-only competition inside one category pool
+- wrong-category schemas cannot be selected even if extracted specs resemble another template family
+- weak generic overlap fails closed instead of drifting globally
+- washing-machine-like extracted specs cannot select unrelated small-appliance templates
+- existing TV/runtime tests now assert the new category-scoped direct-selection behavior rather than weak global matching
+
+Commands run:
+- `rg -n "schema|template|characteristics|matcher|category.*schema|no_safe_template_match|required_labels_any|required_labels_all|forbidden_labels|min_section_overlap|min_label_overlap" scraper -S`
+- `Get-Content scraper\pipeline\schema_matcher.py`
+- `Get-Content scraper\pipeline\prepare_result_assembly.py | Select-Object -First 110`
+- `Get-Content scraper\pipeline\tests\test_schema_matcher.py`
+- `Get-Content scraper\pipeline\tests\test_characteristics_pipeline.py | Select-Object -Skip 320 -First 170`
+- `Get-Content scraper\pipeline\tests\test_prepare_result_assembly_module.py | Select-Object -Skip 240 -First 130`
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher.py`
+- `python -m pytest scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `python -m pytest scraper/pipeline/tests/test_characteristics_pipeline.py`
+- `python -m pytest scraper/pipeline/tests/test_product_parser.py`
+- `python -m pytest scraper/pipeline/tests/test_prepare_provider_resolution.py`
+- `python -m pytest scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `python -m pytest scraper/pipeline/tests`
+
+Validation:
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher.py` passed
+- `python -m pytest scraper/pipeline/tests/test_prepare_result_assembly_module.py` passed
+- `python -m pytest scraper/pipeline/tests/test_characteristics_pipeline.py` passed
+- `python -m pytest scraper/pipeline/tests/test_product_parser.py` passed
+- `python -m pytest scraper/pipeline/tests/test_prepare_provider_resolution.py` passed
+- `python -m pytest scraper/pipeline/tests/test_prepare_stage_result_assembly.py` passed
+- `python -m pytest scraper/pipeline/tests` passed with `215 passed`
+
+Risks / follow-up:
+- compiled metadata currently uses `match_mode` values such as `direct_single` and `category_pool`; runtime now consumes the safety metadata correctly, but a future cleanup can align naming with the docs contract if needed
+- leaf-only fallback is intentionally bounded to the resolved parent/leaf family so categories like TV size buckets still resolve safely without reopening cross-category rescue
+- no category resolver logic changed in this milestone
 
 ## 2026-04-01 - Freeze category-scoped schema matching contract before code changes
 

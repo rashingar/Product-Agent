@@ -433,14 +433,23 @@ def test_schema_matcher_prefers_template_source_files_for_tv_sections() -> None:
     ]
     matcher = SchemaMatcher()
 
-    default_result, _default_candidates = matcher.match(sections, taxonomy_sub_category="50'' & άνω")
+    default_result, _default_candidates = matcher.match(
+        sections,
+        taxonomy_sub_category="50'' & άνω",
+        taxonomy_path="ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
+        taxonomy_parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+        taxonomy_leaf_category="Τηλεοράσεις",
+    )
     preferred_result, preferred_candidates = matcher.match(
         sections,
         taxonomy_sub_category="50'' & άνω",
         preferred_source_files=["tileoraseis.json"],
+        taxonomy_path="ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
+        taxonomy_parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+        taxonomy_leaf_category="Τηλεοράσεις",
     )
 
-    assert default_result.matched_schema_id != TV_TEMPLATE_SCHEMA_ID
+    assert default_result.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
     assert preferred_result.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
     assert preferred_candidates[0]["source_files"] == ["tileoraseis.json"]
 
