@@ -3,6 +3,49 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Add standalone prepare scrape persistence module and unit tests
+
+Goal:
+- add the new scrape artifact persistence module for the branch without wiring it into `prepare_stage.py` yet
+- introduce the preferred typed input/result objects for the persistence seam
+- add focused unit tests that freeze the current scrape-write contract before the follow-up integration commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_scrape_persistence.py`
+- `scraper/pipeline/tests/test_prepare_scrape_persistence.py`
+
+Changes:
+- added `scraper/pipeline/prepare_scrape_persistence.py`
+- added typed persistence models:
+  - `PrepareScrapePersistenceInput`
+  - `PrepareScrapePersistenceResult`
+- added `persist_prepare_scrape_artifacts(...)` as a standalone persistence helper that currently owns:
+  - path derivation for `{model}.raw.html`
+  - path derivation for `{model}.source.json`
+  - path derivation for `{model}.normalized.json`
+  - path derivation for `{model}.report.json`
+  - cleanup of stale `bescos_raw.json`
+  - optional write of `bescos_raw.json`
+- updated the branch-scope note in `PLAN.md` so the proposed module/type names match the landed preferred names for this branch
+
+Intentional temporary duplication left for the next commit:
+- `scraper/pipeline/prepare_stage.py` still performs the active scrape persistence inline
+- the new persistence module mirrors that write surface but is not wired in yet
+- `prepare_execution.py` remains untouched in this commit by branch rule
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `Get-Content scraper/pipeline/services/execution_models.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/utils.py`
+- `python -m pytest -q pipeline/tests/test_prepare_scrape_persistence.py` from `scraper/`
+
+Validation:
+- focused unit tests cover canonical scrape file writes, exact filenames, JSON/text content behavior, stale `bescos_raw.json` cleanup, and no writes under `llm/`
+- `prepare_stage.py` behavior is unchanged in this commit because the new module is not wired yet
+
 ## 2026-04-01 - Freeze prepare-stage artifact persistence refactor scope
 
 Goal:

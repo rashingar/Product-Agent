@@ -345,11 +345,11 @@ Explicit write scope for this branch:
 5. scrape-stage supporting assets and auxiliary artifacts currently written under `work/{model}/scrape/`
 
 Proposed extracted module:
-1. `scraper/pipeline/prepare_artifact_persistence.py`
+1. `scraper/pipeline/prepare_scrape_persistence.py`
 
 Proposed typed persistence names:
-1. input: `PrepareArtifactPersistenceInput`
-2. result: `PrepareArtifactPersistenceResult`
+1. input: `PrepareScrapePersistenceInput`
+2. result: `PrepareScrapePersistenceResult`
 
 Proposed seam responsibilities:
 1. Persist the raw fetched HTML artifact under the current `work/{model}/scrape/` path and filename.
