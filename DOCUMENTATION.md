@@ -3,6 +3,52 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Wire prepare stage to the result-assembly seam
+
+Goal:
+- route `scraper/pipeline/prepare_stage.py` through the new deterministic result-assembly module
+- remove the now-redundant inline schema/result assembly block from `prepare_stage.py`
+- preserve the outward `execute_prepare_stage(...)` payload, prepare/workflow behavior, and prepare/render ownership boundaries
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+
+Changes:
+- wired `prepare_stage.py` to `assemble_prepare_result(...)` in `scraper/pipeline/prepare_result_assembly.py`
+- removed the inline deterministic assembly block from `prepare_stage.py` that previously owned:
+  - effective spec-section shaping for schema selection
+  - preferred schema-source-file computation
+  - `schema_matcher.match(...)` orchestration
+  - deterministic row-building through `build_row(...)`
+  - normalized payload assembly
+  - deterministic report payload assembly
+- `prepare_stage.py` now:
+  - keeps gallery and Besco orchestration
+  - keeps taxonomy resolution
+  - keeps manufacturer enrichment orchestration
+  - prepares the assembly inputs and delegates deterministic result assembly through the new seam
+  - keeps the outward dict-shaped return payload compatible with `prepare_execution.py`
+- removed the now-redundant local `build_identity_checks(...)` helper from `prepare_stage.py` because the assembly seam owns that report field composition now
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `python -m pytest -q pipeline/tests/test_prepare_result_assembly_module.py pipeline/tests/test_prepare_result_assembly.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
+
+Validation:
+- direct seam tests still pass
+- existing prepare-stage characterization tests still pass
+- provider-selection regressions still pass with the stage routed through the seam
+- prepare-focused workflow and service regressions still pass
+- outward `execute_prepare_stage(...)` return keys remain unchanged
+
+Remaining deterministic assembly logic intentionally left in `prepare_stage.py`:
+- none from the extracted schema/result assembly block
+- only upstream orchestration remains there for gallery/Besco handling, taxonomy resolution, manufacturer enrichment, and preparation of inputs for result assembly
+
 ## 2026-04-01 - Add standalone prepare result-assembly seam without wiring it
 
 Goal:
