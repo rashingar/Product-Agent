@@ -3,6 +3,48 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Add standalone prepare result-assembly seam without wiring it
+
+Goal:
+- add the extracted deterministic prepare result-assembly module for the current branch
+- keep `scraper/pipeline/prepare_stage.py` behavior unchanged in this commit by not wiring the new seam yet
+- pin the new module directly with focused tests while preserving the existing prepare-stage regressions
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_result_assembly.py`
+- `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+
+Changes:
+- added `scraper/pipeline/prepare_result_assembly.py`
+- added the new internal typed result:
+  - `PrepareResultAssemblyResult`
+- added the new internal seam:
+  - `assemble_prepare_result(...)`
+- the new module now owns standalone logic for:
+  - effective spec-section shaping used for schema selection
+  - preferred schema-source-file computation
+  - `schema_matcher.match(...)` orchestration
+  - deterministic row-building through `build_row(...)`
+  - normalized payload assembly
+  - deterministic report payload assembly for prepare-stage outputs
+- added focused direct tests for the seam in `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+
+Intentional temporary duplication left for the next commit:
+- `scraper/pipeline/prepare_stage.py` still contains the active inline deterministic schema/result assembly block
+- `scraper/pipeline/prepare_result_assembly.py` currently mirrors that logic but is not called by `prepare_stage.py` yet
+- `build_prepare_result_identity_checks(...)` currently duplicates the local `build_identity_checks(...)` helper shape from `prepare_stage.py`
+
+Commands run:
+- `Get-Content scraper/pipeline/tests/test_prepare_result_assembly.py`
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `python -m pytest -q pipeline/tests/test_prepare_result_assembly_module.py pipeline/tests/test_prepare_result_assembly.py` from `scraper/`
+
+Validation:
+- the new seam module is covered directly without changing production behavior
+- existing prepare-stage characterization tests still pass unchanged
+- this commit does not move taxonomy resolution, manufacturer enrichment, provider resolution, or artifact persistence
+
 ## 2026-04-01 - Freeze prepare-stage result assembly refactor scope
 
 Goal:
