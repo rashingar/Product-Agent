@@ -15,6 +15,7 @@ from .prepare_scrape_persistence import (
     PrepareScrapePersistenceResult,
     persist_prepare_scrape_artifacts,
 )
+from .prepare_taxonomy_enrichment import execute_prepare_taxonomy_enrichment
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .source_detection import validate_url_scope
 from .taxonomy import TaxonomyResolver
@@ -161,38 +162,17 @@ def execute_prepare_stage(
     parsed.source.raw_html_path = str(scrape_persistence_input.raw_html_path)
     parsed.source.fallback_used = fetch.fallback_used
 
-    taxonomy_resolver = taxonomy_resolver_factory()
-    taxonomy, taxonomy_candidates = taxonomy_resolver.resolve(
-        breadcrumbs=parsed.source.breadcrumbs,
-        url=parsed.source.canonical_url or parsed.source.url,
-        name=parsed.source.name,
-        key_specs=parsed.source.key_specs,
-        spec_sections=parsed.source.spec_sections,
+    taxonomy_enrichment = execute_prepare_taxonomy_enrichment(
+        source=source,
+        parsed=parsed,
+        fetcher=fetcher,
+        model_dir=resolved_model_dir,
+        taxonomy_resolver_factory=taxonomy_resolver_factory,
+        enrich_source_from_manufacturer_docs_fn=enrich_source_from_manufacturer_docs_fn,
     )
-    if source == "skroutz":
-        manufacturer_enrichment = enrich_source_from_manufacturer_docs_fn(
-            source=parsed.source,
-            taxonomy=taxonomy,
-            fetcher=fetcher,
-            output_dir=resolved_model_dir / "manufacturer",
-        )
-    else:
-        manufacturer_enrichment = {
-            "applied": False,
-            "provider": "",
-            "providers_considered": [],
-            "matched_providers": [],
-            "documents": [],
-            "documents_discovered": 0,
-            "documents_parsed": 0,
-            "warnings": [],
-            "section_count": 0,
-            "field_count": 0,
-            "hero_summary_applied": False,
-            "presentation_applied": False,
-            "presentation_block_count": 0,
-            "fallback_reason": "direct_source_already_manufacturer" if source == "manufacturer_tefal" else "not_applicable_non_skroutz",
-        }
+    taxonomy = taxonomy_enrichment.taxonomy
+    taxonomy_candidates = taxonomy_enrichment.taxonomy_candidates
+    manufacturer_enrichment = taxonomy_enrichment.manufacturer_enrichment
     if source == "skroutz" and cli.sections > 0:
         manufacturer_blocks = []
         if manufacturer_enrichment.get("presentation_applied"):

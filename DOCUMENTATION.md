@@ -3,6 +3,50 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Wire prepare stage to the taxonomy/enrichment seam
+
+Goal:
+- route `scraper/pipeline/prepare_stage.py` through the new taxonomy-resolution plus manufacturer-enrichment seam
+- remove the now-redundant inline taxonomy/enrichment block from `prepare_stage.py`
+- preserve the outward `execute_prepare_stage(...)` payload, prepare/workflow behavior, and ownership boundaries
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+
+Changes:
+- wired `prepare_stage.py` to `execute_prepare_taxonomy_enrichment(...)` in `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- removed the inline prepare-stage block that previously owned:
+  - local taxonomy resolver construction
+  - `taxonomy_resolver.resolve(...)` orchestration
+  - conditional `source == "skroutz"` manufacturer-doc enrichment orchestration
+  - the local unpacking/assembly of taxonomy plus manufacturer-enrichment handoff values
+- `prepare_stage.py` now:
+  - keeps gallery and Besco orchestration
+  - keeps any upstream shaping required before the taxonomy/enrichment seam
+  - receives typed taxonomy/enrichment outputs from the seam
+  - keeps the downstream handoff into result assembly
+  - keeps the outward dict-shaped return payload compatible with downstream callers
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `Get-Content scraper/pipeline/prepare_taxonomy_enrichment.py`
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment_module.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+
+Validation:
+- direct taxonomy/enrichment seam tests still pass
+- existing prepare-stage taxonomy/enrichment characterization tests still pass
+- adjacent prepare-stage result-assembly tests still pass
+- prepare-focused provider-selection and workflow regressions still pass
+- outward `execute_prepare_stage(...)` return keys remain unchanged
+
+Logic intentionally still left in `prepare_stage.py`:
+- gallery download orchestration
+- section-image/Besco download orchestration
+- Skroutz section extraction and manufacturer-presentation fallback handling
+- downstream result-assembly handoff
+- scrape-artifact persistence handoff
+
 ## 2026-04-01 - Add standalone prepare taxonomy/enrichment seam without wiring it
 
 Goal:
