@@ -3,6 +3,43 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Finalize scrape persistence extraction docs
+
+Goal:
+- mark the scrape persistence extraction branch scope complete in the control docs
+- make the landed current-state ownership boundary unambiguous
+- keep this commit docs-only with no runtime-code changes
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Current-state guidance:
+- scrape artifact persistence now lives in `scraper/pipeline/prepare_scrape_persistence.py`
+- `scraper/pipeline/prepare_stage.py` now owns prepare-stage orchestration only:
+  - it resolves provider-backed input through the existing provider seam
+  - it computes gallery/besco selection, taxonomy, schema match, normalized payloads, and report payloads
+  - it delegates scrape-stage persistence through one typed persistence seam call
+- `scraper/pipeline/services/prepare_execution.py` still owns all `work/{model}/llm/*` writes:
+  - `task_manifest.json`
+  - `intro_text.context.json`
+  - `intro_text.prompt.txt`
+  - `seo_meta.context.json`
+  - `seo_meta.prompt.txt`
+  - output placeholders under `work/{model}/llm/`
+- current scrape artifact ownership under `work/{model}/scrape/` remains:
+  - `{model}.raw.html`
+  - `{model}.source.json`
+  - `{model}.normalized.json`
+  - `{model}.report.json`
+  - `bescos_raw.json` when section extraction produces it
+  - scrape-stage supporting assets that already belong under `work/{model}/scrape/`
+
+Validation:
+- `PLAN.md` now marks the scrape persistence extraction scope complete
+- active docs now state the landed ownership boundary directly
+- this commit is docs-only and does not modify runtime code
+
 ## 2026-04-01 - Narrow the prepare-stage scrape persistence seam
 
 Goal:

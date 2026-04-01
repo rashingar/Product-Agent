@@ -327,7 +327,7 @@ Planned sequencing after this branch:
 
 ### Branch scope — prepare-stage artifact persistence refactor
 
-Status: scope defined
+Status: completed
 
 Purpose:
 1. Freeze the exact branch scope for extracting all scrape-stage artifact persistence out of `scraper/pipeline/prepare_stage.py` into a dedicated module, without changing observable runtime behavior.
@@ -344,14 +344,14 @@ Explicit write scope for this branch:
 4. `work/{model}/scrape/{model}.report.json`
 5. scrape-stage supporting assets and auxiliary artifacts currently written under `work/{model}/scrape/`
 
-Proposed extracted module:
+Landed extracted module:
 1. `scraper/pipeline/prepare_scrape_persistence.py`
 
-Proposed typed persistence names:
+Landed typed persistence names:
 1. input: `PrepareScrapePersistenceInput`
 2. result: `PrepareScrapePersistenceResult`
 
-Proposed seam responsibilities:
+Landed seam responsibilities:
 1. Persist the raw fetched HTML artifact under the current `work/{model}/scrape/` path and filename.
 2. Persist the source payload JSON under the current `work/{model}/scrape/` path and filename.
 3. Persist the normalized payload JSON under the current `work/{model}/scrape/` path and filename.
@@ -387,6 +387,9 @@ Follow-up branch candidates after this one:
 1. Extract schema-matching or taxonomy-adjacent prepare-stage computation behind its own seam without changing current ownership boundaries.
 2. Introduce typed prepare-stage result models for the internal stage seam, if still needed after persistence extraction settles.
 3. Harden focused regression coverage around unchanged warning/error text and scrape-artifact path contracts for supported sources.
+
+Completion note:
+1. completed; scrape artifact persistence now lives under `scraper/pipeline/prepare_scrape_persistence.py`, `scraper/pipeline/prepare_stage.py` now builds prepare state and delegates scrape-stage persistence through one typed seam call, and `scraper/pipeline/services/prepare_execution.py` remains the sole owner of `work/{model}/llm/*` writes while outward prepare-stage payload keys and scrape artifact paths remain unchanged
 
 ### Phase 4 — Hybrid RAG foundation
 
