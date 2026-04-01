@@ -3,6 +3,47 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Add prepare-stage taxonomy/enrichment characterization tests
+
+Goal:
+- pin the current taxonomy-resolution plus manufacturer-enrichment behavior inside `scraper/pipeline/prepare_stage.py`
+- add narrow characterization coverage before extracting the taxonomy/enrichment orchestration seam
+- keep this commit test-only with no production behavior changes
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py`
+
+Changes:
+- added focused prepare-stage seam characterization coverage for:
+  - the exact `taxonomy_resolver.resolve(...)` inputs currently passed by `prepare_stage.py`
+  - top-level and result-assembly propagation of `taxonomy_candidates`
+  - Skroutz-only manufacturer enrichment orchestration, including the current `output_dir=model_dir/"manufacturer"` contract
+  - the current non-Skroutz skip behavior and default fallback payload shape for:
+    - `electronet`
+    - `manufacturer_tefal`
+  - propagation of manufacturer-enrichment mutations on `parsed.source` into the later prepare-stage flow
+  - current warning/reason behavior with the real result-assembly path:
+    - taxonomy `reason` is appended to top-level report warnings
+    - manufacturer-enrichment warnings remain nested under `report["manufacturer_enrichment"]` and are not flattened into `report["warnings"]`
+  - the current top-level `execute_prepare_stage(...)` output shape relied on by downstream code
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `Get-Content scraper/pipeline/prepare_result_assembly.py`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- the new taxonomy/enrichment characterization tests pass
+- adjacent prepare-stage result-assembly tests still pass
+- no production Python modules changed
+- no workflow behavior changed
+
+Ambiguities recorded:
+- current behavior does not flatten manufacturer-enrichment warnings into `report["warnings"]`; they remain only under `report["manufacturer_enrichment"]["warnings"]`
+- non-Skroutz sources currently receive a synthetic default manufacturer-enrichment payload rather than `None` or an omitted field, and the fallback reason differs by source (`not_applicable_non_skroutz` vs `direct_source_already_manufacturer`)
+
 ## 2026-04-01 - Freeze prepare-stage taxonomy enrichment refactor scope
 
 Goal:
