@@ -3,6 +3,80 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Freeze prepare-stage result assembly refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-result-assembly`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, workflow entrypoints, or artifact contracts
+
+Scope framing:
+- this section records planned branch work for extracting the deterministic schema-matching and normalized/report assembly seam out of `scraper/pipeline/prepare_stage.py`
+- it is not a statement that the seam has already been extracted in the current runtime
+- active runtime behavior remains unchanged in this commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- branch goal:
+  - extract the deterministic schema-matching and normalized/report assembly seam out of `scraper/pipeline/prepare_stage.py` while preserving current runtime behavior
+- exact non-goals:
+  - no public workflow or CLI behavior change
+  - no prepare/render ownership-boundary change
+  - no output artifact path or filename change
+  - no taxonomy-resolution extraction in this branch
+  - no manufacturer-enrichment extraction in this branch
+  - no provider-resolution reshuffle in this branch
+  - no scrape-persistence extraction or path redesign in this branch
+  - no render ownership change
+  - no naming-polish cleanup in this branch
+  - no split-task LLM handoff contract change
+- proposed extracted module name:
+  - `scraper/pipeline/prepare_result_assembly.py`
+- proposed result types:
+  - `PrepareResultAssemblyInput`
+  - `PrepareResultAssemblyResult`
+- what stays in `prepare_stage.py` after this branch:
+  - provider-resolution orchestration
+  - gallery download orchestration
+  - section-image/Besco download orchestration
+  - taxonomy resolution for now
+  - manufacturer enrichment orchestration for now
+  - scrape-persistence seam invocation through `scraper/pipeline/prepare_scrape_persistence.py`
+  - the outward dict-shaped `execute_prepare_stage(...)` payload
+- what leaves `prepare_stage.py` in this branch:
+  - effective spec-section selection for deterministic schema matching
+  - preferred schema-source-file selection
+  - the `schema_matcher.match(...)` call and schema-candidate assembly
+  - deterministic row and normalized payload assembly via `build_row(...)`
+  - deterministic report payload assembly, including warning aggregation, diagnostics packaging, and `files_written` composition
+- explicit branch boundary:
+  - taxonomy resolution and manufacturer enrichment stay in `prepare_stage.py` for now
+  - `prepare` remains scrape-only plus LLM-handoff-only
+  - `render` ownership stays unchanged
+  - `scraper/pipeline/services/prepare_execution.py` remains the owner of `work/{model}/llm/*`
+
+Test strategy for the next commits:
+- add focused unit coverage for the extracted result-assembly seam
+- assert unchanged schema-match outputs, normalized payload shape, warning ordering, and report assembly behavior
+- keep existing prepare/workflow/provider regressions as the behavioral backstop for Electronet, Skroutz, and supported manufacturer flows
+- run targeted seam tests during each extraction step, then run the broader scraper suite before closing the branch
+
+Commands run:
+- `rg -n "prepare_stage|artifact persistence|schema-matching|normalized|report assembly|taxonomy|manufacturer enrichment" PLAN.md DOCUMENTATION.md README.md scraper/pipeline/prepare_stage.py`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content README.md`
+- `Get-Content scraper/pipeline/prepare_stage.py`
+
+Validation:
+- the new branch scope is now recorded in `PLAN.md`
+- the engineering log now captures the branch goal, non-goals, proposed module and result types, retained ownership, and planned test strategy
+- this commit remains docs-only and does not modify Python files or tests
+- `README.md` did not require changes for this scope-freeze commit
+
 ## 2026-04-01 - Finalize scrape persistence extraction docs
 
 Goal:
