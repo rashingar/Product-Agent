@@ -3,6 +3,270 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Finalize docs for prepare-stage result-assembly extraction
+
+Goal:
+- freeze the landed ownership for the prepare-stage result-assembly refactor in the control docs
+- remove active-state wording drift that still described the branch as proposed or implied direct `SchemaMatcher` construction in `prepare_stage.py`
+- keep this commit docs-only
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- updated `PLAN.md` to record the landed state instead of the earlier planned state for this branch
+- documented that `scraper/pipeline/prepare_stage.py` now owns only upstream orchestration and input preparation:
+  - gallery/Besco handling
+  - taxonomy resolution
+  - manufacturer enrichment
+  - shaping needed before deterministic result assembly
+- documented that `scraper/pipeline/prepare_result_assembly.py` now owns:
+  - schema source preference logic
+  - schema matcher construction
+  - `schema_matcher.match(...)` orchestration
+  - deterministic row building
+  - normalized payload assembly
+  - report payload assembly
+- documented the landed single injection seam:
+  - `assemble_prepare_result_fn=assemble_prepare_result`
+- documented test intent clearly without renaming files in this commit:
+  - `test_prepare_result_assembly_module.py` covers direct module-level schema/result behavior
+  - `test_prepare_stage_result_assembly.py` isolates stage orchestration by stubbing only the single result-assembly seam
+- recorded that public workflow behavior and `scraper/pipeline/services/prepare_execution.py` behavior remain unchanged
+- recorded the next recommended follow-up branch:
+  - taxonomy/manufacturer-enrichment orchestration extraction
+- reviewed `README.md` and left it unchanged because it does not describe the old internal ownership incorrectly
+
+Commands run:
+- `rg -n "prepare_stage.py|prepare_result_assembly|SchemaMatcher|schema_matcher_factory|assemble_prepare_result_fn|scope defined|Proposed extracted module|test_prepare_stage_result_assembly|test_prepare_result_assembly_module|taxonomy/enrichment" PLAN.md DOCUMENTATION.md README.md`
+- `Get-Content PLAN.md | Select-Object -Skip 390 -First 90`
+- `Get-Content DOCUMENTATION.md -TotalCount 120`
+- `Get-Content README.md -TotalCount 220`
+
+Validation:
+- control docs now describe the landed prepare-stage/result-assembly ownership precisely
+- no stale active-state wording remains in the branch-scope section implying that `prepare_stage.py` still constructs `SchemaMatcher`
+- `README.md` did not require changes
+- no Python files changed
+- no test files changed
+- no public entrypoint changed
+
+## 2026-04-01 - Collapse prepare-stage result assembly to one injected seam
+
+Goal:
+- reduce the deterministic result-assembly dependency surface in `execute_prepare_stage(...)` to one injected callable
+- remove the stage-level low-level schema-matcher injection now that result assembly is extracted
+- keep workflow, prepare execution, and outward stage behavior unchanged
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_result_assembly.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+
+Changes:
+- `execute_prepare_stage(...)` now exposes one deterministic assembly seam:
+  - `assemble_prepare_result_fn=assemble_prepare_result`
+- removed the old lower-level stage injection:
+  - `schema_matcher_factory`
+- `prepare_stage.py` no longer imports or constructs `SchemaMatcher`
+- `prepare_result_assembly.py` now owns schema-matcher construction internally through its own defaulted `schema_matcher_factory`
+- direct tests continue to target `prepare_result_assembly.py` for schema/result behavior
+- stage tests in `test_prepare_stage_result_assembly.py` now stub only `assemble_prepare_result_fn` when isolating stage orchestration
+- provider-selection tests were updated to stub the single result-assembly seam instead of a low-level schema matcher
+- control docs now reflect the landed names:
+  - landed result type: `PrepareResultAssemblyResult`
+  - landed stage injection boundary: `assemble_prepare_result_fn`
+  - no landed `PrepareResultAssemblyInput` type exists in the current branch
+
+Old vs new stage signature summary:
+- old:
+  - `execute_prepare_stage(..., schema_matcher_factory=SchemaMatcher, ...)`
+- new:
+  - `execute_prepare_stage(..., assemble_prepare_result_fn=assemble_prepare_result, ...)`
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `Get-Content scraper/pipeline/prepare_result_assembly.py`
+- `Get-Content scraper/pipeline/tests/test_provider_selection.py`
+- `Get-Content scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
+
+Validation:
+- direct result-assembly tests still pass
+- stage orchestration tests now isolate only the single result-assembly seam
+- provider-selection regressions still pass
+- prepare-focused workflow and service regressions still pass
+- no public workflow or service entrypoint changed
+
+## 2026-04-01 - Wire prepare stage to the result-assembly seam
+
+Goal:
+- route `scraper/pipeline/prepare_stage.py` through the new deterministic result-assembly module
+- remove the now-redundant inline schema/result assembly block from `prepare_stage.py`
+- preserve the outward `execute_prepare_stage(...)` payload, prepare/workflow behavior, and prepare/render ownership boundaries
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+
+Changes:
+- wired `prepare_stage.py` to `assemble_prepare_result(...)` in `scraper/pipeline/prepare_result_assembly.py`
+- removed the inline deterministic assembly block from `prepare_stage.py` that previously owned:
+  - effective spec-section shaping for schema selection
+  - preferred schema-source-file computation
+  - `schema_matcher.match(...)` orchestration
+  - deterministic row-building through `build_row(...)`
+  - normalized payload assembly
+  - deterministic report payload assembly
+- `prepare_stage.py` now:
+  - keeps gallery and Besco orchestration
+  - keeps taxonomy resolution
+  - keeps manufacturer enrichment orchestration
+  - prepares the assembly inputs and delegates deterministic result assembly through the new seam
+  - keeps the outward dict-shaped return payload compatible with `prepare_execution.py`
+- removed the now-redundant local `build_identity_checks(...)` helper from `prepare_stage.py` because the assembly seam owns that report field composition now
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `python -m pytest -q pipeline/tests/test_prepare_result_assembly_module.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
+
+Validation:
+- direct seam tests still pass
+- existing prepare-stage characterization tests still pass
+- provider-selection regressions still pass with the stage routed through the seam
+- prepare-focused workflow and service regressions still pass
+- outward `execute_prepare_stage(...)` return keys remain unchanged
+
+Remaining deterministic assembly logic intentionally left in `prepare_stage.py`:
+- none from the extracted schema/result assembly block
+- only upstream orchestration remains there for gallery/Besco handling, taxonomy resolution, manufacturer enrichment, and preparation of inputs for result assembly
+
+## 2026-04-01 - Add standalone prepare result-assembly seam without wiring it
+
+Goal:
+- add the extracted deterministic prepare result-assembly module for the current branch
+- keep `scraper/pipeline/prepare_stage.py` behavior unchanged in this commit by not wiring the new seam yet
+- pin the new module directly with focused tests while preserving the existing prepare-stage regressions
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_result_assembly.py`
+- `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+
+Changes:
+- added `scraper/pipeline/prepare_result_assembly.py`
+- added the new internal typed result:
+  - `PrepareResultAssemblyResult`
+- added the new internal seam:
+  - `assemble_prepare_result(...)`
+- the new module now owns standalone logic for:
+  - effective spec-section shaping used for schema selection
+  - preferred schema-source-file computation
+  - `schema_matcher.match(...)` orchestration
+  - deterministic row-building through `build_row(...)`
+  - normalized payload assembly
+  - deterministic report payload assembly for prepare-stage outputs
+- added focused direct tests for the seam in `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+
+Intentional temporary duplication left for the next commit:
+- `scraper/pipeline/prepare_stage.py` still contains the active inline deterministic schema/result assembly block
+- `scraper/pipeline/prepare_result_assembly.py` currently mirrors that logic but is not called by `prepare_stage.py` yet
+- `build_prepare_result_identity_checks(...)` currently duplicates the local `build_identity_checks(...)` helper shape from `prepare_stage.py`
+
+Commands run:
+- `Get-Content scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `python -m pytest -q pipeline/tests/test_prepare_result_assembly_module.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- the new seam module is covered directly without changing production behavior
+- existing prepare-stage characterization tests still pass unchanged
+- this commit does not move taxonomy resolution, manufacturer enrichment, provider resolution, or artifact persistence
+
+## 2026-04-01 - Freeze prepare-stage result assembly refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-result-assembly`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, workflow entrypoints, or artifact contracts
+
+Scope framing:
+- this section records planned branch work for extracting the deterministic schema-matching and normalized/report assembly seam out of `scraper/pipeline/prepare_stage.py`
+- it is not a statement that the seam has already been extracted in the current runtime
+- active runtime behavior remains unchanged in this commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- branch goal:
+  - extract the deterministic schema-matching and normalized/report assembly seam out of `scraper/pipeline/prepare_stage.py` while preserving current runtime behavior
+- exact non-goals:
+  - no public workflow or CLI behavior change
+  - no prepare/render ownership-boundary change
+  - no output artifact path or filename change
+  - no taxonomy-resolution extraction in this branch
+  - no manufacturer-enrichment extraction in this branch
+  - no provider-resolution reshuffle in this branch
+  - no scrape-persistence extraction or path redesign in this branch
+  - no render ownership change
+  - no naming-polish cleanup in this branch
+  - no split-task LLM handoff contract change
+- proposed extracted module name:
+  - `scraper/pipeline/prepare_result_assembly.py`
+- proposed result types:
+  - `PrepareResultAssemblyInput`
+  - `PrepareResultAssemblyResult`
+- what stays in `prepare_stage.py` after this branch:
+  - provider-resolution orchestration
+  - gallery download orchestration
+  - section-image/Besco download orchestration
+  - taxonomy resolution for now
+  - manufacturer enrichment orchestration for now
+  - scrape-persistence seam invocation through `scraper/pipeline/prepare_scrape_persistence.py`
+  - the outward dict-shaped `execute_prepare_stage(...)` payload
+- what leaves `prepare_stage.py` in this branch:
+  - effective spec-section selection for deterministic schema matching
+  - preferred schema-source-file selection
+  - the `schema_matcher.match(...)` call and schema-candidate assembly
+  - deterministic row and normalized payload assembly via `build_row(...)`
+  - deterministic report payload assembly, including warning aggregation, diagnostics packaging, and `files_written` composition
+- explicit branch boundary:
+  - taxonomy resolution and manufacturer enrichment stay in `prepare_stage.py` for now
+  - `prepare` remains scrape-only plus LLM-handoff-only
+  - `render` ownership stays unchanged
+  - `scraper/pipeline/services/prepare_execution.py` remains the owner of `work/{model}/llm/*`
+
+Test strategy for the next commits:
+- add focused unit coverage for the extracted result-assembly seam
+- assert unchanged schema-match outputs, normalized payload shape, warning ordering, and report assembly behavior
+- keep existing prepare/workflow/provider regressions as the behavioral backstop for Electronet, Skroutz, and supported manufacturer flows
+- run targeted seam tests during each extraction step, then run the broader scraper suite before closing the branch
+
+Commands run:
+- `rg -n "prepare_stage|artifact persistence|schema-matching|normalized|report assembly|taxonomy|manufacturer enrichment" PLAN.md DOCUMENTATION.md README.md scraper/pipeline/prepare_stage.py`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content README.md`
+- `Get-Content scraper/pipeline/prepare_stage.py`
+
+Validation:
+- the new branch scope is now recorded in `PLAN.md`
+- the engineering log now captures the branch goal, non-goals, proposed module and result types, retained ownership, and planned test strategy
+- this commit remains docs-only and does not modify Python files or tests
+- `README.md` did not require changes for this scope-freeze commit
+
 ## 2026-04-01 - Finalize scrape persistence extraction docs
 
 Goal:

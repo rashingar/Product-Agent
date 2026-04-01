@@ -110,7 +110,6 @@ Render stage writes:
 ## Validation
 
 - `work/{model}/candidate/{model}.validation.json` is the final machine-readable health report.
-- If `products/{model}.csv` exists, compare candidate output against it field by field.
 - Render success is owned only by render; the post-render publish phase reports its own status and does not flip render to failed.
 - Prefer fixing pipeline behavior instead of patching generated files by hand.
 

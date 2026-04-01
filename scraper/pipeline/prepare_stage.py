@@ -3,24 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable
 
-from .characteristics_pipeline import get_characteristics_registry
-from .deterministic_fields import effective_spec_sections as build_effective_spec_sections
 from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
-from .mapping import build_row
 from .manufacturer_enrichment import enrich_source_from_manufacturer_docs
 from .models import CLIInput, GalleryImage, ParsedProduct
 from .normalize import normalize_for_match
 from .prepare_provider_resolution import PrepareProviderResolutionResult, resolve_prepare_provider_resolution
+from .prepare_result_assembly import assemble_prepare_result
 from .prepare_scrape_persistence import (
     PrepareScrapePersistenceInput,
     PrepareScrapePersistenceResult,
     persist_prepare_scrape_artifacts,
 )
-from .repo_paths import SCHEMA_LIBRARY_PATH
-from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
-from .skroutz_taxonomy import serialize_source_category
 from .source_detection import validate_url_scope
 from .taxonomy import TaxonomyResolver
 from .utils import ensure_directory
@@ -68,14 +63,13 @@ def execute_prepare_stage(
     *,
     model_dir: Path | None = None,
     validate_url_scope_fn: Callable[[str], tuple[str, bool, str]] = validate_url_scope,
-    schema_matcher_factory: Callable[..., SchemaMatcher] = SchemaMatcher,
     fetcher_factory: Callable[[], ElectronetFetcher] = ElectronetFetcher,
     taxonomy_resolver_factory: Callable[[], TaxonomyResolver] = TaxonomyResolver,
     resolve_prepare_provider_input_fn: Callable[..., PrepareProviderResolutionResult] = resolve_prepare_provider_resolution,
     enrich_source_from_manufacturer_docs_fn: Callable[..., dict[str, Any]] = enrich_source_from_manufacturer_docs,
+    assemble_prepare_result_fn: Callable[..., Any] = assemble_prepare_result,
     persist_prepare_scrape_artifacts_fn: Callable[[PrepareScrapePersistenceInput], PrepareScrapePersistenceResult] = persist_prepare_scrape_artifacts,
 ) -> dict[str, Any]:
-    schema_matcher = schema_matcher_factory(str(SCHEMA_LIBRARY_PATH))
     fetcher = fetcher_factory()
     provider_resolution = resolve_prepare_provider_input_fn(
         cli,
@@ -353,144 +347,38 @@ def execute_prepare_stage(
                 raise RuntimeError(f"Skroutz besco image download failed: {exc}") from exc
     source_payload = parsed.source.to_dict()
 
-    effective_spec_sections = build_effective_spec_sections(
-        parsed.source,
-        manufacturer_first=normalize_for_match(parsed.source.source_name) == "skroutz",
-    )
-    characteristics_registry = get_characteristics_registry()
-    preferred_schema_source_files = characteristics_registry.preferred_schema_source_files(parsed.source, taxonomy)
-    schema_match, schema_candidates = schema_matcher.match(
-        effective_spec_sections,
-        taxonomy.sub_category,
-        preferred_source_files=preferred_schema_source_files,
-    )
-
-    row, normalized, mapping_warnings = build_row(
-        cli,
-        parsed,
-        taxonomy,
-        schema_match,
-        downloaded_image_count=len(downloaded_gallery),
+    result_assembly = assemble_prepare_result_fn(
+        cli=cli,
+        source=source,
+        fetch=fetch,
+        parsed=parsed,
+        taxonomy=taxonomy,
+        taxonomy_candidates=taxonomy_candidates,
+        manufacturer_enrichment=manufacturer_enrichment,
+        extracted_gallery_count=extracted_gallery_count,
+        downloaded_gallery=downloaded_gallery,
+        gallery_warnings=gallery_warnings,
+        gallery_files=gallery_files,
+        selected_presentation_blocks=selected_presentation_blocks,
+        section_warnings=section_warnings,
+        section_image_candidates=section_image_candidates,
+        section_image_urls_resolved=section_image_urls_resolved,
+        section_extraction_window=section_extraction_window,
+        selected_besco_images=selected_besco_images,
+        downloaded_besco=downloaded_besco,
+        besco_warnings=besco_warnings,
+        besco_files=besco_files,
         besco_filenames_by_section=besco_filenames_by_section,
-        source_raw_html=fetch.html,
+        final_source=final_source,
+        final_scope_ok=final_scope_ok,
+        final_scope_reason=final_scope_reason,
+        scrape_persistence_input=scrape_persistence_input,
+        sections_artifact_payload=sections_artifact_payload,
     )
 
-    report = {
-        "input": cli.to_dict(),
-        "source": source,
-        "fetch_mode": fetch.method,
-        "source_resolution": {
-            "requested_url": cli.url,
-            "detected_source": source,
-            "resolved_url": fetch.final_url,
-        },
-        "identity_checks": build_identity_checks(cli, parsed, source),
-        "url_scope_validation": {
-            "ok": final_scope_ok,
-            "reason": final_scope_reason,
-            "final_url_source": final_source,
-        },
-        "skroutz_blocks_found": {
-            "hero_summary_present": bool(parsed.source.hero_summary),
-            "gallery_images_count": len(parsed.source.gallery_images),
-            "spec_sections_count": len(parsed.source.spec_sections),
-            "manufacturer_spec_sections_count": len(parsed.source.manufacturer_spec_sections),
-        },
-        "characteristics_pairs": {
-            "count": sum(len(section.items) for section in effective_spec_sections),
-            "source_count": sum(len(section.items) for section in parsed.source.spec_sections),
-            "manufacturer_count": sum(len(section.items) for section in parsed.source.manufacturer_spec_sections),
-        },
-        "taxonomy_resolution": taxonomy.to_dict(),
-        "manufacturer_enrichment": manufacturer_enrichment,
-        "schema_resolution": schema_match.to_dict(),
-        "characteristics_diagnostics": normalized.get("characteristics_diagnostics", {}),
-        "skroutz_taxonomy_diagnostics": {
-            "family_key": parsed.source.skroutz_family,
-            "raw_category_tag": parsed.source.category_tag_text,
-            "raw_category_href": parsed.source.category_tag_href,
-            "normalized_href_slug": parsed.source.category_tag_slug,
-            "matched_rule": parsed.source.taxonomy_rule_id,
-            "source_category": parsed.source.taxonomy_source_category
-            or serialize_source_category(
-                taxonomy.parent_category,
-                taxonomy.leaf_category,
-                [taxonomy.sub_category] if taxonomy.sub_category else [],
-            ),
-            "match_type": parsed.source.taxonomy_match_type or ("exact_category" if taxonomy.parent_category and taxonomy.leaf_category else ""),
-            "tv_inches": parsed.source.taxonomy_tv_inches,
-            "ambiguity": parsed.source.taxonomy_ambiguity,
-            "escalation_reason": parsed.source.taxonomy_escalation_reason,
-        },
-        "schema_preference": {
-            "preferred_source_files": preferred_schema_source_files,
-        },
-        "unsupported_features": [],
-        "critical_extractors": {
-            "product_code": parsed.provenance.get("product_code", "missing"),
-            "brand": parsed.provenance.get("brand", "missing"),
-            "mpn": parsed.provenance.get("mpn", "missing"),
-            "name": parsed.provenance.get("name", "missing"),
-            "price": parsed.provenance.get("price", "missing"),
-            "taxonomy": "resolved" if taxonomy.parent_category and taxonomy.leaf_category else "unresolved",
-            "schema_match": "matched" if schema_match.score >= 0.35 else ("weak" if schema_match.score > 0 else "none"),
-        },
-        "field_diagnostics": {key: value.to_dict() for key, value in parsed.field_diagnostics.items()},
-        "missing_fields": parsed.missing_fields,
-        "warnings": parsed.warnings
-        + gallery_warnings
-        + section_warnings
-        + besco_warnings
-        + mapping_warnings
-        + schema_match.warnings
-        + ([taxonomy.reason] if taxonomy.reason and taxonomy.reason != "" else []),
-        "taxonomy_candidates": taxonomy_candidates,
-        "schema_candidates": schema_candidates,
-        "gallery_summary": {
-            "extracted_count": extracted_gallery_count,
-            "downloaded_count": len(downloaded_gallery),
-            "requested_photos": cli.photos,
-        },
-        "sections_requested": cli.sections,
-        "sections_extracted": len(selected_presentation_blocks),
-        "section_titles": [block["title"] for block in selected_presentation_blocks],
-        "section_image_candidates": section_image_candidates,
-        "section_image_urls_resolved": section_image_urls_resolved,
-        "section_downloads": [
-            {
-                "position": image.position,
-                "source_url": image.url,
-                "local_filename": image.local_filename,
-                "local_path": image.local_path,
-            }
-            for image in downloaded_besco
-        ],
-        "section_extraction_window": section_extraction_window,
-        "besco_summary": {
-            "presentation_blocks_count": len(selected_presentation_blocks),
-            "extracted_count": len(selected_besco_images),
-            "downloaded_count": len(downloaded_besco),
-            "requested_sections": cli.sections,
-        },
-        "files_written": [
-            str(scrape_persistence_input.raw_html_path),
-            str(scrape_persistence_input.source_json_path),
-            str(scrape_persistence_input.normalized_json_path),
-            str(scrape_persistence_input.report_json_path),
-            *[
-                path
-                for document in manufacturer_enrichment.get("documents", [])
-                for path in [document.get("local_path", ""), document.get("text_path", "")]
-                if path
-            ],
-            *gallery_files,
-            *([str(scrape_persistence_input.bescos_raw_path)] if sections_artifact_payload is not None else []),
-            *besco_files,
-        ],
-    }
     scrape_persistence_input.source_payload = source_payload
-    scrape_persistence_input.normalized_payload = normalized
-    scrape_persistence_input.report_payload = report
+    scrape_persistence_input.normalized_payload = result_assembly.normalized
+    scrape_persistence_input.report_payload = result_assembly.report
     scrape_persistence_input.bescos_raw_payload = sections_artifact_payload
     scrape_persistence = persist_prepare_scrape_artifacts_fn(scrape_persistence_input)
 
@@ -501,12 +389,12 @@ def execute_prepare_stage(
         "parsed": parsed,
         "taxonomy": taxonomy,
         "taxonomy_candidates": taxonomy_candidates,
-        "schema_match": schema_match,
-        "schema_candidates": schema_candidates,
+        "schema_match": result_assembly.schema_match,
+        "schema_candidates": result_assembly.schema_candidates,
         "manufacturer_enrichment": manufacturer_enrichment,
-        "row": row,
-        "normalized": normalized,
-        "report": report,
+        "row": result_assembly.row,
+        "normalized": result_assembly.normalized,
+        "report": result_assembly.report,
         "model_dir": resolved_model_dir,
         "raw_html_path": scrape_persistence.raw_html_path,
         "source_json_path": scrape_persistence.source_json_path,
@@ -516,16 +404,4 @@ def execute_prepare_stage(
         "downloaded_gallery": downloaded_gallery,
         "downloaded_besco": downloaded_besco,
         "besco_filenames_by_section": besco_filenames_by_section,
-    }
-
-
-def build_identity_checks(cli: CLIInput, parsed: ParsedProduct, source: str) -> dict[str, Any]:
-    return {
-        "source": source,
-        "input_model": cli.model,
-        "page_type": parsed.source.page_type,
-        "page_product_code": parsed.source.product_code,
-        "name_present": bool(parsed.source.name),
-        "brand_present": bool(parsed.source.brand),
-        "mpn_present": bool(parsed.source.mpn),
     }
