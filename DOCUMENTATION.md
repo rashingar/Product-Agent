@@ -3,6 +3,53 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Narrow the prepare-stage scrape persistence seam
+
+Goal:
+- reduce the scrape persistence seam to one clear typed persistence call from `prepare_stage.py`
+- remove remaining write-oriented local variables and persistence choreography from the stage implementation
+- keep the outward `execute_prepare_stage(...)` payload and all public workflow behavior unchanged
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/characteristics_pipeline.py`
+- `scraper/pipeline/mapping.py`
+- `scraper/pipeline/prepare_scrape_persistence.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_prepare_scrape_persistence.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+
+Changes:
+- `prepare_stage.py` now builds one `PrepareScrapePersistenceInput` object, fills it as state is computed, and calls `persist_prepare_scrape_artifacts(...)` once
+- path derivation for the canonical scrape artifacts now lives on `PrepareScrapePersistenceInput` via typed properties instead of ad hoc stage-local path variables
+- `PrepareScrapePersistenceResult` was reduced to the canonical persisted scrape paths only
+- removed write-tracking fields from the persistence result because the stage and direct persistence tests only need the canonical paths and on-disk outputs
+- `mapping.build_row(...)` and `characteristics_pipeline.build_characteristics_for_product(...)` now accept optional in-memory raw HTML so prepare-stage characteristics generation no longer requires an early raw-html disk write before the final scrape persistence call
+- prepare-stage orchestration tests now target the injected persistence seam instead of asserting file-writing internals
+
+Old vs new seam:
+- old seam:
+  - `prepare_stage.py` derived scrape paths locally
+  - staged persistence happened in two phases
+  - prepare-stage tests still indirectly asserted persisted files
+- new seam:
+  - one typed `PrepareScrapePersistenceInput`
+  - one `persist_prepare_scrape_artifacts(...)` call
+  - one small `PrepareScrapePersistenceResult`
+  - prepare-stage tests assert persistence orchestration through the seam
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_scrape_persistence.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
+
+Validation:
+- direct persistence tests still pass against the new module shape
+- prepare-stage tests now assert the typed persistence seam is invoked once with the prepared scrape payload
+- prepare-focused workflow and service regressions still pass
+- public workflow behavior did not change
+
 ## 2026-04-01 - Wire prepare stage to the scrape persistence module
 
 Goal:

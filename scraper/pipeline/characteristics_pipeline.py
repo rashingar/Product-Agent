@@ -220,6 +220,7 @@ def build_characteristics_for_product(
     source: SourceProductData,
     taxonomy: TaxonomyResolution,
     schema_match: SchemaMatchResult | None = None,
+    raw_html: str | None = None,
 ) -> tuple[str, dict[str, Any], list[str]]:
     registry = get_characteristics_registry()
     template = registry.select_template(source, taxonomy, schema_match=schema_match)
@@ -229,7 +230,7 @@ def build_characteristics_for_product(
     if _template_requests_raw_spec_sections(template):
         return _build_raw_spec_sections_result(source, schema_match=schema_match, template=template)
 
-    context = _build_resolution_context(source, taxonomy)
+    context = _build_resolution_context(source, taxonomy, raw_html=raw_html)
     warnings = [f"characteristics_template_used:{template['template_id']}"]
     diagnostics_fields: list[dict[str, Any]] = []
     resolved_sections: list[SpecSection] = []
@@ -308,21 +309,27 @@ def _template_requests_raw_spec_sections(template: dict[str, Any]) -> bool:
     return normalized == "raw_spec_sections"
 
 
-def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResolution) -> _ResolutionContext:
-    raw_html = ""
-    raw_path = normalize_whitespace(source.raw_html_path)
-    if raw_path:
-        path = Path(raw_path)
-        if path.exists():
-            raw_html = path.read_text(encoding="utf-8")
+def _build_resolution_context(
+    source: SourceProductData,
+    taxonomy: TaxonomyResolution,
+    *,
+    raw_html: str | None = None,
+) -> _ResolutionContext:
+    resolved_raw_html = raw_html or ""
+    if not resolved_raw_html:
+        raw_path = normalize_whitespace(source.raw_html_path)
+        if raw_path:
+            path = Path(raw_path)
+            if path.exists():
+                resolved_raw_html = path.read_text(encoding="utf-8")
 
     spec_sections = _effective_spec_sections(source)
     prefer_manufacturer = normalize_for_match(source.source_name) == "skroutz" and bool(source.manufacturer_spec_sections)
     spec_lookup = build_spec_lookup(source.key_specs, spec_sections, key_specs_last=prefer_manufacturer)
-    raw_lookup = _extract_dt_dd_lookup(raw_html)
+    raw_lookup = _extract_dt_dd_lookup(resolved_raw_html)
     section_lookup = _build_section_lookup(spec_sections)
-    offer_titles = _extract_offer_titles(raw_html)
-    raw_text = _extract_raw_text(raw_html)
+    offer_titles = _extract_offer_titles(resolved_raw_html)
+    raw_text = _extract_raw_text(resolved_raw_html)
     combined_text = normalize_whitespace(
         " ".join(
             part
@@ -343,7 +350,7 @@ def _build_resolution_context(source: SourceProductData, taxonomy: TaxonomyResol
         spec_lookup=spec_lookup,
         raw_lookup=raw_lookup,
         section_lookup=section_lookup,
-        raw_html=raw_html,
+        raw_html=resolved_raw_html,
         raw_text=raw_text,
         offer_titles=offer_titles,
         combined_text=combined_text,

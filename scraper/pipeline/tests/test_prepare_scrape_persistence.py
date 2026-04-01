@@ -40,13 +40,6 @@ def test_persist_prepare_scrape_artifacts_writes_expected_file_set_into_scrape_d
         "233541.source.json",
         "bescos_raw.json",
     ]
-    assert result.files_written == [
-        result.raw_html_path,
-        result.source_json_path,
-        result.normalized_json_path,
-        result.report_json_path,
-        result.bescos_raw_path,
-    ]
     assert sentinel.read_text(encoding="utf-8") == "keep"
     assert sorted(path.name for path in llm_dir.iterdir()) == ["keep.txt"]
 
@@ -107,7 +100,6 @@ def test_persist_prepare_scrape_artifacts_cleans_stale_support_artifacts_without
         )
     )
 
-    assert result.cleaned_paths == [result.bescos_raw_path]
     assert not result.bescos_raw_path.exists()
     assert llm_sentinel.read_text(encoding="utf-8") == '{"llm": true}\n'
     assert sorted(path.name for path in scrape_dir.iterdir()) == [

@@ -12,7 +12,11 @@ from .manufacturer_enrichment import enrich_source_from_manufacturer_docs
 from .models import CLIInput, GalleryImage, ParsedProduct
 from .normalize import normalize_for_match
 from .prepare_provider_resolution import PrepareProviderResolutionResult, resolve_prepare_provider_resolution
-from .prepare_scrape_persistence import PrepareScrapePersistenceInput, persist_prepare_scrape_artifacts
+from .prepare_scrape_persistence import (
+    PrepareScrapePersistenceInput,
+    PrepareScrapePersistenceResult,
+    persist_prepare_scrape_artifacts,
+)
 from .repo_paths import SCHEMA_LIBRARY_PATH
 from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
@@ -69,6 +73,7 @@ def execute_prepare_stage(
     taxonomy_resolver_factory: Callable[[], TaxonomyResolver] = TaxonomyResolver,
     resolve_prepare_provider_input_fn: Callable[..., PrepareProviderResolutionResult] = resolve_prepare_provider_resolution,
     enrich_source_from_manufacturer_docs_fn: Callable[..., dict[str, Any]] = enrich_source_from_manufacturer_docs,
+    persist_prepare_scrape_artifacts_fn: Callable[[PrepareScrapePersistenceInput], PrepareScrapePersistenceResult] = persist_prepare_scrape_artifacts,
 ) -> dict[str, Any]:
     schema_matcher = schema_matcher_factory(str(SCHEMA_LIBRARY_PATH))
     fetcher = fetcher_factory()
@@ -83,17 +88,14 @@ def execute_prepare_stage(
     final_source, final_scope_ok, final_scope_reason = validate_url_scope_fn(fetch.final_url)
 
     resolved_model_dir = ensure_directory(model_dir or (Path(cli.out) / cli.model))
-    scrape_persistence = persist_prepare_scrape_artifacts(
-        PrepareScrapePersistenceInput(
-            model=cli.model,
-            scrape_dir=resolved_model_dir,
-            raw_html=fetch.html,
-        )
+    scrape_persistence_input = PrepareScrapePersistenceInput(
+        model=cli.model,
+        scrape_dir=resolved_model_dir,
+        raw_html=fetch.html,
+        source_payload={},
+        normalized_payload={},
+        report_payload={},
     )
-    raw_html_path = scrape_persistence.raw_html_path
-    source_json_path = scrape_persistence.source_json_path
-    normalized_json_path = scrape_persistence.normalized_json_path
-    report_json_path = scrape_persistence.report_json_path
 
     extracted_gallery_count = len(parsed.source.gallery_images)
     gallery_warnings: list[str] = []
@@ -125,7 +127,6 @@ def execute_prepare_stage(
         "stop_anchor": "",
         "title_signature": [],
     }
-    sections_artifact_path = scrape_persistence.bescos_raw_path
     sections_artifact_payload: dict[str, Any] | None = None
     if cli.sections > 0 and source != "skroutz":
         selected_presentation_blocks = extract_presentation_blocks(
@@ -163,7 +164,7 @@ def execute_prepare_stage(
                 raise RuntimeError(f"Skroutz besco image download failed: {exc}") from exc
             besco_warnings.append(f"besco_download_failed:{exc}")
 
-    parsed.source.raw_html_path = str(raw_html_path)
+    parsed.source.raw_html_path = str(scrape_persistence_input.raw_html_path)
     parsed.source.fallback_used = fetch.fallback_used
 
     taxonomy_resolver = taxonomy_resolver_factory()
@@ -371,6 +372,7 @@ def execute_prepare_stage(
         schema_match,
         downloaded_image_count=len(downloaded_gallery),
         besco_filenames_by_section=besco_filenames_by_section,
+        source_raw_html=fetch.html,
     )
 
     report = {
@@ -471,10 +473,10 @@ def execute_prepare_stage(
             "requested_sections": cli.sections,
         },
         "files_written": [
-            str(raw_html_path),
-            str(source_json_path),
-            str(normalized_json_path),
-            str(report_json_path),
+            str(scrape_persistence_input.raw_html_path),
+            str(scrape_persistence_input.source_json_path),
+            str(scrape_persistence_input.normalized_json_path),
+            str(scrape_persistence_input.report_json_path),
             *[
                 path
                 for document in manufacturer_enrichment.get("documents", [])
@@ -482,20 +484,15 @@ def execute_prepare_stage(
                 if path
             ],
             *gallery_files,
-            *([str(sections_artifact_path)] if sections_artifact_payload is not None else []),
+            *([str(scrape_persistence_input.bescos_raw_path)] if sections_artifact_payload is not None else []),
             *besco_files,
         ],
     }
-    scrape_persistence = persist_prepare_scrape_artifacts(
-        PrepareScrapePersistenceInput(
-            model=cli.model,
-            scrape_dir=resolved_model_dir,
-            source_payload=source_payload,
-            normalized_payload=normalized,
-            report_payload=report,
-            bescos_raw_payload=sections_artifact_payload,
-        )
-    )
+    scrape_persistence_input.source_payload = source_payload
+    scrape_persistence_input.normalized_payload = normalized
+    scrape_persistence_input.report_payload = report
+    scrape_persistence_input.bescos_raw_payload = sections_artifact_payload
+    scrape_persistence = persist_prepare_scrape_artifacts_fn(scrape_persistence_input)
 
     return {
         "cli": cli,
