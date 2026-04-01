@@ -480,6 +480,72 @@ Entry handoff:
 4. Preserve the completed split-task steady-state contract while starting retrieval-layer work; do not reintroduce combined LLM artifacts.
 5. Do not reintroduce source-specific routing below the provider boundary.
 
+### Branch scope — prepare-stage taxonomy enrichment refactor
+
+Status: pending
+
+Purpose:
+1. Freeze the exact branch scope for extracting taxonomy resolution plus manufacturer-doc enrichment orchestration out of `scraper/pipeline/prepare_stage.py`, after the result-assembly branch landed, without changing observable runtime behavior.
+2. Keep this branch limited to one orchestration seam that owns `taxonomy_resolver.resolve(...)`, conditional manufacturer-doc enrichment orchestration, and the typed handoff back into `prepare_stage.py`.
+3. Preserve the public workflow entrypoint, prepare/render ownership split, output artifact paths, warnings, errors, and split-task LLM handoff contract while this internal orchestration seam is isolated.
+
+Branch goal:
+1. Move taxonomy resolution and manufacturer enrichment together behind one dedicated internal seam while keeping `python -m pipeline.workflow prepare ...` behavior unchanged.
+
+Proposed extracted module:
+1. `scraper/pipeline/prepare_taxonomy_enrichment.py`
+
+Proposed typed result:
+1. `PrepareTaxonomyEnrichmentResult`
+
+What leaves `prepare_stage.py` in this branch:
+1. The `taxonomy_resolver.resolve(...)` call and the surrounding taxonomy-resolution orchestration.
+2. The conditional manufacturer-doc enrichment orchestration that currently runs after taxonomy resolution.
+3. The internal typed handoff from that seam back into `prepare_stage.py` for resolved taxonomy and manufacturer-enriched section state.
+
+What stays in `prepare_stage.py` in this branch:
+1. Provider-resolution ownership stays in `prepare_stage.py`.
+2. Gallery download orchestration and section-image/Besco download orchestration stay in `prepare_stage.py`.
+3. Scrape artifact persistence stays delegated through `scraper/pipeline/prepare_scrape_persistence.py`.
+4. Result assembly remains outside this branch and stays delegated through `scraper/pipeline/prepare_result_assembly.py`.
+5. The outward `execute_prepare_stage(...)` return payload stays dict-shaped in this branch.
+6. Any orchestration before the new taxonomy/enrichment seam and after its typed handoff stays in `prepare_stage.py`.
+
+Seam boundary that must stay explicit:
+1. Taxonomy resolution and manufacturer enrichment move together as one orchestration seam in this branch; they do not split into separate extractions.
+2. Result assembly remains outside this branch; no schema-match, normalized/report assembly, or result-assembly ownership moves in this branch.
+3. `scraper/pipeline/services/prepare_execution.py` remains unchanged in this branch.
+
+Invariants that must not change:
+1. Public workflow entrypoint and CLI flags remain unchanged.
+2. Prepare remains scrape-only plus LLM-handoff-only; render remains the sole owner of candidate and publish outputs.
+3. `scraper/pipeline/services/prepare_execution.py` remains responsible for all `work/{model}/llm/*` writes and remains behaviorally unchanged.
+4. Output artifact paths, filenames, and directory layout remain exactly under the current `work/{model}/scrape/`, `work/{model}/llm/`, `work/{model}/candidate/`, and `products/` locations.
+5. Result assembly remains delegated through `scraper/pipeline/prepare_result_assembly.py`.
+6. Provider-resolution ownership stays where it landed in the previous branch.
+7. Render ownership does not change in this branch.
+8. The split-task `intro_text` / `seo_meta` handoff contract stays unchanged.
+9. Warning text, warning ordering, error text, and failure behavior remain unchanged unless regression tests prove accidental drift.
+
+Explicit non-goals:
+1. No public workflow or CLI behavior changes.
+2. No prepare/render ownership-boundary changes.
+3. No output artifact path or filename changes.
+4. No `prepare_execution.py` behavior changes.
+5. No provider-resolution reshuffle in this branch.
+6. No scrape-persistence extraction or path redesign in this branch.
+7. No result-assembly extraction or result-assembly ownership changes in this branch.
+8. No schema/result-assembly ownership changes in this branch.
+9. No render ownership changes in this branch.
+10. No naming-polish cleanup in this branch.
+11. No split-task LLM handoff contract changes.
+
+Proposed test split for later commits:
+1. Add direct seam coverage in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py` for taxonomy resolution, manufacturer-doc enrichment gating, and the typed result returned to `prepare_stage.py`.
+2. Add stage-isolation coverage in `scraper/pipeline/tests/test_prepare_stage_taxonomy_enrichment.py` that stubs only the single taxonomy/enrichment seam and keeps `execute_prepare_stage(...)` focused on surrounding orchestration behavior.
+3. Keep existing prepare/workflow/provider regression coverage unchanged in meaning so the refactor continues to prove no public behavior change for Electronet, Skroutz, and supported manufacturer flows.
+4. Run targeted seam and stage tests during each extraction step, then run the broader scraper suite before closing the branch.
+
 ## Root policy
 ### Keep in root
 - `.claude/`

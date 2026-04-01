@@ -3,6 +3,70 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Freeze prepare-stage taxonomy enrichment refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-taxonomy-enrichment`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, workflow entrypoints, or artifact contracts
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- branch goal:
+  - extract taxonomy resolution plus manufacturer-doc enrichment orchestration out of `scraper/pipeline/prepare_stage.py` while preserving current runtime behavior
+- exact non-goals:
+  - no public workflow or CLI behavior change
+  - no prepare/render ownership-boundary change
+  - no output artifact path or filename change
+  - no `prepare_execution.py` behavior change
+  - no provider-resolution reshuffle in this branch
+  - no scrape-persistence extraction or path redesign in this branch
+  - no result-assembly extraction or result-assembly ownership change in this branch
+  - no schema/result-assembly ownership change in this branch
+  - no render ownership change
+  - no naming-polish cleanup in this branch
+  - no split-task LLM handoff contract change
+- proposed module name:
+  - `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- proposed typed result name:
+  - `PrepareTaxonomyEnrichmentResult`
+- what leaves `prepare_stage.py` in this branch:
+  - `taxonomy_resolver.resolve(...)`
+  - conditional manufacturer-doc enrichment orchestration
+  - the typed handoff carrying resolved taxonomy plus manufacturer-enriched section state back into `prepare_stage.py`
+- what stays in `prepare_stage.py` in this branch:
+  - provider-resolution ownership
+  - gallery and Besco orchestration
+  - scrape persistence seam invocation
+  - result-assembly seam invocation
+  - the outward dict-shaped `execute_prepare_stage(...)` payload
+- explicit branch boundary:
+  - result assembly remains outside this branch
+  - `prepare_execution.py` remains unchanged
+  - taxonomy and manufacturer enrichment move together as one orchestration seam
+
+Proposed test split for later commits:
+- add direct module-level coverage in `test_prepare_taxonomy_enrichment_module.py`
+- add stage-isolation coverage in `test_prepare_stage_taxonomy_enrichment.py`
+- keep existing prepare/workflow/provider regressions as the behavioral backstop for Electronet, Skroutz, and supported manufacturer flows
+- run targeted seam tests during each extraction step, then run the broader scraper suite before closing the branch
+
+Commands run:
+- `rg -n "Branch scope|prepare-stage result assembly refactor|recommended next branch|taxonomy/manufacturer-enrichment orchestration" PLAN.md DOCUMENTATION.md`
+- `Get-Content PLAN.md | Select-Object -Skip 350 -First 140`
+- `Get-Content DOCUMENTATION.md -TotalCount 140`
+- `Get-Content README.md`
+
+Validation:
+- the new branch scope is now recorded in `PLAN.md`
+- the engineering log now captures the branch goal, non-goals, proposed module/result names, ownership split, and planned test split
+- `README.md` was reviewed and did not require changes for this scope-freeze commit
+- this commit remains docs-only and does not modify Python files
+- this commit remains docs-only and does not modify test files
+
 ## 2026-04-01 - Finalize docs for prepare-stage result-assembly extraction
 
 Goal:
