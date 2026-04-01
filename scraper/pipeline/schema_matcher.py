@@ -61,7 +61,17 @@ class SchemaMatcher:
         taxonomy_leaf_category: str | None = None,
     ) -> tuple[SchemaMatchResult, list[dict[str, Any]]]:
         if not spec_sections:
-            return SchemaMatchResult(None, taxonomy_sub_category, 0.0, ["no_spec_sections_extracted"]), []
+            return (
+                SchemaMatchResult(
+                    matched_schema_id=None,
+                    matched_sub_category=taxonomy_sub_category,
+                    score=0.0,
+                    warnings=["no_spec_sections_extracted"],
+                    resolved_category_path=taxonomy_path or "",
+                    fail_reason="no_safe_template_match",
+                ),
+                [],
+            )
 
         extracted_titles = {normalize_for_match(section.section) for section in spec_sections if section.section}
         extracted_labels = {
@@ -83,12 +93,50 @@ class SchemaMatcher:
             taxonomy_leaf_category=taxonomy_leaf_category,
             preferred_source_files=preferred_source_files or [],
         )
+        resolved_category_path = self._resolved_category_path(
+            taxonomy_path=taxonomy_path,
+            taxonomy_parent_category=taxonomy_parent_category,
+            taxonomy_leaf_category=taxonomy_leaf_category,
+            taxonomy_sub_category=taxonomy_sub_category,
+        )
+        candidate_template_ids = [str(schema.get("template_id", "")) for schema in category_pool if str(schema.get("template_id", "")).strip()]
         if not category_pool:
-            return SchemaMatchResult(None, taxonomy_sub_category, 0.0, ["no_safe_template_match"]), []
+            return (
+                self._debug_result(
+                    matched_schema_id=None,
+                    matched_sub_category=taxonomy_sub_category,
+                    score=0.0,
+                    warnings=["no_safe_template_match"],
+                    resolved_category_path=resolved_category_path,
+                    candidate_pool_size=0,
+                    candidate_template_ids=[],
+                    selected_template_id=None,
+                    match_mode="",
+                    hard_gate_failures=[],
+                    fail_reason="pool_empty_for_category",
+                ),
+                [],
+            )
 
         safe_templates, inactive_candidates = self.filter_inactive_templates(category_pool)
         if not safe_templates:
-            return SchemaMatchResult(None, taxonomy_sub_category, 0.0, ["no_safe_template_match"]), inactive_candidates[:5]
+            fail_reason = "manual_only_category" if self._all_manual_only(category_pool) else "no_active_templates"
+            return (
+                self._debug_result(
+                    matched_schema_id=None,
+                    matched_sub_category=taxonomy_sub_category,
+                    score=0.0,
+                    warnings=["no_safe_template_match"],
+                    resolved_category_path=resolved_category_path,
+                    candidate_pool_size=len(category_pool),
+                    candidate_template_ids=candidate_template_ids,
+                    selected_template_id=None,
+                    match_mode=self._pool_match_mode(category_pool),
+                    hard_gate_failures=[],
+                    fail_reason=fail_reason,
+                ),
+                inactive_candidates[:5],
+            )
 
         if len(safe_templates) == 1:
             selected = safe_templates[0]
@@ -110,6 +158,10 @@ class SchemaMatcher:
                 extracted_labels=extracted_labels,
                 taxonomy_sub_category=taxonomy_sub_category,
                 score=1.0,
+                resolved_category_path=resolved_category_path,
+                candidate_pool_size=len(category_pool),
+                candidate_template_ids=candidate_template_ids,
+                fail_reason="",
             )
 
         gated_templates, gated_candidates = self.apply_hard_gates(
@@ -121,7 +173,21 @@ class SchemaMatcher:
         if not gated_templates:
             gated_candidates.sort(key=self._candidate_sort_key)
             return (
-                SchemaMatchResult(None, taxonomy_sub_category, 0.0, ["no_safe_template_match"]),
+                self._debug_result(
+                    matched_schema_id=None,
+                    matched_sub_category=taxonomy_sub_category,
+                    score=0.0,
+                    warnings=["no_safe_template_match"],
+                    resolved_category_path=resolved_category_path,
+                    candidate_pool_size=len(category_pool),
+                    candidate_template_ids=candidate_template_ids,
+                    selected_template_id=None,
+                    match_mode=self._pool_match_mode(safe_templates),
+                    hard_gate_failures=self._hard_gate_failures(gated_candidates),
+                    fail_reason=self._summarize_fail_reason(gated_candidates),
+                    discriminator_hits=[],
+                    discriminator_misses=self._aggregate_discriminator_misses(gated_candidates),
+                ),
                 gated_candidates[:5],
             )
 
@@ -141,6 +207,10 @@ class SchemaMatcher:
             extracted_labels=extracted_labels,
             taxonomy_sub_category=taxonomy_sub_category,
             score=float(scored_candidates[0]["score"]),
+            resolved_category_path=resolved_category_path,
+            candidate_pool_size=len(category_pool),
+            candidate_template_ids=candidate_template_ids,
+            fail_reason="",
         )
 
     def build_candidate_pool(
@@ -186,7 +256,7 @@ class SchemaMatcher:
         safe_templates: list[dict[str, Any]] = []
         diagnostics: list[dict[str, Any]] = []
         for schema in candidate_pool:
-            template_status = normalize_for_match(schema.get("template_status", ""))
+            template_status = self._normalized_template_status(schema.get("template_status", ""))
             if template_status == "active":
                 safe_templates.append(schema)
                 continue
@@ -300,17 +370,33 @@ class SchemaMatcher:
         extracted_labels: set[str],
         taxonomy_sub_category: str | None,
         score: float,
+        resolved_category_path: str,
+        candidate_pool_size: int,
+        candidate_template_ids: list[str],
+        fail_reason: str,
     ) -> tuple[SchemaMatchResult, list[dict[str, Any]]]:
         warnings: list[str] = []
         if len(candidates) > 1 and score < 0.35:
             warnings.append("weak_schema_match")
         warnings.extend(self._selection_warnings(schema, extracted_titles=extracted_titles, extracted_labels=extracted_labels))
+        best_candidate = candidates[0] if candidates else {}
         return (
-            SchemaMatchResult(
+            self._debug_result(
                 matched_schema_id=str(schema.get("schema_id", "")).strip() or None,
                 matched_sub_category=schema.get("sub_category") or taxonomy_sub_category,
                 score=round(score, 4),
                 warnings=warnings,
+                resolved_category_path=resolved_category_path,
+                candidate_pool_size=candidate_pool_size,
+                candidate_template_ids=candidate_template_ids,
+                selected_template_id=str(schema.get("template_id", "")).strip() or None,
+                match_mode=str(schema.get("match_mode", "")).strip(),
+                hard_gate_failures=self._hard_gate_failures(candidates),
+                fail_reason=fail_reason,
+                discriminator_hits=list(best_candidate.get("discriminator_hits", [])),
+                discriminator_misses=list(best_candidate.get("discriminator_misses", [])),
+                section_overlap_score=float(best_candidate.get("section_overlap_score", 0.0)),
+                label_overlap_score=float(best_candidate.get("label_overlap_score", 0.0)),
             ),
             candidates[:5],
         )
@@ -334,6 +420,10 @@ class SchemaMatcher:
         label_overlap = len(extracted_labels & labels)
         pair_overlap = len(extracted_pairs & section_label_pairs)
         discriminator_overlap = len(extracted_labels & discriminator_labels)
+        discriminator_hits = sorted(label for label in discriminator_labels if label in extracted_labels)
+        discriminator_misses = sorted(label for label in discriminator_labels if label not in extracted_labels)
+        section_overlap_score = section_overlap / max(len(section_names), 1)
+        label_overlap_score = label_overlap / max(len(labels), 1)
         return {
             "matched_schema_id": schema.get("schema_id"),
             "template_id": schema.get("template_id"),
@@ -344,8 +434,12 @@ class SchemaMatcher:
             "score": round(score, 4),
             "section_overlap": section_overlap,
             "label_overlap": label_overlap,
+            "section_overlap_score": round(section_overlap_score, 4),
+            "label_overlap_score": round(label_overlap_score, 4),
             "pair_overlap": pair_overlap,
             "discriminator_overlap": discriminator_overlap,
+            "discriminator_hits": discriminator_hits,
+            "discriminator_misses": discriminator_misses,
             "gate_status": gate_status,
             "gate_reasons": gate_reasons,
             "n_sections": schema.get("n_sections"),
@@ -407,6 +501,22 @@ class SchemaMatcher:
             return ""
         return normalize_for_match(f"{parent} > {leaf} > {sub_category or '-'}")
 
+    def _resolved_category_path(
+        self,
+        *,
+        taxonomy_path: str | None,
+        taxonomy_parent_category: str | None,
+        taxonomy_leaf_category: str | None,
+        taxonomy_sub_category: str | None,
+    ) -> str:
+        if str(taxonomy_path or "").strip():
+            return str(taxonomy_path or "").strip()
+        parent = str(taxonomy_parent_category or "").strip()
+        leaf = str(taxonomy_leaf_category or "").strip()
+        if not parent or not leaf:
+            return ""
+        return f"{parent} > {leaf} > {taxonomy_sub_category or '-'}"
+
     def _parent_leaf_key(self, parent_category: str | None, leaf_category: str | None) -> tuple[str, str] | None:
         parent = normalize_for_match(parent_category)
         leaf = normalize_for_match(leaf_category)
@@ -423,3 +533,83 @@ class SchemaMatcher:
             -int(item.get("discriminator_overlap", 0)),
             str(item.get("template_id", "")),
         )
+
+    def _debug_result(
+        self,
+        *,
+        matched_schema_id: str | None,
+        matched_sub_category: str | None,
+        score: float,
+        warnings: list[str],
+        resolved_category_path: str,
+        candidate_pool_size: int,
+        candidate_template_ids: list[str],
+        selected_template_id: str | None = None,
+        match_mode: str = "",
+        hard_gate_failures: list[dict[str, Any]] | None = None,
+        fail_reason: str = "",
+        discriminator_hits: list[str] | None = None,
+        discriminator_misses: list[str] | None = None,
+        section_overlap_score: float = 0.0,
+        label_overlap_score: float = 0.0,
+    ) -> SchemaMatchResult:
+        return SchemaMatchResult(
+            matched_schema_id=matched_schema_id,
+            matched_sub_category=matched_sub_category,
+            score=score,
+            warnings=warnings,
+            resolved_category_path=resolved_category_path,
+            candidate_pool_size=candidate_pool_size,
+            candidate_template_ids=candidate_template_ids,
+            selected_template_id=selected_template_id,
+            match_mode=match_mode,
+            hard_gate_failures=hard_gate_failures or [],
+            fail_reason=fail_reason,
+            discriminator_hits=discriminator_hits or [],
+            discriminator_misses=discriminator_misses or [],
+            section_overlap_score=round(section_overlap_score, 4),
+            label_overlap_score=round(label_overlap_score, 4),
+        )
+
+    def _all_manual_only(self, category_pool: list[dict[str, Any]]) -> bool:
+        return bool(category_pool) and all(self._normalized_template_status(schema.get("template_status", "")) == "manual_only" for schema in category_pool)
+
+    def _pool_match_mode(self, category_pool: list[dict[str, Any]]) -> str:
+        modes = [str(schema.get("match_mode", "")).strip() for schema in category_pool if str(schema.get("match_mode", "")).strip()]
+        return modes[0] if len(set(modes)) == 1 and modes else ("mixed" if modes else "")
+
+    def _hard_gate_failures(self, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        return [
+            {
+                "template_id": candidate.get("template_id"),
+                "gate_reasons": list(candidate.get("gate_reasons", [])),
+            }
+            for candidate in candidates
+            if candidate.get("gate_reasons")
+        ]
+
+    def _aggregate_discriminator_misses(self, candidates: list[dict[str, Any]]) -> list[str]:
+        misses: list[str] = []
+        seen: set[str] = set()
+        for candidate in candidates:
+            for label in candidate.get("discriminator_misses", []):
+                if label in seen:
+                    continue
+                seen.add(label)
+                misses.append(str(label))
+        return misses
+
+    def _summarize_fail_reason(self, candidates: list[dict[str, Any]]) -> str:
+        failures = [set(candidate.get("gate_reasons", [])) for candidate in candidates if candidate.get("gate_reasons")]
+        if not failures:
+            return "no_safe_template_match"
+        if all(any(reason in reasons for reason in {"missing_required_labels_any", "missing_required_labels_all", "forbidden_labels_present"}) for reasons in failures):
+            return "discriminator_miss"
+        if all("min_section_overlap" in reasons and reasons <= {"min_section_overlap"} for reasons in failures):
+            return "insufficient_section_overlap"
+        if all("min_label_overlap" in reasons and reasons <= {"min_label_overlap"} for reasons in failures):
+            return "insufficient_label_overlap"
+        return "no_safe_template_match"
+
+    def _normalized_template_status(self, value: Any) -> str:
+        return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")

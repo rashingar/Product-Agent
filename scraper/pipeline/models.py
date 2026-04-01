@@ -261,6 +261,17 @@ class SchemaMatchResult:
     matched_sub_category: Optional[str] = None
     score: float = 0.0
     warnings: list[str] = field(default_factory=list)
+    resolved_category_path: str = ""
+    candidate_pool_size: int = 0
+    candidate_template_ids: list[str] = field(default_factory=list)
+    selected_template_id: Optional[str] = None
+    match_mode: str = ""
+    hard_gate_failures: list[dict[str, Any]] = field(default_factory=list)
+    fail_reason: str = ""
+    discriminator_hits: list[str] = field(default_factory=list)
+    discriminator_misses: list[str] = field(default_factory=list)
+    section_overlap_score: float = 0.0
+    label_overlap_score: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

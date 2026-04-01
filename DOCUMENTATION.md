@@ -1,7 +1,84 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-Category-scoped runtime schema selection is now implemented and validated. The matcher now builds bounded candidate pools from resolved category metadata and fails closed with `no_safe_template_match` instead of drifting globally.
+Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
+
+## 2026-04-01 - Add structured debug reporting for category-scoped schema matching
+
+Goal:
+- expose enough structured schema-selection detail to debug fail-closed outcomes quickly from existing report artifacts
+- keep the result envelope additive and backward-compatible while preserving fail-closed behavior
+- ensure success paths also emit the new metadata so selected-template decisions remain diagnosable
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/models.py`
+- `scraper/pipeline/schema_matcher.py`
+- `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `scraper/pipeline/tests/test_schema_matcher.py`
+
+What changed:
+- `SchemaMatchResult` now carries additive structured debug fields:
+  - `resolved_category_path`
+  - `candidate_pool_size`
+  - `candidate_template_ids`
+  - `selected_template_id`
+  - `match_mode`
+  - `hard_gate_failures`
+  - `fail_reason`
+  - `discriminator_hits`
+  - `discriminator_misses`
+  - `section_overlap_score`
+  - `label_overlap_score`
+- the matcher now populates those fields for:
+  - empty category pools
+  - manual-only categories
+  - categories with no active templates
+  - hard-gate failures
+  - successful direct selection
+  - successful bounded sibling selection
+- standard fail reasons are now surfaced through the result envelope:
+  - `pool_empty_for_category`
+  - `manual_only_category`
+  - `no_active_templates`
+  - `discriminator_miss`
+  - `insufficient_section_overlap`
+  - `insufficient_label_overlap`
+  - `no_safe_template_match`
+- `schema_resolution` in the prepare report now includes the expanded structured debug payload automatically via `SchemaMatchResult.to_dict()`
+- fail-closed behavior is unchanged:
+  - no unrelated fallback template is selected
+  - `selected_template_id` stays `null` when no safe match exists
+  - `no_safe_template_match` remains an explicit surfaced warning/result state rather than a silent continuation
+
+Test coverage added/updated:
+- matcher tests now assert specific surfaced fail reasons for:
+  - discriminator misses
+  - manual-only categories
+  - insufficient section overlap
+  - insufficient label overlap
+- success-path tests now assert that selected-template debug metadata is present in both `SchemaMatchResult` and the prepare report payload
+
+Commands run:
+- `Get-Content scraper\pipeline\models.py | Select-Object -Skip 248 -First 60`
+- `Get-Content scraper\pipeline\prepare_result_assembly.py | Select-Object -Skip 90 -First 90`
+- `Get-Content scraper\pipeline\tests\test_schema_matcher.py`
+- `Get-Content scraper\pipeline\tests\test_prepare_result_assembly_module.py | Select-Object -Skip 360 -First 90`
+- `Get-Content scraper\pipeline\services\render_execution.py | Select-Object -First 120`
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher.py`
+- `python -m pytest scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `python -m pytest scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_services.py`
+- `python -m pytest scraper/pipeline/tests`
+
+Validation:
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher.py` passed
+- `python -m pytest scraper/pipeline/tests/test_prepare_result_assembly_module.py` passed
+- `python -m pytest scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_services.py` passed
+- `python -m pytest scraper/pipeline/tests` passed with `218 passed`
+
+Risks / follow-up:
+- fail reasons are intentionally summarized to one primary reason in `SchemaMatchResult.fail_reason`; full per-template gate detail remains available in `hard_gate_failures`
+- direct-single categories expose real overlap metrics from the selected compiled template; those values are diagnostic, not a synthetic guarantee of `1.0`
 
 ## 2026-04-01 - Implement category-scoped runtime schema selection with fail-closed sibling matching
 

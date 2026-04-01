@@ -373,10 +373,21 @@ def test_assemble_prepare_result_pins_normalized_and_report_payloads(tmp_path: P
     assert result.schema_match.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
     assert result.schema_match.score == 1.0
     assert "weak_schema_match" not in result.schema_match.warnings
+    assert result.schema_match.resolved_category_path == "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω"
+    assert result.schema_match.candidate_pool_size == 1
+    assert result.schema_match.selected_template_id == "tileoraseis"
+    assert result.schema_match.match_mode == "direct_single"
+    assert result.schema_match.fail_reason == ""
+    assert isinstance(result.schema_match.section_overlap_score, float)
+    assert isinstance(result.schema_match.label_overlap_score, float)
+    assert result.schema_match.section_overlap_score >= 0.0
+    assert result.schema_match.label_overlap_score >= 0.0
     assert result.normalized["llm_product"] == {"meta_keywords": ["Hisense", "55A6Q"]}
     assert result.normalized["csv_row"] == result.row
     assert result.normalized["characteristics_diagnostics"]["matched_schema_id"] == TV_TEMPLATE_SCHEMA_ID
     assert result.report["schema_resolution"] == result.schema_match.to_dict()
+    assert result.report["schema_resolution"]["selected_template_id"] == "tileoraseis"
+    assert result.report["schema_resolution"]["candidate_pool_size"] == 1
     assert result.report["critical_extractors"]["schema_match"] == "matched"
     assert "weak_schema_match" not in result.report["warnings"]
     assert result.report["schema_candidates"][0]["matched_schema_id"] == TV_TEMPLATE_SCHEMA_ID
@@ -423,6 +434,8 @@ def test_assemble_prepare_result_preserves_no_spec_sections_semantics(tmp_path: 
     assert result.schema_match.matched_schema_id is None
     assert result.schema_match.score == 0.0
     assert result.schema_match.warnings == ["no_spec_sections_extracted"]
+    assert result.schema_match.selected_template_id is None
+    assert result.schema_match.fail_reason == "no_safe_template_match"
     assert result.normalized["schema_match"] == result.schema_match.to_dict()
     assert result.normalized["characteristics_diagnostics"]["mode"] == "raw_spec_sections"
     assert result.report["critical_extractors"]["taxonomy"] == "unresolved"

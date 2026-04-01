@@ -154,6 +154,18 @@ def test_direct_single_category_selects_only_active_safe_template(tmp_path: Path
     assert result.matched_schema_id == "wm-1"
     assert result.score == 1.0
     assert "weak_schema_match" not in result.warnings
+    assert result.resolved_category_path == "Home > Laundry > Washing Machines"
+    assert result.candidate_pool_size == 3
+    assert result.candidate_template_ids == [
+        "washing_machine_active",
+        "washing_machine_manual",
+        "washing_machine_deprecated",
+    ]
+    assert result.selected_template_id == "washing_machine_active"
+    assert result.match_mode == "direct_single"
+    assert result.fail_reason == ""
+    assert result.section_overlap_score == 1.0
+    assert result.label_overlap_score == 1.0
     assert candidates == [
         {
             "matched_schema_id": "wm-1",
@@ -165,8 +177,12 @@ def test_direct_single_category_selects_only_active_safe_template(tmp_path: Path
             "score": 1.0,
             "section_overlap": 2,
             "label_overlap": 4,
+            "section_overlap_score": 1.0,
+            "label_overlap_score": 1.0,
             "pair_overlap": 4,
             "discriminator_overlap": 0,
+            "discriminator_hits": [],
+            "discriminator_misses": [],
             "gate_status": "bypassed_direct_single",
             "gate_reasons": [],
             "n_sections": 2,
@@ -244,6 +260,11 @@ def test_category_pool_compares_only_sibling_templates(tmp_path: Path) -> None:
     )
 
     assert result.matched_schema_id == "kettle-glass"
+    assert result.selected_template_id == "kettle_glass"
+    assert result.match_mode == "category_pool"
+    assert result.resolved_category_path == "Home > Small Appliances > Kettles"
+    assert result.candidate_pool_size == 2
+    assert result.candidate_template_ids == ["kettle_basic", "kettle_glass"]
     assert {candidate["matched_schema_id"] for candidate in candidates} == {"kettle-basic", "kettle-glass"}
     assert all(candidate["category_path"] == "Home > Small Appliances > Kettles" for candidate in candidates)
 
@@ -318,6 +339,13 @@ def test_wrong_category_schema_cannot_be_selected(tmp_path: Path) -> None:
 
     assert result.matched_schema_id is None
     assert result.warnings == ["no_safe_template_match"]
+    assert result.fail_reason == "discriminator_miss"
+    assert result.selected_template_id is None
+    assert result.candidate_template_ids == ["kettle_basic", "kettle_glass"]
+    assert result.hard_gate_failures == [
+        {"template_id": "kettle_basic", "gate_reasons": ["missing_required_labels_any", "min_label_overlap"]},
+        {"template_id": "kettle_glass", "gate_reasons": ["missing_required_labels_any", "min_label_overlap"]},
+    ]
     assert {candidate["matched_schema_id"] for candidate in candidates} == {"kettle-basic", "kettle-glass"}
     assert "wm-1" not in {candidate["matched_schema_id"] for candidate in candidates}
 
@@ -386,6 +414,7 @@ def test_generic_overlap_fails_closed_instead_of_global_drift(tmp_path: Path) ->
 
     assert result.matched_schema_id is None
     assert result.warnings == ["no_safe_template_match"]
+    assert result.fail_reason == "discriminator_miss"
     assert {candidate["matched_schema_id"] for candidate in candidates} == {"kettle-basic", "kettle-glass"}
     assert all(candidate["gate_status"] == "failed" for candidate in candidates)
 
@@ -445,4 +474,140 @@ def test_washing_machine_like_specs_cannot_select_small_appliance_template(tmp_p
 
     assert result.matched_schema_id is None
     assert result.warnings == ["no_safe_template_match"]
+    assert result.fail_reason == "discriminator_miss"
     assert {candidate["matched_schema_id"] for candidate in candidates} == {"kettle-basic", "toaster-1"}
+
+
+def test_manual_only_category_reports_manual_only_fail_reason(tmp_path: Path) -> None:
+    schema_path = _write_schema_library(
+        tmp_path,
+        [
+            _schema(
+                schema_id="manual-1",
+                template_id="manual_template",
+                category_path="Home > Laundry > Irons",
+                parent_category="Home",
+                leaf_category="Laundry",
+                sub_category="Irons",
+                sections=[("TODO", ["Needs Manual Labels"])],
+                template_status="manual_only",
+                match_mode="manual_only",
+            ),
+        ],
+    )
+    matcher = SchemaMatcher(str(schema_path))
+
+    result, candidates = matcher.match(
+        _spec_sections(("Overview", ["Power"])),
+        taxonomy_sub_category="Irons",
+        taxonomy_path="Home > Laundry > Irons",
+        taxonomy_parent_category="Home",
+        taxonomy_leaf_category="Laundry",
+    )
+
+    assert result.matched_schema_id is None
+    assert result.fail_reason == "manual_only_category"
+    assert result.candidate_pool_size == 1
+    assert result.candidate_template_ids == ["manual_template"]
+    assert result.selected_template_id is None
+    assert candidates[0]["gate_reasons"] == ["template_status:manual_only"]
+
+
+def test_insufficient_section_overlap_reports_specific_fail_reason(tmp_path: Path) -> None:
+    schema_path = _write_schema_library(
+        tmp_path,
+        [
+            _schema(
+                schema_id="schema-1",
+                template_id="section_heavy",
+                category_path="Home > Appliances > Fans",
+                parent_category="Home",
+                leaf_category="Appliances",
+                sub_category="Fans",
+                sections=[
+                    ("Overview", ["Power", "Color"]),
+                    ("Features", ["Remote Control"]),
+                    ("Dimensions", ["Height"]),
+                ],
+                match_mode="category_pool",
+                sibling_template_ids=["schema-2"],
+                min_section_overlap=2,
+                min_label_overlap=1,
+            ),
+            _schema(
+                schema_id="schema-2",
+                template_id="section_heavy_2",
+                category_path="Home > Appliances > Fans",
+                parent_category="Home",
+                leaf_category="Appliances",
+                sub_category="Fans",
+                sections=[
+                    ("Overview", ["Power", "Color"]),
+                    ("Features", ["Timer"]),
+                    ("Dimensions", ["Width"]),
+                ],
+                match_mode="category_pool",
+                sibling_template_ids=["schema-1"],
+                min_section_overlap=2,
+                min_label_overlap=1,
+            ),
+        ],
+    )
+    matcher = SchemaMatcher(str(schema_path))
+
+    result, _candidates = matcher.match(
+        _spec_sections(("Overview", ["Power", "Color"])),
+        taxonomy_sub_category="Fans",
+        taxonomy_path="Home > Appliances > Fans",
+        taxonomy_parent_category="Home",
+        taxonomy_leaf_category="Appliances",
+    )
+
+    assert result.matched_schema_id is None
+    assert result.fail_reason == "insufficient_section_overlap"
+
+
+def test_insufficient_label_overlap_reports_specific_fail_reason(tmp_path: Path) -> None:
+    schema_path = _write_schema_library(
+        tmp_path,
+        [
+            _schema(
+                schema_id="schema-1",
+                template_id="label_heavy",
+                category_path="Home > Appliances > Mixers",
+                parent_category="Home",
+                leaf_category="Appliances",
+                sub_category="Mixers",
+                sections=[("Overview", ["Power", "Speed", "Color"])],
+                match_mode="category_pool",
+                sibling_template_ids=["schema-2"],
+                min_section_overlap=1,
+                min_label_overlap=3,
+            ),
+            _schema(
+                schema_id="schema-2",
+                template_id="label_heavy_2",
+                category_path="Home > Appliances > Mixers",
+                parent_category="Home",
+                leaf_category="Appliances",
+                sub_category="Mixers",
+                sections=[("Overview", ["Power", "Pulse", "Bowl"])],
+                match_mode="category_pool",
+                sibling_template_ids=["schema-1"],
+                min_section_overlap=1,
+                min_label_overlap=3,
+            ),
+        ],
+    )
+    matcher = SchemaMatcher(str(schema_path))
+
+    result, _candidates = matcher.match(
+        _spec_sections(("Overview", ["Power"])),
+        taxonomy_sub_category="Mixers",
+        taxonomy_path="Home > Appliances > Mixers",
+        taxonomy_parent_category="Home",
+        taxonomy_leaf_category="Appliances",
+    )
+
+    assert result.matched_schema_id is None
+    assert result.fail_reason == "insufficient_label_overlap"
