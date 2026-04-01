@@ -42,6 +42,20 @@ def test_build_library_emits_category_bound_metadata_for_regression_families() -
             "sub_category": None,
             "subcategory_match_policy": "leaf_family",
         },
+        "klimatistika": {
+            "category_path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > -",
+            "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+            "leaf_category": "Κλιματιστικά",
+            "sub_category": None,
+            "subcategory_match_policy": "mixed_family",
+        },
+        "anemistires": {
+            "category_path": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Ανεμιστήρες > -",
+            "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+            "leaf_category": "Ανεμιστήρες",
+            "sub_category": None,
+            "subcategory_match_policy": "mixed_family",
+        },
         "koyzines": {
             "category_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > -",
             "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
@@ -163,6 +177,30 @@ def test_build_library_emits_explicit_subcategory_match_policy_for_known_excepti
     assert schemas["koyzines"]["subcategory_match_policy"] == "leaf_family"
     assert schemas["plyntiria_piaton"]["subcategory_match_policy"] == "leaf_family"
     assert schemas["foyrnoi_mikrokymaton"]["subcategory_match_policy"] == "leaf_family"
+    assert schemas["plyntiria_rouxwn"]["subcategory_match_policy"] == "exact_subcategory"
+
+
+def test_build_library_emits_mixed_family_policy_for_air_conditioners_and_fans() -> None:
+    payload = _repo_payload()
+    schemas = _schemas_by_template_id(payload)
+
+    for template_id in [
+        "klimatistika",
+        "toixoy",
+        "forita",
+        "ntoylapes",
+        "anemistires",
+        "mini",
+        "ydronefosis",
+        "orthostatis",
+        "epitrapezioi",
+        "orofis",
+        "air_coolers_epidapedioi",
+        "anemisthres_an_toixou",
+    ]:
+        assert schemas[template_id]["subcategory_match_policy"] == "mixed_family"
+
+    assert schemas["tileoraseis"]["subcategory_match_policy"] == "leaf_family"
     assert schemas["plyntiria_rouxwn"]["subcategory_match_policy"] == "exact_subcategory"
 
 

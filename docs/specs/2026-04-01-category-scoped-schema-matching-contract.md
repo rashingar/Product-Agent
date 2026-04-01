@@ -85,6 +85,7 @@ Landed `match_mode` values:
 Landed `subcategory_match_policy` values:
 - `exact_subcategory`: if a resolved subcategory path has no exact compiled pool, runtime fails closed instead of falling back to a leaf-only template
 - `leaf_family`: if a resolved subcategory path has no exact compiled pool, runtime may fall back only to leaf-only templates explicitly marked with this policy inside the same resolved parent/leaf family
+- `mixed_family`: exact subcategory templates and a leaf-level template may coexist in one parent/leaf family; runtime must use the exact category-path pool when present and may fall back to the leaf-level template only when no exact compiled pool exists
 
 ## Runtime matcher decision flow
 
@@ -93,22 +94,23 @@ The landed matcher flow is:
 1. Resolve canonical category first.
 2. Build a category-scoped candidate pool from compiled metadata using `taxonomy_path` when available.
 3. If `taxonomy_path` is absent but parent/leaf/subcategory are resolved, normalize that binding and use it to scope the pool.
-4. If no exact category-path pool exists and the resolved family has an explicitly eligible `leaf_family` policy, fall back only to leaf-only templates inside that same resolved parent/leaf family.
-5. Apply preferred source-file narrowing only inside that already bounded pool.
-6. Drop any candidate whose `template_status` is not `active`.
-7. If exactly one active safe template remains, select it directly and do not run sibling scoring.
-8. If multiple active safe templates remain, apply hard gates before scoring:
+4. If no exact category-path pool exists and the resolved family has an explicitly eligible fallback policy (`leaf_family` or `mixed_family`), fall back only to leaf-only templates inside that same resolved parent/leaf family.
+5. In `mixed_family` categories, exact subcategory templates and leaf-level templates may coexist in the broader family, but the exact category-path pool always wins when it exists.
+6. Apply preferred source-file narrowing only inside that already bounded pool.
+7. Drop any candidate whose `template_status` is not `active`.
+8. If exactly one active safe template remains, select it directly and do not run sibling scoring.
+9. If multiple active safe templates remain, apply hard gates before scoring:
    - reject candidates missing `required_labels_all`
    - reject candidates missing all of `required_labels_any` when that field is populated
    - reject candidates containing any `forbidden_labels`
    - reject candidates below `min_section_overlap`
    - reject candidates below `min_label_overlap`
-9. Score only the remaining sibling candidates in that same bounded category family using:
+10. Score only the remaining sibling candidates in that same bounded category family using:
    - normalized section overlap
    - normalized label overlap
    - normalized section-label pair overlap
    - discriminator-label overlap
-10. If no candidate survives the hard gates, return a fail-closed matcher result.
+11. If no candidate survives the hard gates, return a fail-closed matcher result.
 
 ## Hard-gating rules
 

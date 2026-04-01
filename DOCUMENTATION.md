@@ -5016,3 +5016,36 @@ Validation:
 
 Risks, blockers, or skipped items:
 - `refresh_template_coverage.py` still derives expected coverage from repository taxonomy inputs and bound templates only; it does not infer any broader multi-source coverage model beyond the current repo truth
+
+## 2026-04-02 - Mixed leaf and subcategory family policy normalization
+
+What changed:
+- extended the compiled `subcategory_match_policy` contract with a third value, `mixed_family`
+- mapped the mixed air-conditioner family templates (`klimatistika`, `toixoy`, `forita`, `ntoylapes`) and mixed fan family templates (`anemistires`, `mini`, `ydronefosis`, `orthostatis`, `epitrapezioi`, `orofis`, `air_coolers_epidapedioi`, `anemisthres_an_toixou`) to `mixed_family`
+- kept the existing `leaf_family` exceptions unchanged and preserved strict `exact_subcategory` behavior for non-exception families
+- updated `SchemaMatcher.build_candidate_pool()` so exact category-path pools always win first, while leaf-level fallback remains parent/leaf-bounded and is allowed only for `leaf_family` and `mixed_family`
+- added synthetic matcher regressions and compiled-library regressions covering exact-win, bounded fallback, and strict fail-closed behavior
+- regenerated `resources/schemas/electronet_schema_library.json` to reflect the new explicit policy values
+
+Files changed:
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+- `resources/schemas/electronet_schema_library.json`
+- `scraper/pipeline/schema_matcher.py`
+- `scraper/pipeline/tests/test_schema_matcher.py`
+- `scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+- `tools/schema_registry/build_electronet_schema_library.py`
+- `tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+Commands run:
+- `python -m tools.schema_registry.build_electronet_schema_library`
+- `python -m tools.schema_registry.build_schema_index`
+- `python -m tools.schema_registry.refresh_template_coverage`
+- `python -m pytest tools/schema_registry/tests/test_build_electronet_schema_library.py scraper/pipeline/tests/test_schema_matcher.py scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py tools/schema_registry/tests/test_build_schema_index.py tools/schema_registry/tests/test_refresh_template_coverage.py -q`
+
+Validation:
+- focused compiler, matcher, and related registry regressions passed: `41 passed`
+- regenerated compiled Electronet schema library now emits `mixed_family` for the intended air-conditioner and fan families
+
+Risks, blockers, or skipped items:
+- this commit keeps the `mixed_family` allowlist deliberately narrow and explicit; broader generic mixed-family inference remains out of scope

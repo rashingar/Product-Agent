@@ -20,12 +20,29 @@ CURRENT_LIBRARY_PATH = DEFAULT_OUTPUT_PATH
 LIBRARY_VERSION = "2026-04-01"
 SUBCATEGORY_MATCH_POLICY_EXACT = "exact_subcategory"
 SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY = "leaf_family"
+SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY = "mixed_family"
 LEAF_FAMILY_TEMPLATE_EXCEPTIONS = frozenset(
     {
         "tileoraseis",
         "koyzines",
         "plyntiria_piaton",
         "foyrnoi_mikrokymaton",
+    }
+)
+MIXED_FAMILY_TEMPLATE_EXCEPTIONS = frozenset(
+    {
+        "klimatistika",
+        "toixoy",
+        "forita",
+        "ntoylapes",
+        "anemistires",
+        "mini",
+        "ydronefosis",
+        "orthostatis",
+        "epitrapezioi",
+        "orofis",
+        "air_coolers_epidapedioi",
+        "anemisthres_an_toixou",
     }
 )
 
@@ -418,6 +435,8 @@ def _compiled_sections_from_authored(template: TemplateRecord) -> list[dict[str,
 def _subcategory_match_policy(template: TemplateRecord) -> str:
     if template.template_id in LEAF_FAMILY_TEMPLATE_EXCEPTIONS:
         return SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY
+    if template.template_id in MIXED_FAMILY_TEMPLATE_EXCEPTIONS:
+        return SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY
     return SUBCATEGORY_MATCH_POLICY_EXACT
 
 

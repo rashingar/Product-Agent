@@ -407,6 +407,113 @@ def test_leaf_family_policy_allows_leaf_only_fallback_when_exact_subcategory_poo
     assert all(candidate["category_path"] == "Electronics > TVs > -" for candidate in candidates)
 
 
+def test_mixed_family_exact_pool_wins_over_leaf_template(tmp_path: Path) -> None:
+    schema_path = _write_schema_library(
+        tmp_path,
+        [
+            _schema(
+                schema_id="ac-leaf",
+                template_id="klimatistika",
+                category_path="Home > Air Conditioners > -",
+                parent_category="Home",
+                leaf_category="Air Conditioners",
+                sub_category=None,
+                subcategory_match_policy="mixed_family",
+                sections=[("Overview", ["BTU", "Inverter", "Wi-Fi"])],
+                min_section_overlap=1,
+                min_label_overlap=2,
+            ),
+            _schema(
+                schema_id="ac-wall",
+                template_id="toixoy",
+                category_path="Home > Air Conditioners > Wall Mounted",
+                parent_category="Home",
+                leaf_category="Air Conditioners",
+                sub_category="Wall Mounted",
+                subcategory_match_policy="mixed_family",
+                sections=[
+                    ("Overview", ["BTU", "Inverter", "Wi-Fi"]),
+                    ("Dimensions", ["Indoor Height", "Outdoor Height"]),
+                ],
+                min_section_overlap=1,
+                min_label_overlap=2,
+            ),
+        ],
+    )
+    matcher = SchemaMatcher(str(schema_path))
+
+    result, candidates = matcher.match(
+        _spec_sections(
+            ("Overview", ["BTU", "Inverter", "Wi-Fi"]),
+            ("Dimensions", ["Indoor Height", "Outdoor Height"]),
+        ),
+        taxonomy_sub_category="Wall Mounted",
+        taxonomy_path="Home > Air Conditioners > Wall Mounted",
+        taxonomy_parent_category="Home",
+        taxonomy_leaf_category="Air Conditioners",
+    )
+
+    assert result.matched_schema_id == "ac-wall"
+    assert result.selected_template_id == "toixoy"
+    assert result.subcategory_match_policy == "mixed_family"
+    assert result.candidate_pool_size == 1
+    assert result.candidate_template_ids == ["toixoy"]
+    assert {candidate["template_id"] for candidate in candidates} == {"toixoy"}
+
+
+def test_mixed_family_allows_leaf_fallback_when_exact_missing(tmp_path: Path) -> None:
+    schema_path = _write_schema_library(
+        tmp_path,
+        [
+            _schema(
+                schema_id="fan-leaf",
+                template_id="anemistires",
+                category_path="Home > Fans > -",
+                parent_category="Home",
+                leaf_category="Fans",
+                sub_category=None,
+                subcategory_match_policy="mixed_family",
+                sections=[
+                    ("Overview", ["Power", "Diameter", "Speeds"]),
+                    ("General", ["Color", "Warranty"]),
+                ],
+                min_section_overlap=1,
+                min_label_overlap=2,
+            ),
+            _schema(
+                schema_id="fan-desk",
+                template_id="epitrapezioi",
+                category_path="Home > Fans > Desk",
+                parent_category="Home",
+                leaf_category="Fans",
+                sub_category="Desk",
+                subcategory_match_policy="mixed_family",
+                sections=[("Overview", ["Power", "Diameter", "Oscillation"])],
+            ),
+        ],
+    )
+    matcher = SchemaMatcher(str(schema_path))
+
+    result, candidates = matcher.match(
+        _spec_sections(
+            ("Overview", ["Power", "Diameter", "Speeds"]),
+            ("General", ["Color", "Warranty"]),
+        ),
+        taxonomy_sub_category="Ceiling",
+        taxonomy_path="Home > Fans > Ceiling",
+        taxonomy_parent_category="Home",
+        taxonomy_leaf_category="Fans",
+    )
+
+    assert result.matched_schema_id == "fan-leaf"
+    assert result.selected_template_id == "anemistires"
+    assert result.subcategory_match_policy == "mixed_family"
+    assert result.candidate_pool_size == 1
+    assert result.candidate_template_ids == ["anemistires"]
+    assert candidates[0]["subcategory_match_policy"] == "mixed_family"
+    assert all(candidate["category_path"] == "Home > Fans > -" for candidate in candidates)
+
+
 def test_exact_subcategory_policy_does_not_fall_back_to_leaf_only_template(tmp_path: Path) -> None:
     schema_path = _write_schema_library(
         tmp_path,

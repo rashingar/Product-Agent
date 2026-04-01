@@ -166,6 +166,63 @@ def test_compiled_library_tv_leaf_family_policy_supports_subcategory_fallback() 
     assert candidates[0]["subcategory_match_policy"] == "leaf_family"
 
 
+def test_compiled_library_emits_mixed_family_for_air_conditioners_and_fans() -> None:
+    assert _schema("klimatistika")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("toixoy")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("forita")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("ntoylapes")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("anemistires")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("mini")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("ydronefosis")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("orthostatis")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("epitrapezioi")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("orofis")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("air_coolers_epidapedioi")["subcategory_match_policy"] == "mixed_family"
+    assert _schema("anemisthres_an_toixou")["subcategory_match_policy"] == "mixed_family"
+
+
+def test_compiled_library_mixed_family_exact_pool_wins_for_air_conditioners() -> None:
+    wall_mounted = _schema("toixoy")
+    matcher = SchemaMatcher()
+
+    result, candidates = matcher.match(
+        _spec_sections_from_schema(wall_mounted),
+        taxonomy_sub_category=wall_mounted.get("sub_category"),
+        taxonomy_path=str(wall_mounted.get("category_path", "")),
+        taxonomy_parent_category=wall_mounted.get("parent_category"),
+        taxonomy_leaf_category=wall_mounted.get("leaf_category"),
+    )
+
+    assert result.selected_template_id == "toixoy"
+    assert result.matched_schema_id == wall_mounted["schema_id"]
+    assert result.subcategory_match_policy == "mixed_family"
+    assert result.candidate_pool_size == 1
+    assert result.candidate_template_ids == ["toixoy"]
+    assert {candidate["template_id"] for candidate in candidates} == {"toixoy"}
+
+
+def test_compiled_library_mixed_family_allows_leaf_fallback_for_air_conditioners_when_exact_missing() -> None:
+    air_conditioners = _schema("klimatistika")
+    matcher = SchemaMatcher()
+
+    result, candidates = matcher.match(
+        _spec_sections_from_schema(air_conditioners),
+        taxonomy_sub_category="Κασέτα",
+        taxonomy_path="ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ > Κλιματιστικά > Κασέτα",
+        taxonomy_parent_category=air_conditioners.get("parent_category"),
+        taxonomy_leaf_category=air_conditioners.get("leaf_category"),
+    )
+
+    assert result.selected_template_id == "klimatistika"
+    assert result.matched_schema_id == air_conditioners["schema_id"]
+    assert result.subcategory_match_policy == "mixed_family"
+    assert result.fail_reason == ""
+    assert result.candidate_pool_size == 1
+    assert result.candidate_template_ids == ["klimatistika"]
+    assert {candidate["template_id"] for candidate in candidates} == {"klimatistika"}
+    assert candidates[0]["subcategory_match_policy"] == "mixed_family"
+
+
 def test_compiled_library_kitchen_specs_cannot_override_washing_machine_category_binding() -> None:
     washing_machine = _schema("plyntiria_rouxwn")
     kitchen = _schema("koyzines")

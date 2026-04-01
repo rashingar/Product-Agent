@@ -10,6 +10,7 @@ from .utils import read_json
 
 SUBCATEGORY_MATCH_POLICY_EXACT = "exact_subcategory"
 SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY = "leaf_family"
+SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY = "mixed_family"
 
 
 class SchemaMatcher:
@@ -251,7 +252,7 @@ class SchemaMatcher:
         if exact_pool:
             pool = exact_pool
         elif taxonomy_parent_category and taxonomy_leaf_category and taxonomy_sub_category:
-            pool = self._leaf_family_fallback_candidates(taxonomy_parent_category, taxonomy_leaf_category)
+            pool = self._fallback_candidates_for_parent_leaf(taxonomy_parent_category, taxonomy_leaf_category)
         else:
             pool = []
 
@@ -509,13 +510,18 @@ class SchemaMatcher:
             if not normalize_for_match(schema.get("sub_category", ""))
         ]
 
-    def _leaf_family_fallback_candidates(self, parent_category: str | None, leaf_category: str | None) -> list[dict[str, Any]]:
+    def _fallback_candidates_for_parent_leaf(self, parent_category: str | None, leaf_category: str | None) -> list[dict[str, Any]]:
         return [
             schema
             for schema in self._leaf_only_candidates(parent_category, leaf_category)
-            if self._normalized_subcategory_match_policy(schema.get("subcategory_match_policy", ""))
-            == SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY
+            if self._allows_leaf_fallback(schema)
         ]
+
+    def _allows_leaf_fallback(self, schema: dict[str, Any]) -> bool:
+        return self._normalized_subcategory_match_policy(schema.get("subcategory_match_policy", "")) in {
+            SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY,
+            SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY,
+        }
 
     def _normalized_source_files(self, schema: dict[str, Any]) -> set[str]:
         return {
@@ -664,4 +670,6 @@ class SchemaMatcher:
         normalized = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
         if normalized == SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY:
             return SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY
+        if normalized == SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY:
+            return SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY
         return SUBCATEGORY_MATCH_POLICY_EXACT
