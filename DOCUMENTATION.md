@@ -3,6 +3,55 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Finalize docs for prepare-stage result-assembly extraction
+
+Goal:
+- freeze the landed ownership for the prepare-stage result-assembly refactor in the control docs
+- remove active-state wording drift that still described the branch as proposed or implied direct `SchemaMatcher` construction in `prepare_stage.py`
+- keep this commit docs-only
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Changes:
+- updated `PLAN.md` to record the landed state instead of the earlier planned state for this branch
+- documented that `scraper/pipeline/prepare_stage.py` now owns only upstream orchestration and input preparation:
+  - gallery/Besco handling
+  - taxonomy resolution
+  - manufacturer enrichment
+  - shaping needed before deterministic result assembly
+- documented that `scraper/pipeline/prepare_result_assembly.py` now owns:
+  - schema source preference logic
+  - schema matcher construction
+  - `schema_matcher.match(...)` orchestration
+  - deterministic row building
+  - normalized payload assembly
+  - report payload assembly
+- documented the landed single injection seam:
+  - `assemble_prepare_result_fn=assemble_prepare_result`
+- documented test intent clearly without renaming files in this commit:
+  - `test_prepare_result_assembly_module.py` covers direct module-level schema/result behavior
+  - `test_prepare_stage_result_assembly.py` isolates stage orchestration by stubbing only the single result-assembly seam
+- recorded that public workflow behavior and `scraper/pipeline/services/prepare_execution.py` behavior remain unchanged
+- recorded the next recommended follow-up branch:
+  - taxonomy/manufacturer-enrichment orchestration extraction
+- reviewed `README.md` and left it unchanged because it does not describe the old internal ownership incorrectly
+
+Commands run:
+- `rg -n "prepare_stage.py|prepare_result_assembly|SchemaMatcher|schema_matcher_factory|assemble_prepare_result_fn|scope defined|Proposed extracted module|test_prepare_stage_result_assembly|test_prepare_result_assembly_module|taxonomy/enrichment" PLAN.md DOCUMENTATION.md README.md`
+- `Get-Content PLAN.md | Select-Object -Skip 390 -First 90`
+- `Get-Content DOCUMENTATION.md -TotalCount 120`
+- `Get-Content README.md -TotalCount 220`
+
+Validation:
+- control docs now describe the landed prepare-stage/result-assembly ownership precisely
+- no stale active-state wording remains in the branch-scope section implying that `prepare_stage.py` still constructs `SchemaMatcher`
+- `README.md` did not require changes
+- no Python files changed
+- no test files changed
+- no public entrypoint changed
+
 ## 2026-04-01 - Collapse prepare-stage result assembly to one injected seam
 
 Goal:

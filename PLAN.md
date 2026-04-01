@@ -393,17 +393,17 @@ Completion note:
 
 ### Branch scope — prepare-stage result assembly refactor
 
-Status: scope defined
+Status: completed
 
 Purpose:
-1. Freeze the exact branch scope for extracting the deterministic schema-matching and normalized/report assembly seam out of `scraper/pipeline/prepare_stage.py`, after the scrape-persistence branch has landed, without changing observable runtime behavior.
-2. Keep this branch limited to the schema-match, normalized payload, and report payload assembly that still sits inline inside `prepare_stage.py`.
-3. Preserve the current public workflow entrypoint, prepare/render ownership split, output artifact paths, warnings, errors, and split-task LLM handoff contract while this internal computation seam is isolated.
+1. Extract the deterministic schema-matching and normalized/report assembly seam out of `scraper/pipeline/prepare_stage.py`, after the scrape-persistence branch landed, without changing observable runtime behavior.
+2. Keep the branch limited to the schema-match, normalized payload, and report payload assembly that previously sat inline inside `prepare_stage.py`.
+3. Preserve the public workflow entrypoint, prepare/render ownership split, output artifact paths, warnings, errors, and split-task LLM handoff contract while this internal computation seam is isolated.
 
 Branch goal:
 1. Move the deterministic schema-matching and normalized/report assembly path behind one dedicated internal seam while keeping `python -m pipeline.workflow prepare ...` behavior unchanged.
 
-Proposed extracted module:
+Landed extracted module:
 1. `scraper/pipeline/prepare_result_assembly.py`
 
 Landed result type:
@@ -415,7 +415,8 @@ What stays in `prepare_stage.py` after this branch:
 3. Taxonomy resolution stays in `prepare_stage.py` for now.
 4. Manufacturer enrichment orchestration stays in `prepare_stage.py` for now.
 5. Scrape artifact persistence stays delegated through `scraper/pipeline/prepare_scrape_persistence.py`.
-6. The outward `execute_prepare_stage(...)` return payload stays dict-shaped in this branch.
+6. Any shaping needed before deterministic result assembly stays in `prepare_stage.py`.
+7. The outward `execute_prepare_stage(...)` return payload stays dict-shaped in this branch.
 
 What leaves `prepare_stage.py` in this branch:
 1. Effective spec-section selection for deterministic schema matching.
@@ -425,10 +426,10 @@ What leaves `prepare_stage.py` in this branch:
 5. Deterministic report payload assembly, including warning aggregation, diagnostics packaging, and `files_written` report composition.
 6. The internal typed handoff back to `prepare_stage.py` for schema-match, schema-candidates, row, normalized, and report outputs.
 
-Proposed extracted seam responsibilities:
+Landed seam responsibilities:
 1. Accept the already-resolved prepare-stage state needed for deterministic schema matching and result assembly.
 2. Build effective spec sections from the current parsed source plus manufacturer-enriched sections.
-3. Resolve schema preferences, run schema matching, and return schema candidates with unchanged behavior.
+3. Resolve schema preferences, construct the schema matcher, run schema matching, and return schema candidates with unchanged behavior.
 4. Build the deterministic normalized payload and mapped row with unchanged behavior.
 5. Assemble the scrape report payload with unchanged warning ordering, diagnostics content, and file-path reporting.
 6. Return the deterministic result bundle needed by `prepare_stage.py` without moving taxonomy resolution, manufacturer enrichment, scrape persistence, or LLM handoff ownership.
@@ -456,14 +457,17 @@ Explicit non-goals:
 9. No naming-polish cleanup in this branch.
 10. No split-task LLM handoff contract changes.
 
-Test strategy for the next commits:
-1. Add focused unit coverage around the extracted result-assembly seam so schema matching, schema candidates, normalized payload assembly, warning ordering, and report assembly are asserted directly.
-2. Keep prepare-stage regression coverage centered on unchanged observable behavior, especially outward payload keys and scrape artifact path reporting.
-3. Reuse the existing prepare/workflow/provider regression tests so the refactor proves no behavior change for supported Electronet, Skroutz, and manufacturer flows.
-4. Run targeted seam tests plus prepare/workflow regressions during each extraction step, then run the broader scraper suite before closing the branch.
+Landed test coverage:
+1. Direct schema/result behavior is covered in module-level tests for `scraper/pipeline/prepare_result_assembly.py`.
+2. Stage-isolation tests stub only the single result-assembly seam and keep `execute_prepare_stage(...)` focused on upstream orchestration behavior.
+3. Existing prepare/workflow/provider regression coverage continues to prove no public behavior change for supported Electronet, Skroutz, and manufacturer flows.
+4. Public workflow and `scraper/pipeline/services/prepare_execution.py` behavior remain unchanged.
 
 Landed injection boundary:
 1. `execute_prepare_stage(...)` keeps one deterministic result-assembly seam injection, `assemble_prepare_result_fn`, and no longer exposes lower-level schema-matcher injection for this branch.
+
+Recommended next branch:
+1. Extract taxonomy/manufacturer-enrichment orchestration out of `scraper/pipeline/prepare_stage.py` as the next internal seam, without widening into workflow or handoff behavior changes.
 
 ### Phase 4 — Hybrid RAG foundation
 
