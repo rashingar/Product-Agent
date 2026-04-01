@@ -5,11 +5,23 @@ from pathlib import Path
 from pipeline.models import CLIInput, FetchResult, ParsedProduct, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.prepare_result_assembly import PrepareResultAssemblyResult, assemble_prepare_result
 from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput
+from pipeline.repo_paths import SCHEMA_LIBRARY_PATH
 from pipeline.schema_matcher import SchemaMatcher
+from pipeline.utils import read_json
 
 
-TV_TEMPLATE_SCHEMA_ID = "sha1:954c8413f2da941e78f3ddce65df522654336c8c"
-BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
+def _schema_id_for_source_file(source_file: str) -> str:
+    payload = read_json(SCHEMA_LIBRARY_PATH)
+    for schema in payload.get("schemas", []):
+        if source_file in schema.get("source_files", []):
+            schema_id = str(schema.get("schema_id", "")).strip()
+            if schema_id:
+                return schema_id
+    raise AssertionError(f"Schema id not found for source file {source_file!r}.")
+
+
+TV_TEMPLATE_SCHEMA_ID = _schema_id_for_source_file("tileoraseis.json")
+BUILT_IN_HOB_SCHEMA_ID = _schema_id_for_source_file("esties.json")
 
 
 def _build_cli(tmp_path: Path, *, model: str, url: str) -> CLIInput:

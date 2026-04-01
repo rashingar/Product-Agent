@@ -1,8 +1,20 @@
 from pipeline.characteristics_pipeline import CharacteristicsTemplateRegistry
 from pipeline.models import SchemaMatchResult, SourceProductData, TaxonomyResolution
+from pipeline.repo_paths import SCHEMA_LIBRARY_PATH
+from pipeline.utils import read_json
 
 
-ROBOT_VACUUM_SCHEMA_ID = "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79"
+def _schema_id_for_source_file(source_file: str) -> str:
+    payload = read_json(SCHEMA_LIBRARY_PATH)
+    for schema in payload.get("schemas", []):
+        if source_file in schema.get("source_files", []):
+            schema_id = str(schema.get("schema_id", "")).strip()
+            if schema_id:
+                return schema_id
+    raise AssertionError(f"Schema id not found for source file {source_file!r}.")
+
+
+ROBOT_VACUUM_SCHEMA_ID = _schema_id_for_source_file("skoypes_rompot.json")
 
 
 def test_characteristics_registry_prefers_robot_vacuum_schema_for_skroutz() -> None:
