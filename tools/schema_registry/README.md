@@ -158,6 +158,7 @@ Matcher-relevant fields that currently land in the compiled library include:
 * `parent_category`
 * `leaf_category`
 * `sub_category`
+* `subcategory_match_policy`
 * `cta_map_key`
 * `cta_url`
 * `template_status`
@@ -218,6 +219,7 @@ Those report objects now expose the structured matcher debug envelope, including
 * resolved category path
 * candidate pool size and template ids
 * selected template id
+* subcategory match policy
 * match mode
 * hard-gate failures
 * fail reason

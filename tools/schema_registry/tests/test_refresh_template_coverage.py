@@ -62,6 +62,48 @@ def test_refresh_template_coverage_marks_statuses_and_is_deterministic() -> None
     assert [row["Status"] for row in first] == ["OK", "NEEDS_MANUAL", "MISSING"]
 
 
+def test_refresh_template_coverage_marks_duplicate_category_ownership_as_review() -> None:
+    expected = [
+        ExpectedCategory(
+            key="Κατηγορία Α",
+            label="Κατηγορία Α",
+            parent_category="P1",
+            leaf_category="L1",
+            sub_category=None,
+            category_path="P1 > L1 > -",
+            cta_url="https://example.test/a",
+        ),
+    ]
+    observed = [
+        ObservedTemplate(
+            template_id="active_a",
+            template_file="active_a.json",
+            category_path="P1 > L1 > -",
+            template_status="active",
+            examples=("https://example.test/product-a",),
+        ),
+        ObservedTemplate(
+            template_id="active_b",
+            template_file="active_b.json",
+            category_path="P1 > L1 > -",
+            template_status="active",
+            examples=("https://example.test/product-b",),
+        ),
+    ]
+
+    rows = assess_template_coverage(expected, observed)
+
+    assert rows == [
+        {
+            "CTA Leaf Category": "Κατηγορία Α",
+            "File": "active_a.json<br>active_b.json",
+            "Status": "REVIEW",
+            "Electronet Examples": "https://example.test/product-a<br>https://example.test/product-b",
+            "_sort_path": "P1 > L1 > -",
+        }
+    ]
+
+
 def test_refresh_template_coverage_disambiguates_duplicate_leaf_labels_when_needed() -> None:
     expected = [
         ExpectedCategory(

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from tools.schema_registry.build_schema_index import FIELDNAMES, build_rows
 
 
@@ -18,6 +20,7 @@ def test_build_schema_index_emits_deterministic_rows_with_stable_columns() -> No
                 "cta_map_key": "Category",
                 "cta_url": "https://example.test/b",
                 "template_status": "active",
+                "subcategory_match_policy": "exact_subcategory",
                 "match_mode": "direct_single",
                 "fingerprint": "fingerprint-b",
                 "source_template_file": "resources/templates/electronet/beta.json",
@@ -38,6 +41,7 @@ def test_build_schema_index_emits_deterministic_rows_with_stable_columns() -> No
                 "cta_map_key": "Category",
                 "cta_url": "https://example.test/a",
                 "template_status": "manual_only",
+                "subcategory_match_policy": "exact_subcategory",
                 "match_mode": "manual_only",
                 "fingerprint": "fingerprint-a",
                 "source_template_file": "resources/templates/electronet/alpha.json",
@@ -72,6 +76,7 @@ def test_build_schema_index_computes_sentinel_derived_fields_correctly() -> None
                 "cta_map_key": "Path",
                 "cta_url": "https://example.test/demo",
                 "template_status": "active",
+                "subcategory_match_policy": "leaf_family",
                 "match_mode": "direct_single",
                 "fingerprint": "fp",
                 "source_template_file": "resources/templates/electronet/demo.json",
@@ -89,3 +94,32 @@ def test_build_schema_index_computes_sentinel_derived_fields_correctly() -> None
     assert row["last_label"] == "Τελική Ετικέτα"
     assert row["example_count"] == 2
     assert row["first_example"] == "https://example.test/example-1"
+    assert row["subcategory_match_policy"] == "leaf_family"
+
+
+def test_build_schema_index_fails_clearly_when_compiled_schema_is_missing_required_fields() -> None:
+    payload = {
+        "schemas": [
+            {
+                "schema_id": "schema-1",
+                "template_id": "demo",
+                "authored_template_id": "demo_electronet_labels_v1",
+                "category_path": "Demo > Path > -",
+                "parent_category": "Demo",
+                "leaf_category": "Path",
+                "category_gr": "Path",
+                "cta_map_key": "Path",
+                "cta_url": "https://example.test/demo",
+                "template_status": "active",
+                "match_mode": "direct_single",
+                "fingerprint": "fp",
+                "source_template_file": "resources/templates/electronet/demo.json",
+                "n_sections": 1,
+                "n_rows_total": 1,
+                "sentinel": {"last_section": "Τελική Ενότητα", "last_label": "Τελική Ετικέτα"},
+            }
+        ]
+    }
+
+    with pytest.raises(ValueError, match="subcategory_match_policy"):
+        build_rows(payload)

@@ -4984,3 +4984,35 @@ Validation:
 
 Risks, blockers, or skipped items:
 - this commit intentionally keeps the `leaf_family` exception set narrow and metadata-driven; broader mixed-family policy handling is still deferred
+
+## 2026-04-02 - Schema-registry validation, index, and coverage tools
+
+What changed:
+- finalized the schema-registry support tooling around the live repo layout and outputs
+- updated the schema index contract to emit `subcategory_match_policy` from the compiled Electronet library into `resources/schemas/schema_index.csv`
+- extended schema-index tests to cover the new column and malformed-library failure handling
+- extended coverage tests to lock in `REVIEW` status when multiple templates claim the same expected category
+- updated the schema-registry README so the documented emitted metadata matches the current compiled library and matcher debug surface
+
+Files changed:
+- `DOCUMENTATION.md`
+- `resources/schemas/schema_index.csv`
+- `tools/schema_registry/README.md`
+- `tools/schema_registry/build_schema_index.py`
+- `tools/schema_registry/tests/test_build_schema_index.py`
+- `tools/schema_registry/tests/test_refresh_template_coverage.py`
+
+Commands run:
+- `python -m tools.schema_registry.validate_templates`
+- `python -m tools.schema_registry.build_electronet_schema_library`
+- `python -m tools.schema_registry.build_schema_index`
+- `python -m tools.schema_registry.refresh_template_coverage`
+- `python -m pytest tools/schema_registry/tests/test_validate_templates.py tools/schema_registry/tests/test_build_schema_index.py tools/schema_registry/tests/test_refresh_template_coverage.py tools/schema_registry/tests/test_build_electronet_schema_library.py -q`
+
+Validation:
+- repo-root validation CLI passed against the live Electronet templates
+- repo-root build CLIs completed successfully for the compiled library, schema index, and coverage report
+- focused schema-registry test suite passed: `18 passed`
+
+Risks, blockers, or skipped items:
+- `refresh_template_coverage.py` still derives expected coverage from repository taxonomy inputs and bound templates only; it does not infer any broader multi-source coverage model beyond the current repo truth
