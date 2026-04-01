@@ -45,12 +45,14 @@ Supported runtime URL scope is determined by the code-supported source-detection
    - `work/{model}/llm/seo_meta.output.json`
 4. Run `python -m pipeline.workflow render --model {model}` from `scraper/`.
 5. When render publishes `products/{model}.csv`, the runtime must then start a separate OpenCart publish phase through `tools/run_opencart_pipeline.sh` from repo root with `CURRENT_JOB_PRODUCT_FILE` set to that exact published CSV path.
+<!--
 6. Inspect:
    - `work/{model}/candidate/{model}.validation.json`
    - `work/{model}/publish.run.json`
    - `work/{model}/upload.opencart.json`
    - `work/{model}/import.opencart.json`
-
+-->
+<!--
 ## Source Of Truth
 
 Use these local files as runtime sources:
@@ -61,7 +63,7 @@ Use these local files as runtime sources:
 - `resources/templates/TEMPLATE_presentation.html`
 - `resources/prompts/master_prompt+.txt`
 - `resources/schemas/compact_response.schema.json`
-
+-->
 ## Local Responsibilities
 
 Local code owns:
@@ -113,8 +115,4 @@ Render stage writes:
 - Render success is owned only by render; the post-render publish phase reports its own status and does not flip render to failed.
 - Prefer fixing pipeline behavior instead of patching generated files by hand.
 
-## Legacy Workflow
 
-The old script-driven flow is preserved only as historical reference:
-- `archive/legacy/master_prompt_legacy.txt`
-- `archive/legacy/RULES_legacy.md`

@@ -60,7 +60,7 @@ treat it as a request to run the full pipeline.
 8. Output rules:
    - `intro_text.output.txt` must contain plain Greek text only
    - exactly one paragraph
-   - 120-180 words
+   - 100-180 words
    - no HTML
    - no bullets
    - no CTA language

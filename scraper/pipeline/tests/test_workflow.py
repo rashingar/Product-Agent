@@ -10,7 +10,7 @@ from pipeline.services import PrepareRequest, PublishRequest, RenderRequest, Run
 from pipeline.workflow import build_cli_input_from_args, build_parser, prepare_workflow, render_workflow, resolve_model_for_render
 
 
-def build_intro(words: int = 120) -> str:
+def build_intro(words: int = 100) -> str:
     return " ".join(["λέξη"] * words)
 
 
