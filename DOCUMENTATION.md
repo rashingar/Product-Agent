@@ -3,6 +3,39 @@
 ## Current milestone
 Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
 
+## 2026-04-01 - Finalize category-scoped schema matching docs to match landed behavior
+
+Goal:
+- align the branch docs with the implementation that actually shipped
+- document the compiled runtime metadata shape, landed `match_mode` values, hard-gating rules, fail-closed semantics, and runtime debug inspection path
+- remove stale wording that still implied planned-state names or allowed global schema similarity fallback
+
+Files edited:
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+- `tools/schema_registry/README.md`
+
+What changed:
+- the category-scoped contract spec is now marked `implemented` instead of `planned`
+- stale planned-state matcher names such as `direct_only` / `sibling_scored` were replaced with the landed values:
+  - `direct_single`
+  - `category_pool`
+  - `manual_only`
+- the docs now describe the landed matcher flow:
+  - category-path scoped candidate pool
+  - same-family leaf-only fallback only when needed
+  - active-template filtering
+  - hard gates before sibling scoring
+  - bounded intra-category scoring only
+  - fail-closed `no_safe_template_match`
+- the docs now spell out where to inspect runtime matcher diagnostics:
+  - `work/{model}/scrape/{model}.normalized.json`
+  - `work/{model}/scrape/{model}.report.json`
+
+Validation:
+- docs updated to match the current implementation and regression coverage
+- stale wording implying global schema fallback or old matcher mode names was removed from the schema-matching spec and schema-registry runbook
+
 ## 2026-04-01 - Add focused regression coverage for category-scoped schema safety
 
 Goal:

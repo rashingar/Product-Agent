@@ -1,96 +1,174 @@
 # Category-Scoped Schema Matching Contract
 
 Date: 2026-04-01
-Status: planned
+Status: implemented
 
 ## Purpose
 
-This document freezes the branch contract for category-scoped schema matching before runtime behavior changes land.
+This document records the landed contract for category-scoped schema matching.
 
-The branch is limited to:
+The branch scope covered:
 - schema/template compilation
 - compiled runtime metadata
 - runtime schema selection safety
+- structured matcher debug reporting
 
-This branch does not change:
+This branch did not change:
 - category resolution behavior
 - public workflow entrypoints
 - unrelated prepare/render orchestration
 
 ## Problem statement
 
-The current failure mode is not that canonical category resolution is always wrong. The real safety gap is that category resolution can be correct while runtime schema selection still drifts to an unrelated template because matching is too global or too weakly constrained.
+The safety gap was not category resolution alone. A product could resolve to the correct canonical category while schema matching still drifted to an unrelated template because selection was previously too global or too weakly constrained.
 
-The concrete failure class to prevent is a washing-machine product resolving to the correct category while still inheriting meat-grinder-like characteristics from an unrelated template family.
+The failure class this implementation prevents is a correctly resolved washing-machine product inheriting characteristics from an unrelated kitchen, grooming, or other appliance family.
 
-## Required design
+## Landed design
 
-1. Runtime schema selection must be category-scoped, not global.
-2. Compiled runtime metadata must include category binding and hard-gating fields.
-3. If a category has exactly one active safe template, runtime selection must use deterministic direct selection.
-4. If multiple templates exist in the same category family, only sibling templates in that family may compete.
-5. If hard gates fail, the matcher must fail closed instead of borrowing another category's schema.
+1. Runtime schema selection is category-scoped, not global.
+2. Compiled runtime metadata includes category binding plus hard-gating fields.
+3. If a resolved category has exactly one active safe template, runtime selects it directly.
+4. If multiple active safe templates exist in one category family, only those siblings may compete.
+5. If hard gates fail, matcher returns a fail-closed result instead of borrowing another category's schema.
 
-## Compiled runtime metadata contract
+## Compiled runtime metadata
 
-Every compiled template entry introduced by this branch must include the following fields:
+Every compiled runtime entry now includes these matcher-relevant fields:
 
-| Field | Contract |
+| Field | Meaning |
 | --- | --- |
+| `schema_id` | Stable schema identifier used by runtime selection and downstream render steps. |
 | `source_system` | Source family the compiled template belongs to. |
-| `template_id` | Stable identifier for the compiled template entry. |
-| `category_path` | Canonical full category path the template is bound to. |
-| `parent_category` | Canonical parent category segment used for category-family scoping. |
+| `template_id` | Stable compiled template identifier. |
+| `authored_template_id` | Authored template id from the source template file. |
+| `category_path` | Canonical full category path bound to the template. |
+| `parent_category` | Canonical parent category segment. |
 | `leaf_category` | Canonical leaf category segment. |
-| `sub_category` | Canonical optional sub-category segment when present. |
+| `sub_category` | Canonical optional sub-category segment. |
 | `cta_map_key` | Deterministic CTA mapping key already used elsewhere in the pipeline. |
-| `template_status` | Eligibility status for runtime auto-selection. Required values: `active`, `manual_only`, `deprecated`, `incomplete`. |
-| `match_mode` | Runtime selection mode. Required values: `direct_only`, `sibling_scored`. |
-| `section_names_exact` | Exact section names preserved from the source template. |
-| `section_names_normalized` | Normalized section names used for bounded matching. |
-| `label_set_exact` | Exact label set preserved from the source template. |
-| `label_set_normalized` | Normalized label set used for bounded matching. |
-| `section_label_pairs_normalized` | Normalized section-plus-label pairs used for stronger within-family discrimination. |
-| `discriminator_labels` | Labels that strongly distinguish one sibling template from another. |
-| `required_labels_any` | Labels where at least one must be present for the template to remain eligible. |
-| `required_labels_all` | Labels that must all be present for the template to remain eligible. |
-| `forbidden_labels` | Labels that immediately disqualify the template at runtime. |
-| `min_section_overlap` | Minimum allowed section overlap before scoring can proceed. |
-| `min_label_overlap` | Minimum allowed label overlap before scoring can proceed. |
-| `sibling_template_ids` | Closed list of sibling templates in the same category family that may compete with this template. |
-| `fingerprint` | Stable compiled fingerprint for deterministic change tracking and diagnostics. |
-| `source_template_file` | Source template file path used to produce the compiled entry. |
+| `cta_url` | Resolved CTA URL bound to the taxonomy entry. |
+| `template_status` | Runtime eligibility status. |
+| `match_mode` | Runtime matching mode for the compiled entry. |
+| `section_names_exact` | Exact authored section names. |
+| `section_names_normalized` | Normalized section names used by runtime matching. |
+| `label_set_exact` | Exact authored label set. |
+| `label_set_normalized` | Normalized label set used by runtime matching. |
+| `section_label_pairs_normalized` | Normalized section-label pairs used for bounded sibling comparison. |
+| `discriminator_labels` | Labels that distinguish one sibling template from another. |
+| `required_labels_any` | At least one of these labels must be present when populated. |
+| `required_labels_all` | All of these labels must be present when populated. |
+| `forbidden_labels` | Presence of any of these labels disqualifies the candidate. |
+| `min_section_overlap` | Minimum section-overlap count required before scoring can proceed. |
+| `min_label_overlap` | Minimum label-overlap count required before scoring can proceed. |
+| `sibling_template_ids` | Closed list of sibling templates allowed to compete inside the same category family. |
+| `fingerprint` | Stable compiled fingerprint for deterministic change tracking. |
+| `source_template_file` | Source template path used to produce the compiled entry. |
+| `n_sections` | Count of compiled sections. |
+| `n_rows_total` | Count of compiled characteristic rows. |
+| `sections` | Compatibility section payload used by rendering and template materialization. |
+| `sentinel` | Sentinel section/label metadata used for diagnostics. |
+| `source_files` | Source filenames associated with the compiled entry. |
 
-Additional contract rules:
-- Only `template_status = active` entries may enter the automatic runtime candidate pool.
-- `manual_only`, `deprecated`, and `incomplete` entries must be compiled for visibility and diagnostics, but must be excluded from automatic runtime selection.
-- `match_mode = direct_only` means the compiled entry is eligible only for deterministic direct selection after category scoping.
-- `match_mode = sibling_scored` means the compiled entry may participate only in bounded competition against `sibling_template_ids` from the same category family.
-- `sibling_template_ids` must never contain templates from a different `category_path` family.
+Landed `template_status` behavior:
+- `active`: eligible for automatic runtime selection
+- `manual_only`: compiled for visibility/diagnostics, excluded from automatic runtime selection
+- `deprecated`: compiled for visibility/diagnostics, excluded from automatic runtime selection
+- `incomplete`: compiled for visibility/diagnostics, excluded from automatic runtime selection
+
+Landed `match_mode` values:
+- `direct_single`: the category-scoped active pool contains exactly one safe template; runtime selects it directly
+- `category_pool`: multiple active siblings exist in the same category family; runtime may compare only within that bounded pool
+- `manual_only`: entry is visible in compiled metadata but excluded from automatic runtime matching
 
 ## Runtime matcher decision flow
 
-The runtime matcher contract for this branch is:
+The landed matcher flow is:
 
-1. Resolve canonical category.
-2. Build a category-scoped candidate pool from compiled metadata using the resolved category binding.
-3. Drop any candidate with `template_status` of `manual_only`, `deprecated`, or `incomplete`.
-4. If exactly one active safe template remains, select it directly.
-5. If multiple active safe templates remain in the same category family, apply only intra-category hard gates:
+1. Resolve canonical category first.
+2. Build a category-scoped candidate pool from compiled metadata using `taxonomy_path` when available.
+3. If `taxonomy_path` is absent but parent/leaf/subcategory are resolved, normalize that binding and use it to scope the pool.
+4. If no exact category-path pool exists and the resolved family is leaf-only, fall back only to leaf-only templates inside that same resolved parent/leaf family.
+5. Apply preferred source-file narrowing only inside that already bounded pool.
+6. Drop any candidate whose `template_status` is not `active`.
+7. If exactly one active safe template remains, select it directly and do not run sibling scoring.
+8. If multiple active safe templates remain, apply hard gates before scoring:
    - reject candidates missing `required_labels_all`
    - reject candidates missing all of `required_labels_any` when that field is populated
    - reject candidates containing any `forbidden_labels`
    - reject candidates below `min_section_overlap`
    - reject candidates below `min_label_overlap`
-6. Score only the remaining sibling candidates in that same category family using bounded within-family signals such as normalized section names, normalized label sets, section-label pairs, and discriminator labels.
-7. If no candidate survives the hard gates, return `no_safe_template_match`.
+9. Score only the remaining sibling candidates in that same bounded category family using:
+   - normalized section overlap
+   - normalized label overlap
+   - normalized section-label pair overlap
+   - discriminator-label overlap
+10. If no candidate survives the hard gates, return a fail-closed matcher result.
 
-## Fail-closed safety rules
+## Hard-gating rules
 
-- No global fuzzy fallback is allowed.
-- No cross-category schema rescue is allowed.
-- A category mismatch discovered at matcher time must not be "healed" by borrowing a template from another category family.
-- `no_safe_template_match` is the correct runtime result when the category-scoped pool cannot satisfy the hard gates safely.
+The hard gates are mandatory safety checks, not soft ranking hints:
+
+- `required_labels_all`
+  - every listed normalized label must be present
+- `required_labels_any`
+  - at least one listed normalized label must be present when the field is populated
+- `forbidden_labels`
+  - any overlap disqualifies the candidate immediately
+- `min_section_overlap`
+  - extracted normalized section overlap must meet the compiled minimum
+- `min_label_overlap`
+  - extracted normalized label overlap must meet the compiled minimum
+
+If these gates fail, runtime does not downgrade the result into a cross-category fallback.
+
+## Fail-closed semantics
+
+`no_safe_template_match` is the correct fail-closed outcome when the category-scoped runtime pool cannot produce a safe match.
+
+Fail-closed rules:
+- no global fuzzy fallback is allowed
+- no cross-category schema rescue is allowed
+- a candidate from another category family must never be selected to “heal” a mismatch
+- `matched_schema_id` stays `null`
+- `selected_template_id` stays `null`
+- runtime reports still include bounded candidate and gate-failure diagnostics for debugging
+
+Standard fail reasons currently surfaced:
+- `pool_empty_for_category`
+- `manual_only_category`
+- `no_active_templates`
+- `discriminator_miss`
+- `insufficient_section_overlap`
+- `insufficient_label_overlap`
+- `no_safe_template_match`
+
+## Runtime debug reporting
+
+Matcher results are exposed through the existing runtime artifacts.
+
+Inspect:
+- `work/{model}/scrape/{model}.normalized.json`
+  - `schema_match`
+- `work/{model}/scrape/{model}.report.json`
+  - `schema_resolution`
+  - `schema_candidates`
+  - `schema_preference`
+
+Structured matcher debug fields currently surfaced on `schema_match` / `schema_resolution`:
+- `resolved_category_path`
+- `candidate_pool_size`
+- `candidate_template_ids`
+- `selected_template_id`
+- `match_mode`
+- `hard_gate_failures`
+- `fail_reason`
+- `discriminator_hits`
+- `discriminator_misses`
+- `section_overlap_score`
+- `label_overlap_score`
+
+The entries in `schema_candidates` are bounded to the resolved category pool. They are no longer a global similarity leaderboard.
 
 ## Non-goals
 
@@ -103,4 +181,4 @@ The runtime matcher contract for this branch is:
 
 ## Current branch state
 
-This document is a scope and contract freeze only. It does not, by itself, change runtime behavior.
+The compiler metadata, category-scoped matcher, structured debug reporting, and regression coverage for this contract are implemented in the repository.
