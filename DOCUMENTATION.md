@@ -3,6 +3,48 @@
 ## Current milestone
 Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
 
+## 2026-04-01 - Add focused regression coverage for category-scoped schema safety
+
+Goal:
+- lock the new category-scoped schema safety behavior so correct category resolution cannot silently drift to the wrong characteristics template in future changes
+- cover the key direct-single template families from the compiled Electronet schema library
+- keep the coverage deterministic, cheap, and synthetic where runtime fixture extraction is sufficient
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+
+What changed:
+- added compiled-library matcher regressions for these direct-single template families:
+  - `tileoraseis`
+  - `koyzines`
+  - `plyntiria_piaton`
+  - `entoixizomena_plyntiria_piaton`
+  - `plyntiria_rouxwn`
+  - `entoixizomena_plyntiria_royxon`
+  - `entoixizomena_psygeia`
+- each regression test drives `SchemaMatcher` with deterministic synthetic extracted specs derived from the compiled schema metadata and asserts that the resolved family selects its own template
+- added compiled-library negative-path regressions proving that:
+  - generic washing-machine-family labels cannot escape the resolved washing-machine category
+  - kitchen/cooker-shaped extracted specs cannot override a washing-machine category binding
+- existing bounded sibling behavior remains pinned by:
+  - `scraper/pipeline/tests/test_schema_matcher.py` synthetic `category_pool` matcher tests
+  - `tools/schema_registry/tests/test_build_electronet_schema_library.py` compiler-side `category_pool` metadata test
+
+Commands run:
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+- `python -m pytest tools/schema_registry/tests/test_build_electronet_schema_library.py scraper/pipeline/tests/test_schema_matcher.py`
+- `python -m pytest scraper/pipeline/tests tools/schema_registry/tests`
+
+Validation:
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py` passed
+- `python -m pytest tools/schema_registry/tests/test_build_electronet_schema_library.py scraper/pipeline/tests/test_schema_matcher.py` passed
+- `python -m pytest scraper/pipeline/tests tools/schema_registry/tests` passed with `232 passed`
+
+Notes:
+- no schema-result field names or fail-reason enums changed in this milestone
+- the new coverage intentionally keeps the listed family tests on direct-single categories from the real compiled library and leaves sibling-pool behavior pinned by the existing synthetic matcher + compiler tests
+
 ## 2026-04-01 - Add structured debug reporting for category-scoped schema matching
 
 Goal:
