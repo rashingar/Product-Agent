@@ -3,6 +3,54 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Finalize docs for prepare-stage taxonomy/enrichment extraction
+
+Goal:
+- mark the taxonomy/enrichment extraction branch scope complete in the control docs
+- make the landed ownership boundary and landed test split explicit
+- keep this commit docs-only with no Python changes
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Landed state recorded:
+- landed internal seam module:
+  - `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- landed typed result:
+  - `PrepareTaxonomyEnrichmentResult`
+- landed narrowed `prepare_stage.py` responsibilities:
+  - provider-resolution ownership
+  - gallery download orchestration
+  - section-image/Besco download orchestration
+  - Skroutz section extraction and manufacturer-presentation fallback handling
+  - downstream result-assembly handoff
+  - scrape-artifact persistence handoff
+  - outward dict-shaped `execute_prepare_stage(...)` return payload compatibility
+- landed test coverage split:
+  - direct seam tests in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py`
+  - stage-isolation tests in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py`
+  - downstream deterministic stage-isolation tests in `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+  - prepare/workflow/provider regression coverage remains the higher-level unchanged-behavior backstop
+- landed injection boundary:
+  - `execute_prepare_stage(...)` now keeps one taxonomy/enrichment seam injection:
+    - `resolve_prepare_taxonomy_enrichment_fn`
+
+Next recommended branch:
+- the next real structural seam is still the remaining gallery/Besco plus Skroutz section-extraction orchestration in `prepare_stage.py`
+- naming polish is not yet the recommended next branch because that larger stage seam still remains
+
+Commands run:
+- `Get-Content PLAN.md | Select-Object -Skip 480 -First 80`
+- `Get-Content DOCUMENTATION.md -TotalCount 160`
+- `Get-Content README.md`
+
+Validation:
+- `PLAN.md` now records the taxonomy/enrichment extraction as landed rather than proposed
+- `DOCUMENTATION.md` now records the landed module name, typed result name, narrowed stage responsibilities, and test split
+- `README.md` was reviewed and left unchanged because it does not incorrectly describe internal prepare-stage ownership
+- this commit is docs-only and does not modify Python files
+
 ## 2026-04-01 - Collapse prepare-stage taxonomy/enrichment to one injected seam
 
 Goal:
