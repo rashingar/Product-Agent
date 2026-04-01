@@ -3,6 +3,35 @@
 ## Current milestone
 Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
 
+## 2026-04-02 - Regenerate stale schema index artifact
+
+Goal:
+- bring the checked-in schema index back into sync with the current compiled Electronet library and index contract
+- keep the fix limited to the stale derived artifact identified in merge review
+- avoid any matcher, compiler-policy, or coverage-report behavior changes
+
+Files changed:
+- `DOCUMENTATION.md`
+- `resources/schemas/schema_index.csv`
+
+What changed:
+- regenerated `resources/schemas/schema_index.csv` from the current compiled library using the existing schema-index tool
+- confirmed the checked-in compiled library did not change during regeneration
+- updated stale `subcategory_match_policy` rows in the index so the mixed air-conditioner and fan families now match the current compiled metadata
+
+Commands run:
+- `python -m tools.schema_registry.build_electronet_schema_library`
+- `python -m tools.schema_registry.build_schema_index`
+- `python -m pytest tools/schema_registry/tests/test_build_schema_index.py tools/schema_registry/tests/test_build_electronet_schema_library.py -q`
+
+Validation:
+- regenerated schema index diff is limited to stale `subcategory_match_policy` values in mixed-family rows
+- focused schema-index and compiler tests passed
+- no matcher/runtime/tool logic changed in this blocker-fix commit
+
+Risks, blockers, or skipped items:
+- no additional repo-state guard was added in this commit to keep the pre-merge fix minimal
+
 ## 2026-04-02 - Disambiguate ambiguous coverage labels only when needed
 
 Goal:
