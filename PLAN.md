@@ -515,6 +515,7 @@ Seam boundary that must stay explicit:
 1. Taxonomy resolution and manufacturer enrichment move together as one orchestration seam in this branch; they do not split into separate extractions.
 2. Result assembly remains outside this branch; no schema-match, normalized/report assembly, or result-assembly ownership moves in this branch.
 3. `scraper/pipeline/services/prepare_execution.py` remains unchanged in this branch.
+4. `execute_prepare_stage(...)` should keep one taxonomy/enrichment seam injection, `resolve_prepare_taxonomy_enrichment_fn`, instead of exposing lower-level resolver or enrichment-helper injections directly.
 
 Invariants that must not change:
 1. Public workflow entrypoint and CLI flags remain unchanged.

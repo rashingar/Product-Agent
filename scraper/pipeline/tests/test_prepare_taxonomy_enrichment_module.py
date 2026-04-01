@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from pipeline.models import ParsedProduct, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
-from pipeline.prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult, execute_prepare_taxonomy_enrichment
+from pipeline.prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult, resolve_prepare_taxonomy_enrichment
 
 
 def _build_source(
@@ -49,7 +49,7 @@ class DummyFetcher:
     pass
 
 
-def test_execute_prepare_taxonomy_enrichment_calls_resolver_with_current_prepare_stage_inputs(tmp_path: Path) -> None:
+def test_resolve_prepare_taxonomy_enrichment_calls_resolver_with_current_prepare_stage_inputs(tmp_path: Path) -> None:
     key_specs = [SpecItem(label="Power", value="2200 W")]
     spec_sections = [SpecSection(section="Specs", items=[SpecItem(label="Color", value="Black")])]
     source = _build_source(
@@ -75,7 +75,7 @@ def test_execute_prepare_taxonomy_enrichment_calls_resolver_with_current_prepare
             resolver_calls.append(kwargs)
             return taxonomy, taxonomy_candidates
 
-    result = execute_prepare_taxonomy_enrichment(
+    result = resolve_prepare_taxonomy_enrichment(
         source="electronet",
         parsed=parsed,
         fetcher=DummyFetcher(),
@@ -98,7 +98,7 @@ def test_execute_prepare_taxonomy_enrichment_calls_resolver_with_current_prepare
     assert result.taxonomy.reason == "resolver_reason"
 
 
-def test_execute_prepare_taxonomy_enrichment_attempts_skroutz_manufacturer_enrichment_and_preserves_mutated_source(
+def test_resolve_prepare_taxonomy_enrichment_attempts_skroutz_manufacturer_enrichment_and_preserves_mutated_source(
     tmp_path: Path,
 ) -> None:
     source = _build_source(source_name="skroutz", url="https://www.skroutz.gr/s/143051/example.html")
@@ -139,7 +139,7 @@ def test_execute_prepare_taxonomy_enrichment_attempts_skroutz_manufacturer_enric
         ]
         return enrichment_result
 
-    result = execute_prepare_taxonomy_enrichment(
+    result = resolve_prepare_taxonomy_enrichment(
         source="skroutz",
         parsed=parsed,
         fetcher=fetcher,
@@ -165,7 +165,7 @@ def test_execute_prepare_taxonomy_enrichment_attempts_skroutz_manufacturer_enric
         ("manufacturer_tefal", "direct_source_already_manufacturer"),
     ],
 )
-def test_execute_prepare_taxonomy_enrichment_skips_non_skroutz_enrichment_with_current_default_shape(
+def test_resolve_prepare_taxonomy_enrichment_skips_non_skroutz_enrichment_with_current_default_shape(
     tmp_path: Path,
     source_name: str,
     fallback_reason: str,
@@ -177,7 +177,7 @@ def test_execute_prepare_taxonomy_enrichment_skips_non_skroutz_enrichment_with_c
         def resolve(self, **_kwargs):
             return TaxonomyResolution(parent_category="Home", leaf_category="Appliances", sub_category="Category"), []
 
-    result = execute_prepare_taxonomy_enrichment(
+    result = resolve_prepare_taxonomy_enrichment(
         source=source_name,
         parsed=parsed,
         fetcher=DummyFetcher(),

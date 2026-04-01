@@ -3,6 +3,50 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Collapse prepare-stage taxonomy/enrichment to one injected seam
+
+Goal:
+- reduce the taxonomy/enrichment dependency surface in `execute_prepare_stage(...)` to one injected callable
+- remove the now-redundant lower-level stage injection surface because those helpers are internal to `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- keep workflow, prepare execution, and outward stage behavior unchanged
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py`
+- `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py`
+- `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+
+Changes:
+- `execute_prepare_stage(...)` now exposes one taxonomy/enrichment seam:
+  - `resolve_prepare_taxonomy_enrichment_fn=resolve_prepare_taxonomy_enrichment`
+- removed the old lower-level stage injection surface:
+  - `taxonomy_resolver_factory`
+  - `enrich_source_from_manufacturer_docs_fn`
+- `prepare_stage.py` now depends only on the single typed taxonomy/enrichment seam and no longer exposes the internal resolver/enrichment helpers in its signature
+- direct seam tests continue to target `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- stage-isolation tests now stub only `resolve_prepare_taxonomy_enrichment_fn` when isolating `execute_prepare_stage(...)`
+- docs now use the landed seam name:
+  - `resolve_prepare_taxonomy_enrichment(...)`
+
+Old vs new stage signature summary:
+- old:
+  - `execute_prepare_stage(..., taxonomy_resolver_factory=TaxonomyResolver, enrich_source_from_manufacturer_docs_fn=enrich_source_from_manufacturer_docs, ...)`
+- new:
+  - `execute_prepare_stage(..., resolve_prepare_taxonomy_enrichment_fn=resolve_prepare_taxonomy_enrichment, ...)`
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment_module.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+
+Validation:
+- direct taxonomy/enrichment seam tests still pass
+- stage-isolation tests now stub only the single taxonomy/enrichment seam
+- prepare-focused provider-selection regressions still pass
+- prepare-focused workflow regression coverage still passes
+- no public workflow or service entrypoint changed
+
 ## 2026-04-01 - Wire prepare stage to the taxonomy/enrichment seam
 
 Goal:
@@ -15,7 +59,7 @@ Files edited:
 - `scraper/pipeline/prepare_stage.py`
 
 Changes:
-- wired `prepare_stage.py` to `execute_prepare_taxonomy_enrichment(...)` in `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- wired `prepare_stage.py` to `resolve_prepare_taxonomy_enrichment(...)` in `scraper/pipeline/prepare_taxonomy_enrichment.py`
 - removed the inline prepare-stage block that previously owned:
   - local taxonomy resolver construction
   - `taxonomy_resolver.resolve(...)` orchestration
@@ -64,7 +108,7 @@ Changes:
 - added the new internal typed result:
   - `PrepareTaxonomyEnrichmentResult`
 - added the new internal seam:
-  - `execute_prepare_taxonomy_enrichment(...)`
+  - `resolve_prepare_taxonomy_enrichment(...)`
 - the new module now owns standalone logic for:
   - taxonomy resolver construction through `taxonomy_resolver_factory`
   - `taxonomy_resolver.resolve(...)` orchestration using the current prepare-stage input contract

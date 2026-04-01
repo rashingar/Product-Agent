@@ -16,7 +16,7 @@ class PrepareTaxonomyEnrichmentResult:
     manufacturer_enrichment: dict[str, Any]
 
 
-def execute_prepare_taxonomy_enrichment(
+def resolve_prepare_taxonomy_enrichment(
     *,
     source: str,
     parsed: ParsedProduct,
@@ -64,3 +64,6 @@ def execute_prepare_taxonomy_enrichment(
         taxonomy_candidates=taxonomy_candidates,
         manufacturer_enrichment=manufacturer_enrichment,
     )
+
+
+execute_prepare_taxonomy_enrichment = resolve_prepare_taxonomy_enrichment

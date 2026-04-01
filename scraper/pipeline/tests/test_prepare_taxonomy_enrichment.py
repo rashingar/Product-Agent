@@ -9,6 +9,7 @@ from pipeline.prepare_provider_resolution import PrepareProviderResolutionResult
 from pipeline.prepare_result_assembly import PrepareResultAssemblyResult
 from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput, PrepareScrapePersistenceResult
 from pipeline.prepare_stage import execute_prepare_stage
+from pipeline.prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult
 
 
 def _build_cli(tmp_path: Path, *, model: str = "100001", url: str, sections: int = 0) -> CLIInput:
@@ -138,13 +139,7 @@ def test_prepare_stage_passes_current_source_fields_to_taxonomy_resolver_and_pro
         {"taxonomy_path": "Home > Small Appliances > Kettles", "confidence": 0.91},
         {"taxonomy_path": "Home > Kitchen > Kettles", "confidence": 0.54},
     ]
-    resolver_calls: list[dict[str, object]] = []
     assembly_calls: list[dict[str, object]] = []
-
-    class RecordingResolver:
-        def resolve(self, **kwargs):
-            resolver_calls.append(kwargs)
-            return taxonomy, taxonomy_candidates
 
     def fake_assemble_prepare_result(**kwargs) -> PrepareResultAssemblyResult:
         assembly_calls.append(kwargs)
@@ -155,28 +150,35 @@ def test_prepare_stage_passes_current_source_fields_to_taxonomy_resolver_and_pro
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: ("electronet", True, "electronet_product_path"),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=lambda: RecordingResolver(),
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
             source="electronet",
             url=cli_arg.url,
             parsed=parsed,
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: (_ for _ in ()).throw(
-            AssertionError("manufacturer enrichment should not be attempted for electronet")
+        resolve_prepare_taxonomy_enrichment_fn=lambda **kwargs: PrepareTaxonomyEnrichmentResult(
+            taxonomy=taxonomy,
+            taxonomy_candidates=taxonomy_candidates,
+            manufacturer_enrichment={
+                "applied": False,
+                "provider": "",
+                "providers_considered": [],
+                "matched_providers": [],
+                "documents": [],
+                "documents_discovered": 0,
+                "documents_parsed": 0,
+                "warnings": [],
+                "section_count": 0,
+                "field_count": 0,
+                "hero_summary_applied": False,
+                "presentation_applied": False,
+                "presentation_block_count": 0,
+                "fallback_reason": "not_applicable_non_skroutz",
+            },
         ),
         assemble_prepare_result_fn=fake_assemble_prepare_result,
         persist_prepare_scrape_artifacts_fn=_persist_stub,
     )
 
-    assert resolver_calls == [
-        {
-            "breadcrumbs": source.breadcrumbs,
-            "url": source.canonical_url,
-            "name": source.name,
-            "key_specs": key_specs,
-            "spec_sections": spec_sections,
-        }
-    ]
     assert len(assembly_calls) == 1
     assert assembly_calls[0]["taxonomy"] is taxonomy
     assert assembly_calls[0]["taxonomy_candidates"] is taxonomy_candidates
@@ -199,8 +201,6 @@ def test_prepare_stage_attempts_skroutz_manufacturer_enrichment_and_propagates_m
         leaf_category="Televisions",
         sub_category="50'' and up",
     )
-    fetcher = DummyFetcher()
-    enrichment_calls: list[dict[str, object]] = []
     assembly_calls: list[dict[str, object]] = []
     enrichment_result = {
         "applied": True,
@@ -219,17 +219,18 @@ def test_prepare_stage_attempts_skroutz_manufacturer_enrichment_and_propagates_m
         "fallback_reason": "",
     }
 
-    class StaticResolver:
-        def resolve(self, **_kwargs):
-            return taxonomy, []
+    fetcher = DummyFetcher()
 
-    def fake_enrich_source_from_manufacturer_docs(**kwargs) -> dict[str, object]:
-        enrichment_calls.append(kwargs)
-        kwargs["source"].manufacturer_source_text = "Power: 2200 W"
-        kwargs["source"].manufacturer_spec_sections = [
+    def fake_resolve_prepare_taxonomy_enrichment(**kwargs) -> PrepareTaxonomyEnrichmentResult:
+        kwargs["parsed"].source.manufacturer_source_text = "Power: 2200 W"
+        kwargs["parsed"].source.manufacturer_spec_sections = [
             SpecSection(section="Manufacturer Specs", items=[SpecItem(label="Power", value="2200 W")])
         ]
-        return enrichment_result
+        return PrepareTaxonomyEnrichmentResult(
+            taxonomy=taxonomy,
+            taxonomy_candidates=[],
+            manufacturer_enrichment=enrichment_result,
+        )
 
     def fake_assemble_prepare_result(**kwargs) -> PrepareResultAssemblyResult:
         assembly_calls.append(kwargs)
@@ -249,22 +250,16 @@ def test_prepare_stage_attempts_skroutz_manufacturer_enrichment_and_propagates_m
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
         fetcher_factory=lambda: fetcher,
-        taxonomy_resolver_factory=lambda: StaticResolver(),
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
             source="skroutz",
             url=cli_arg.url,
             parsed=parsed,
         ),
-        enrich_source_from_manufacturer_docs_fn=fake_enrich_source_from_manufacturer_docs,
+        resolve_prepare_taxonomy_enrichment_fn=fake_resolve_prepare_taxonomy_enrichment,
         assemble_prepare_result_fn=fake_assemble_prepare_result,
         persist_prepare_scrape_artifacts_fn=_persist_stub,
     )
 
-    assert len(enrichment_calls) == 1
-    assert enrichment_calls[0]["source"] is parsed.source
-    assert enrichment_calls[0]["taxonomy"] is taxonomy
-    assert enrichment_calls[0]["fetcher"] is fetcher
-    assert enrichment_calls[0]["output_dir"] == tmp_path / cli.model / "manufacturer"
     assert len(assembly_calls) == 1
     assert assembly_calls[0]["manufacturer_enrichment"] is enrichment_result
     assert assembly_calls[0]["parsed"].source.manufacturer_source_text == "Power: 2200 W"
@@ -297,10 +292,6 @@ def test_prepare_stage_skips_manufacturer_enrichment_for_non_skroutz_sources_and
     parsed = _build_parsed(source)
     assembly_calls: list[dict[str, object]] = []
 
-    class StaticResolver:
-        def resolve(self, **_kwargs):
-            return TaxonomyResolution(parent_category="Home", leaf_category="Appliances", sub_category="Category"), []
-
     def fake_assemble_prepare_result(**kwargs) -> PrepareResultAssemblyResult:
         assembly_calls.append(kwargs)
         return _build_assembly_result(cli=kwargs["cli"], source=kwargs["source"])
@@ -310,14 +301,30 @@ def test_prepare_stage_skips_manufacturer_enrichment_for_non_skroutz_sources_and
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: (source_name, True, scope_reason),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=lambda: StaticResolver(),
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
             source=source_name,
             url=cli_arg.url,
             parsed=parsed,
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: (_ for _ in ()).throw(
-            AssertionError("manufacturer enrichment should not be called for non-skroutz sources")
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: PrepareTaxonomyEnrichmentResult(
+            taxonomy=TaxonomyResolution(parent_category="Home", leaf_category="Appliances", sub_category="Category"),
+            taxonomy_candidates=[],
+            manufacturer_enrichment={
+                "applied": False,
+                "provider": "",
+                "providers_considered": [],
+                "matched_providers": [],
+                "documents": [],
+                "documents_discovered": 0,
+                "documents_parsed": 0,
+                "warnings": [],
+                "section_count": 0,
+                "field_count": 0,
+                "hero_summary_applied": False,
+                "presentation_applied": False,
+                "presentation_block_count": 0,
+                "fallback_reason": fallback_reason,
+            },
         ),
         assemble_prepare_result_fn=fake_assemble_prepare_result,
         persist_prepare_scrape_artifacts_fn=_persist_stub,
@@ -354,46 +361,42 @@ def test_prepare_stage_with_real_result_assembly_keeps_taxonomy_reason_in_report
     taxonomy_reason = "taxonomy_resolved_from_candidate_fallback"
     taxonomy_candidates = [{"taxonomy_path": "Home > Appliances > Special Cases"}]
 
-    class StaticResolver:
-        def resolve(self, **_kwargs):
-            return (
-                TaxonomyResolution(
-                    parent_category="Home",
-                    leaf_category="Appliances",
-                    sub_category="Special Cases",
-                    cta_url="https://www.etranoulis.gr/example",
-                    reason=taxonomy_reason,
-                ),
-                taxonomy_candidates,
-            )
-
     result = execute_prepare_stage(
         cli,
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=lambda: StaticResolver(),
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
             source="skroutz",
             url=cli_arg.url,
             parsed=parsed,
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {
-            "applied": False,
-            "provider": "",
-            "providers_considered": [],
-            "matched_providers": [],
-            "documents": [],
-            "documents_discovered": 0,
-            "documents_parsed": 0,
-            "warnings": ["manufacturer_doc_lookup_unavailable"],
-            "section_count": 0,
-            "field_count": 0,
-            "hero_summary_applied": False,
-            "presentation_applied": False,
-            "presentation_block_count": 0,
-            "fallback_reason": "provider_not_matched",
-        },
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: PrepareTaxonomyEnrichmentResult(
+            taxonomy=TaxonomyResolution(
+                parent_category="Home",
+                leaf_category="Appliances",
+                sub_category="Special Cases",
+                cta_url="https://www.etranoulis.gr/example",
+                reason=taxonomy_reason,
+            ),
+            taxonomy_candidates=taxonomy_candidates,
+            manufacturer_enrichment={
+                "applied": False,
+                "provider": "",
+                "providers_considered": [],
+                "matched_providers": [],
+                "documents": [],
+                "documents_discovered": 0,
+                "documents_parsed": 0,
+                "warnings": ["manufacturer_doc_lookup_unavailable"],
+                "section_count": 0,
+                "field_count": 0,
+                "hero_summary_applied": False,
+                "presentation_applied": False,
+                "presentation_block_count": 0,
+                "fallback_reason": "provider_not_matched",
+            },
+        ),
         persist_prepare_scrape_artifacts_fn=_persist_stub,
     )
 
@@ -408,23 +411,35 @@ def test_prepare_stage_returns_current_output_shape_for_downstream_code(tmp_path
     source = _build_source(source_name="electronet", url=cli.url)
     parsed = _build_parsed(source)
 
-    class StaticResolver:
-        def resolve(self, **_kwargs):
-            return TaxonomyResolution(parent_category="Home", leaf_category="Appliances", sub_category="Category"), []
-
     result = execute_prepare_stage(
         cli,
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: ("electronet", True, "electronet_product_path"),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=lambda: StaticResolver(),
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
             source="electronet",
             url=cli_arg.url,
             parsed=parsed,
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: (_ for _ in ()).throw(
-            AssertionError("manufacturer enrichment should not be attempted for electronet")
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: PrepareTaxonomyEnrichmentResult(
+            taxonomy=TaxonomyResolution(parent_category="Home", leaf_category="Appliances", sub_category="Category"),
+            taxonomy_candidates=[],
+            manufacturer_enrichment={
+                "applied": False,
+                "provider": "",
+                "providers_considered": [],
+                "matched_providers": [],
+                "documents": [],
+                "documents_discovered": 0,
+                "documents_parsed": 0,
+                "warnings": [],
+                "section_count": 0,
+                "field_count": 0,
+                "hero_summary_applied": False,
+                "presentation_applied": False,
+                "presentation_block_count": 0,
+                "fallback_reason": "not_applicable_non_skroutz",
+            },
         ),
         assemble_prepare_result_fn=lambda **kwargs: _build_assembly_result(cli=kwargs["cli"], source=kwargs["source"]),
         persist_prepare_scrape_artifacts_fn=_persist_stub,

@@ -5,7 +5,6 @@ from typing import Any, Callable
 
 from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
-from .manufacturer_enrichment import enrich_source_from_manufacturer_docs
 from .models import CLIInput, GalleryImage, ParsedProduct
 from .normalize import normalize_for_match
 from .prepare_provider_resolution import PrepareProviderResolutionResult, resolve_prepare_provider_resolution
@@ -15,10 +14,9 @@ from .prepare_scrape_persistence import (
     PrepareScrapePersistenceResult,
     persist_prepare_scrape_artifacts,
 )
-from .prepare_taxonomy_enrichment import execute_prepare_taxonomy_enrichment
+from .prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult, resolve_prepare_taxonomy_enrichment
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .source_detection import validate_url_scope
-from .taxonomy import TaxonomyResolver
 from .utils import ensure_directory
 
 
@@ -65,9 +63,8 @@ def execute_prepare_stage(
     model_dir: Path | None = None,
     validate_url_scope_fn: Callable[[str], tuple[str, bool, str]] = validate_url_scope,
     fetcher_factory: Callable[[], ElectronetFetcher] = ElectronetFetcher,
-    taxonomy_resolver_factory: Callable[[], TaxonomyResolver] = TaxonomyResolver,
     resolve_prepare_provider_input_fn: Callable[..., PrepareProviderResolutionResult] = resolve_prepare_provider_resolution,
-    enrich_source_from_manufacturer_docs_fn: Callable[..., dict[str, Any]] = enrich_source_from_manufacturer_docs,
+    resolve_prepare_taxonomy_enrichment_fn: Callable[..., PrepareTaxonomyEnrichmentResult] = resolve_prepare_taxonomy_enrichment,
     assemble_prepare_result_fn: Callable[..., Any] = assemble_prepare_result,
     persist_prepare_scrape_artifacts_fn: Callable[[PrepareScrapePersistenceInput], PrepareScrapePersistenceResult] = persist_prepare_scrape_artifacts,
 ) -> dict[str, Any]:
@@ -162,13 +159,11 @@ def execute_prepare_stage(
     parsed.source.raw_html_path = str(scrape_persistence_input.raw_html_path)
     parsed.source.fallback_used = fetch.fallback_used
 
-    taxonomy_enrichment = execute_prepare_taxonomy_enrichment(
+    taxonomy_enrichment = resolve_prepare_taxonomy_enrichment_fn(
         source=source,
         parsed=parsed,
         fetcher=fetcher,
         model_dir=resolved_model_dir,
-        taxonomy_resolver_factory=taxonomy_resolver_factory,
-        enrich_source_from_manufacturer_docs_fn=enrich_source_from_manufacturer_docs_fn,
     )
     taxonomy = taxonomy_enrichment.taxonomy
     taxonomy_candidates = taxonomy_enrichment.taxonomy_candidates
