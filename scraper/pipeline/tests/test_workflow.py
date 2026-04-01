@@ -362,16 +362,15 @@ def test_prepare_workflow_writes_failed_metadata_on_error(tmp_path: Path, monkey
     assert metadata["run"]["error_detail"] == "prepare exploded"
 
 
-def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_path: Path, monkeypatch) -> None:
-    from pipeline import workflow
-
-    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
-    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+def test_execute_render_workflow_retries_short_intro_before_candidate_build(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_execution
 
     model = "233541"
     scrape_dir = tmp_path / "work" / model / "scrape"
+    llm_dir = tmp_path / "work" / model / "llm"
     products_dir = tmp_path / "products"
     scrape_dir.mkdir(parents=True)
+    llm_dir.mkdir(parents=True)
     products_dir.mkdir(parents=True)
 
     source = SourceProductData(
@@ -425,41 +424,128 @@ def test_render_workflow_writes_candidate_bundle_when_publish_is_skipped(tmp_pat
     }
     (scrape_dir / f"{model}.normalized.json").write_text(__import__("json").dumps(normalized_payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    write_split_llm_outputs(
-        tmp_path / "work" / model,
-        intro_text="Σύντομο κείμενο.",
-        meta_description="Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost και WiFi για άνεση κάθε μέρα.",
-        meta_keywords=["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα", "Total No Frost"],
+    events: list[str] = []
+    original_build_row = render_execution.build_row
+
+    def tracking_build_row(*args, **kwargs):
+        events.append("build_row")
+        return original_build_row(*args, **kwargs)
+
+    def resolve_seo_meta(**_kwargs):
+        events.append("seo_meta")
+        return {
+            "product": {
+                "meta_description": "Το LG GSGV80PYLL είναι ψυγείο ντουλάπα 635 λίτρων με Total No Frost και WiFi για άνεση κάθε μέρα.",
+                "meta_keywords": ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα", "Total No Frost"],
+            }
+        }
+
+    def resolve_intro_text(**kwargs):
+        events.append(f"intro:{kwargs['attempt']}")
+        return build_intro(99 if kwargs["attempt"] == 1 else 100)
+
+    monkeypatch.setattr(render_execution, "build_row", tracking_build_row)
+
+    result = render_execution.execute_render_workflow(
+        model,
+        work_root=tmp_path / "work",
+        products_root=products_dir,
+        resolve_intro_text_fn=resolve_intro_text,
+        resolve_seo_meta_fn=resolve_seo_meta,
     )
 
-    result = render_workflow(model)
+    assert events == ["seo_meta", "intro:1", "intro:2", "build_row"]
+    assert result.run_status == RunStatus.COMPLETED
+    assert result.published_csv_path == products_dir / f"{model}.csv"
+    assert result.validation_report.ok is True
+    assert (llm_dir / "seo_meta.output.json").exists()
+    assert (llm_dir / "intro_text.output.txt").read_text(encoding="utf-8") == build_intro(100)
 
-    assert result.candidate_csv_path.exists()
-    assert result.published_csv_path is None
-    assert result.validation_report_path.exists()
-    assert result.metadata_path.exists()
-    assert result.run_status == RunStatus.FAILED
-    assert result.validation_report.ok is False
-    assert "field_health" in result.validation_report.payload
-    assert result.validation_report.payload["errors"] == ["llm_intro_text_word_count_invalid"]
-    assert "Candidate failed validation; skipping publish to products/." in result.validation_report.warnings
-    metadata = json.loads(result.metadata_path.read_text(encoding="utf-8"))
-    assert result.metadata_path.name == "render.run.json"
-    assert metadata["run"]["model"] == model
-    assert metadata["run"]["run_type"] == "render"
+
+def test_execute_render_workflow_stops_before_candidate_build_when_intro_retries_exhaust(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_execution
+
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    llm_dir = tmp_path / "work" / model / "llm"
+    scrape_dir.mkdir(parents=True)
+    llm_dir.mkdir(parents=True)
+
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        name="LG Example",
+        gallery_images=[GalleryImage(url="https://example.com/233541-1.jpg", position=1, local_filename="233541-1.jpg", downloaded=True)],
+        spec_sections=[SpecSection(section="Επισκόπηση Προϊόντος", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")])],
+        presentation_source_html="""
+        <section>
+          <h3>NatureFRESH</h3>
+          <p>Κείμενο αρκετά μεγάλο ώστε η ενότητα να παραμένει χρήσιμη στη deterministic απόδοση περιγραφής προϊόντος.</p>
+        </section>
+        """,
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {"model": model, "url": source.url, "photos": 1, "sections": 1, "skroutz_status": 1, "boxnow": 0, "price": "2099"},
+                "taxonomy": TaxonomyResolution(cta_url="https://example.com", leaf_category="Ψυγεία & Καταψύκτες").to_dict(),
+                "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9).to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    events: list[str] = []
+
+    def fail_if_build_row_called(*_args, **_kwargs):
+        events.append("build_row")
+        raise AssertionError("build_row should not run before intro validation succeeds")
+
+    def resolve_seo_meta(**_kwargs):
+        events.append("seo_meta")
+        return {"product": {"meta_description": "Έγκυρη περιγραφή.", "meta_keywords": ["LG", "Example"]}}
+
+    def resolve_intro_text(**kwargs):
+        events.append(f"intro:{kwargs['attempt']}")
+        return build_intro(99)
+
+    monkeypatch.setattr(render_execution, "build_row", fail_if_build_row_called)
+
+    with pytest.raises(ServiceError) as excinfo:
+        render_execution.execute_render_workflow(
+            model,
+            work_root=tmp_path / "work",
+            products_root=tmp_path / "products",
+            resolve_intro_text_fn=resolve_intro_text,
+            resolve_seo_meta_fn=resolve_seo_meta,
+        )
+
+    assert events == ["seo_meta", "intro:1", "intro:2", "intro:3"]
+    assert excinfo.value.code == ServiceErrorCode.VALIDATION_FAILURE.value
+    assert excinfo.value.details["stage"] == "intro_text"
+    assert excinfo.value.details["error_code"] == "llm_intro_text_word_count_invalid"
+    assert excinfo.value.details["attempt_count"] == 3
+    assert excinfo.value.details["trace_path"] == str(llm_dir / "intro_text.retry_trace.json")
+    assert (llm_dir / "seo_meta.output.json").exists()
+    assert (llm_dir / "intro_text.output.txt").exists()
+    trace = json.loads((llm_dir / "intro_text.retry_trace.json").read_text(encoding="utf-8"))
+    assert [item["status"] for item in trace] == ["retry", "retry", "failed"]
+    assert not (tmp_path / "work" / model / "candidate" / f"{model}.csv").exists()
+    assert not (tmp_path / "products" / f"{model}.csv").exists()
+    metadata = json.loads((tmp_path / "work" / model / "render.run.json").read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
     assert metadata["run"]["error_code"] == ServiceErrorCode.VALIDATION_FAILURE.value
-    assert metadata["run"]["error_detail"] == "Candidate validation failed"
-    assert metadata["artifacts"]["candidate_csv_path"] == str(result.candidate_csv_path)
-    assert metadata["artifacts"]["published_csv_path"] is None
-    assert metadata["artifacts"]["validation_report_path"] == str(result.validation_report_path)
-    assert metadata["artifacts"]["metadata_path"] == str(result.metadata_path)
-    assert metadata["details"]["validation_ok"] is False
-    assert metadata["details"]["published"] is False
-    assert "upload_attempted" not in metadata["details"]
-    assert "upload_ok" not in metadata["details"]
-    assert "upload_report_path" not in metadata["details"]
-    assert "upload_warning" not in metadata["details"]
+    assert "stage=intro_text" in metadata["run"]["error_detail"]
+    assert "error_code=llm_intro_text_word_count_invalid" in metadata["run"]["error_detail"]
+    assert metadata["details"]["stage"] == "intro_text"
+    assert metadata["details"]["error_code"] == "llm_intro_text_word_count_invalid"
+    assert metadata["details"]["attempt_count"] == 3
+    assert metadata["details"]["trace_path"] == str(llm_dir / "intro_text.retry_trace.json")
 
 
 def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_path: Path, monkeypatch) -> None:
@@ -496,7 +582,7 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     try:
         render_workflow(model)
     except FileNotFoundError as exc:
-        assert str(exc) == f"Missing split-task LLM outputs in {tmp_path / 'work' / model / 'llm'}"
+        assert str(exc) == f"Missing seo_meta output artifact: {tmp_path / 'work' / model / 'llm' / 'seo_meta.output.json'}"
     else:
         raise AssertionError("Expected FileNotFoundError")
 
@@ -504,7 +590,7 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
     assert metadata["run"]["error_code"] == ServiceErrorCode.MISSING_ARTIFACT.value
-    assert "Missing split-task LLM outputs" in metadata["run"]["error_detail"]
+    assert "Missing seo_meta output artifact" in metadata["run"]["error_detail"]
 
 
 def test_render_workflow_builds_description_from_split_outputs_and_deterministic_sections(tmp_path: Path, monkeypatch) -> None:
@@ -599,7 +685,103 @@ def test_render_workflow_builds_description_from_split_outputs_and_deterministic
     metadata = json.loads(result.metadata_path.read_text(encoding="utf-8"))
     assert metadata["details"]["validation_ok"] is True
     assert metadata["details"]["published"] is True
+    assert metadata["details"]["intro_text_trace_path"] == str(tmp_path / "work" / model / "llm" / "intro_text.retry_trace.json")
     assert "upload_attempted" not in metadata["details"]
+
+
+def test_execute_render_workflow_rerun_with_existing_valid_seo_keeps_downstream_work_single_per_run(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_execution
+
+    model = "233541"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    llm_dir = tmp_path / "work" / model / "llm"
+    products_dir = tmp_path / "products"
+    scrape_dir.mkdir(parents=True)
+    llm_dir.mkdir(parents=True)
+    products_dir.mkdir(parents=True)
+
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="LG",
+        mpn="GSGV80PYLL",
+        name="Ψυγείο Ντουλάπα LG GSGV80PYLL Ασημί E",
+        hero_summary="Το LG GSGV80PYLL προσφέρει μεγάλη χωρητικότητα.",
+        price_text="2.099,00 €",
+        price_value=2099.0,
+        gallery_images=[GalleryImage(url="https://example.com/233541-1.jpg", position=1, local_filename="233541-1.jpg", downloaded=True)],
+        besco_images=[GalleryImage(url="https://example.com/besco1.jpg", position=1, local_filename="besco1.jpg", downloaded=True)],
+        key_specs=[
+            SpecItem(label="Συνολική Καθαρή Χωρητικότητα", value="635"),
+            SpecItem(label="Τεχνολογία Ψύξης", value="Total No Frost"),
+            SpecItem(label="Συνδεσιμότητα", value="WiFi"),
+        ],
+        spec_sections=[SpecSection(section="Βασικά Χαρακτηριστικά", items=[SpecItem(label="Τύπος Ψυγείου", value="Ντουλάπα")])],
+        presentation_source_html="""
+        <section>
+          <h3>NatureFRESH για καθημερινή φρεσκάδα</h3>
+          <p>Το NatureFRESH βοηθά στη σωστή συντήρηση και διατηρεί σταθερή ψύξη σε όλο τον θάλαμο, προσφέροντας πρακτική οργάνωση, καθαρή πρόσβαση στα τρόφιμα και σταθερή καθημερινή χρήση με ευκολία για όλη την οικογένεια.</p>
+        </section>
+        """,
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {"model": model, "url": source.url, "photos": 1, "sections": 1, "skroutz_status": 1, "boxnow": 0, "price": "2099"},
+                "taxonomy": TaxonomyResolution(
+                    parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+                    leaf_category="Ψυγεία & Καταψύκτες",
+                    sub_category="Ψυγεία Ντουλάπες",
+                    cta_url="https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia-ntoulapes",
+                ).to_dict(),
+                "schema_match": SchemaMatchResult(matched_schema_id="schema-1", score=0.9).to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    seo_text = json.dumps(
+        {"product": {"meta_description": "Υπάρχουσα έγκυρη περιγραφή.", "meta_keywords": ["LG", "GSGV80PYLL", "Ψυγείο Ντουλάπα"]}},
+        ensure_ascii=False,
+        indent=2,
+    )
+    (llm_dir / "seo_meta.output.json").write_text(seo_text, encoding="utf-8")
+
+    build_calls: list[str] = []
+    intro_calls: list[int] = []
+    original_build_row = render_execution.build_row
+
+    def tracking_build_row(*args, **kwargs):
+        build_calls.append("build_row")
+        return original_build_row(*args, **kwargs)
+
+    def resolve_intro_text(**kwargs):
+        intro_calls.append(kwargs["attempt"])
+        return build_intro(100)
+
+    monkeypatch.setattr(render_execution, "build_row", tracking_build_row)
+
+    first_result = render_execution.execute_render_workflow(
+        model,
+        work_root=tmp_path / "work",
+        products_root=products_dir,
+        resolve_intro_text_fn=resolve_intro_text,
+    )
+    second_result = render_execution.execute_render_workflow(
+        model,
+        work_root=tmp_path / "work",
+        products_root=products_dir,
+        resolve_intro_text_fn=resolve_intro_text,
+    )
+
+    assert first_result.run_status == RunStatus.COMPLETED
+    assert second_result.run_status == RunStatus.COMPLETED
+    assert intro_calls == [1, 1]
+    assert build_calls == ["build_row", "build_row"]
+    assert (llm_dir / "seo_meta.output.json").read_text(encoding="utf-8") == seo_text
 
 def test_workflow_main_render_reports_publish_failure_without_failing_render(monkeypatch, capsys, tmp_path: Path) -> None:
     from pipeline import workflow

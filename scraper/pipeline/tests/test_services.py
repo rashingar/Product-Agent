@@ -561,6 +561,36 @@ def test_render_product_degrades_when_metadata_artifact_is_missing(tmp_path: Pat
     assert result.artifacts.validation_report_path == tmp_path / "work" / "233541" / "candidate" / "233541.validation.json"
 
 
+def test_render_product_propagates_early_intro_validation_failure(tmp_path: Path, monkeypatch) -> None:
+    from pipeline.services import render_service
+
+    def fake_execute_render_workflow(model: str):
+        assert model == "233541"
+        raise ServiceError(
+            ServiceErrorCode.VALIDATION_FAILURE.value,
+            (
+                "LLM stage validation failed: stage=intro_text; "
+                "error_code=llm_intro_text_word_count_invalid; attempt_count=3; "
+                "reason=word count 99 is outside 100-180"
+            ),
+            details={
+                "stage": "intro_text",
+                "error_code": "llm_intro_text_word_count_invalid",
+                "attempt_count": 3,
+            },
+        )
+
+    monkeypatch.setattr(render_service, "execute_render_workflow", fake_execute_render_workflow)
+
+    with pytest.raises(ServiceError) as excinfo:
+        render_product(RenderRequest(model="233541"))
+
+    assert excinfo.value.code == ServiceErrorCode.VALIDATION_FAILURE.value
+    assert excinfo.value.details["stage"] == "intro_text"
+    assert excinfo.value.details["error_code"] == "llm_intro_text_word_count_invalid"
+    assert excinfo.value.details["attempt_count"] == 3
+
+
 def test_publish_product_maps_execution_result(tmp_path: Path, monkeypatch) -> None:
     from pipeline.services import publish_service
 

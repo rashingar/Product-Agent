@@ -1,7 +1,99 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
+Split-LLM intro validation timing and intro-only retry refactor completed on `feat/split-llm-intro-retry`. Render now resolves `seo_meta` first, then `intro_text`, validates intro immediately with intro-only retry for `llm_intro_text_word_count_invalid`, and blocks downstream candidate/render/publish work until intro validation succeeds.
+
+## 2026-04-01 - Land split-LLM intro validation timing and intro-only retry refactor
+
+Goal:
+- record the dedicated follow-up branch scope for the split-LLM orchestration refactor before changing Python code
+- move intro word-count enforcement earlier so candidate/render/publish work is gated on intro success instead of discovering failures first at late candidate validation time
+- keep `seo_meta` single-pass and allow it to complete before intro validation, without letting intro retries mutate it
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/llm_stage_execution.py`
+- `scraper/pipeline/services/metadata.py`
+- `scraper/pipeline/services/models.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/tests/test_llm_stage_execution.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Recorded scope:
+- execution order becomes:
+  - `seo_meta` generation or resolution first
+  - `intro_text` generation or resolution second
+  - immediate intro validation
+  - intro-only retry on `llm_intro_text_word_count_invalid`
+  - only then existing render/validation/publish flow
+- `seo_meta` may complete before intro validation succeeds
+- intro validation is now an early hard gate for downstream candidate build, final render assembly, CSV publish, and OpenCart publish work
+- intro retries do not regenerate or mutate `seo_meta`
+- later candidate validation remains as a safety backstop, not the first intro word-count enforcement point
+- landed internal seam:
+  - `scraper/pipeline/services/llm_stage_execution.py`
+  - `run_intro_text_with_retry(...)`
+  - `execute_split_llm_stage(...)`
+- landed render-stage behavior:
+  - `render_execution.py` now resolves and validates `seo_meta` before intro execution
+  - intro retries are limited to 3 total attempts and only occur for `llm_intro_text_word_count_invalid`
+  - intro validation failures now stop the run before candidate CSV build, final render assembly, CSV publish copy, or OpenCart publish can begin
+  - successful intro retries unlock the downstream render path exactly once
+- landed intro failure typing and trace behavior:
+  - intro retry exhaustion now raises a typed `IntroTextRetryExhaustedError`
+  - the typed failure carries structured intro-specific data through `failure.stage`, `failure.code`, and `failure.attempts`
+  - `intro_text.retry_trace.json` is written under `work/{model}/llm/` with per-attempt `attempt`, `word_count`, `error_codes`, `status`, and `reason`
+  - render failure metadata now persists the intro stage trace details under `render.run.json`
+- landed atomic-write behavior:
+  - intro retry writes now use temp-file plus `os.replace(...)` semantics so a partial intro rewrite cannot be mistaken for a persisted invalid intro on the next validation pass
+- landed test coverage:
+  - direct helper coverage in `scraper/pipeline/tests/test_llm_stage_execution.py`
+  - workflow regressions proving early intro retry/success and early intro failure before candidate build
+  - regression proving `seo_meta.output.json` stays preserved and byte-for-byte unchanged across intro retries and final intro exhaustion
+  - rerun/idempotency regression proving render with already-valid `seo_meta` performs downstream work exactly once per render invocation when intro becomes valid on the first pass
+  - service regression proving early intro validation failures propagate as render-stage service failures
+
+Commands run:
+- `Get-Location; git branch --show-current; git status --short`
+- `rg --files PLAN.md DOCUMENTATION.md scraper/pipeline | sort`
+- `rg -n "render_execution|validate_intro_text_output|intro_text.output|seo_meta.output|llm_intro_text_word_count_invalid|split llm|intro_text" scraper/pipeline -S`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/services/llm_stage_execution.py`
+- `Get-Content scraper/pipeline/services/metadata.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/llm_contract.py`
+- `Get-Content scraper/pipeline/services/errors.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 400 -First 120`
+- `Get-Content scraper/pipeline/tests/test_services.py | Select-Object -Skip 430 -First 170`
+- `Get-Content scraper/pipeline/services/__init__.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -First 220`
+- `Get-Content scraper/pipeline/tests/test_services.py | Select-Object -First 220`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 560 -First 220`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 940 -First 120`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 1320 -First 90`
+- `rg -n "_load_render_llm_inputs|_normalize_render_llm_inputs|llm_stage_execution|execute_split_llm_stage|run_intro_text_with_retry" scraper/pipeline/tests scraper/pipeline -S`
+- `python -m pytest -q pipeline/tests/test_llm_stage_execution.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_llm_contract.py` from `scraper/`
+
+Validation:
+- `PLAN.md` now records the branch scope as completed
+- `seo_meta` is resolved first, remains single-pass, and is not regenerated during intro retries
+- intro word-count failures are now handled at the split-LLM stage instead of first surfacing during late candidate validation
+- downstream candidate/render/publish work is blocked until intro validation succeeds
+- intro retry exhaustion is now a typed error object with structured `stage`, intro-specific `code`, and `attempts` fields
+- per-attempt retry trace data is now persisted under `work/{model}/llm/intro_text.retry_trace.json` and copied into failure metadata details for inspection in CI and local runs
+- intro retry rewrites now use atomic replace semantics
+- targeted pytest results:
+  - `pipeline/tests/test_llm_stage_execution.py`: `9 passed`
+  - `pipeline/tests/test_workflow.py`: `40 passed`
+  - `pipeline/tests/test_services.py`: `21 passed`
+  - `pipeline/tests/test_llm_contract.py`: `10 passed`
 
 ## 2026-04-01 - Finalize docs for prepare-stage taxonomy/enrichment extraction
 
