@@ -3,6 +3,41 @@
 ## Current milestone
 Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
 
+## 2026-04-02 - Disambiguate ambiguous coverage labels only when needed
+
+Goal:
+- keep the Electronet template coverage report compact while removing any chance of misleading duplicate-looking labels across taxonomy branches
+- make label disambiguation conditional on the actual rendered coverage rows instead of precomputing display labels during taxonomy load
+- keep matcher, compiler, and runtime workflow behavior unchanged
+
+Files changed:
+- `DOCUMENTATION.md`
+- `tools/schema_registry/refresh_template_coverage.py`
+- `tools/schema_registry/tests/test_refresh_template_coverage.py`
+
+What changed:
+- moved coverage-label rendering into a focused helper that counts collisions across the expected rows being rendered
+- kept unique labels compact and unchanged
+- kept colliding labels in the compact contextual format `label [parent > leaf]`
+- stopped storing pre-disambiguated labels in `ExpectedCategory.key`; coverage rows now derive their visible label at render time from taxonomy context
+- expanded focused tests to cover:
+  - unique labels staying compact
+  - Android/iOS-style branch collisions disambiguating deterministically
+  - non-colliding rows not being expanded when some labels in the report do collide
+- regenerated the live Electronet coverage report; the file content stayed stable because the already-rendered ambiguous branch labels still resolve to the same visible strings
+
+Commands run:
+- `python -m pytest tools/schema_registry/tests/test_refresh_template_coverage.py -q`
+- `python -m tools.schema_registry.refresh_template_coverage`
+
+Validation:
+- focused coverage tests passed: `5 passed`
+- coverage report regeneration completed successfully
+- no matcher, compiler, or runtime files changed
+
+Risks, blockers, or skipped items:
+- this commit intentionally keeps disambiguation context at `parent > leaf`; if a future taxonomy ever collides within the same parent/leaf branch, the coverage helper would need a narrower context format
+
 ## 2026-04-02 - Remove compiled-library state reuse from Electronet schema compilation
 
 Goal:

@@ -52,15 +52,22 @@ def _expected_label(parent_category: str, leaf_category: str, sub_category: str 
     return sub_category or leaf_category
 
 
-def _disambiguated_label(
-    label: str,
-    parent_category: str,
-    leaf_category: str,
-    counts: Counter[str],
-) -> str:
-    if counts[label] <= 1:
-        return label
-    return f"{label} [{parent_category} > {leaf_category}]"
+def _coverage_label_context(expected: ExpectedCategory) -> str:
+    return f"{expected.parent_category} > {expected.leaf_category}"
+
+
+def _render_coverage_label(expected: ExpectedCategory, counts: Counter[str]) -> str:
+    if counts[expected.label] <= 1:
+        return expected.label
+    return f"{expected.label} [{_coverage_label_context(expected)}]"
+
+
+def _rendered_coverage_labels(expected_categories: list[ExpectedCategory]) -> dict[str, str]:
+    label_counts = Counter(expected.label for expected in expected_categories)
+    return {
+        expected.category_path: _render_coverage_label(expected, label_counts)
+        for expected in expected_categories
+    }
 
 
 def load_expected_categories(
@@ -76,15 +83,6 @@ def load_expected_categories(
         raise ValueError(f"Filter map payload is malformed: {filter_map_path}")
 
     raw_paths = taxonomy_payload["paths"]
-    label_counts = Counter(
-        _expected_label(
-            normalize_whitespace(item.get("parent_category")),
-            normalize_whitespace(item.get("leaf_category")),
-            normalize_whitespace(item.get("sub_category")) or None,
-        )
-        for item in raw_paths
-    )
-
     expected_categories: list[ExpectedCategory] = []
     seen_paths: set[str] = set()
     for item in sorted(
@@ -109,7 +107,7 @@ def load_expected_categories(
         label = _expected_label(parent_category, leaf_category, sub_category)
         expected_categories.append(
             ExpectedCategory(
-                key=_disambiguated_label(label, parent_category, leaf_category, label_counts),
+                key=category_path,
                 label=label,
                 parent_category=parent_category,
                 leaf_category=leaf_category,
@@ -200,6 +198,7 @@ def assess_template_coverage(
 ) -> list[dict[str, str]]:
     orphan_templates = orphan_templates or []
     observed_by_path: defaultdict[str, list[ObservedTemplate]] = defaultdict(list)
+    rendered_labels = _rendered_coverage_labels(expected_categories)
     for template in observed_templates:
         observed_by_path[template.category_path].append(template)
 
@@ -211,7 +210,7 @@ def assess_template_coverage(
         )
         rows.append(
             {
-                "CTA Leaf Category": expected.key,
+                "CTA Leaf Category": rendered_labels[expected.category_path],
                 "File": "<br>".join(template.template_file for template in templates) if templates else "-",
                 "Status": _status_for_templates(templates),
                 "Electronet Examples": _join_examples(templates),
