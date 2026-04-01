@@ -3,6 +3,248 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Finalize scrape persistence extraction docs
+
+Goal:
+- mark the scrape persistence extraction branch scope complete in the control docs
+- make the landed current-state ownership boundary unambiguous
+- keep this commit docs-only with no runtime-code changes
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Current-state guidance:
+- scrape artifact persistence now lives in `scraper/pipeline/prepare_scrape_persistence.py`
+- `scraper/pipeline/prepare_stage.py` now owns prepare-stage orchestration only:
+  - it resolves provider-backed input through the existing provider seam
+  - it computes gallery/besco selection, taxonomy, schema match, normalized payloads, and report payloads
+  - it delegates scrape-stage persistence through one typed persistence seam call
+- `scraper/pipeline/services/prepare_execution.py` still owns all `work/{model}/llm/*` writes:
+  - `task_manifest.json`
+  - `intro_text.context.json`
+  - `intro_text.prompt.txt`
+  - `seo_meta.context.json`
+  - `seo_meta.prompt.txt`
+  - output placeholders under `work/{model}/llm/`
+- current scrape artifact ownership under `work/{model}/scrape/` remains:
+  - `{model}.raw.html`
+  - `{model}.source.json`
+  - `{model}.normalized.json`
+  - `{model}.report.json`
+  - `bescos_raw.json` when section extraction produces it
+  - scrape-stage supporting assets that already belong under `work/{model}/scrape/`
+
+Validation:
+- `PLAN.md` now marks the scrape persistence extraction scope complete
+- active docs now state the landed ownership boundary directly
+- this commit is docs-only and does not modify runtime code
+
+## 2026-04-01 - Narrow the prepare-stage scrape persistence seam
+
+Goal:
+- reduce the scrape persistence seam to one clear typed persistence call from `prepare_stage.py`
+- remove remaining write-oriented local variables and persistence choreography from the stage implementation
+- keep the outward `execute_prepare_stage(...)` payload and all public workflow behavior unchanged
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/characteristics_pipeline.py`
+- `scraper/pipeline/mapping.py`
+- `scraper/pipeline/prepare_scrape_persistence.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_prepare_scrape_persistence.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+
+Changes:
+- `prepare_stage.py` now builds one `PrepareScrapePersistenceInput` object, fills it as state is computed, and calls `persist_prepare_scrape_artifacts(...)` once
+- path derivation for the canonical scrape artifacts now lives on `PrepareScrapePersistenceInput` via typed properties instead of ad hoc stage-local path variables
+- `PrepareScrapePersistenceResult` was reduced to the canonical persisted scrape paths only
+- removed write-tracking fields from the persistence result because the stage and direct persistence tests only need the canonical paths and on-disk outputs
+- `mapping.build_row(...)` and `characteristics_pipeline.build_characteristics_for_product(...)` now accept optional in-memory raw HTML so prepare-stage characteristics generation no longer requires an early raw-html disk write before the final scrape persistence call
+- prepare-stage orchestration tests now target the injected persistence seam instead of asserting file-writing internals
+
+Old vs new seam:
+- old seam:
+  - `prepare_stage.py` derived scrape paths locally
+  - staged persistence happened in two phases
+  - prepare-stage tests still indirectly asserted persisted files
+- new seam:
+  - one typed `PrepareScrapePersistenceInput`
+  - one `persist_prepare_scrape_artifacts(...)` call
+  - one small `PrepareScrapePersistenceResult`
+  - prepare-stage tests assert persistence orchestration through the seam
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_scrape_persistence.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
+
+Validation:
+- direct persistence tests still pass against the new module shape
+- prepare-stage tests now assert the typed persistence seam is invoked once with the prepared scrape payload
+- prepare-focused workflow and service regressions still pass
+- public workflow behavior did not change
+
+## 2026-04-01 - Wire prepare stage to the scrape persistence module
+
+Goal:
+- route `scraper/pipeline/prepare_stage.py` through the new scrape persistence module
+- remove the now-redundant inline scrape write logic from `prepare_stage.py`
+- preserve the prepare-stage outward payload, artifact paths, and downstream service/workflow behavior
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_scrape_persistence.py`
+- `scraper/pipeline/prepare_stage.py`
+
+Changes:
+- wired `prepare_stage.py` to `persist_prepare_scrape_artifacts(...)`
+- moved the active scrape artifact writes behind the new module for:
+  - `{model}.raw.html`
+  - `{model}.source.json`
+  - `{model}.normalized.json`
+  - `{model}.report.json`
+  - `bescos_raw.json` cleanup and optional write
+- removed the direct inline `write_text(...)` / `write_json(...)` scrape writes from `prepare_stage.py`
+- kept the outward `execute_prepare_stage(...)` return payload stable:
+  - `raw_html_path`
+  - `source_json_path`
+  - `normalized_json_path`
+  - `report_json_path`
+  - all existing stage result keys still return with the same meaning
+- expanded `PrepareScrapePersistenceInput` so the same module can support:
+  - the early raw-HTML write needed before characteristics generation reads `source.raw_html_path`
+  - the final scrape bundle write for source, normalized, report, and optional `bescos_raw.json`
+
+Compatibility behavior preserved intentionally:
+- `prepare_stage.py` still computes prepare state, taxonomy, schema match, manufacturer enrichment, gallery selection, and besco selection exactly where it did before
+- raw HTML is still persisted before downstream characteristics logic that reads `source.raw_html_path` from disk
+- `prepare_execution.py` remains untouched
+- `work/{model}/llm/*` ownership remains untouched
+- provider-resolution, taxonomy, manufacturer, and schema logic remain untouched
+- file names and locations under `work/{model}/scrape/` remain unchanged
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_scrape_persistence.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
+
+Validation:
+- new scrape persistence unit tests passed
+- prepare-stage/provider-selection tests passed after the wiring change
+- prepare-focused workflow and service regression tests passed
+- `prepare_stage.py` no longer owns direct scrape artifact writes inline
+- outward stage behavior remained stable in the targeted regression set
+
+## 2026-04-01 - Add standalone prepare scrape persistence module and unit tests
+
+Goal:
+- add the new scrape artifact persistence module for the branch without wiring it into `prepare_stage.py` yet
+- introduce the preferred typed input/result objects for the persistence seam
+- add focused unit tests that freeze the current scrape-write contract before the follow-up integration commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_scrape_persistence.py`
+- `scraper/pipeline/tests/test_prepare_scrape_persistence.py`
+
+Changes:
+- added `scraper/pipeline/prepare_scrape_persistence.py`
+- added typed persistence models:
+  - `PrepareScrapePersistenceInput`
+  - `PrepareScrapePersistenceResult`
+- added `persist_prepare_scrape_artifacts(...)` as a standalone persistence helper that currently owns:
+  - path derivation for `{model}.raw.html`
+  - path derivation for `{model}.source.json`
+  - path derivation for `{model}.normalized.json`
+  - path derivation for `{model}.report.json`
+  - cleanup of stale `bescos_raw.json`
+  - optional write of `bescos_raw.json`
+- updated the branch-scope note in `PLAN.md` so the proposed module/type names match the landed preferred names for this branch
+
+Intentional temporary duplication left for the next commit:
+- `scraper/pipeline/prepare_stage.py` still performs the active scrape persistence inline
+- the new persistence module mirrors that write surface but is not wired in yet
+- `prepare_execution.py` remains untouched in this commit by branch rule
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `Get-Content scraper/pipeline/services/execution_models.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/utils.py`
+- `python -m pytest -q pipeline/tests/test_prepare_scrape_persistence.py` from `scraper/`
+
+Validation:
+- focused unit tests cover canonical scrape file writes, exact filenames, JSON/text content behavior, stale `bescos_raw.json` cleanup, and no writes under `llm/`
+- `prepare_stage.py` behavior is unchanged in this commit because the new module is not wired yet
+
+## 2026-04-01 - Freeze prepare-stage artifact persistence refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-artifact-persistence`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, workflow entrypoints, or artifact contracts
+
+Scope framing:
+- this section records planned branch work for extracting all scrape-stage artifact persistence out of `scraper/pipeline/prepare_stage.py`
+- it is not a statement that the persistence seam has already been extracted in the current runtime
+- active runtime behavior remains unchanged in this commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- exact branch goal:
+  - extract all scrape artifact persistence out of `scraper/pipeline/prepare_stage.py` into a dedicated module while preserving current runtime behavior
+- exact non-goals:
+  - no public workflow or CLI behavior change
+  - no `work/{model}/llm/*` ownership change
+  - no provider-resolution ownership change
+  - no taxonomy/manufacturer/schema logic change
+  - no stage result payload-key redesign
+  - no artifact path or filename change
+  - no candidate-stage or publish-stage persistence extraction
+- explicit scrape-stage writes that move together in this branch:
+  - `work/{model}/scrape/{model}.raw.html`
+  - `work/{model}/scrape/{model}.source.json`
+  - `work/{model}/scrape/{model}.normalized.json`
+  - `work/{model}/scrape/{model}.report.json`
+  - scrape-stage supporting assets and auxiliary artifacts currently written under `work/{model}/scrape/`
+- proposed extracted module name:
+  - `scraper/pipeline/prepare_artifact_persistence.py`
+- proposed typed persistence names:
+  - `PrepareArtifactPersistenceInput`
+  - `PrepareArtifactPersistenceResult`
+- explicit ownership boundary captured in `PLAN.md`:
+  - `scraper/pipeline/services/prepare_execution.py` remains responsible for all `work/{model}/llm/*` task-manifest, context, prompt, and LLM-handoff writes
+- invariants recorded in `PLAN.md`:
+  - prepare remains scrape-only plus LLM-handoff-only; render remains the sole owner of candidate and publish outputs
+  - provider-resolution ownership does not move in this branch
+  - taxonomy/manufacturer/schema logic does not move in this branch
+  - stage result payload keys stay unchanged
+  - scrape artifact paths and filenames stay unchanged
+  - warning/error behavior must stay unchanged unless tests prove accidental drift
+- follow-up branch candidates recorded:
+  - schema-matching or taxonomy-adjacent prepare-stage seam extraction
+  - typed prepare-stage result models
+  - regression hardening around warning/error text and scrape-artifact path invariants
+
+Commands run:
+- `Get-ChildItem -Name`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content README.md`
+
+Validation:
+- scope is now documented in `PLAN.md` and logged in `DOCUMENTATION.md`
+- this commit remains docs-only and does not modify Python files, tests, imports, or runtime behavior
+- `README.md` did not require changes for this scope-freeze commit
+
 ## 2026-04-01 - Freeze prepare-stage provider-resolution refactor scope
 
 Goal:

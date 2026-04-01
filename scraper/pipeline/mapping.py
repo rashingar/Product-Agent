@@ -85,6 +85,7 @@ def build_row(
     llm_intro_text: str | None = None,
     deterministic_presentation_sections: list[dict[str, Any]] | None = None,
     llm_presentation: dict[str, Any] | None = None,
+    source_raw_html: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], list[str]]:
     warnings: list[str] = []
     source = parsed.source
@@ -146,6 +147,7 @@ def build_row(
         source=source,
         taxonomy=taxonomy,
         schema_match=schema_match,
+        raw_html=source_raw_html,
     )
     warnings.extend(characteristics_warnings)
 

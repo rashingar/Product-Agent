@@ -12,13 +12,18 @@ from .manufacturer_enrichment import enrich_source_from_manufacturer_docs
 from .models import CLIInput, GalleryImage, ParsedProduct
 from .normalize import normalize_for_match
 from .prepare_provider_resolution import PrepareProviderResolutionResult, resolve_prepare_provider_resolution
+from .prepare_scrape_persistence import (
+    PrepareScrapePersistenceInput,
+    PrepareScrapePersistenceResult,
+    persist_prepare_scrape_artifacts,
+)
 from .repo_paths import SCHEMA_LIBRARY_PATH
 from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .skroutz_taxonomy import serialize_source_category
 from .source_detection import validate_url_scope
 from .taxonomy import TaxonomyResolver
-from .utils import ensure_directory, write_json, write_text
+from .utils import ensure_directory
 
 
 def _select_skroutz_image_backed_sections(
@@ -68,6 +73,7 @@ def execute_prepare_stage(
     taxonomy_resolver_factory: Callable[[], TaxonomyResolver] = TaxonomyResolver,
     resolve_prepare_provider_input_fn: Callable[..., PrepareProviderResolutionResult] = resolve_prepare_provider_resolution,
     enrich_source_from_manufacturer_docs_fn: Callable[..., dict[str, Any]] = enrich_source_from_manufacturer_docs,
+    persist_prepare_scrape_artifacts_fn: Callable[[PrepareScrapePersistenceInput], PrepareScrapePersistenceResult] = persist_prepare_scrape_artifacts,
 ) -> dict[str, Any]:
     schema_matcher = schema_matcher_factory(str(SCHEMA_LIBRARY_PATH))
     fetcher = fetcher_factory()
@@ -82,10 +88,14 @@ def execute_prepare_stage(
     final_source, final_scope_ok, final_scope_reason = validate_url_scope_fn(fetch.final_url)
 
     resolved_model_dir = ensure_directory(model_dir or (Path(cli.out) / cli.model))
-    raw_html_path = resolved_model_dir / f"{cli.model}.raw.html"
-    source_json_path = resolved_model_dir / f"{cli.model}.source.json"
-    normalized_json_path = resolved_model_dir / f"{cli.model}.normalized.json"
-    report_json_path = resolved_model_dir / f"{cli.model}.report.json"
+    scrape_persistence_input = PrepareScrapePersistenceInput(
+        model=cli.model,
+        scrape_dir=resolved_model_dir,
+        raw_html=fetch.html,
+        source_payload={},
+        normalized_payload={},
+        report_payload={},
+    )
 
     extracted_gallery_count = len(parsed.source.gallery_images)
     gallery_warnings: list[str] = []
@@ -117,9 +127,7 @@ def execute_prepare_stage(
         "stop_anchor": "",
         "title_signature": [],
     }
-    sections_artifact_path = resolved_model_dir / "bescos_raw.json"
-    if sections_artifact_path.exists():
-        sections_artifact_path.unlink()
+    sections_artifact_payload: dict[str, Any] | None = None
     if cli.sections > 0 and source != "skroutz":
         selected_presentation_blocks = extract_presentation_blocks(
             parsed.source.presentation_source_html,
@@ -156,10 +164,8 @@ def execute_prepare_stage(
                 raise RuntimeError(f"Skroutz besco image download failed: {exc}") from exc
             besco_warnings.append(f"besco_download_failed:{exc}")
 
-    parsed.source.raw_html_path = str(raw_html_path)
+    parsed.source.raw_html_path = str(scrape_persistence_input.raw_html_path)
     parsed.source.fallback_used = fetch.fallback_used
-
-    write_text(raw_html_path, fetch.html)
 
     taxonomy_resolver = taxonomy_resolver_factory()
     taxonomy, taxonomy_candidates = taxonomy_resolver.resolve(
@@ -234,25 +240,22 @@ def execute_prepare_stage(
                 "stop_anchor": "",
                 "title_signature": [block["title"] for block in selected_presentation_blocks],
             }
-            write_json(
-                sections_artifact_path,
-                {
-                    "source": "manufacturer",
-                    "requested_sections": cli.sections,
-                    "window": section_extraction_window,
-                    "sections": [
-                        {
-                            "position": index,
-                            "title": block["title"],
-                            "body": block["paragraph"],
-                            "image_candidates": [block["image_url"]] if block.get("image_url") else [],
-                            "resolved_image_url": block.get("image_url", ""),
-                            "target_filename": f"besco{index}.jpg",
-                        }
-                        for index, block in enumerate(selected_presentation_blocks, start=1)
-                    ],
-                },
-            )
+            sections_artifact_payload = {
+                "source": "manufacturer",
+                "requested_sections": cli.sections,
+                "window": section_extraction_window,
+                "sections": [
+                    {
+                        "position": index,
+                        "title": block["title"],
+                        "body": block["paragraph"],
+                        "image_candidates": [block["image_url"]] if block.get("image_url") else [],
+                        "resolved_image_url": block.get("image_url", ""),
+                        "target_filename": f"besco{index}.jpg",
+                    }
+                    for index, block in enumerate(selected_presentation_blocks, start=1)
+                ],
+            }
         else:
             extracted_window = extract_skroutz_section_window(
                 fetch.html,
@@ -310,25 +313,22 @@ def execute_prepare_stage(
 
             if not manufacturer_enrichment.get("presentation_applied"):
                 parsed.source.presentation_source_html = build_skroutz_presentation_source_html(selected_presentation_blocks)
-            write_json(
-                sections_artifact_path,
-                {
-                    "source": "skroutz",
-                    "requested_sections": cli.sections,
-                    "window": section_extraction_window,
-                    "sections": [
-                        {
-                            "position": index,
-                            "title": block["title"],
-                            "body": block["paragraph"],
-                            "image_candidates": list(block.get("image_candidates", [])),
-                            "resolved_image_url": block.get("image_url", ""),
-                            "target_filename": f"besco{index}.jpg",
-                        }
-                        for index, block in enumerate(selected_presentation_blocks, start=1)
-                    ],
-                },
-            )
+            sections_artifact_payload = {
+                "source": "skroutz",
+                "requested_sections": cli.sections,
+                "window": section_extraction_window,
+                "sections": [
+                    {
+                        "position": index,
+                        "title": block["title"],
+                        "body": block["paragraph"],
+                        "image_candidates": list(block.get("image_candidates", [])),
+                        "resolved_image_url": block.get("image_url", ""),
+                        "target_filename": f"besco{index}.jpg",
+                    }
+                    for index, block in enumerate(selected_presentation_blocks, start=1)
+                ],
+            }
 
         parsed.source.besco_images = selected_besco_images
         besco_warnings = []
@@ -351,7 +351,7 @@ def execute_prepare_stage(
                     besco_filenames_by_section = {image.position: image.local_filename for image in downloaded_besco}
             except FetchError as exc:
                 raise RuntimeError(f"Skroutz besco image download failed: {exc}") from exc
-    write_json(source_json_path, parsed.source.to_dict())
+    source_payload = parsed.source.to_dict()
 
     effective_spec_sections = build_effective_spec_sections(
         parsed.source,
@@ -372,8 +372,8 @@ def execute_prepare_stage(
         schema_match,
         downloaded_image_count=len(downloaded_gallery),
         besco_filenames_by_section=besco_filenames_by_section,
+        source_raw_html=fetch.html,
     )
-    write_json(normalized_json_path, normalized)
 
     report = {
         "input": cli.to_dict(),
@@ -473,10 +473,10 @@ def execute_prepare_stage(
             "requested_sections": cli.sections,
         },
         "files_written": [
-            str(raw_html_path),
-            str(source_json_path),
-            str(normalized_json_path),
-            str(report_json_path),
+            str(scrape_persistence_input.raw_html_path),
+            str(scrape_persistence_input.source_json_path),
+            str(scrape_persistence_input.normalized_json_path),
+            str(scrape_persistence_input.report_json_path),
             *[
                 path
                 for document in manufacturer_enrichment.get("documents", [])
@@ -484,11 +484,15 @@ def execute_prepare_stage(
                 if path
             ],
             *gallery_files,
-            *([str(sections_artifact_path)] if sections_artifact_path.exists() else []),
+            *([str(scrape_persistence_input.bescos_raw_path)] if sections_artifact_payload is not None else []),
             *besco_files,
         ],
     }
-    write_json(report_json_path, report)
+    scrape_persistence_input.source_payload = source_payload
+    scrape_persistence_input.normalized_payload = normalized
+    scrape_persistence_input.report_payload = report
+    scrape_persistence_input.bescos_raw_payload = sections_artifact_payload
+    scrape_persistence = persist_prepare_scrape_artifacts_fn(scrape_persistence_input)
 
     return {
         "cli": cli,
@@ -504,10 +508,10 @@ def execute_prepare_stage(
         "normalized": normalized,
         "report": report,
         "model_dir": resolved_model_dir,
-        "raw_html_path": raw_html_path,
-        "source_json_path": source_json_path,
-        "normalized_json_path": normalized_json_path,
-        "report_json_path": report_json_path,
+        "raw_html_path": scrape_persistence.raw_html_path,
+        "source_json_path": scrape_persistence.source_json_path,
+        "normalized_json_path": scrape_persistence.normalized_json_path,
+        "report_json_path": scrape_persistence.report_json_path,
         "selected_presentation_blocks": selected_presentation_blocks,
         "downloaded_gallery": downloaded_gallery,
         "downloaded_besco": downloaded_besco,

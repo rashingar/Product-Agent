@@ -325,6 +325,72 @@ Landed injection boundary:
 Planned sequencing after this branch:
 1. The next follow-up branch after this provider-resolution extraction should isolate artifact persistence out of `prepare_stage.py`.
 
+### Branch scope — prepare-stage artifact persistence refactor
+
+Status: completed
+
+Purpose:
+1. Freeze the exact branch scope for extracting all scrape-stage artifact persistence out of `scraper/pipeline/prepare_stage.py` into a dedicated module, without changing observable runtime behavior.
+2. Keep this branch limited to scrape-stage writes under `work/{model}/scrape/` and the persistence seam that currently lives inline inside `prepare_stage.py`.
+3. Preserve the current public workflow entrypoint, prepare/render ownership split, provider-resolution ownership, artifact paths, warnings, errors, and stage result payload keys while the write seam is isolated.
+
+Branch goal:
+1. Move all scrape-stage artifact persistence currently owned inline by `scraper/pipeline/prepare_stage.py` behind one dedicated internal persistence module, while keeping `python -m pipeline.workflow prepare ...` behavior unchanged.
+
+Explicit write scope for this branch:
+1. `work/{model}/scrape/{model}.raw.html`
+2. `work/{model}/scrape/{model}.source.json`
+3. `work/{model}/scrape/{model}.normalized.json`
+4. `work/{model}/scrape/{model}.report.json`
+5. scrape-stage supporting assets and auxiliary artifacts currently written under `work/{model}/scrape/`
+
+Landed extracted module:
+1. `scraper/pipeline/prepare_scrape_persistence.py`
+
+Landed typed persistence names:
+1. input: `PrepareScrapePersistenceInput`
+2. result: `PrepareScrapePersistenceResult`
+
+Landed seam responsibilities:
+1. Persist the raw fetched HTML artifact under the current `work/{model}/scrape/` path and filename.
+2. Persist the source payload JSON under the current `work/{model}/scrape/` path and filename.
+3. Persist the normalized payload JSON under the current `work/{model}/scrape/` path and filename.
+4. Persist the scrape report JSON under the current `work/{model}/scrape/` path and filename.
+5. Persist any scrape-stage supporting assets and auxiliary artifacts that currently belong under `work/{model}/scrape/`.
+6. Return the same persisted artifact-path information that the current prepare-stage flow already exposes to downstream callers.
+
+Ownership boundary that must stay explicit:
+1. `scraper/pipeline/services/prepare_execution.py` remains the owner of all `work/{model}/llm/*` task-manifest, context, prompt, and LLM-handoff writes in this branch.
+2. This branch extracts scrape-stage writes together only; it does not move `work/{model}/llm/*` persistence out of `prepare_execution.py`.
+
+Invariants that must not change:
+1. Public workflow entrypoint and CLI flags remain unchanged.
+2. Prepare remains scrape-only plus LLM-handoff-only; render remains the sole owner of candidate and publish outputs.
+3. `prepare_execution.py` remains responsible for `work/{model}/llm/*`.
+4. Provider-resolution ownership stays where it landed in the provider-resolution branch; no provider-resolution reshuffle happens here.
+5. Taxonomy, manufacturer enrichment, schema matching, and normalization logic stay where they are in this branch.
+6. Stage result payload keys remain unchanged in this branch.
+7. Output artifact paths, filenames, and directory layout remain exactly under the current `work/{model}/scrape/`, `work/{model}/llm/`, `work/{model}/candidate/`, and `products/` locations.
+8. Warning text, warning ordering, error text, and failure behavior remain unchanged unless regression tests prove an accidental drift.
+9. The split-task LLM handoff contract stays unchanged.
+
+Explicit non-goals:
+1. No public workflow or CLI behavior changes.
+2. No `work/{model}/llm/*` ownership changes.
+3. No provider-resolution extraction or provider-routing changes.
+4. No taxonomy/manufacturer/schema logic changes.
+5. No stage result payload-key redesign.
+6. No artifact path or filename changes.
+7. No candidate-stage or publish-stage persistence extraction in this branch.
+
+Follow-up branch candidates after this one:
+1. Extract schema-matching or taxonomy-adjacent prepare-stage computation behind its own seam without changing current ownership boundaries.
+2. Introduce typed prepare-stage result models for the internal stage seam, if still needed after persistence extraction settles.
+3. Harden focused regression coverage around unchanged warning/error text and scrape-artifact path contracts for supported sources.
+
+Completion note:
+1. completed; scrape artifact persistence now lives under `scraper/pipeline/prepare_scrape_persistence.py`, `scraper/pipeline/prepare_stage.py` now builds prepare state and delegates scrape-stage persistence through one typed seam call, and `scraper/pipeline/services/prepare_execution.py` remains the sole owner of `work/{model}/llm/*` writes while outward prepare-stage payload keys and scrape artifact paths remain unchanged
+
 ### Phase 4 — Hybrid RAG foundation
 
 Status: pending

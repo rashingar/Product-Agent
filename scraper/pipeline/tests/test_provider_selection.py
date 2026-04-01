@@ -6,6 +6,7 @@ import pytest
 
 from pipeline.models import CLIInput, FetchResult, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.prepare_provider_resolution import PrepareProviderResolutionResult
+from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput, PrepareScrapePersistenceResult
 from pipeline.prepare_stage import execute_prepare_stage
 from pipeline.providers import ProviderInputIdentity, ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
 from pipeline.providers.models import (
@@ -325,6 +326,69 @@ def test_execute_prepare_stage_reuses_injected_provider_resolution_payload(tmp_p
     assert result["parsed"].warnings == []
     assert result["report"]["source"] == "electronet"
     assert result["report"]["identity_checks"]["source"] == "electronet"
+
+
+def test_execute_prepare_stage_calls_persistence_seam_once_with_typed_input(tmp_path: Path) -> None:
+    cli = CLIInput(
+        model="229957",
+        url="https://www.electronet.gr/example",
+        photos=2,
+        sections=0,
+        skroutz_status=1,
+        boxnow=0,
+        price="599",
+        out=str(tmp_path),
+    )
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            url=cli.url,
+            canonical_url=cli.url,
+            product_code="235370",
+            brand="LG",
+            name="LG RHX5009TWB",
+        ),
+    )
+    persistence_calls: list[PrepareScrapePersistenceInput] = []
+
+    def fake_persist(persistence_input: PrepareScrapePersistenceInput) -> PrepareScrapePersistenceResult:
+        persistence_calls.append(persistence_input)
+        return PrepareScrapePersistenceResult(
+            scrape_dir=persistence_input.scrape_dir,
+            raw_html_path=persistence_input.raw_html_path,
+            source_json_path=persistence_input.source_json_path,
+            normalized_json_path=persistence_input.normalized_json_path,
+            report_json_path=persistence_input.report_json_path,
+            bescos_raw_path=persistence_input.bescos_raw_path,
+        )
+
+    result = execute_prepare_stage(
+        cli,
+        model_dir=tmp_path / cli.model,
+        validate_url_scope_fn=lambda _url: ("electronet", True, ""),
+        schema_matcher_factory=DummySchemaMatcher,
+        fetcher_factory=DummyFetcher,
+        taxonomy_resolver_factory=DummyResolver,
+        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: build_prepare_provider_resolution_result(
+            source="electronet",
+            url=cli_arg.url,
+            parsed=parsed,
+            fetch_method="httpx",
+        ),
+        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {},
+        persist_prepare_scrape_artifacts_fn=fake_persist,
+    )
+
+    assert len(persistence_calls) == 1
+    persistence_input = persistence_calls[0]
+    assert persistence_input.model == cli.model
+    assert persistence_input.scrape_dir == tmp_path / cli.model
+    assert persistence_input.raw_html == "<html></html>"
+    assert persistence_input.source_payload["raw_html_path"] == str(persistence_input.raw_html_path)
+    assert persistence_input.normalized_payload["input"]["model"] == cli.model
+    assert result["raw_html_path"] == persistence_input.raw_html_path
+    assert result["source_json_path"] == persistence_input.source_json_path
+    assert result["normalized_json_path"] == persistence_input.normalized_json_path
+    assert result["report_json_path"] == persistence_input.report_json_path
 
 
 def test_execute_prepare_stage_routes_skroutz_through_provider_by_default(tmp_path: Path) -> None:
