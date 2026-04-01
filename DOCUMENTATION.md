@@ -3,6 +3,77 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Freeze prepare-stage section-assets refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-section-assets`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, workflow entrypoints, or artifact contracts
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- branch goal:
+  - extract the Skroutz/manufacturer-first section asset workflow out of `scraper/pipeline/prepare_stage.py` while preserving current runtime behavior
+- exact non-goals:
+  - no public workflow or CLI behavior change
+  - no prepare/render ownership-boundary change
+  - no output artifact path or filename change
+  - no `prepare_execution.py` behavior change
+  - no result-assembly ownership change in this branch
+  - no provider-resolution ownership change in this branch
+  - no render ownership change
+  - no extraction of the whole direct-source / non-Skroutz section path in this branch
+  - no extraction of `html_builders.extract_presentation_blocks(...)` in this branch
+  - no relocation of `skroutz_sections` helpers in this branch
+  - no naming-polish cleanup in this branch
+  - no split-task LLM handoff contract change
+- proposed module name:
+  - `scraper/pipeline/prepare_skroutz_section_assets.py`
+- proposed typed result name:
+  - `PrepareSkroutzSectionAssetsResult`
+- what leaves `prepare_stage.py` in this branch:
+  - the Skroutz/manufacturer-first section asset workflow
+  - the rendered-Skroutz image-backed section matching path
+  - the shared section-image download helper reused by both direct and Skroutz paths
+  - deterministic section diagnostics builders, including `section_image_candidates`, `section_image_urls_resolved`, `section_extraction_window`, and `bescos_raw` / sections-artifact payload shaping
+  - the typed handoff carrying section asset state back into `prepare_stage.py`
+- what stays in `prepare_stage.py` in this branch:
+  - top-level routing for whether sections run at all
+  - direct-source / non-Skroutz section orchestration except for reuse of the shared extracted downloader
+  - final handoff into `assemble_prepare_result_fn(...)`
+  - final handoff into `persist_prepare_scrape_artifacts_fn(...)`
+  - provider-resolution ownership
+  - outward dict-shaped `execute_prepare_stage(...)` payload compatibility
+- explicit branch boundary:
+  - `html_builders.extract_presentation_blocks(...)` stays where it is
+  - `skroutz_sections` helpers stay where they are
+  - direct-source section extraction itself is not fully extracted in this branch
+  - `prepare` stays scrape-only plus LLM-handoff-only
+  - render ownership does not change
+
+Planned test split for later commits:
+- add direct module-level coverage in `scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py`
+- add stage-isolation coverage in `scraper/pipeline/tests/test_prepare_stage_section_assets.py`
+- keep adjacent stage-isolation coverage in `test_prepare_taxonomy_enrichment.py` and `test_prepare_stage_result_assembly.py`
+- keep prepare/workflow/provider regressions as the unchanged-behavior backstop
+
+Commands run:
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content README.md`
+- `rg -n "section|besco|download|skroutz|presentation|html_builders|extract_presentation_blocks|assemble_prepare_result_fn|persist_prepare_scrape_artifacts_fn" scraper/pipeline/prepare_stage.py`
+- `rg -n "extract_presentation_blocks|skroutz_sections|bescos_raw|section image|download" scraper/pipeline -g "*.py"`
+
+Validation:
+- `PLAN.md` now records the new branch goal, non-goals, proposed seam/module/result naming, ownership split, and later test split
+- `DOCUMENTATION.md` now captures the same scope freeze as the engineering log entry for this docs-only commit
+- `README.md` was reviewed and left unchanged because it does not describe the internal prepare-stage seam inaccurately
+- this commit does not modify Python files
+- this commit does not modify test files
+
 ## 2026-04-01 - Finalize docs for prepare-stage taxonomy/enrichment extraction
 
 Goal:

@@ -554,6 +554,79 @@ Completion note:
 Recommended next branch:
 1. Extract the remaining gallery/Besco plus Skroutz section-extraction orchestration out of `scraper/pipeline/prepare_stage.py` as the next real structural seam; naming polish should stay secondary to that extraction.
 
+### Branch scope — prepare-stage section assets refactor
+
+Status: planned
+
+Purpose:
+1. Freeze the exact branch scope for extracting the Skroutz/manufacturer-first section asset workflow out of `scraper/pipeline/prepare_stage.py` without changing observable runtime behavior.
+2. Keep this branch limited to the Skroutz section-asset seam, the shared section-image download helper reused by both direct and Skroutz paths, and the deterministic section diagnostics / `bescos_raw` payload builders.
+3. Preserve the public workflow entrypoint, prepare/render ownership split, output artifact paths, warnings, errors, and split-task LLM handoff contract while this internal seam is isolated.
+
+Branch goal:
+1. Move the Skroutz/manufacturer-first section asset workflow behind one dedicated internal seam while keeping `python -m pipeline.workflow prepare ...` behavior unchanged.
+
+Proposed extracted module:
+1. `scraper/pipeline/prepare_skroutz_section_assets.py`
+
+Proposed typed result:
+1. `PrepareSkroutzSectionAssetsResult`
+
+What leaves `prepare_stage.py` in this branch:
+1. The Skroutz/manufacturer-first section asset workflow that currently chooses between manufacturer presentation blocks and rendered Skroutz section assets.
+2. The rendered-Skroutz image-backed section matching path, including the current title-order validation and resolved-image selection behavior.
+3. The shared section-image download helper used by both the direct-source and Skroutz section paths.
+4. Deterministic section diagnostics builders, including section-image candidate payloads, resolved-image payloads, extraction-window payload shaping, and `bescos_raw` / sections-artifact payload assembly.
+5. The typed handoff back into `prepare_stage.py` for selected presentation blocks, Besco images, download outputs, warnings, and deterministic diagnostics/artifact payloads.
+
+What stays in `prepare_stage.py` in this branch:
+1. Top-level routing for whether sections run at all stays in `prepare_stage.py`.
+2. Direct-source / non-Skroutz section orchestration stays in `prepare_stage.py`, except that it reuses the shared extracted section-image downloader.
+3. Final handoff into `assemble_prepare_result_fn(...)` stays in `prepare_stage.py`.
+4. Final handoff into `persist_prepare_scrape_artifacts_fn(...)` stays in `prepare_stage.py`.
+5. Provider-resolution ownership stays in `prepare_stage.py`.
+6. Taxonomy resolution and manufacturer enrichment remain outside this branch and stay delegated through `scraper/pipeline/prepare_taxonomy_enrichment.py`.
+7. Result assembly remains outside this branch and stays delegated through `scraper/pipeline/prepare_result_assembly.py`.
+8. The outward `execute_prepare_stage(...)` return payload stays dict-shaped in this branch.
+
+Explicit boundary statements:
+1. `html_builders.extract_presentation_blocks(...)` stays where it is in `scraper/pipeline/html_builders.py`.
+2. `skroutz_sections` helpers stay where they are in `scraper/pipeline/skroutz_sections.py`.
+3. Direct-source section extraction itself is not fully extracted in this branch.
+4. `scraper/pipeline/services/prepare_execution.py` remains behaviorally unchanged in this branch.
+5. Prepare stays scrape-only plus LLM-handoff-only, and render ownership does not change in this branch.
+
+Invariants that must not change:
+1. Public workflow entrypoint and CLI flags remain unchanged.
+2. Prepare remains scrape-only plus LLM-handoff-only; render remains the sole owner of candidate and publish outputs.
+3. `scraper/pipeline/services/prepare_execution.py` remains responsible for all `work/{model}/llm/*` writes and remains behaviorally unchanged.
+4. Output artifact paths, filenames, and directory layout remain exactly under the current `work/{model}/scrape/`, `work/{model}/llm/`, `work/{model}/candidate/`, and `products/` locations.
+5. Result assembly ownership does not change in this branch.
+6. Provider-resolution ownership does not change in this branch.
+7. Render ownership does not change in this branch.
+8. The split-task `intro_text` / `seo_meta` handoff contract stays unchanged.
+9. Warning text, warning ordering, error text, and failure behavior remain unchanged unless regression tests prove accidental drift.
+
+Explicit non-goals:
+1. No public workflow or CLI behavior changes.
+2. No prepare/render ownership-boundary changes.
+3. No output artifact path or filename changes.
+4. No `prepare_execution.py` behavior changes.
+5. No result-assembly ownership changes in this branch.
+6. No provider-resolution ownership changes in this branch.
+7. No render ownership changes in this branch.
+8. No extraction of the whole direct-source / non-Skroutz section path in this branch.
+9. No extraction of `html_builders.extract_presentation_blocks(...)` in this branch.
+10. No relocation of `skroutz_sections` helpers in this branch.
+11. No naming-polish cleanup in this branch.
+12. No split-task LLM handoff contract changes.
+
+Planned test split for later commits:
+1. Add direct module-level coverage in `scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py` for manufacturer-first selection, rendered-section matching, shared section-image download behavior, and deterministic diagnostics / `bescos_raw` payload building.
+2. Add stage-isolation coverage in `scraper/pipeline/tests/test_prepare_stage_section_assets.py` and stub only the extracted Skroutz section-asset seam so `execute_prepare_stage(...)` stays focused on surrounding orchestration behavior.
+3. Keep adjacent stage-isolation coverage in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py` and `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`.
+4. Keep existing prepare/workflow/provider regression coverage as the higher-level unchanged-behavior backstop for Electronet, Skroutz, and supported manufacturer flows.
+
 ## Root policy
 ### Keep in root
 - `.claude/`
