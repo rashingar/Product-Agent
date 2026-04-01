@@ -3,6 +3,69 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Freeze prepare-stage artifact persistence refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-artifact-persistence`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, workflow entrypoints, or artifact contracts
+
+Scope framing:
+- this section records planned branch work for extracting all scrape-stage artifact persistence out of `scraper/pipeline/prepare_stage.py`
+- it is not a statement that the persistence seam has already been extracted in the current runtime
+- active runtime behavior remains unchanged in this commit
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- exact branch goal:
+  - extract all scrape artifact persistence out of `scraper/pipeline/prepare_stage.py` into a dedicated module while preserving current runtime behavior
+- exact non-goals:
+  - no public workflow or CLI behavior change
+  - no `work/{model}/llm/*` ownership change
+  - no provider-resolution ownership change
+  - no taxonomy/manufacturer/schema logic change
+  - no stage result payload-key redesign
+  - no artifact path or filename change
+  - no candidate-stage or publish-stage persistence extraction
+- explicit scrape-stage writes that move together in this branch:
+  - `work/{model}/scrape/{model}.raw.html`
+  - `work/{model}/scrape/{model}.source.json`
+  - `work/{model}/scrape/{model}.normalized.json`
+  - `work/{model}/scrape/{model}.report.json`
+  - scrape-stage supporting assets and auxiliary artifacts currently written under `work/{model}/scrape/`
+- proposed extracted module name:
+  - `scraper/pipeline/prepare_artifact_persistence.py`
+- proposed typed persistence names:
+  - `PrepareArtifactPersistenceInput`
+  - `PrepareArtifactPersistenceResult`
+- explicit ownership boundary captured in `PLAN.md`:
+  - `scraper/pipeline/services/prepare_execution.py` remains responsible for all `work/{model}/llm/*` task-manifest, context, prompt, and LLM-handoff writes
+- invariants recorded in `PLAN.md`:
+  - prepare remains scrape-only plus LLM-handoff-only; render remains the sole owner of candidate and publish outputs
+  - provider-resolution ownership does not move in this branch
+  - taxonomy/manufacturer/schema logic does not move in this branch
+  - stage result payload keys stay unchanged
+  - scrape artifact paths and filenames stay unchanged
+  - warning/error behavior must stay unchanged unless tests prove accidental drift
+- follow-up branch candidates recorded:
+  - schema-matching or taxonomy-adjacent prepare-stage seam extraction
+  - typed prepare-stage result models
+  - regression hardening around warning/error text and scrape-artifact path invariants
+
+Commands run:
+- `Get-ChildItem -Name`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content README.md`
+
+Validation:
+- scope is now documented in `PLAN.md` and logged in `DOCUMENTATION.md`
+- this commit remains docs-only and does not modify Python files, tests, imports, or runtime behavior
+- `README.md` did not require changes for this scope-freeze commit
+
 ## 2026-04-01 - Freeze prepare-stage provider-resolution refactor scope
 
 Goal:
