@@ -3,6 +3,58 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Wire prepare stage to the scrape persistence module
+
+Goal:
+- route `scraper/pipeline/prepare_stage.py` through the new scrape persistence module
+- remove the now-redundant inline scrape write logic from `prepare_stage.py`
+- preserve the prepare-stage outward payload, artifact paths, and downstream service/workflow behavior
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_scrape_persistence.py`
+- `scraper/pipeline/prepare_stage.py`
+
+Changes:
+- wired `prepare_stage.py` to `persist_prepare_scrape_artifacts(...)`
+- moved the active scrape artifact writes behind the new module for:
+  - `{model}.raw.html`
+  - `{model}.source.json`
+  - `{model}.normalized.json`
+  - `{model}.report.json`
+  - `bescos_raw.json` cleanup and optional write
+- removed the direct inline `write_text(...)` / `write_json(...)` scrape writes from `prepare_stage.py`
+- kept the outward `execute_prepare_stage(...)` return payload stable:
+  - `raw_html_path`
+  - `source_json_path`
+  - `normalized_json_path`
+  - `report_json_path`
+  - all existing stage result keys still return with the same meaning
+- expanded `PrepareScrapePersistenceInput` so the same module can support:
+  - the early raw-HTML write needed before characteristics generation reads `source.raw_html_path`
+  - the final scrape bundle write for source, normalized, report, and optional `bescos_raw.json`
+
+Compatibility behavior preserved intentionally:
+- `prepare_stage.py` still computes prepare state, taxonomy, schema match, manufacturer enrichment, gallery selection, and besco selection exactly where it did before
+- raw HTML is still persisted before downstream characteristics logic that reads `source.raw_html_path` from disk
+- `prepare_execution.py` remains untouched
+- `work/{model}/llm/*` ownership remains untouched
+- provider-resolution, taxonomy, manufacturer, and schema logic remain untouched
+- file names and locations under `work/{model}/scrape/` remain unchanged
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_scrape_persistence.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
+
+Validation:
+- new scrape persistence unit tests passed
+- prepare-stage/provider-selection tests passed after the wiring change
+- prepare-focused workflow and service regression tests passed
+- `prepare_stage.py` no longer owns direct scrape artifact writes inline
+- outward stage behavior remained stable in the targeted regression set
+
 ## 2026-04-01 - Add standalone prepare scrape persistence module and unit tests
 
 Goal:
