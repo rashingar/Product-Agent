@@ -3,6 +3,59 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Collapse prepare-stage result assembly to one injected seam
+
+Goal:
+- reduce the deterministic result-assembly dependency surface in `execute_prepare_stage(...)` to one injected callable
+- remove the stage-level low-level schema-matcher injection now that result assembly is extracted
+- keep workflow, prepare execution, and outward stage behavior unchanged
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_result_assembly.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+
+Changes:
+- `execute_prepare_stage(...)` now exposes one deterministic assembly seam:
+  - `assemble_prepare_result_fn=assemble_prepare_result`
+- removed the old lower-level stage injection:
+  - `schema_matcher_factory`
+- `prepare_stage.py` no longer imports or constructs `SchemaMatcher`
+- `prepare_result_assembly.py` now owns schema-matcher construction internally through its own defaulted `schema_matcher_factory`
+- direct tests continue to target `prepare_result_assembly.py` for schema/result behavior
+- stage tests in `test_prepare_stage_result_assembly.py` now stub only `assemble_prepare_result_fn` when isolating stage orchestration
+- provider-selection tests were updated to stub the single result-assembly seam instead of a low-level schema matcher
+- control docs now reflect the landed names:
+  - landed result type: `PrepareResultAssemblyResult`
+  - landed stage injection boundary: `assemble_prepare_result_fn`
+  - no landed `PrepareResultAssemblyInput` type exists in the current branch
+
+Old vs new stage signature summary:
+- old:
+  - `execute_prepare_stage(..., schema_matcher_factory=SchemaMatcher, ...)`
+- new:
+  - `execute_prepare_stage(..., assemble_prepare_result_fn=assemble_prepare_result, ...)`
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `Get-Content scraper/pipeline/prepare_result_assembly.py`
+- `Get-Content scraper/pipeline/tests/test_provider_selection.py`
+- `Get-Content scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
+
+Validation:
+- direct result-assembly tests still pass
+- stage orchestration tests now isolate only the single result-assembly seam
+- provider-selection regressions still pass
+- prepare-focused workflow and service regressions still pass
+- no public workflow or service entrypoint changed
+
 ## 2026-04-01 - Wire prepare stage to the result-assembly seam
 
 Goal:
@@ -33,7 +86,7 @@ Changes:
 
 Commands run:
 - `Get-Content scraper/pipeline/prepare_stage.py`
-- `python -m pytest -q pipeline/tests/test_prepare_result_assembly_module.py pipeline/tests/test_prepare_result_assembly.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_prepare_result_assembly_module.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
 - `python -m pytest -q pipeline/tests/test_provider_selection.py` from `scraper/`
 - `python -m pytest -q pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
 - `python -m pytest -q pipeline/tests/test_services.py -k "prepare_product"` from `scraper/`
@@ -82,9 +135,9 @@ Intentional temporary duplication left for the next commit:
 - `build_prepare_result_identity_checks(...)` currently duplicates the local `build_identity_checks(...)` helper shape from `prepare_stage.py`
 
 Commands run:
-- `Get-Content scraper/pipeline/tests/test_prepare_result_assembly.py`
+- `Get-Content scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
 - `Get-Content scraper/pipeline/prepare_stage.py`
-- `python -m pytest -q pipeline/tests/test_prepare_result_assembly_module.py pipeline/tests/test_prepare_result_assembly.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_prepare_result_assembly_module.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
 
 Validation:
 - the new seam module is covered directly without changing production behavior

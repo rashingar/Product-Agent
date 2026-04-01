@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 from .characteristics_pipeline import get_characteristics_registry
 from .deterministic_fields import effective_spec_sections as build_effective_spec_sections
@@ -9,6 +9,8 @@ from .mapping import build_row
 from .models import CLIInput, FetchResult, GalleryImage, ParsedProduct, SchemaMatchResult, TaxonomyResolution
 from .normalize import normalize_for_match
 from .prepare_scrape_persistence import PrepareScrapePersistenceInput
+from .repo_paths import SCHEMA_LIBRARY_PATH
+from .schema_matcher import SchemaMatcher
 from .skroutz_taxonomy import serialize_source_category
 
 
@@ -47,10 +49,11 @@ def assemble_prepare_result(
     final_source: str,
     final_scope_ok: bool,
     final_scope_reason: str,
-    schema_matcher: Any,
     scrape_persistence_input: PrepareScrapePersistenceInput,
     sections_artifact_payload: dict[str, Any] | None = None,
+    schema_matcher_factory: Callable[..., Any] = SchemaMatcher,
 ) -> PrepareResultAssemblyResult:
+    schema_matcher = schema_matcher_factory(str(SCHEMA_LIBRARY_PATH))
     effective_spec_sections = build_effective_spec_sections(
         parsed.source,
         manufacturer_first=normalize_for_match(parsed.source.source_name) == "skroutz",

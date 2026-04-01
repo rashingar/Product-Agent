@@ -406,9 +406,8 @@ Branch goal:
 Proposed extracted module:
 1. `scraper/pipeline/prepare_result_assembly.py`
 
-Proposed result types:
-1. input: `PrepareResultAssemblyInput`
-2. result: `PrepareResultAssemblyResult`
+Landed result type:
+1. `PrepareResultAssemblyResult`
 
 What stays in `prepare_stage.py` after this branch:
 1. Provider-resolution orchestration stays in `prepare_stage.py`.
@@ -424,7 +423,7 @@ What leaves `prepare_stage.py` in this branch:
 3. The `schema_matcher.match(...)` call and schema-candidate assembly.
 4. Deterministic row plus normalized payload assembly currently produced through `build_row(...)`.
 5. Deterministic report payload assembly, including warning aggregation, diagnostics packaging, and `files_written` report composition.
-6. The internal typed handoff back to `prepare_stage.py` for schema-match, normalized, and report outputs.
+6. The internal typed handoff back to `prepare_stage.py` for schema-match, schema-candidates, row, normalized, and report outputs.
 
 Proposed extracted seam responsibilities:
 1. Accept the already-resolved prepare-stage state needed for deterministic schema matching and result assembly.
@@ -462,6 +461,9 @@ Test strategy for the next commits:
 2. Keep prepare-stage regression coverage centered on unchanged observable behavior, especially outward payload keys and scrape artifact path reporting.
 3. Reuse the existing prepare/workflow/provider regression tests so the refactor proves no behavior change for supported Electronet, Skroutz, and manufacturer flows.
 4. Run targeted seam tests plus prepare/workflow regressions during each extraction step, then run the broader scraper suite before closing the branch.
+
+Landed injection boundary:
+1. `execute_prepare_stage(...)` keeps one deterministic result-assembly seam injection, `assemble_prepare_result_fn`, and no longer exposes lower-level schema-matcher injection for this branch.
 
 ### Phase 4 — Hybrid RAG foundation
 

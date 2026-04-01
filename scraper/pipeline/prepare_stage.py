@@ -15,8 +15,6 @@ from .prepare_scrape_persistence import (
     PrepareScrapePersistenceResult,
     persist_prepare_scrape_artifacts,
 )
-from .repo_paths import SCHEMA_LIBRARY_PATH
-from .schema_matcher import SchemaMatcher
 from .skroutz_sections import build_skroutz_presentation_source_html, extract_skroutz_section_window
 from .source_detection import validate_url_scope
 from .taxonomy import TaxonomyResolver
@@ -65,14 +63,13 @@ def execute_prepare_stage(
     *,
     model_dir: Path | None = None,
     validate_url_scope_fn: Callable[[str], tuple[str, bool, str]] = validate_url_scope,
-    schema_matcher_factory: Callable[..., SchemaMatcher] = SchemaMatcher,
     fetcher_factory: Callable[[], ElectronetFetcher] = ElectronetFetcher,
     taxonomy_resolver_factory: Callable[[], TaxonomyResolver] = TaxonomyResolver,
     resolve_prepare_provider_input_fn: Callable[..., PrepareProviderResolutionResult] = resolve_prepare_provider_resolution,
     enrich_source_from_manufacturer_docs_fn: Callable[..., dict[str, Any]] = enrich_source_from_manufacturer_docs,
+    assemble_prepare_result_fn: Callable[..., Any] = assemble_prepare_result,
     persist_prepare_scrape_artifacts_fn: Callable[[PrepareScrapePersistenceInput], PrepareScrapePersistenceResult] = persist_prepare_scrape_artifacts,
 ) -> dict[str, Any]:
-    schema_matcher = schema_matcher_factory(str(SCHEMA_LIBRARY_PATH))
     fetcher = fetcher_factory()
     provider_resolution = resolve_prepare_provider_input_fn(
         cli,
@@ -350,7 +347,7 @@ def execute_prepare_stage(
                 raise RuntimeError(f"Skroutz besco image download failed: {exc}") from exc
     source_payload = parsed.source.to_dict()
 
-    result_assembly = assemble_prepare_result(
+    result_assembly = assemble_prepare_result_fn(
         cli=cli,
         source=source,
         fetch=fetch,
@@ -375,7 +372,6 @@ def execute_prepare_stage(
         final_source=final_source,
         final_scope_ok=final_scope_ok,
         final_scope_reason=final_scope_reason,
-        schema_matcher=schema_matcher,
         scrape_persistence_input=scrape_persistence_input,
         sections_artifact_payload=sections_artifact_payload,
     )

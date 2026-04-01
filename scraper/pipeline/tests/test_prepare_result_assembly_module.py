@@ -281,8 +281,8 @@ def test_assemble_prepare_result_passes_effective_sections_and_schema_preference
         final_source="skroutz",
         final_scope_ok=True,
         final_scope_reason="test_scope",
-        schema_matcher=RecordingSchemaMatcher(),
         scrape_persistence_input=_build_persistence_input(tmp_path, model=cli.model),
+        schema_matcher_factory=RecordingSchemaMatcher,
     )
 
     assert isinstance(result, PrepareResultAssemblyResult)
@@ -332,8 +332,8 @@ def test_assemble_prepare_result_pins_normalized_and_report_payloads(tmp_path: P
         final_source="skroutz",
         final_scope_ok=True,
         final_scope_reason="test_scope",
-        schema_matcher=SchemaMatcher(),
         scrape_persistence_input=_build_persistence_input(tmp_path, model=cli.model),
+        schema_matcher_factory=SchemaMatcher,
     )
 
     assert result.schema_match.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
@@ -382,8 +382,8 @@ def test_assemble_prepare_result_preserves_no_spec_sections_semantics(tmp_path: 
         final_source="electronet",
         final_scope_ok=True,
         final_scope_reason="test_scope",
-        schema_matcher=SchemaMatcher(),
         scrape_persistence_input=_build_persistence_input(tmp_path, model=cli.model),
+        schema_matcher_factory=SchemaMatcher,
     )
 
     assert result.schema_match.matched_schema_id is None
