@@ -1,0 +1,181 @@
+
+# Schema Registry
+
+This directory contains the tooling for the editable schema-template layer.
+
+The purpose of the schema registry is to keep **human-maintained schema templates**
+separate from the **compiled runtime schema artifacts** used by the pipeline.
+
+## Why this exists
+
+The runtime schema library is compact and useful for fast matching, but it is not
+the best authoring surface for:
+
+- reviewing category-specific schema structure
+- tracking label drift over time
+- validating template consistency
+- reporting coverage and missing categories
+- compiling deterministic runtime artifacts
+
+This toolchain solves that by introducing an editable template layer that can be:
+
+- validated
+- audited
+- compiled
+- indexed
+
+## Source of truth vs runtime artifacts
+
+### Editable source-of-truth
+Located under:
+
+`resources/schemas/templates/electronet/`
+
+These template files are the human-maintained category templates.
+
+They should preserve:
+
+* exact section order
+* exact label order
+* category ownership
+* example URLs
+* stable template ids
+* template fingerprints
+
+### Compiled runtime artifacts
+
+Located under:
+
+`resources/schemas/`
+
+
+Main outputs:
+
+* `electronet_schema_library.json`
+* `schema_index.csv`
+
+These are derived artifacts for runtime matching and inspection.
+
+## Tool responsibilities
+
+### `validate_templates.py`
+
+Validate all schema template files before build.
+
+Responsibilities:
+
+* load template files
+* validate against the shared JSON schema contract
+* enforce repo-level invariants
+* detect duplicate ids or suspicious category drift
+* fail loudly when templates are invalid
+
+Use this first.
+
+### `build_electronet_schema_library.py`
+
+Compile validated Electronet templates into the compact runtime schema library.
+
+Responsibilities:
+
+* read template files
+* normalize them into the runtime schema shape
+* derive summary fields such as section counts and sentinel values
+* write `resources/schemas/electronet_schema_library.json`
+
+This is the main compile step.
+
+### `build_schema_index.py`
+
+Flatten the compiled runtime schema library into an index CSV.
+
+Responsibilities:
+
+* read the compiled schema library
+* emit one row per schema
+* produce a stable inspection/debugging index
+* write `resources/schemas/schema_index.csv`
+
+This is a support artifact, not the primary runtime output.
+
+### `refresh_template_coverage.py`
+
+Generate a markdown coverage report for the Electronet template registry.
+
+Responsibilities:
+
+* compare expected category coverage against existing templates
+* show which categories are covered, missing, or manual-only
+* include example-backed visibility for review
+* write the coverage report under `docs/audits/`
+
+This is an audit/planning tool, not a runtime step.
+
+## Expected workflow
+
+Typical workflow:
+
+1. Add or edit template files under `resources/schemas/templates/electronet/`
+2. Run template validation
+3. Build the compiled Electronet schema library
+4. Build the schema index
+5. Refresh the coverage report
+6. Commit source templates and derived artifacts together when appropriate
+
+## Suggested command order
+
+```bash
+python -m tools.schema_registry.validate_templates
+python -m tools.schema_registry.build_electronet_schema_library
+python -m tools.schema_registry.build_schema_index
+python -m tools.schema_registry.refresh_template_coverage
+```
+
+## Design rules
+
+* Templates are the editable source of truth.
+* Compiled artifacts are derived outputs.
+* Do not edit compiled runtime artifacts manually if they are generated from templates.
+* Preserve exact authored Greek strings unless a compiler rule explicitly says otherwise.
+* Preserve section and label order.
+* Prefer deterministic output over convenience.
+* Fail clearly instead of guessing when template inputs are invalid.
+
+## Non-goals
+
+This directory does **not** own:
+
+* live product scraping
+* runtime pipeline orchestration
+* LLM prompting
+* direct publish behavior
+* ad hoc manual data fixes inside runtime artifacts
+
+Those belong elsewhere in the repo.
+
+## Directory relationship
+
+
+`tools/schema_registry/`
+`resources/schemas/templates/electronet/`
+`resources/schemas/`
+`docs/audits/`
+
+
+Interpretation:
+
+* `tools/schema_registry/` = tooling
+* `resources/schemas/templates/electronet/` = editable templates
+* `resources/schemas/` = compiled runtime outputs
+* `docs/audits/` = human-readable coverage/audit reports
+
+## Future extensions
+
+Likely future improvements:
+
+* fingerprint verification
+* CI validation
+* machine-readable coverage output
+* multi-source template registries beyond Electronet
+* compiler support for richer runtime matching metadata
+
