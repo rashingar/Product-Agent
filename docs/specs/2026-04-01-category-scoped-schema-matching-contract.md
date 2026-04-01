@@ -46,6 +46,7 @@ Every compiled runtime entry now includes these matcher-relevant fields:
 | `parent_category` | Canonical parent category segment. |
 | `leaf_category` | Canonical leaf category segment. |
 | `sub_category` | Canonical optional sub-category segment. |
+| `subcategory_match_policy` | Explicit policy controlling whether a resolved subcategory may fall back to a leaf-only template inside the same parent/leaf family. |
 | `cta_map_key` | Deterministic CTA mapping key already used elsewhere in the pipeline. |
 | `cta_url` | Resolved CTA URL bound to the taxonomy entry. |
 | `template_status` | Runtime eligibility status. |
@@ -81,6 +82,10 @@ Landed `match_mode` values:
 - `category_pool`: multiple active siblings exist in the same category family; runtime may compare only within that bounded pool
 - `manual_only`: entry is visible in compiled metadata but excluded from automatic runtime matching
 
+Landed `subcategory_match_policy` values:
+- `exact_subcategory`: if a resolved subcategory path has no exact compiled pool, runtime fails closed instead of falling back to a leaf-only template
+- `leaf_family`: if a resolved subcategory path has no exact compiled pool, runtime may fall back only to leaf-only templates explicitly marked with this policy inside the same resolved parent/leaf family
+
 ## Runtime matcher decision flow
 
 The landed matcher flow is:
@@ -88,7 +93,7 @@ The landed matcher flow is:
 1. Resolve canonical category first.
 2. Build a category-scoped candidate pool from compiled metadata using `taxonomy_path` when available.
 3. If `taxonomy_path` is absent but parent/leaf/subcategory are resolved, normalize that binding and use it to scope the pool.
-4. If no exact category-path pool exists and the resolved family is leaf-only, fall back only to leaf-only templates inside that same resolved parent/leaf family.
+4. If no exact category-path pool exists and the resolved family has an explicitly eligible `leaf_family` policy, fall back only to leaf-only templates inside that same resolved parent/leaf family.
 5. Apply preferred source-file narrowing only inside that already bounded pool.
 6. Drop any candidate whose `template_status` is not `active`.
 7. If exactly one active safe template remains, select it directly and do not run sibling scoring.
@@ -157,6 +162,7 @@ Inspect:
 
 Structured matcher debug fields currently surfaced on `schema_match` / `schema_resolution`:
 - `resolved_category_path`
+- `subcategory_match_policy`
 - `candidate_pool_size`
 - `candidate_template_ids`
 - `selected_template_id`

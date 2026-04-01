@@ -2,10 +2,10 @@
   "version": "2026-04-01",
   "source_system": "electronet",
   "template_root": "resources/templates/electronet",
-  "compile_fingerprint": "6d4a15fa6027d47710b4d87161b15e0b31dfdb3772ca648e991fcc67df26fc37",
+  "compile_fingerprint": "44d92451feabffec3a5e996fe8aa173ad13eef3dcddff63383bd0496192384d9",
   "schemas": [
     {
-      "schema_id": "sha1:f93b5ef2ce2a5f6f4e8e7f7b45c664abc2e70a12",
+      "schema_id": "sha1:f6a6b06354520711670993a702aca49de7739f4f",
       "source_system": "electronet",
       "template_id": "aerioy",
       "authored_template_id": "aerioy_electronet_labels_v1",
@@ -14,6 +14,7 @@
       "parent_category": "HOBBIES",
       "leaf_category": "Barbeque",
       "sub_category": "Αερίου",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αερίου",
       "cta_url": "https://www.etranoulis.gr/hobbies/barbeque/aeriou",
       "template_status": "active",
@@ -134,7 +135,7 @@
         {
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -149,7 +150,7 @@
       ]
     },
     {
-      "schema_id": "sha1:2bedc7b7afc9567fd7c95a06e32e4336ea1e72a2",
+      "schema_id": "sha1:e3187ee772b51ad4cdf3f070c07237aec686aa3a",
       "source_system": "electronet",
       "template_id": "axesoyar_psistarion",
       "authored_template_id": "axesoyar_psistarion_electronet_labels_v1",
@@ -158,6 +159,7 @@
       "parent_category": "HOBBIES",
       "leaf_category": "Barbeque",
       "sub_category": "Αξεσουάρ Ψησταριών",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αξεσουάρ Ψησταριών",
       "cta_url": "https://www.etranoulis.gr/hobbies/barbeque/aksesouar-pshstariwn",
       "template_status": "active",
@@ -243,7 +245,7 @@
       ]
     },
     {
-      "schema_id": "sha1:b6561906abf4eea130e08e0de5f6f76ef398d80b",
+      "schema_id": "sha1:032c0723b26bd3a96ef5048957c1b05c265740c9",
       "source_system": "electronet",
       "template_id": "karvoynoy",
       "authored_template_id": "karvoynoy_electronet_labels_v1",
@@ -252,6 +254,7 @@
       "parent_category": "HOBBIES",
       "leaf_category": "Barbeque",
       "sub_category": "Κάρβουνου",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Κάρβουνου",
       "cta_url": "https://www.etranoulis.gr/hobbies/barbeque/karvounou",
       "template_status": "active",
@@ -335,7 +338,7 @@
             "Θερμόμετρο",
             "Συλλέκτης Στάχτης",
             "Τροχοί",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -350,7 +353,7 @@
       ]
     },
     {
-      "schema_id": "sha1:fd4436f62fc83f6056f2fc641a982e41e383b00b",
+      "schema_id": "sha1:a281ed4db7565bb4e2522055ec77f79e64db863c",
       "source_system": "electronet",
       "template_id": "electric_scooter",
       "authored_template_id": "electric_scooter_electronet_labels_v1",
@@ -359,6 +362,7 @@
       "parent_category": "HOBBIES",
       "leaf_category": "Electric Scooter",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "ELECTRIC SCOOTER",
       "cta_url": "https://www.etranoulis.gr/hobbies/Electric-Scooter",
       "template_status": "active",
@@ -429,9 +433,9 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Μέγιστο Βάρος Χρήστη σε Κιλά",
-            "Μέγιστη Ταχύτητα (km/h",
+            "Μέγιστη Ταχύτητα (km/h)",
             "Μπαταρία",
-            "Αυτονομία Μπαταρίας (Max",
+            "Αυτονομία Μπαταρίας (Max)",
             "Βάρος συσκευής σε κιλά",
             "Χρώμα",
             "Εγγύηση Κατασκευαστή"
@@ -447,7 +451,7 @@
       ]
     },
     {
-      "schema_id": "sha1:0fa08ace0048ae2f00fb5cfc22431a885d60dd4f",
+      "schema_id": "sha1:164ce421686962f57c3219cedbbab57e775c443f",
       "source_system": "electronet",
       "template_id": "playstation",
       "authored_template_id": "playstation_electronet_labels_v1",
@@ -456,6 +460,7 @@
       "parent_category": "HOBBIES",
       "leaf_category": "Gaming",
       "sub_category": "Playstation",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Playstation",
       "cta_url": "https://www.etranoulis.gr/hobbies/gaming/playstation",
       "template_status": "active",
@@ -570,7 +575,7 @@
             "Παρεχόμενα Παιχνίδια",
             "Σκληρός Δίσκος",
             "Μοντέλο Επεξεργαστή",
-            "Μνήμη Ram (GB",
+            "Μνήμη Ram (GB)",
             "Δίσκοι Αναπαραγωγής"
           ]
         },
@@ -604,7 +609,7 @@
       ]
     },
     {
-      "schema_id": "sha1:e494f254364c65c21c899ec902f0832f9c5ef405",
+      "schema_id": "sha1:cd82df42015bec0512c09d0f8bc1d476d58c28ec",
       "source_system": "electronet",
       "template_id": "wearables",
       "authored_template_id": "wearables_electronet_labels_v1",
@@ -613,6 +618,7 @@
       "parent_category": "HOBBIES",
       "leaf_category": "Wearables",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "WEARABLES",
       "cta_url": "https://www.etranoulis.gr/hobbies/wearables",
       "template_status": "active",
@@ -757,7 +763,7 @@
       ]
     },
     {
-      "schema_id": "sha1:7dc480bfef9194f079be6a764987477047641554",
+      "schema_id": "sha1:200255ff5846720be80c86bb50ade422c22346c9",
       "source_system": "electronet",
       "template_id": "dvd",
       "authored_template_id": "dvd_electronet_labels_v1",
@@ -766,6 +772,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Audio Systems",
       "sub_category": "DVD",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "DVD",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/dvd",
       "template_status": "active",
@@ -963,7 +970,7 @@
       ]
     },
     {
-      "schema_id": "sha1:897a070a16154c4cbaae14d3dff63c70694a11d6",
+      "schema_id": "sha1:8669bc001dddd4bc0dcbf30b0abcc999caf11eea",
       "source_system": "electronet",
       "template_id": "dvd_blurays",
       "authored_template_id": "dvd_blurays_electronet_labels_v1",
@@ -972,6 +979,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Audio Systems",
       "sub_category": "DVD Blurays",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "DVD Blurays",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/dvd-blurays",
       "template_status": "active",
@@ -1169,7 +1177,7 @@
       ]
     },
     {
-      "schema_id": "sha1:e80720aff598ee551d0eaf2c77c53a7c1b7f0a5f",
+      "schema_id": "sha1:d4ebbf1b2997e71b4e996eebf9be317255d6467c",
       "source_system": "electronet",
       "template_id": "hifi",
       "authored_template_id": "hifi_electronet_labels_v1",
@@ -1178,6 +1186,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Audio Systems",
       "sub_category": "Hifi",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Hifi",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/hifi",
       "template_status": "active",
@@ -1342,8 +1351,8 @@
             "Τύπος Ηχοσυστήματος",
             "Τύπος Ηχείων",
             "Σύστημα Ήχου",
-            "Συνολική Ισχύς Ηχείων(Watt",
-            "Ισχύς Subwoofer(Watt",
+            "Συνολική Ισχύς Ηχείων(Watt)",
+            "Ισχύς Subwoofer(Watt)",
             "Δίσκοι Αναπαραγωγής",
             "Αναπαραγωγή Αρχείων Ήχου",
             "Αναπαραγωγή Κασσέτας",
@@ -1356,8 +1365,8 @@
             "Ασύρματη Αναπαραγωγή",
             "USB 2.0",
             "Bluetooth",
-            "Κατανάλωση Ενέργειας σε Λειτουργία ( Watt",
-            "Κατανάλωση Ενέργειας σε Αναμονή ( Watt",
+            "Κατανάλωση Ενέργειας σε Λειτουργία ( Watt )",
+            "Κατανάλωση Ενέργειας σε Αναμονή ( Watt )",
             "Βασικός Εξοπλισμός",
             "Χρώμα",
             "Εγγύηση Κατασκευαστή"
@@ -1381,7 +1390,7 @@
       ]
     },
     {
-      "schema_id": "sha1:108010e7d8977d4fcfae80de0cac1bd5a99171d1",
+      "schema_id": "sha1:d628a461c09eb13884b5e3b63ad6fdf5f25c0d08",
       "source_system": "electronet",
       "template_id": "sound_bars",
       "authored_template_id": "sound_bars_electronet_labels_v1",
@@ -1390,6 +1399,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Audio Systems",
       "sub_category": "Sound Bars",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Sound Bars",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/sound-bars",
       "template_status": "active",
@@ -1513,8 +1523,8 @@
           "title": "Τεχνικά Χαρακτηριστικά",
           "labels": [
             "Σύστημα Ήχου",
-            "Συνολική Ισχύς Ηχείων(Watt",
-            "Ισχύς Subwoofer(Watt",
+            "Συνολική Ισχύς Ηχείων(Watt)",
+            "Ισχύς Subwoofer(Watt)",
             "Wi - Fi",
             "Αναπαραγωγή Αρχείων Ήχου",
             "Συμβατό με iPod/iPhone",
@@ -1553,7 +1563,7 @@
       ]
     },
     {
-      "schema_id": "sha1:21bacaa0fccaebbe3e5c1908666176e9a574183c",
+      "schema_id": "sha1:3cb059eb10272d5de1d4fbc120da210223cb362b",
       "source_system": "electronet",
       "template_id": "enisxytes",
       "authored_template_id": "enisxytes_electronet_labels_v1",
@@ -1562,6 +1572,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Audio Systems",
       "sub_category": "Ενισχυτές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ενισχυτές",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/enisxytes",
       "template_status": "active",
@@ -1730,7 +1741,7 @@
             "Σύστημα Ήχου",
             "Ισχύς σε Watt/Κανάλι",
             "Ραδιοφωνικός Δέκτης",
-            "Ευαισθησία ( db",
+            "Ευαισθησία ( db )",
             "Έξοδος Ακουστικών",
             "Αναπαραγωγή Αρχείων Ήχου",
             "Αναπαραγωγή Αρχείων Εικόνας",
@@ -1757,8 +1768,8 @@
         {
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
-            "Κατανάλωση Ενέργειας σε Λειτουργία ( Watt",
-            "Κατανάλωση Ενέργειας σε Αναμονή ( Watt",
+            "Κατανάλωση Ενέργειας σε Λειτουργία ( Watt )",
+            "Κατανάλωση Ενέργειας σε Αναμονή ( Watt )",
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
             "Βασικός Εξοπλισμός",
@@ -1779,7 +1790,7 @@
       ]
     },
     {
-      "schema_id": "sha1:17658a4bc5514cf81e7f939685bfedc586294115",
+      "schema_id": "sha1:5bd45eb87143f4b4b0d0c261c4701e4b19c1f40b",
       "source_system": "electronet",
       "template_id": "ixeia",
       "authored_template_id": "ixeia_electronet_labels_v1",
@@ -1788,6 +1799,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Audio Systems",
       "sub_category": "Ηχεία",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ηχεία",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/audio-systems/hxeia",
       "template_status": "active",
@@ -1975,8 +1987,8 @@
             "Τύπος Ηχοσυστήματος",
             "Τύπος Ηχείων",
             "Σύστημα Ήχου",
-            "Συνολική Ισχύς Ηχείων(Watt",
-            "Ισχύς Subwoofer(Watt",
+            "Συνολική Ισχύς Ηχείων(Watt)",
+            "Ισχύς Subwoofer(Watt)",
             "Δίσκοι Αναπαραγωγής",
             "Αναπαραγωγή Αρχείων Ήχου",
             "Αναπαραγωγή Κασσέτας",
@@ -2014,26 +2026,26 @@
         {
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
-            "Κατανάλωση Ενέργειας σε Λειτουργία ( Watt",
-            "Κατανάλωση Ενέργειας σε Αναμονή ( Watt",
+            "Κατανάλωση Ενέργειας σε Λειτουργία ( Watt )",
+            "Κατανάλωση Ενέργειας σε Αναμονή ( Watt )",
             "Βασικός Εξοπλισμός",
             "Χρώμα",
             "Εγγύηση Κατασκευαστή",
             "Χώρα Κατασκευής",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
           ]
         }
       ],
       "sentinel": {
         "last_section": "Γενικά Χαρακτηριστικά",
-        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
       },
       "source_files": [
         "ixeia.json"
       ]
     },
     {
-      "schema_id": "sha1:2a906c1d8ec243b76230efc4aa4069f13f2a1c78",
+      "schema_id": "sha1:61e80377cd87e14c168eb1097243f90c95805493",
       "source_system": "electronet",
       "template_id": "pikap",
       "authored_template_id": "pikap_electronet_labels_v1",
@@ -2042,6 +2054,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Audio Systems",
       "sub_category": "Πικαπ",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Πικαπ",
       "cta_url": "https://www.etranoulis.gr/index.php?route=product/category&path=59_100_310",
       "template_status": "active",
@@ -2151,11 +2164,11 @@
           "labels": [
             "Δίσκοι Αναπαραγωγής",
             "Συμβατός Δίσκος",
-            "Ταχύτητα Περιστροφής ( rpm",
+            "Ταχύτητα Περιστροφής ( rpm )",
             "Ενσωματωμένα Ηχεία",
             "Ενσωματωμένος Ενισχυτής",
             "Έξοδος Ακουστικών",
-            "Συνολική Ισχύς Ηχείων(Watt",
+            "Συνολική Ισχύς Ηχείων(Watt)",
             "Ραδιοφωνικός Δέκτης"
           ]
         },
@@ -2182,7 +2195,7 @@
       ]
     },
     {
-      "schema_id": "sha1:8f70ddae04ec2f19b7e65d78a6871ad4a8edbeea",
+      "schema_id": "sha1:933b7ba9f1be0dad966a50cf2a0e490524400af2",
       "source_system": "electronet",
       "template_id": "car_audio",
       "authored_template_id": "car_audio_electronet_labels_v1",
@@ -2191,6 +2204,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Car Audio",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "CAR AUDIO",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/car-audio",
       "template_status": "active",
@@ -2334,7 +2348,7 @@
         {
           "title": "Αναπαραγωγή",
           "labels": [
-            "Ισχύς ανά Κανάλι Εξόδου( Watt",
+            "Ισχύς ανά Κανάλι Εξόδου( Watt )",
             "Κανάλια Εξόδου",
             "Δίσκοι Αναπαραγωγής",
             "Μέσα Αναπαραγωγής",
@@ -2385,7 +2399,7 @@
       ]
     },
     {
-      "schema_id": "sha1:dea97926076f03ad78f1b4e4276f22bf3c8cae57",
+      "schema_id": "sha1:7a180fd652c802aeb75ac02e209ab7b33af3d70c",
       "source_system": "electronet",
       "template_id": "tv_box",
       "authored_template_id": "tv_box_electronet_labels_v1",
@@ -2394,6 +2408,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Αξεσουάρ",
       "sub_category": "TV Box",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "TV Box",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/tv-box",
       "template_status": "manual_only",
@@ -2442,7 +2457,7 @@
       ]
     },
     {
-      "schema_id": "sha1:8cefea1eec4f996d2d676a05907dc7ace35ad473",
+      "schema_id": "sha1:77db79f96bbde1ceb957ced3220fd4bee609057e",
       "source_system": "electronet",
       "template_id": "tv_control",
       "authored_template_id": "tv_control_electronet_labels_v1",
@@ -2451,6 +2466,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Αξεσουάρ",
       "sub_category": "TV Control",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "TV Control",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/tv-control",
       "template_status": "active",
@@ -2549,7 +2565,7 @@
       ]
     },
     {
-      "schema_id": "sha1:25d40cc171cae293a01d1098b2a38dbb75cb4dff",
+      "schema_id": "sha1:b4ddef4aca5f90de85f0428c82f512365106786d",
       "source_system": "electronet",
       "template_id": "keraies",
       "authored_template_id": "keraies_electronet_labels_v1",
@@ -2558,6 +2574,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Αξεσουάρ",
       "sub_category": "Κεραίες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Κεραίες",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/keraies",
       "template_status": "active",
@@ -2693,7 +2710,7 @@
       ]
     },
     {
-      "schema_id": "sha1:55864a4525eda9379147cac182db2fedd9e9500a",
+      "schema_id": "sha1:600cf2c44281c50509e9c127804fb67108cc4660",
       "source_system": "electronet",
       "template_id": "psifiakoi_apokodikopoiites",
       "authored_template_id": "psifiakoi_apokodikopoiites_electronet_labels_v1",
@@ -2702,6 +2719,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Αξεσουάρ",
       "sub_category": "Ψηφιακοί Αποκωδικοποιητές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ψηφιακοί Αποκωδικοποιητές",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/eikona-ixos/pshfiakoi-apokwdikopoihtes",
       "template_status": "active",
@@ -2834,7 +2852,7 @@
       ]
     },
     {
-      "schema_id": "sha1:33a68e02b3c573bfb06d7158c874a9c403627550",
+      "schema_id": "sha1:679e1a740a4d6fe6c5069e0d09c2ea3ed685f3c6",
       "source_system": "electronet",
       "template_id": "epipla",
       "authored_template_id": "epipla_electronet_labels_v1",
@@ -2843,6 +2861,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Βάσεις & Έπιπλα TV",
       "sub_category": "Έπιπλα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Έπιπλα",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/vaseis-epipla-tv/epipla",
       "template_status": "active",
@@ -2935,7 +2954,7 @@
       ]
     },
     {
-      "schema_id": "sha1:818c84093197e7fc0849bb5f29c345a1bd4e2765",
+      "schema_id": "sha1:33ca01eb036e41fc913cb469c86917a0b6f791b5",
       "source_system": "electronet",
       "template_id": "vaseis",
       "authored_template_id": "vaseis_electronet_labels_v1",
@@ -2944,6 +2963,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Βάσεις & Έπιπλα TV",
       "sub_category": "Βάσεις",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Βάσεις",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/vaseis-epipla-tv/vaseis",
       "template_status": "active",
@@ -3065,22 +3085,22 @@
             "Ελάχιστη Διάσταση Τηλεόρασης",
             "Μέγιστη Διάσταση Τηλεόρασης",
             "Μέγιστο Φορτίο",
-            "Διάκενο Βάσης Τοίχου Vesa (mm",
+            "Διάκενο Βάσης Τοίχου Vesa (mm)",
             "VESA & Universal Συμβατότητα",
-            "Γωνία Κλίσης Κάθετα (Μοίρες",
-            "Περιστροφή (Swivel",
-            "Απόσταση από τον τοίχο (Profile",
+            "Γωνία Κλίσης Κάθετα (Μοίρες)",
+            "Περιστροφή (Swivel)",
+            "Απόσταση από τον τοίχο (Profile)",
             "Οδηγός Καλωδίων",
             "Οδηγός Προσανατολισμού",
             "Συμβατή για Curved TVs",
-            "Αλφάδι (Bubble Level",
+            "Αλφάδι (Bubble Level)",
             "Υλικό Κατασκευής"
           ]
         },
         {
           "title": "Διαστάσεις / Βάρος",
           "labels": [
-            "Διαστάσεις Βάσης (Π × Υ × Β",
+            "Διαστάσεις Βάσης (Π × Υ × Β)",
             "Καθαρό Βάρος",
             "Μεικτό Βάρος"
           ]
@@ -3095,7 +3115,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a4815acc782c677a42ac612464839720416b8d58",
+      "schema_id": "sha1:e92c9fc54faaf35cb2021971152ab992d2d59a7e",
       "source_system": "electronet",
       "template_id": "fotografikes",
       "authored_template_id": "fotografikes_electronet_labels_v1",
@@ -3104,6 +3124,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Κάμερες",
       "sub_category": "Φωτογραφικές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Φωτογραφικές",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/kameres/fwtografikes",
       "template_status": "active",
@@ -3262,11 +3283,11 @@
           "title": "Τεχνικά Χαρακτηριστικά",
           "labels": [
             "Τύπος Φακού",
-            "Ενεργά Pixel ( mp",
-            "Οπτικό Zoom ( - x",
-            "Ψηφιακό Zoom ( - x",
+            "Ενεργά Pixel ( mp )",
+            "Οπτικό Zoom ( - x )",
+            "Ψηφιακό Zoom ( - x )",
             "Εστιακή Απόσταση",
-            "Ευαισθησία (ISO",
+            "Ευαισθησία (ISO)",
             "Σταθεροποιητής Εικόνας",
             "Ανάλυση Φωτογραφιών",
             "Ανάλυση Βίντεο",
@@ -3282,8 +3303,8 @@
             "Wi - Fi",
             "GPS",
             "Αδιάβροχη",
-            "Ενσωματωμένη Μνήμη ( MB",
-            "Αποθηκευτικό Μέσο ( Κάρτα Μνήμης",
+            "Ενσωματωμένη Μνήμη ( MB )",
+            "Αποθηκευτικό Μέσο ( Κάρτα Μνήμης )",
             "Επιπλέον Δυνατότητες",
             "Micro USB",
             "Mini HDMI"
@@ -3294,7 +3315,7 @@
           "labels": [
             "Παρεχόμενη Μπαταρία",
             "Διάρκεια Μπαταρίας",
-            "Βάρος με Μπαταρία & Κάρτα ( gr",
+            "Βάρος με Μπαταρία & Κάρτα ( gr )",
             "Παρεχόμενα Εξαρτήματα",
             "Χρώμα",
             "Εγγύηση Κατασκευαστή",
@@ -3311,7 +3332,7 @@
       ]
     },
     {
-      "schema_id": "sha1:dfeb4ad735e983e44b9eb6c886f2a8f081bf07eb",
+      "schema_id": "sha1:5a22c5333f6b176e971f1c0386ff01f50db5249e",
       "source_system": "electronet",
       "template_id": "psifiakes_kornizes",
       "authored_template_id": "psifiakes_kornizes_electronet_labels_v1",
@@ -3320,6 +3341,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Κάμερες",
       "sub_category": "Ψηφιακές κορνίζες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ψηφιακές κορνίζες",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/kameres/digital-frames",
       "template_status": "active",
@@ -3409,8 +3431,8 @@
           "labels": [
             "Οθόνη Ίντσες",
             "Αριθμός Pixels",
-            "Ενσωματωμένη Μνήμη ( MB",
-            "Αποθηκευτικό Μέσο ( Κάρτα Μνήμης",
+            "Ενσωματωμένη Μνήμη ( MB )",
+            "Αποθηκευτικό Μέσο ( Κάρτα Μνήμης )",
             "USB 2.0",
             "SD Card"
           ]
@@ -3435,7 +3457,7 @@
       ]
     },
     {
-      "schema_id": "sha1:954c8413f2da941e78f3ddce65df522654336c8c",
+      "schema_id": "sha1:0e4ef19599bb0d01bddaa8501ee81189e8b2b85d",
       "source_system": "electronet",
       "template_id": "tileoraseis",
       "authored_template_id": "tileoraseis_electronet_labels_v1",
@@ -3444,6 +3466,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Τηλεοράσεις",
       "sub_category": null,
+      "subcategory_match_policy": "leaf_family",
       "cta_map_key": "Τηλεοράσεις",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/thleoraseis",
       "template_status": "active",
@@ -3614,8 +3637,8 @@
           "title": "Εικόνα - Ήχος",
           "labels": [
             "Τεχνολογία Οθόνης",
-            "Διαγώνιος Οθόνης ( Ίντσες",
-            "Διαγώνιος Οθόνης ( Εκατοστά",
+            "Διαγώνιος Οθόνης ( Ίντσες )",
+            "Διαγώνιος Οθόνης ( Εκατοστά )",
             "Ανάλυση Οθόνης",
             "Αριθμός Pixels",
             "Λειτουργίες Εικόνας",
@@ -3623,8 +3646,8 @@
             "HDR",
             "Ενεργειακή Κλάση",
             "Ενεργειακή Κλάση HDR",
-            "Κατανάλωση Ενέργειας σε Λειτουργία SDR (kWh/1000h",
-            "Κατανάλωση Ενέργειας σε Λειτουργία HDR (kWh/1000h",
+            "Κατανάλωση Ενέργειας σε Λειτουργία SDR (kWh/1000h)",
+            "Κατανάλωση Ενέργειας σε Λειτουργία HDR (kWh/1000h)",
             "Δέκτης",
             "Σύστημα Ήχου",
             "Επεξεργαστής"
@@ -3653,25 +3676,25 @@
           "labels": [
             "Βασικός Εξοπλισμός",
             "Εμφάνιση",
-            "Διάκενο Βάσης Τοίχου Vesa (mm",
+            "Διάκενο Βάσης Τοίχου Vesa (mm)",
             "Χρώμα",
-            "Βάρος Συσκευής σε Κιλά (με Βάση",
+            "Βάρος Συσκευής σε Κιλά (με Βάση)",
             "Χώρα Κατασκευής",
             "Εγγύηση Κατασκευαστή",
-            "Διαστάσεις Συσκευής σε Εκατοστά με Βάση (Υ × Π × Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά με Βάση (Υ × Π × Β)"
           ]
         }
       ],
       "sentinel": {
         "last_section": "Γενικά",
-        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά με Βάση (Υ × Π × Β"
+        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά με Βάση (Υ × Π × Β)"
       },
       "source_files": [
         "tileoraseis.json"
       ]
     },
     {
-      "schema_id": "sha1:bdef05933faf19818da956dd3c57ecdb57245055",
+      "schema_id": "sha1:58cf4f7531345d27aee72a7b56bb7772163311ca",
       "source_system": "electronet",
       "template_id": "radio_cd",
       "authored_template_id": "radio_cd_electronet_labels_v1",
@@ -3680,6 +3703,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Φορητά",
       "sub_category": "Radio CD",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Radio CD",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/foritsa/radio-cd",
       "template_status": "active",
@@ -3798,7 +3822,7 @@
             "Τηλεχειριστήριο",
             "Αναπαραγωγή Κασσέτας",
             "Αναπαραγωγή Αρχείων Ήχου",
-            "Συνολική Ισχύς Ηχείων(Watt",
+            "Συνολική Ισχύς Ηχείων(Watt)",
             "Λειτουργίες Ηχοσυστήματος",
             "Οθόνη Ενδείξεων"
           ]
@@ -3825,7 +3849,7 @@
       ]
     },
     {
-      "schema_id": "sha1:671acaba22ebb4ad7ba7185509c9e7831a393776",
+      "schema_id": "sha1:e7d38785a89d921b39a82c8d356fd5fc938189eb",
       "source_system": "electronet",
       "template_id": "radiofona",
       "authored_template_id": "radiofona_electronet_labels_v1",
@@ -3834,6 +3858,7 @@
       "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
       "leaf_category": "Φορητά",
       "sub_category": "Ραδιόφωνα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ραδιοφώνα",
       "cta_url": "https://www.etranoulis.gr/eikona-hxos/foritsa/radiofwna",
       "template_status": "active",
@@ -3967,7 +3992,7 @@
       ]
     },
     {
-      "schema_id": "sha1:4bb8d0fd56f65875fa8b0abae8c1552d8c2b55ca",
+      "schema_id": "sha1:af26605d5d0539bdddda38279da76602e4f8eff4",
       "source_system": "electronet",
       "template_id": "anemistires",
       "authored_template_id": "anemistires_electronet_labels_v1",
@@ -3976,6 +4001,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ανεμιστήρες",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "ΑΝΕΜΙΣΤΗΡΕΣ",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres",
       "template_status": "active",
@@ -4127,7 +4153,7 @@
       ]
     },
     {
-      "schema_id": "sha1:32f30b8444c31bcc3166209cf3008819c55c3d43",
+      "schema_id": "sha1:3fe712a36e66b41e87d44a6ae0233325446953cc",
       "source_system": "electronet",
       "template_id": "air_coolers_epidapedioi",
       "authored_template_id": "air_coolers_epidapedioi_electronet_labels_v1",
@@ -4136,6 +4162,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ανεμιστήρες",
       "sub_category": "Air Coolers & Επιδαπέδιοι",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Air Coolers & Επιδαπέδιοι",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/aircoolers-epidapedioi",
       "template_status": "active",
@@ -4287,7 +4314,7 @@
       ]
     },
     {
-      "schema_id": "sha1:88e48b4c14be8ec86a0870715ffc019a098a7821",
+      "schema_id": "sha1:b488370934936377124bc5c49e3ccb028ffe9d0c",
       "source_system": "electronet",
       "template_id": "mini",
       "authored_template_id": "mini_electronet_labels_v1",
@@ -4296,6 +4323,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ανεμιστήρες",
       "sub_category": "Mini",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Mini",
       "cta_url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_196_304",
       "template_status": "active",
@@ -4446,7 +4474,7 @@
       ]
     },
     {
-      "schema_id": "sha1:0774f01e9e346266446516a79b840cc8fb2379f6",
+      "schema_id": "sha1:1674681caef802e2aee6cd23b8b7a903acd7968b",
       "source_system": "electronet",
       "template_id": "epitrapezioi",
       "authored_template_id": "epitrapezioi_electronet_labels_v1",
@@ -4455,6 +4483,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ανεμιστήρες",
       "sub_category": "Επιτραπέζιοι",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Επιτραπέζιοι",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/epitrapezioi",
       "template_status": "active",
@@ -4606,7 +4635,7 @@
       ]
     },
     {
-      "schema_id": "sha1:4af0e12bef7803149b94a6c0d9bf256f24b80dc2",
+      "schema_id": "sha1:3ed6dc2583b483b9ca0313d6b099e52151e7519a",
       "source_system": "electronet",
       "template_id": "orthostatis",
       "authored_template_id": "orthostatis_electronet_labels_v1",
@@ -4615,6 +4644,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ανεμιστήρες",
       "sub_category": "Ορθοστάτης",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ορθοστάτης",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/orthostatis",
       "template_status": "active",
@@ -4766,7 +4796,7 @@
       ]
     },
     {
-      "schema_id": "sha1:e8a8ea7e0150b33943158ac7200b1258ee9d572c",
+      "schema_id": "sha1:c07731c51168c7b40c02140865bf616a365c3cc6",
       "source_system": "electronet",
       "template_id": "orofis",
       "authored_template_id": "orofis_electronet_labels_v1",
@@ -4775,6 +4805,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ανεμιστήρες",
       "sub_category": "Οροφής",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Οροφής",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/orofhs",
       "template_status": "active",
@@ -4926,7 +4957,7 @@
       ]
     },
     {
-      "schema_id": "sha1:094699763577300a374905482b3910f83809a941",
+      "schema_id": "sha1:2466111a73c196ae727be58b3b46a38394f19e59",
       "source_system": "electronet",
       "template_id": "anemisthres_an_toixou",
       "authored_template_id": "anemisthres_an_toixou_electronet_labels_v1",
@@ -4935,6 +4966,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ανεμιστήρες",
       "sub_category": "Τοίχου",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Τοίχου",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/anemisthres/an-toixou",
       "template_status": "active",
@@ -5027,7 +5059,7 @@
       ]
     },
     {
-      "schema_id": "sha1:bc067b529dd8f39ec266219056252557788042a7",
+      "schema_id": "sha1:293cc0f2cfbf39bb0360257cda576140f03fd69b",
       "source_system": "electronet",
       "template_id": "ydronefosis",
       "authored_template_id": "ydronefosis_electronet_labels_v1",
@@ -5036,6 +5068,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ανεμιστήρες",
       "sub_category": "Υδρονέφωσης",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Υδρονέφωσης",
       "cta_url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_196_305",
       "template_status": "active",
@@ -5186,7 +5219,7 @@
       ]
     },
     {
-      "schema_id": "sha1:561498e984e4aff06e80a8f1c9df04a16ef0463f",
+      "schema_id": "sha1:32d13476d880bbfd3ae37c21ac5cc54a9b11200f",
       "source_system": "electronet",
       "template_id": "antlies_thermotitas",
       "authored_template_id": "antlies_thermotitas_electronet_labels_v1",
@@ -5195,6 +5228,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Αντλίες Θερμότητας",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "ΑΝΤΛΙΕΣ ΘΕΡΜΟΤΗΤΑΣ",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/antlies-therm",
       "template_status": "active",
@@ -5337,13 +5371,13 @@
             "Τεχνολογία",
             "Είδος Συστήματος",
             "Μονάδες",
-            "Ονομαστική Θερμική Ισχύς (7°C - 35°C",
+            "Ονομαστική Θερμική Ισχύς (7°C - 35°C)",
             "Ονομαστική Ψυκτική Απόδοση",
             "Μέγιστη Θερμοκρασία Νερού",
             "Λειτουργίες",
-            "Εύρος Λειτουργίας Θέρμανσης (Περιβάλλον",
-            "Εύρος Λειτουργίας Ψύξης (Περιβάλλον",
-            "Εύρος Λειτουργίας ΖΝΧ (Περιβάλλον",
+            "Εύρος Λειτουργίας Θέρμανσης (Περιβάλλον)",
+            "Εύρος Λειτουργίας Ψύξης (Περιβάλλον)",
+            "Εύρος Λειτουργίας ΖΝΧ (Περιβάλλον)",
             "Προτείνεται για κατοικία",
             "Χειριστήριο",
             "Wi-Fi"
@@ -5352,15 +5386,15 @@
         {
           "title": "Ενέργεια",
           "labels": [
-            "Ενεργειακή Κλάση (νερό 35°C",
-            "Ενεργειακή Κλάση (νερό 55°C",
-            "Ενεργειακή Κλάση (εποχιακή"
+            "Ενεργειακή Κλάση (νερό 35°C)",
+            "Ενεργειακή Κλάση (νερό 55°C)",
+            "Ενεργειακή Κλάση (εποχιακή)"
           ]
         },
         {
           "title": "Ηλεκτρικά - Ψυκτικό",
           "labels": [
-            "Τροφοδοσία (Ph/Hz/V",
+            "Τροφοδοσία (Ph/Hz/V)",
             "Ψυκτικό Υγρό"
           ]
         },
@@ -5369,7 +5403,7 @@
           "labels": [
             "Κωδικός Προϊόντος",
             "Χρώμα",
-            "Διαστάσεις Συσκευής (Υ × Π × Β",
+            "Διαστάσεις Συσκευής (Υ × Π × Β)",
             "Βάρος",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -5384,7 +5418,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a44d3cb9cd0e45562d3bc391fb0a6bfd9f99fdca",
+      "schema_id": "sha1:0971eeb87fd3fc48df2be7242bd0af92c6a15495",
       "source_system": "electronet",
       "template_id": "axesoyar_afygransis",
       "authored_template_id": "axesoyar_afygransis_electronet_labels_v1",
@@ -5393,6 +5427,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Αφύγρανση Ιονιστές",
       "sub_category": "Αξεσουάρ Αφύγρανσης",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αξεσουάρ Αφύγρανσης",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/axeouar-afigranshs",
       "template_status": "active",
@@ -5479,7 +5514,7 @@
       ]
     },
     {
-      "schema_id": "sha1:b6569dcdbe33f70fbcd2e1a90946ab9aac2ae40d",
+      "schema_id": "sha1:e35576dce187b28f318389d1ec722465b8584da0",
       "source_system": "electronet",
       "template_id": "afygrantires",
       "authored_template_id": "afygrantires_electronet_labels_v1",
@@ -5488,6 +5523,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Αφύγρανση Ιονιστές",
       "sub_category": "Αφυγραντήρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αφυγραντήρες",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/afygranthres",
       "template_status": "active",
@@ -5681,14 +5717,14 @@
             "Ισχύς σε Watt",
             "Παροχή Αέρα σε m3/h",
             "Εύρος Λειτουργίας σε °C",
-            "Στάθμη Θορύβου σε dB(A"
+            "Στάθμη Θορύβου σε dB(A)"
           ]
         },
         {
           "title": "Γενικά χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -5703,7 +5739,7 @@
       ]
     },
     {
-      "schema_id": "sha1:cb35bfdcd1d11050e086a3f5f09b9b1906702c2d",
+      "schema_id": "sha1:6ec2656bd801acf19878caade8c8fc69cf430679",
       "source_system": "electronet",
       "template_id": "katharistes_aera_ionistes",
       "authored_template_id": "katharistes_aera_ionistes_electronet_labels_v1",
@@ -5712,6 +5748,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Αφύγρανση Ιονιστές",
       "sub_category": "Καθαριστές Αέρα Ιονιστές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Καθαριστές Αέρα Ιονιστές",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/afygransh-ionistes/katharistes-aera-ionistes",
       "template_status": "active",
@@ -5827,14 +5864,14 @@
         {
           "title": "Απόδοση",
           "labels": [
-            "Στάθμη θορύβου σε dB(A",
+            "Στάθμη θορύβου σε dB(A)",
             "Ισχύς σε Watt"
           ]
         },
         {
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
-            "Διαστάσεις συσκευής σε εκατ. (Υ χ Π χ Β",
+            "Διαστάσεις συσκευής σε εκατ. (Υ χ Π χ Β)",
             "Βάρος συσκευής σε κιλά",
             "Εγγύηση προμηθευτή"
           ]
@@ -5849,7 +5886,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a4bbd4ee3cc144e68525a7a5a9504beff8445f57",
+      "schema_id": "sha1:a2b036aa0df4f9cd0cf4eb2af88f734ba71ec05d",
       "source_system": "electronet",
       "template_id": "entomoapothitika",
       "authored_template_id": "entomoapothitika_electronet_labels_v1",
@@ -5858,6 +5895,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Εντομοαπωθητικά",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "ΕΝΤΟΜΟΑΠΩΘΗΤΙΚΑ",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/entomoapothitika",
       "template_status": "active",
@@ -5955,7 +5993,7 @@
       ]
     },
     {
-      "schema_id": "sha1:44ce037c5477d73a780847d68515db5d1a920255",
+      "schema_id": "sha1:ee2d4229f39aa14ec83ead5a2e67608a6bd90059",
       "source_system": "electronet",
       "template_id": "iliakoi_thermosifones",
       "authored_template_id": "iliakoi_thermosifones_electronet_labels_v1",
@@ -5964,6 +6002,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Ηλιακοί Θερμοσίφωνες",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "ΗΛΙΑΚΟΙ ΘΕΡΜΟΣΙΦΩΝΕΣ",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/hliakoi-thermosifones",
       "template_status": "active",
@@ -6046,7 +6085,7 @@
             "Τύπος τοποθέτησης",
             "Τύπος λειτουργίας",
             "Τύπος συλλέκτη",
-            "Επιφάνεια συλλέκτη σε τ.μ",
+            "Επιφάνεια συλλέκτη σε τ.μ.",
             "Αριθμός συλλεκτών",
             "Υλικό δοχείου",
             "Εγγύηση προμηθευτή"
@@ -6062,7 +6101,7 @@
       ]
     },
     {
-      "schema_id": "sha1:555bdc96c54a59e86d260dffd9769faac88c2fe7",
+      "schema_id": "sha1:206762c8d1345213a83268c2ea95527cb9e4166d",
       "source_system": "electronet",
       "template_id": "aerotherma",
       "authored_template_id": "aerotherma_electronet_labels_v1",
@@ -6071,6 +6110,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Αερόθερμα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αερόθερμα",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/aerotherma",
       "template_status": "active",
@@ -6217,7 +6257,7 @@
         {
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
-            "Διαστάσεις συσκευής σε εκατ. (Υ χ Π χ Β",
+            "Διαστάσεις συσκευής σε εκατ. (Υ χ Π χ Β)",
             "Εγγύηση προμηθευτή",
             "Χρώμα"
           ]
@@ -6232,7 +6272,7 @@
       ]
     },
     {
-      "schema_id": "sha1:fa58e72f02a9de312f53558ec87855d7d64ec15d",
+      "schema_id": "sha1:3e31a94f35670109d8eaf413bf757d2cf1e67d6f",
       "source_system": "electronet",
       "template_id": "ilektrika_ypostromata",
       "authored_template_id": "ilektrika_ypostromata_electronet_labels_v1",
@@ -6241,6 +6281,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Ηλεκτρικά Υποστρώματα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ηλεκτρικά Υποστρώματα",
       "cta_url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_197_311",
       "template_status": "active",
@@ -6400,7 +6441,7 @@
       ]
     },
     {
-      "schema_id": "sha1:c12f68ed8293de0784791f0d8f3b4e9fce638a1e",
+      "schema_id": "sha1:7760334a31b67f6837c72d28c89d615d729a2024",
       "source_system": "electronet",
       "template_id": "ilektrikes_koyvertes",
       "authored_template_id": "ilektrikes_koyvertes_electronet_labels_v1",
@@ -6409,6 +6450,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Ηλεκτρικές Κουβέρτες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ηλεκτρικές Κουβέρτες",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/hlektrikes-kouvertes",
       "template_status": "active",
@@ -6568,7 +6610,7 @@
       ]
     },
     {
-      "schema_id": "sha1:470dc561dcd6d26d8e684bccf8a55e92d078cda6",
+      "schema_id": "sha1:5f832996b312e5da9dcea2ce3fc2f05259b4e5cd",
       "source_system": "electronet",
       "template_id": "thermastres_carbon",
       "authored_template_id": "thermastres_carbon_electronet_labels_v1",
@@ -6577,6 +6619,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Θερμάστρες Carbon",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Θερμάστρες Carbon",
       "cta_url": "https://www.etranoulis.gr/index.php?route=product/category&path=194_197_312",
       "template_status": "active",
@@ -6722,7 +6765,7 @@
       ]
     },
     {
-      "schema_id": "sha1:bdc3a7a58f6e54f238febb4532e039969415e29e",
+      "schema_id": "sha1:6a7e0115d9f93d45ca2d0b6e881806a9c9a8b788",
       "source_system": "electronet",
       "template_id": "thermastres_petrelaioy",
       "authored_template_id": "thermastres_petrelaioy_electronet_labels_v1",
@@ -6731,6 +6774,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Θερμάστρες Πετρελαίου",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Θερμάστρες Πετρελαίου",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermastres-petrelaiou",
       "template_status": "active",
@@ -6811,9 +6855,9 @@
           "title": "Επισκόπηση Προϊόντος",
           "labels": [
             "Τύπος Θερμαντικού",
-            "Θερμική Απόδοση ( Btu/h",
+            "Θερμική Απόδοση ( Btu/h )",
             "Συνίσταται για χώρους έως m2",
-            "Κατανάλωση ( lt/h",
+            "Κατανάλωση ( lt/h )",
             "Χωρητικότητα σε λίτρα",
             "Σύστημα ασφαλείας"
           ]
@@ -6822,7 +6866,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Εγγύηση προμηθευτή",
-            "Διαστάσεις συσκευής σε εκατ. (Υ χ Π χ Β",
+            "Διαστάσεις συσκευής σε εκατ. (Υ χ Π χ Β)",
             "Χρώμα"
           ]
         }
@@ -6836,7 +6880,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a47b963096089ae4cb6b45eeca223a9050aa32db",
+      "schema_id": "sha1:a3420a9c733eee1c3b6025f4e345d5274b12bff7",
       "source_system": "electronet",
       "template_id": "thermantika_ygraerioy",
       "authored_template_id": "thermantika_ygraerioy_electronet_labels_v1",
@@ -6845,6 +6889,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Θερμαντικά Υγραερίου",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Θερμαντικά Υγραερίου",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermantika-ygraeriou",
       "template_status": "active",
@@ -6953,7 +6998,7 @@
       ]
     },
     {
-      "schema_id": "sha1:de0e4b6ff62f1b91dd00e7ce7262248e889d7339",
+      "schema_id": "sha1:cc328da42987deda50b22ee30fe6ee9057b09c02",
       "source_system": "electronet",
       "template_id": "thermopompoi",
       "authored_template_id": "thermopompoi_electronet_labels_v1",
@@ -6962,6 +7007,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Θερμοπομποί",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Θερμοπομποί",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/thermopompoi",
       "template_status": "active",
@@ -7121,7 +7167,7 @@
           "title": "Γενικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις συσκευής σε εκατ. (Υ x Π x Β",
+            "Διαστάσεις συσκευής σε εκατ. (Υ x Π x Β)",
             "Εγγύηση προμηθευτή"
           ]
         }
@@ -7135,7 +7181,7 @@
       ]
     },
     {
-      "schema_id": "sha1:2ba345931f650a0b9836037ca638aaaee52f93d1",
+      "schema_id": "sha1:9944ff816b3ef8b95601ec993cc67ef7c38701b4",
       "source_system": "electronet",
       "template_id": "kalorifer",
       "authored_template_id": "kalorifer_electronet_labels_v1",
@@ -7144,6 +7190,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Καλοριφέρ",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Καλοριφέρ",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/kalorifer",
       "template_status": "active",
@@ -7274,7 +7321,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Εγγύηση προμηθευτή",
-            "Διαστάσεις συσκευής σε εκατ. (Υ χ Π χ Β",
+            "Διαστάσεις συσκευής σε εκατ. (Υ χ Π χ Β)",
             "Χρώμα",
             "Βάρος συσκευής σε κιλά"
           ]
@@ -7289,7 +7336,7 @@
       ]
     },
     {
-      "schema_id": "sha1:0883efd16e63776e0e9c24c64d72a93b8186331a",
+      "schema_id": "sha1:6c5e1b90b919f52fe8d00ba2d9edaafdf6c238e2",
       "source_system": "electronet",
       "template_id": "xalazia",
       "authored_template_id": "xalazia_electronet_labels_v1",
@@ -7298,6 +7345,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Θερμαντικά",
       "sub_category": "Χαλαζία",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Χαλαζία",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/thermantika/xalazia",
       "template_status": "active",
@@ -7443,7 +7491,7 @@
       ]
     },
     {
-      "schema_id": "sha1:0c6c188df66531edccb1fb69013c37182e3dba48",
+      "schema_id": "sha1:53d36eac94f2e7f3456855776ae38b0f5a20e7c0",
       "source_system": "electronet",
       "template_id": "klimatistika",
       "authored_template_id": "klimatistika_electronet_labels_v1",
@@ -7452,6 +7500,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Κλιματιστικά",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Κλιματιστικά",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika",
       "template_status": "active",
@@ -7748,7 +7797,7 @@
       ]
     },
     {
-      "schema_id": "sha1:edf994483ca57e5e874be9bd43594694c48874c9",
+      "schema_id": "sha1:17702a04704e05a704b98e35ccaf43fcda307bf6",
       "source_system": "electronet",
       "template_id": "axesoyar_klimatistikon",
       "authored_template_id": "axesoyar_klimatistikon_electronet_labels_v1",
@@ -7757,6 +7806,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Κλιματιστικά",
       "sub_category": "Αξεσουάρ Κλιματιστικών",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αξεσουάρ Κλιματιστικών",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/aksesouar-klimatistikwn",
       "template_status": "manual_only",
@@ -7805,7 +7855,7 @@
       ]
     },
     {
-      "schema_id": "sha1:8b94b7143e8852697897c70076f9a05afedd23c5",
+      "schema_id": "sha1:b4db79bf6808680ebf82affa112a178df12b94d7",
       "source_system": "electronet",
       "template_id": "ntoylapes",
       "authored_template_id": "ntoylapes_electronet_labels_v1",
@@ -7814,6 +7864,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Κλιματιστικά",
       "sub_category": "Ντουλάπες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ντουλάπες",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/ntoulapes",
       "template_status": "active",
@@ -8027,19 +8078,19 @@
         {
           "title": "Φορτίο σχεδιασμού",
           "labels": [
-            "Φορτίου Σχεδιασμού Ψύξης ( kW/h",
-            "Φορτίου Σχεδιασμού Θέρμανσης Μεσαίας Ζώνης ( kW/h",
-            "Φορτίου Σχεδιασμού Θέρμανσης Θερμής Ζώνης ( kW/h"
+            "Φορτίου Σχεδιασμού Ψύξης ( kW/h )",
+            "Φορτίου Σχεδιασμού Θέρμανσης Μεσαίας Ζώνης ( kW/h )",
+            "Φορτίου Σχεδιασμού Θέρμανσης Θερμής Ζώνης ( kW/h )"
           ]
         },
         {
           "title": "Ψυκτική / Θερμική απόδοση",
           "labels": [
-            "Ονομαστική Απόδοση (Btu/h",
-            "Ψυκτική Απόδοση ( Btu/h",
-            "Θερμική Απόδοση ( Btu/h",
-            "Εύρος Ψυκτικής Απόδοσης ( Btu/h",
-            "Εύρος Θερμικής Απόδοσης ( Btu/h"
+            "Ονομαστική Απόδοση (Btu/h)",
+            "Ψυκτική Απόδοση ( Btu/h )",
+            "Θερμική Απόδοση ( Btu/h )",
+            "Εύρος Ψυκτικής Απόδοσης ( Btu/h )",
+            "Εύρος Θερμικής Απόδοσης ( Btu/h )"
           ]
         },
         {
@@ -8056,10 +8107,10 @@
         {
           "title": "Καταναλώσεις",
           "labels": [
-            "Ετήσια Κατανάλωση Ψύξης ( kWh / a",
-            "Ετήσια Κατανάλωση Θέρμανσης Μέσης Εποχής ( kWh / a",
-            "Ετήσια Κατανάλωση Θέρμανσης Θερμότερης Εποχής ( kWh / a",
-            "Κατανάλωση Ενέργειας σε Αναμονή ( Watt"
+            "Ετήσια Κατανάλωση Ψύξης ( kWh / a )",
+            "Ετήσια Κατανάλωση Θέρμανσης Μέσης Εποχής ( kWh / a )",
+            "Ετήσια Κατανάλωση Θέρμανσης Θερμότερης Εποχής ( kWh / a )",
+            "Κατανάλωση Ενέργειας σε Αναμονή ( Watt )"
           ]
         },
         {
@@ -8080,14 +8131,14 @@
         {
           "title": "Διαστάσεις και Βάρος",
           "labels": [
-            "Βάρος Εσωτερικής Μονάδας ( Kg",
-            "Βάρος Εξωτερικής Μονάδας ( Kg",
-            "Ύψος Εσωτερικής Μονάδας ( mm",
-            "Πλάτος Εσωτερικής Μονάδας ( mm",
-            "Βάθος Εσωτερικής Μονάδας ( mm",
-            "Ύψος Εξωτερικής Μονάδας ( mm",
-            "Πλάτος Εξωτερικής Μονάδας ( mm",
-            "Βάθος Εξωτερικής Μονάδας ( mm"
+            "Βάρος Εσωτερικής Μονάδας ( Kg )",
+            "Βάρος Εξωτερικής Μονάδας ( Kg )",
+            "Ύψος Εσωτερικής Μονάδας ( mm )",
+            "Πλάτος Εσωτερικής Μονάδας ( mm )",
+            "Βάθος Εσωτερικής Μονάδας ( mm )",
+            "Ύψος Εξωτερικής Μονάδας ( mm )",
+            "Πλάτος Εξωτερικής Μονάδας ( mm )",
+            "Βάθος Εξωτερικής Μονάδας ( mm )"
           ]
         },
         {
@@ -8109,7 +8160,7 @@
       ]
     },
     {
-      "schema_id": "sha1:55bda0e40fe437c05a91c3ba737d5833e752802c",
+      "schema_id": "sha1:623b1eb793d26176ad391cdf287ac8cd5cf7f759",
       "source_system": "electronet",
       "template_id": "toixoy",
       "authored_template_id": "toixoy_electronet_labels_v1",
@@ -8118,6 +8169,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Κλιματιστικά",
       "sub_category": "Τοίχου",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Τοίχου",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/toixou",
       "template_status": "active",
@@ -8414,7 +8466,7 @@
       ]
     },
     {
-      "schema_id": "sha1:d81b4c8ed361161646b32fbd1ece996ef9e28e64",
+      "schema_id": "sha1:987219efe1f4c08a696a12d8f7deff810e1547d2",
       "source_system": "electronet",
       "template_id": "forita",
       "authored_template_id": "forita_electronet_labels_v1",
@@ -8423,6 +8475,7 @@
       "parent_category": "ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
       "leaf_category": "Κλιματιστικά",
       "sub_category": "Φορητά",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Φορητά",
       "cta_url": "https://www.etranoulis.gr/klimatismos-thermansi/klimatistika/forita",
       "template_status": "active",
@@ -8719,7 +8772,7 @@
       ]
     },
     {
-      "schema_id": "sha1:299a5c790b776a96a1df402daeffc1b9ef45c123",
+      "schema_id": "sha1:3943ddd78c2ad76147c2cbc60c024abc21466273",
       "source_system": "electronet",
       "template_id": "axesoyar_oikiakon_syskeyon",
       "authored_template_id": "axesoyar_oikiakon_syskeyon_electronet_labels_v1",
@@ -8728,6 +8781,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Αξεσουάρ Οικιακών Συσκευών",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αξεσουάρ Οικιακών Συσκευών",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/aksesouar-oikiakwn-syskeuwn",
       "template_status": "active",
@@ -8821,7 +8875,7 @@
       ]
     },
     {
-      "schema_id": "sha1:0afca19ffd5ea62d89eedacca3c889e8d0e67b37",
+      "schema_id": "sha1:3cdbbef148abc8b523bec832dfd18263ece0e9c0",
       "source_system": "electronet",
       "template_id": "aporrofitires",
       "authored_template_id": "aporrofitires_electronet_labels_v1",
@@ -8830,6 +8884,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Απορροφητήρες",
       "sub_category": null,
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Απορροφητήρες",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/aporrofhthres",
       "template_status": "active",
@@ -8983,8 +9038,8 @@
             "Τρόπος Τοποθέτησης",
             "Χειρισμός",
             "Αριθμός Μοτέρ",
-            "Μέγιστη Απόδοση Εξαγωγής Αέρα (m3/h",
-            "Μέγιστη Απόδοση Επανακυκλοφορίας Αέρα (m3/h",
+            "Μέγιστη Απόδοση Εξαγωγής Αέρα (m3/h)",
+            "Μέγιστη Απόδοση Επανακυκλοφορίας Αέρα (m3/h)",
             "Ταχύτητες Απορρόφησης",
             "Τύπος Φίλτρου",
             "Αριθμός Φίλτρων",
@@ -8993,9 +9048,9 @@
             "Διάμετρος Σωλήνα",
             "Συνδεσιμότητα",
             "Άλλα Χαρακτηριστικά",
-            "Συνολική Ισχύς (Watt",
-            "Ισχύς Μοτέρ (Watt",
-            "Ισχύς Φωτισμού (Watt"
+            "Συνολική Ισχύς (Watt)",
+            "Ισχύς Μοτέρ (Watt)",
+            "Ισχύς Φωτισμού (Watt)"
           ]
         },
         {
@@ -9013,7 +9068,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -9028,7 +9083,7 @@
       ]
     },
     {
-      "schema_id": "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82",
+      "schema_id": "sha1:a87d9b150ccedc34b311b9395f27519f35c567b6",
       "source_system": "electronet",
       "template_id": "esties",
       "authored_template_id": "esties_electronet_labels_v1",
@@ -9037,6 +9092,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Εντοιχιζόμενες Συσκευές",
       "sub_category": "Εστίες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εστίες",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/esties",
       "template_status": "active",
@@ -9222,12 +9278,12 @@
         {
           "title": "Απόδοση",
           "labels": [
-            "Ισχύς Εστίας Μπροστά Αριστερά (KW",
-            "Ισχύς Εστίας Πίσω Αριστερά (KW",
-            "Ισχύς Εστίας Πίσω Δεξιά (KW",
-            "Ισχύς Εστίας Μπροστά Δεξιά (KW",
-            "Μέγιστη Ονομαστική Ισχύς (W",
-            "Μέγιστη Ονομαστική Ισχύς Αερίου (ΚW"
+            "Ισχύς Εστίας Μπροστά Αριστερά (KW)",
+            "Ισχύς Εστίας Πίσω Αριστερά (KW)",
+            "Ισχύς Εστίας Πίσω Δεξιά (KW)",
+            "Ισχύς Εστίας Μπροστά Δεξιά (KW)",
+            "Μέγιστη Ονομαστική Ισχύς (W)",
+            "Μέγιστη Ονομαστική Ισχύς Αερίου (ΚW)"
           ]
         },
         {
@@ -9262,7 +9318,7 @@
       ]
     },
     {
-      "schema_id": "sha1:69cddb69ff2da7918e2607a809c6e9e098d0e632",
+      "schema_id": "sha1:a26f3e823ea6afa6e02ee5453f9c2f03c020c581",
       "source_system": "electronet",
       "template_id": "entoixizomenoi_katapsyktes",
       "authored_template_id": "entoixizomenoi_katapsyktes_electronet_labels_v1",
@@ -9271,6 +9327,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Εντοιχιζόμενες Συσκευές",
       "sub_category": "Καταψύκτες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εντοιχιζόμενοι Καταψύκτες",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-katapsyktes",
       "template_status": "active",
@@ -9450,14 +9507,14 @@
             "Δυνατότητα Κλειδώματος",
             "Έξοδος Νερού σε Περίπτωση Απόψυξης",
             "Δυνατότητα Αλλαγής Φοράς Πόρτας",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
           ]
         },
         {
           "title": "Κατάψυξη",
           "labels": [
-            "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά",
-            "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες",
+            "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά )",
+            "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες)",
             "Καλάθια Αποθήκευσης",
             "Αριθμός Συρταριών",
             "Αριθμός Ραφιών",
@@ -9497,7 +9554,7 @@
       ]
     },
     {
-      "schema_id": "sha1:79a77e924228283019b52fbcbe179f0dc7e79ce1",
+      "schema_id": "sha1:751f5fd45736db6e5c78a618e736c93a96645813",
       "source_system": "electronet",
       "template_id": "entoixizomena_mikrokymaton",
       "authored_template_id": "entoixizomena_mikrokymaton_electronet_labels_v1",
@@ -9506,6 +9563,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Εντοιχιζόμενες Συσκευές",
       "sub_category": "Μικροκυμάτων",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εντοιχιζόμενα Μικροκυμάτων",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/mikrokymatwn",
       "template_status": "active",
@@ -9668,12 +9726,12 @@
           "labels": [
             "Τρόπος Τοποθέτησης",
             "Χωρητικότητα Φούρνου σε Λίτρα",
-            "Ισχύς Μικροκυμάτων (Watt",
+            "Ισχύς Μικροκυμάτων (Watt)",
             "Επίπεδα Ισχύος Μικροκυμάτων",
-            "Ισχύς Grill (Watt",
+            "Ισχύς Grill (Watt)",
             "Χειριστήριο",
             "Οθόνη Ενδείξεων",
-            "Περιστρεφόμενος Δίσκος",
+            "Περιστρεφόμενος Δίσκος;",
             "Διάμετρος Περιστρεφόμενου Δίσκου σε mm",
             "Άνοιγμα Πόρτας με",
             "Κλείδωμα Ασφαλείας για Παιδιά",
@@ -9707,7 +9765,7 @@
             "Χρώμα",
             "Χρώμα Φούρνου Εσωτερικά",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -9721,7 +9779,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a2c2142a1a9746a7d1a91b0de5c3786195f37a5f",
+      "schema_id": "sha1:7a7ac48d6ecb591fc9ded17f8262dceb001cb128",
       "source_system": "electronet",
       "template_id": "entoixizomena_plyntiria_piaton",
       "authored_template_id": "entoixizomena_plyntiria_piaton_electronet_labels_v1",
@@ -9730,6 +9788,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Εντοιχιζόμενες Συσκευές",
       "sub_category": "Πλυντήρια Πιάτων",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εντοιχιζόμενα Πλυντήρια Πιάτων",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-plynthria-piatwn",
       "template_status": "active",
@@ -9921,20 +9980,20 @@
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
           ]
         }
       ],
       "sentinel": {
         "last_section": "Γενικά χαρακτηριστικά",
-        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
       },
       "source_files": [
         "entoixizomena_plyntiria_piaton.json"
       ]
     },
     {
-      "schema_id": "sha1:f01f90ea7ede91062cf9431f54a3cea83c040481",
+      "schema_id": "sha1:f9736fc21b622377932b47f13cccca0541776129",
       "source_system": "electronet",
       "template_id": "entoixizomena_plyntiria_royxon",
       "authored_template_id": "entoixizomena_plyntiria_royxon_electronet_labels_v1",
@@ -9943,6 +10002,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Εντοιχιζόμενες Συσκευές",
       "sub_category": "Πλυντήρια Ρούχων",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εντοιχιζόμενα Πλυντήρια Ρούχων",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/en-plynthria-rouxwn",
       "template_status": "active",
@@ -10141,10 +10201,10 @@
             "Αναγνώριση Αφρού",
             "Μείωση Κραδασμών",
             "Διπλή Παροχή Νερού",
-            "Τύπος Κινητήτηρα(μοτέρ",
+            "Τύπος Κινητήτηρα(μοτέρ)",
             "Συνδεσιμότητα",
             "Άλλα Χαρακτηριστικά",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
           ]
         },
         {
@@ -10196,7 +10256,7 @@
       ]
     },
     {
-      "schema_id": "sha1:4e141321f61efc85ad7269f80954b0eac2a24c47",
+      "schema_id": "sha1:d2700cb0f29970e0eea8bb420915f1c1911a3a71",
       "source_system": "electronet",
       "template_id": "set_foyrnoi_kai_esties",
       "authored_template_id": "set_foyrnoi_kai_esties_electronet_labels_v1",
@@ -10205,6 +10265,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Εντοιχιζόμενες Συσκευές",
       "sub_category": "Σετ Φούρνοι και Εστίες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σετ Φούρνοι και Εστίες",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/Set-fournoi-esties",
       "template_status": "active",
@@ -10436,7 +10497,7 @@
           "title": "Γενικά Χαρακτηριστικά Φούρνου",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
           ]
         },
         {
@@ -10450,7 +10511,7 @@
             "Χρονοδιακόπτης",
             "Αυτόματη Αναγνώρηση Σκευών",
             "Αυτόματη Απενεργοποίηση Ασφαλείας",
-            "Μέγιστη Ονομαστική Ισχύς (W",
+            "Μέγιστη Ονομαστική Ισχύς (W)",
             "Χρώμα Πλαισίου",
             "Άλλα Χαρακτηριστικά"
           ]
@@ -10479,7 +10540,7 @@
       ]
     },
     {
-      "schema_id": "sha1:e7171941e40746d1e332cdc440c1df5e3b93fc98",
+      "schema_id": "sha1:a5ada7b3cbca265e72442764a28970c39d91d102",
       "source_system": "electronet",
       "template_id": "entoixizomenoi_foyrnoi",
       "authored_template_id": "entoixizomenoi_foyrnoi_electronet_labels_v1",
@@ -10488,6 +10549,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Εντοιχιζόμενες Συσκευές",
       "sub_category": "Φούρνοι",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εντοιχιζόμενοι Φούρνοι",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/fournoi",
       "template_status": "active",
@@ -10682,9 +10744,9 @@
           "title": "Ενεργειακά Χαρακτηριστικά",
           "labels": [
             "Ενεργειακή Κλάση",
-            "Κατανάλωση ενέργειας ανά κύκλο σε συμβατική λειτουργία (kWh/cycle",
-            "Κατανάλωση ενέργειας ανά κύκλο σε λειτουργία κυκλοφορίας θερμού αέρα (kWh/cycle",
-            "Δείκτης ενεργειακής απόδοσης"
+            "Κατανάλωση ενέργειας ανά κύκλο σε συμβατική λειτουργία (kWh/cycle)",
+            "Κατανάλωση ενέργειας ανά κύκλο σε λειτουργία κυκλοφορίας θερμού αέρα (kWh/cycle)",
+            "Δείκτης ενεργειακής απόδοσης (%)"
           ]
         },
         {
@@ -10698,10 +10760,10 @@
         {
           "title": "Ηλεκτρικά Χαρακτηριστικά",
           "labels": [
-            "Συνολική Ισχύς (Watt",
-            "Ηλεκτρικό Ρεύμα (A",
-            "Τάση (V",
-            "Συχνότητα (Hz",
+            "Συνολική Ισχύς (Watt)",
+            "Ηλεκτρικό Ρεύμα (A)",
+            "Τάση (V)",
+            "Συχνότητα (Hz)",
             "Μήκος Καλωδίου Ηλεκτρικής Παροχής",
             "Τύπος Πρίζας"
           ]
@@ -10709,8 +10771,8 @@
         {
           "title": "Διαστάσεις - Βάρη",
           "labels": [
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β",
-            "Διαστάσεις Εντοιχισμού σε Εκατοστά (Υ × Π × Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β)",
+            "Διαστάσεις Εντοιχισμού σε Εκατοστά (Υ × Π × Β)",
             "Βάρος Συσκευής σε Κιλά"
           ]
         },
@@ -10732,7 +10794,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a89228304ba0f5b14b7fdb756022443eb8cded62",
+      "schema_id": "sha1:d51981dcf489c633bdda8c860e39ea9c409072ea",
       "source_system": "electronet",
       "template_id": "entoixizomena_psygeia",
       "authored_template_id": "entoixizomena_psygeia_electronet_labels_v1",
@@ -10741,6 +10803,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Εντοιχιζόμενες Συσκευές",
       "sub_category": "Ψυγεία",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εντοιχιζόμενα Ψυγεία",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/entoixizomenes-syskeues/ent-psygeia",
       "template_status": "active",
@@ -11058,7 +11121,7 @@
       ]
     },
     {
-      "schema_id": "sha1:56cfdd284d6463c550bebbbdc93bc453031abbd1",
+      "schema_id": "sha1:fcf6a1c459feb328784777c75640a01ac0799b1c",
       "source_system": "electronet",
       "template_id": "koyzines",
       "authored_template_id": "koyzines_electronet_labels_v1",
@@ -11067,6 +11130,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Κουζίνες",
       "sub_category": null,
+      "subcategory_match_policy": "leaf_family",
       "cta_map_key": "Κουζίνες",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines",
       "template_status": "active",
@@ -11273,7 +11337,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή",
             "Πλάτος Συσκευής σε Εκατοστά"
@@ -11289,7 +11353,7 @@
       ]
     },
     {
-      "schema_id": "sha1:4baa5f4cef74197218aaff4b6a9533fbf9d1413a",
+      "schema_id": "sha1:203721e8b49543e31ba8b6161a5bcf3a96f9cbb1",
       "source_system": "electronet",
       "template_id": "plyntiria_piaton",
       "authored_template_id": "plyntiria_piaton_electronet_labels_v1",
@@ -11298,6 +11362,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Πλυντήρια Πιάτων",
       "sub_category": null,
+      "subcategory_match_policy": "leaf_family",
       "cta_map_key": "Πλυντήρια Πιάτων",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-piatwn",
       "template_status": "active",
@@ -11487,20 +11552,20 @@
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
           ]
         }
       ],
       "sentinel": {
         "last_section": "Γενικά χαρακτηριστικά",
-        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
       },
       "source_files": [
         "plyntiria_piaton.json"
       ]
     },
     {
-      "schema_id": "sha1:5dd5b1d1398630b950232cbf39069774fbf003cc",
+      "schema_id": "sha1:4ac3dea18da7478c5ca073e99a70b9ad95791c1c",
       "source_system": "electronet",
       "template_id": "plyntiria_rouxwn",
       "authored_template_id": "plyntiria_rouxwn_electronet_labels_v1",
@@ -11509,6 +11574,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Πλυντήρια-Στεγνωτήρια",
       "sub_category": "Πλυντήρια Ρούχων",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Πλυντήρια Ρούχων",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-rouxwn",
       "template_status": "active",
@@ -11705,10 +11771,10 @@
             "Αναγνώριση Αφρού",
             "Μείωση Κραδασμών",
             "Διπλή Παροχή Νερού",
-            "Τύπος Κινητήτηρα(μοτέρ",
+            "Τύπος Κινητήτηρα(μοτέρ)",
             "Συνδεσιμότητα",
             "Άλλα Χαρακτηριστικά",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β)"
           ]
         },
         {
@@ -11760,7 +11826,7 @@
       ]
     },
     {
-      "schema_id": "sha1:2c20efe5796bd53a1ff1c5a70225c16439398ee4",
+      "schema_id": "sha1:eef61e8b47b1641386d1fc20327ae83d6d038ec6",
       "source_system": "electronet",
       "template_id": "plyntiria_stegnwthria_2in1",
       "authored_template_id": "plyntiria_stegnwthria_2in1_electronet_labels_v1",
@@ -11769,6 +11835,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Πλυντήρια-Στεγνωτήρια",
       "sub_category": "Πλυντήρια Στεγνωτήρια 2 in1",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Πλυντήρια - Στεγνωτήρια 2 in 1",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/plynthria-stegnwthria-2-1",
       "template_status": "active",
@@ -11954,7 +12021,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -11969,7 +12036,7 @@
       ]
     },
     {
-      "schema_id": "sha1:e769d86b2b3d2f27cbcc8f05e0f98d81e916979d",
+      "schema_id": "sha1:5c5337294fb2e57bbd37e3bfe8ac9c08af0429ac",
       "source_system": "electronet",
       "template_id": "stegnotiria_rouxwn",
       "authored_template_id": "stegnotiria_rouxwn",
@@ -11978,6 +12045,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Πλυντήρια-Στεγνωτήρια",
       "sub_category": "Στεγνωτήρια Ρούχων",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Στεγνωτήρια Ρούχων",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/stegnwthria-rouxwn",
       "template_status": "active",
@@ -12174,7 +12242,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -12189,7 +12257,7 @@
       ]
     },
     {
-      "schema_id": "sha1:7a6777b4092e72e4a8dbc81d979cf24990048b47",
+      "schema_id": "sha1:240c6d5c4ddfa08b3f516133fece9b5b65b58155",
       "source_system": "electronet",
       "template_id": "foyrnoi_mikrokymaton",
       "authored_template_id": "foyrnoi_mikrokymaton_electronet_labels_v1",
@@ -12198,6 +12266,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Φούρνοι Μικροκυμάτων",
       "sub_category": null,
+      "subcategory_match_policy": "leaf_family",
       "cta_map_key": "Φούρνοι Μικροκυμάτων",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/fournoi-mikrokymatwn",
       "template_status": "active",
@@ -12378,12 +12447,12 @@
           "labels": [
             "Τρόπος Τοποθέτησης",
             "Χωρητικότητα Φούρνου σε Λίτρα",
-            "Ισχύς Μικροκυμάτων (Watt",
+            "Ισχύς Μικροκυμάτων (Watt)",
             "Επίπεδα Ισχύος Μικροκυμάτων",
-            "Ισχύς Grill (Watt",
+            "Ισχύς Grill (Watt)",
             "Χειριστήριο",
             "Οθόνη Ενδείξεων",
-            "Περιστρεφόμενος Δίσκος",
+            "Περιστρεφόμενος Δίσκος;",
             "Διάμετρος Περιστρεφόμενου Δίσκου σε mm",
             "Άνοιγμα Πόρτας με",
             "Κλείδωμα Ασφαλείας για Παιδιά",
@@ -12426,7 +12495,7 @@
             "Χρώμα",
             "Χρώμα Φούρνου Εσωτερικά",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -12440,7 +12509,7 @@
       ]
     },
     {
-      "schema_id": "sha1:771a63f424bb546fed15d1c9b6beaec997bad407",
+      "schema_id": "sha1:ace8f4db0f16528cfdbe85873718cbad1f7f22c5",
       "source_system": "electronet",
       "template_id": "katapsyktes",
       "authored_template_id": "katapsyktes_electronet_labels_v1",
@@ -12449,6 +12518,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Ψυγεία & Καταψύκτες",
       "sub_category": "Καταψύκτες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Καταψύκτες",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/katapsyktes",
       "template_status": "active",
@@ -12633,14 +12703,14 @@
             "Δυνατότητα Κλειδώματος",
             "Έξοδος Νερού σε Περίπτωση Απόψυξης",
             "Δυνατότητα Αλλαγής Φοράς Πόρτας",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
           ]
         },
         {
           "title": "Κατάψυξη",
           "labels": [
-            "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά",
-            "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες",
+            "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά )",
+            "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες)",
             "Καλάθια Αποθήκευσης",
             "Αριθμός Συρταριών",
             "Αριθμός Ραφιών",
@@ -12657,7 +12727,7 @@
             "Κατάψυξη με Αστέρια",
             "Επίπεδο Θορύβου σε dB",
             "Κλιματική Κλάση",
-            "Κατανάλωση Ενέργειας (kWh/έτος"
+            "Κατανάλωση Ενέργειας (kWh/έτος)"
           ]
         },
         {
@@ -12681,7 +12751,7 @@
       ]
     },
     {
-      "schema_id": "sha1:27acd23e244876dd0f9eee68083304a7800e9aee",
+      "schema_id": "sha1:dd7708d26bcd85b56c7898fca74eaa511832322e",
       "source_system": "electronet",
       "template_id": "psygeia",
       "authored_template_id": "psygeia_electronet_labels_v1",
@@ -12690,6 +12760,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Ψυγεία & Καταψύκτες",
       "sub_category": "Ψυγεία",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ψυγεία",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeia",
       "template_status": "active",
@@ -12931,7 +13002,7 @@
             "Χρώμα",
             "Χρώμα Πλαϊνών",
             "Έλενχος και Ενδείξεις Θερμοκρασίας",
-            "Αριθμός Συμπιεστών (μοτέρ",
+            "Αριθμός Συμπιεστών (μοτέρ)",
             "Δύο Κυκλώματα Ψύξης",
             "Αισθητήρες Ψύξης",
             "Πολλαπλή Ροή Αέρα",
@@ -12969,8 +13040,8 @@
           "labels": [
             "Κατάψυξη με Αστέρια",
             "Καθαρή Χωρητικότητα Κατάψυξης σε Λίτρα",
-            "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά",
-            "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες",
+            "Ικανότητα Κατάψυξης σε 24 ώρες ( Κιλά )",
+            "Αυτονομία Κατάψυξης σε Περίπτωση Διακοπής Ρεύματος (ώρες)",
             "Αριθμός Συρταριών",
             "Αριθμός Ραφιών",
             "Θήκες στην Πόρτα",
@@ -12994,7 +13065,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -13008,7 +13079,7 @@
       ]
     },
     {
-      "schema_id": "sha1:6d9a259f1c321abcac7a10490c0b10c555f70fed",
+      "schema_id": "sha1:8ee808ad8e1b79759cfca134bfd54a7f61774f33",
       "source_system": "electronet",
       "template_id": "psygeiokatapsyktes",
       "authored_template_id": "psygeiokatapsyktes_electronet_labels_v1",
@@ -13017,6 +13088,7 @@
       "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
       "leaf_category": "Ψυγεία & Καταψύκτες",
       "sub_category": "Ψυγειοκαταψύκτες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ψυγειοκαταψύκτες",
       "cta_url": "https://www.etranoulis.gr/oikiakes-syskeues/psygeia-katapsyktes/psygeiokatapsyktes",
       "template_status": "active",
@@ -13334,7 +13406,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a9c9e7421a8719d56fcfe817d078a56f4e9aa2be",
+      "schema_id": "sha1:ecf3f44eaebcf89ba258818d1a880f5b0dc795a3",
       "source_system": "electronet",
       "template_id": "axesoyar_analosima_thermos",
       "authored_template_id": "axesoyar_analosima_thermos_electronet_labels_v1",
@@ -13343,6 +13415,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Καφές-Ροφήματα-Χυμοί",
       "sub_category": "Αξεσουάρ-Αναλώσιμα-Θερμός",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αξεσουάρ-Αναλώσιμα-Θερμός",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kaf-aksesouar-analwsima-thermos",
       "template_status": "active",
@@ -13434,7 +13507,7 @@
       ]
     },
     {
-      "schema_id": "sha1:3a2c8af4fd08d85e302b1500a2200f1f34483a57",
+      "schema_id": "sha1:62d97665364bdffdce2cb6b12b9fbba59984bfce",
       "source_system": "electronet",
       "template_id": "apoxymotes",
       "authored_template_id": "apoxymotes_electronet_labels_v1",
@@ -13443,6 +13516,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Καφές-Ροφήματα-Χυμοί",
       "sub_category": "Αποχυμωτές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αποχυμωτές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/apoxymwtes",
       "template_status": "active",
@@ -13606,7 +13680,7 @@
       ]
     },
     {
-      "schema_id": "sha1:c6edc11ad35beed894102a54675ee96a0ee5dacd",
+      "schema_id": "sha1:c35dc98b6c8551bb63444b31bddadf26aab71306",
       "source_system": "electronet",
       "template_id": "kafetieres_espresso",
       "authored_template_id": "kafetieres_espresso_electronet_labels_v1",
@@ -13615,6 +13689,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Καφές-Ροφήματα-Χυμοί",
       "sub_category": "Καφετιέρες Espresso",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Καφετιέρες Espresso",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kafetieres-espresso",
       "template_status": "active",
@@ -13767,7 +13842,7 @@
             "Επιλογή για 1 ή 2 Φλιτζάνια Καφέ",
             "Αποσπώμενο Φίλτρο Καφέ",
             "Ακροφύσιο Ατμού",
-            "Χωρητικότητα Δοχείου Νερού (Λίτρα",
+            "Χωρητικότητα Δοχείου Νερού (Λίτρα)",
             "Αποσπώμενο Δοχείο Νερού",
             "Αποσπώμενη Βάση Συλλογής Υγρών",
             "Μύλος Άλεσης",
@@ -13786,7 +13861,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -13801,7 +13876,7 @@
       ]
     },
     {
-      "schema_id": "sha1:5c393ed79534c4885582469115ac4c56bc30d095",
+      "schema_id": "sha1:e87f207d4ae6a90bb2e4e7a128dd4c7611a93a14",
       "source_system": "electronet",
       "template_id": "kafetieres_filtroy",
       "authored_template_id": "kafetieres_filtroy_electronet_labels_v1",
@@ -13810,6 +13885,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Καφές-Ροφήματα-Χυμοί",
       "sub_category": "Καφετιέρες Φίλτρου",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Καφετιέρες Φίλτρου",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/kafetieres-filtrou",
       "template_status": "active",
@@ -13954,7 +14030,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -13968,7 +14044,7 @@
       ]
     },
     {
-      "schema_id": "sha1:7b492728eade5d99cc37090815f1ed159cccd19a",
+      "schema_id": "sha1:7587665f28c88477b4178c334219d06c9c66e1eb",
       "source_system": "electronet",
       "template_id": "styptiria",
       "authored_template_id": "styptiria_electronet_labels_v1",
@@ -13977,6 +14053,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Καφές-Ροφήματα-Χυμοί",
       "sub_category": "Στυπτήρια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Στυπτήρια",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/stypthria",
       "template_status": "active",
@@ -14139,7 +14216,7 @@
       ]
     },
     {
-      "schema_id": "sha1:12ccc574367c4d65c77ec44cf6e7c3f41f6395ef",
+      "schema_id": "sha1:4319759389a6ea26a862818fe3711c385e3fa544",
       "source_system": "electronet",
       "template_id": "frapieres",
       "authored_template_id": "frapieres_electronet_labels_v1",
@@ -14148,6 +14225,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Καφές-Ροφήματα-Χυμοί",
       "sub_category": "Φραπιέρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Φραπιέρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/kafes-rofhmata-xhmoi/frapieres",
       "template_status": "active",
@@ -14241,7 +14319,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a51bf1f30f2acacf96bf1fd23fb64bd014c87556",
+      "schema_id": "sha1:d5f9ec76f2f60cbc501fa514b86e9e93752df630",
       "source_system": "electronet",
       "template_id": "artoparaskeyastes",
       "authored_template_id": "artoparaskeyastes_electronet_labels_v1",
@@ -14250,6 +14328,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Αρτοπαρασκευαστές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αρτοπαρασκευαστές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/artoparaskeuastes",
       "template_status": "active",
@@ -14393,7 +14472,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -14407,7 +14486,7 @@
       ]
     },
     {
-      "schema_id": "sha1:f2e4597d9f340cfade24927391f8479c04a4b640",
+      "schema_id": "sha1:532210a196c709101ef9cb4732e1129db4f11895",
       "source_system": "electronet",
       "template_id": "atmomageires",
       "authored_template_id": "atmomageires_electronet_labels_v1",
@@ -14416,6 +14495,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Ατμομάγειρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ατμομάγειρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/atmomageires",
       "template_status": "active",
@@ -14564,7 +14644,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -14578,7 +14658,7 @@
       ]
     },
     {
-      "schema_id": "sha1:5efb1eddbe6bf3a6770f831e84282f1dcaa9cf3b",
+      "schema_id": "sha1:b7eaa6b91539391fa8e9f87dc40fe5968ed97858",
       "source_system": "electronet",
       "template_id": "mikroi_mageires_esties_small",
       "authored_template_id": "mikroi_mageires_esties_small_electronet_labels_v1",
@@ -14587,6 +14667,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Εστίες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εστίες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/esties_small",
       "template_status": "active",
@@ -14679,7 +14760,7 @@
       ]
     },
     {
-      "schema_id": "sha1:fb24efeacf0495fc3359e8528122e32ba3f7ec00",
+      "schema_id": "sha1:4a792500820218e77f6e4e252c6d283374f6945a",
       "source_system": "electronet",
       "template_id": "pagotomixanes",
       "authored_template_id": "pagotomixanes_electronet_labels_v1",
@@ -14688,6 +14769,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Παγωτομηχανές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Παγωτομηχανές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/pagwtomhxanes",
       "template_status": "active",
@@ -14773,20 +14855,20 @@
             "Αποσπώμενα Μέρη που Πλένονται στο Πλυντήριο",
             "Ισχύς σε Watts",
             "Εγγύηση Κατασκευαστή",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
           ]
         }
       ],
       "sentinel": {
         "last_section": "Επισκόπηση Προϊόντος",
-        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"
+        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)"
       },
       "source_files": [
         "pagotomixanes.json"
       ]
     },
     {
-      "schema_id": "sha1:fc99c1f21e774bc516208941962c8d92d5daafb2",
+      "schema_id": "sha1:ad3a924200aea062ee6755c18d6b7ce5f467761c",
       "source_system": "electronet",
       "template_id": "paraskeyastis_pop_korn",
       "authored_template_id": "paraskeyastis_pop_korn_electronet_labels_v1",
@@ -14795,6 +14877,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Παρασκευαστής Ποπ Κορν",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Παρασκευαστής Ποπ Κορν",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/popcorn-maker",
       "template_status": "manual_only",
@@ -14843,7 +14926,7 @@
       ]
     },
     {
-      "schema_id": "sha1:dc46728b1307adc50b9cbc09b0d86a3d7e3844db",
+      "schema_id": "sha1:53ed434fafd77b1adc2c44900ed9e9b95df6a6f1",
       "source_system": "electronet",
       "template_id": "tostieres",
       "authored_template_id": "tostieres_electronet_labels_v1",
@@ -14852,6 +14935,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Τοστιέρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Τοστιέρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/tostieres",
       "template_status": "active",
@@ -15000,7 +15084,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -15015,7 +15099,7 @@
       ]
     },
     {
-      "schema_id": "sha1:1f68f069961fded3ca13ff06e940e9593497dd04",
+      "schema_id": "sha1:af57d9e20e9ecedbf9538785c7075afcba2f3bda",
       "source_system": "electronet",
       "template_id": "foyrnakia",
       "authored_template_id": "foyrnakia_electronet_labels_v1",
@@ -15024,6 +15108,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Φουρνάκια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Φουρνάκια",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fournakia",
       "template_status": "active",
@@ -15172,8 +15257,8 @@
             "Αριθμός Κρυστάλλων Πόρτας",
             "Υλικό Κατασκευής",
             "Εξαρτήματα",
-            "Συνολική Ισχύς (Watt",
-            "Ισχύς Grill (Watt"
+            "Συνολική Ισχύς (Watt)",
+            "Ισχύς Grill (Watt)"
           ]
         },
         {
@@ -15188,7 +15273,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -15202,7 +15287,7 @@
       ]
     },
     {
-      "schema_id": "sha1:d10255e41f8c0b7563a97291d0421d1e6df9146b",
+      "schema_id": "sha1:24a0f9136b5ac84ff6573c07200199c2c65e22fd",
       "source_system": "electronet",
       "template_id": "fritezes",
       "authored_template_id": "fritezes_electronet_labels_v1",
@@ -15211,6 +15296,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Φριτέζες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Φριτέζες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fritezes",
       "template_status": "active",
@@ -15348,7 +15434,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -15362,7 +15448,7 @@
       ]
     },
     {
-      "schema_id": "sha1:989e32be31833c891ab05912236e5da513439582",
+      "schema_id": "sha1:7af36f37c4b744dc9e0ec3e128d511849ec62caf",
       "source_system": "electronet",
       "template_id": "fryganieres",
       "authored_template_id": "fryganieres_electronet_labels_v1",
@@ -15371,6 +15457,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Φρυγανιέρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Φρυγανιέρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/fryganieres",
       "template_status": "active",
@@ -15515,7 +15602,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -15529,7 +15616,7 @@
       ]
     },
     {
-      "schema_id": "sha1:8ed131cab04279a8d9b0c78b5ef6f73931ef03d6",
+      "schema_id": "sha1:56876482ac780e1ff67a6b42d2d27eea76a47e45",
       "source_system": "electronet",
       "template_id": "psistieres_gkrilieres",
       "authored_template_id": "psistieres_gkrilieres_electronet_labels_v1",
@@ -15538,6 +15625,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Μικροί Μάγειρες",
       "sub_category": "Ψηστιέρες - Γκριλιέρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ψηστιέρες - Γκριλιέρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/mikroi-mageires/pshstieres-gkrilieres",
       "template_status": "active",
@@ -15671,7 +15759,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
           ]
@@ -15686,7 +15774,7 @@
       ]
     },
     {
-      "schema_id": "sha1:8a46016661a3f3c81e02bfa6e9550e9caaf47ecd",
+      "schema_id": "sha1:d6a32a87c3285c6b3516d2960c38dd28a4b8837d",
       "source_system": "electronet",
       "template_id": "isiotika_mallion",
       "authored_template_id": "isiotika_mallion",
@@ -15695,6 +15783,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Προσωπική Φροντίδα",
       "sub_category": "Βούρτσες-Ψαλίδια-ισιωτικά",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Βούρτσες-Ψαλίδια-ισιωτικά",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/vourtses-psalidia",
       "template_status": "active",
@@ -15849,7 +15938,7 @@
       ]
     },
     {
-      "schema_id": "sha1:d8a26f54f96aa5e4dffe693072345fc522d6d013",
+      "schema_id": "sha1:339f14990568f1c284d619e1810f9ed82c44d749",
       "source_system": "electronet",
       "template_id": "voyrtses_psalidia_isiotika",
       "authored_template_id": "voyrtses_psalidia_isiotika",
@@ -15858,6 +15947,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Προσωπική Φροντίδα",
       "sub_category": "Βούρτσες-Ψαλίδια-ισιωτικά",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Βούρτσες-Ψαλίδια-ισιωτικά",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/vourtses-psalidia",
       "template_status": "active",
@@ -16000,7 +16090,7 @@
       ]
     },
     {
-      "schema_id": "sha1:7c5d2a32496a5241e0872fbc57a52ce80f405f51",
+      "schema_id": "sha1:acfafd59ac83de90f004b30614147777b645c624",
       "source_system": "electronet",
       "template_id": "zygaries_somatos",
       "authored_template_id": "zygaries_somatos_electronet_labels_v1",
@@ -16009,6 +16099,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Προσωπική Φροντίδα",
       "sub_category": "Ζυγαρίες Σώματος",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ζυγαρίες Σώματος",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/zygaries-swmatos",
       "template_status": "active",
@@ -16149,7 +16240,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -16163,7 +16254,7 @@
       ]
     },
     {
-      "schema_id": "sha1:be0282a97ba6dbcc40ebdac9ac5969eefa04d34f",
+      "schema_id": "sha1:256e09f4cdc8776927d5ca71228f822283a1466b",
       "source_system": "electronet",
       "template_id": "koyreytikes_mixanes",
       "authored_template_id": "koyreytikes_mixanes",
@@ -16172,6 +16263,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Προσωπική Φροντίδα",
       "sub_category": "Κουρευτικές Μηχανές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Κουρευτικές Μηχανές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/koureutikes-mhxanes",
       "template_status": "active",
@@ -16315,7 +16407,7 @@
       ]
     },
     {
-      "schema_id": "sha1:68bedf79b52e81d4ef74359fdd51ff9fbd12c831",
+      "schema_id": "sha1:c85519ef3a1ce53554584873581faf76f36e2c7f",
       "source_system": "electronet",
       "template_id": "xyristikes_mixanes",
       "authored_template_id": "xyristikes_mixanes",
@@ -16324,6 +16416,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Προσωπική Φροντίδα",
       "sub_category": "Ξυριστικές Μηχανές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ξυριστικές Μηχανές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/ksyristikes-mhxanes",
       "template_status": "active",
@@ -16441,7 +16534,7 @@
             "Τύπος Επαναφορτιζόμενης Μπαταρίας",
             "Τάση Λειτουργίας",
             "Καθάρισμα Συσκευής",
-            "Τρίμερ Ακριβείας για Μουστάκι και Φαβορίτες",
+            "Τρίμερ Ακριβείας για Μουστάκι και Φαβορίτες.",
             "Περιλαμβάνει",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή"
@@ -16457,7 +16550,7 @@
       ]
     },
     {
-      "schema_id": "sha1:914fa7805adb25ba0ddccb4db4e8cc40203e17bd",
+      "schema_id": "sha1:41215e1d0153b952cd7243299ac72c82507ee3ba",
       "source_system": "electronet",
       "template_id": "sesoyar",
       "authored_template_id": "sesoyar",
@@ -16466,6 +16559,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Προσωπική Φροντίδα",
       "sub_category": "Σεσουάρ",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σεσουάρ",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/sesouar",
       "template_status": "active",
@@ -16621,7 +16715,7 @@
       ]
     },
     {
-      "schema_id": "sha1:1f6515328769b8a04af246887a49462f485a0c73",
+      "schema_id": "sha1:5c6509100a21cd9698504d2ba79983fc64adb619",
       "source_system": "electronet",
       "template_id": "syskeyes_apotrixosis",
       "authored_template_id": "syskeyes_apotrixosis_electronet_labels_v1",
@@ -16630,6 +16724,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Προσωπική Φροντίδα",
       "sub_category": "Συσκευές Αποτρίχωσης",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Συσκευές Αποτρίχωσης",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/syskeues-apotrixwshs",
       "template_status": "active",
@@ -16758,7 +16853,7 @@
       ]
     },
     {
-      "schema_id": "sha1:7ea393f443280b877a1be95e894e87b4af55297d",
+      "schema_id": "sha1:13e5fc0dbc8166a8b79e9c31df4cb955c43bd912",
       "source_system": "electronet",
       "template_id": "siderwma_accessories_consumables",
       "authored_template_id": "siderwma_accessories_consumables_electronet_labels_v1",
@@ -16767,6 +16862,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σιδέρωμα",
       "sub_category": "Αξεσουάρ - Αναλώσιμα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αξεσουάρ - Αναλώσιμα",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/accessories-consumables",
       "template_status": "active",
@@ -16860,7 +16956,7 @@
       ]
     },
     {
-      "schema_id": "sha1:4cd7ca0d1bf63bcb0cbc74b8614e8cfbf561e9ee",
+      "schema_id": "sha1:20386edb987a0fc1c29a8452baf9f9690fef3d48",
       "source_system": "electronet",
       "template_id": "sidera",
       "authored_template_id": "sidera_electronet_labels_v1",
@@ -16869,6 +16965,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σιδέρωμα",
       "sub_category": "Σίδερα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σίδερα",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/sidera",
       "template_status": "active",
@@ -17010,7 +17107,7 @@
             "Κάθετη Εκπομπή Ατμού",
             "Δυνατότητα Ψεκασμού",
             "Λειτουργίες Κατά της Συγκέντρωσης Αλάτων",
-            "Λειτουργία Εξοικονόμησης Ενέργειας (Eco",
+            "Λειτουργία Εξοικονόμησης Ενέργειας (Eco)",
             "Αυτόματη Απενεργοποίηση",
             "Διακοπή Σταξίματος",
             "Χωρητικότητα Δοχείου Νερού σε λίτρα",
@@ -17029,7 +17126,7 @@
       ]
     },
     {
-      "schema_id": "sha1:70907e9185e67ba9e5d709771d359197c54509df",
+      "schema_id": "sha1:bc4076831dd2a4f2195e9038b3614490e23e91b3",
       "source_system": "electronet",
       "template_id": "siderostres",
       "authored_template_id": "siderostres_electronet_labels_v1",
@@ -17038,6 +17135,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σιδέρωμα",
       "sub_category": "Σιδερώστρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σιδερώστρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/siderwstres",
       "template_status": "active",
@@ -17138,7 +17236,7 @@
             "Τύπος Σιδερώστρας",
             "Ειδική Σχάρα για",
             "Ρύθμιση Θέσεων Ύψους",
-            "Διαστάσεις Επιφάνειας Σιδερώματος σε Εκατοστά",
+            "Διαστάσεις Επιφάνειας Σιδερώματος σε Εκατοστά.",
             "Σχάρα Τοποθέτησης Ρούχων",
             "Ρύθμιση 'Υψους σε Εκατοστά από",
             "Ρύθμιση Ύψους σε Εκατοστά έως",
@@ -17161,7 +17259,7 @@
       ]
     },
     {
-      "schema_id": "sha1:f83a633c717f7d39bc719fea763a755be90f0ae4",
+      "schema_id": "sha1:01f9284883dc553d0ef4cc505111d8fab41b9cb8",
       "source_system": "electronet",
       "template_id": "systimata_sideromatos",
       "authored_template_id": "systimata_sideromatos_electronet_labels_v1",
@@ -17170,6 +17268,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σιδέρωμα",
       "sub_category": "Συστήματα Σιδερώματος",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Συστήματα Σιδερώματος",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/siderwma/systhmata-siderwmatos",
       "template_status": "active",
@@ -17347,7 +17446,7 @@
             "Κάθετη Εκπομπή Ατμού",
             "Δυνατότητα Ψεκασμού",
             "Λειτουργίες Κατά της Συγκέντρωσης Αλάτων",
-            "Λειτουργία Εξοικονόμησης Ενέργειας (Eco",
+            "Λειτουργία Εξοικονόμησης Ενέργειας (Eco)",
             "Αυτόματη Απενεργοποίηση",
             "Διακοπή Σταξίματος",
             "Χωρητικότητα Δοχείου Νερού Λίτρα",
@@ -17361,7 +17460,7 @@
             "Πίεση Ατμού",
             "Συνεχόμενη Παροχή Ατμού σε Γραμμάρια/Λεπτό",
             "Βολή Ατμού σε Γραμμάρια",
-            "Συνολική Ισχύς (Watts",
+            "Συνολική Ισχύς (Watts)",
             "Ισχύς Σίδερου Watts",
             "Ισχύς Λέβητα σε Watts"
           ]
@@ -17395,7 +17494,7 @@
       ]
     },
     {
-      "schema_id": "sha1:cb837c039f544868f3e2d7696ff2bbc76a4f6abf",
+      "schema_id": "sha1:8981f231ce2bc1ee67ca8b93b11637c6e3856cf1",
       "source_system": "electronet",
       "template_id": "gastres",
       "authored_template_id": "gastres_electronet_labels_v1",
@@ -17404,6 +17503,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκεύη Μαγειρικής",
       "sub_category": "Γάστρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Γάστρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/gastres",
       "template_status": "active",
@@ -17499,7 +17599,7 @@
           "title": "Βασικά Χαρακτηριστικά",
           "labels": [
             "Τύπος Σκεύους",
-            "Διάμετρος Σκεύους σε Εκατοστά",
+            "Διάμετρος Σκεύους σε Εκατοστά.",
             "Χωρητικότητα σε Λίτρα",
             "Υλικό Σκεύους",
             "Πηγή Θερμότητας",
@@ -17518,7 +17618,7 @@
         {
           "title": "Γενικά",
           "labels": [
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β)",
             "Βάρος Συσκευής σε Κιλά"
           ]
         }
@@ -17532,7 +17632,7 @@
       ]
     },
     {
-      "schema_id": "sha1:bedba51a652021af79d3daf464820a053d8b8ea5",
+      "schema_id": "sha1:c22d17d3d2440c7e7b009f2827927b0991143010",
       "source_system": "electronet",
       "template_id": "diafora_skeyi",
       "authored_template_id": "diafora_skeyi_electronet_labels_v1",
@@ -17541,6 +17641,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκεύη Μαγειρικής",
       "sub_category": "Διάφορα Σκεύη",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Διάφορα Σκεύη",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/diafora-skeyh",
       "template_status": "active",
@@ -17629,7 +17730,7 @@
       ]
     },
     {
-      "schema_id": "sha1:e8d74dddbc5db8f5c83796e31427d00a1c2de8f9",
+      "schema_id": "sha1:8cbccf12b4b1459f7f087e3cc5ad2dfb7c27c1ab",
       "source_system": "electronet",
       "template_id": "maxairia",
       "authored_template_id": "maxairia_electronet_labels_v1",
@@ -17638,6 +17739,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκεύη Μαγειρικής",
       "sub_category": "Μαχαίρια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Μαχαίρια",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/maxairia",
       "template_status": "active",
@@ -17731,7 +17833,7 @@
       ]
     },
     {
-      "schema_id": "sha1:797e05ba81d6746689ccfbc403602e5f142b1052",
+      "schema_id": "sha1:8c05ab94614782308988eaf5e1e8b64faf2b498a",
       "source_system": "electronet",
       "template_id": "set",
       "authored_template_id": "set_electronet_labels_v1",
@@ -17740,6 +17842,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκεύη Μαγειρικής",
       "sub_category": "Σετ",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σετ",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/set-utensils",
       "template_status": "manual_only",
@@ -17788,7 +17891,7 @@
       ]
     },
     {
-      "schema_id": "sha1:c7eeb056482b79df83a897552de3cf7ddcc089db",
+      "schema_id": "sha1:99dc655bfed67a3d6edb737fec1c18b2ff0a00a4",
       "source_system": "electronet",
       "template_id": "tapsia",
       "authored_template_id": "tapsia_electronet_labels_v1",
@@ -17797,6 +17900,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκεύη Μαγειρικής",
       "sub_category": "Ταψιά",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ταψιά",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/tapsia",
       "template_status": "active",
@@ -17895,7 +17999,7 @@
       ]
     },
     {
-      "schema_id": "sha1:68bf20e37e7e47b1794b86cfb2cc73509ee4b033",
+      "schema_id": "sha1:c8f5938ea08caf7a43e24a13dc6691c19f074982",
       "source_system": "electronet",
       "template_id": "tigania",
       "authored_template_id": "tigania_electronet_labels_v1",
@@ -17904,6 +18008,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκεύη Μαγειρικής",
       "sub_category": "Τηγάνια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Τηγάνια",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/thgania",
       "template_status": "active",
@@ -17991,8 +18096,8 @@
           "title": "Επισκόπηση Προϊόντος",
           "labels": [
             "Τύπος Σκεύους",
-            "Διάμετρος Σκεύους σε Εκατοστά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διάμετρος Σκεύους σε Εκατοστά.",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Χωρητικότητα σε Λίτρα",
             "Πηγή Θερμότητας",
             "Υλικό Σκεύους",
@@ -18013,7 +18118,7 @@
       ]
     },
     {
-      "schema_id": "sha1:b542e682075de64d8b91a4ef64c38e04edb061e6",
+      "schema_id": "sha1:4b7ce772049b2fbcdad95025ecca39bb11afe344",
       "source_system": "electronet",
       "template_id": "xytres",
       "authored_template_id": "xytres_electronet_labels_v1",
@@ -18022,6 +18127,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκεύη Μαγειρικής",
       "sub_category": "Χύτρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Χύτρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/xytres",
       "template_status": "active",
@@ -18129,7 +18235,7 @@
           "title": "Βασικά Χαρακτηριστικά",
           "labels": [
             "Τύπος Σκεύους",
-            "Διάμετρος Σκεύους σε Εκατοστά",
+            "Διάμετρος Σκεύους σε Εκατοστά.",
             "Χωρητικότητα σε Λίτρα",
             "Υλικό Σκεύους",
             "Εσωτερική Επίστρωση",
@@ -18165,7 +18271,7 @@
       ]
     },
     {
-      "schema_id": "sha1:f103dfff84886632a819ab4b17b48f9a89cf9575",
+      "schema_id": "sha1:51be0639d845ef98e745c5fa3cc0d82a62cf6ccd",
       "source_system": "electronet",
       "template_id": "xytres_taxytitas",
       "authored_template_id": "xytres_taxytitas_electronet_labels_v1",
@@ -18174,6 +18280,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκεύη Μαγειρικής",
       "sub_category": "Χύτρες Ταχύτητας",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Χύτρες Ταχύτητας",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skeuh-mageirikhs/xytres-taxythtas",
       "template_status": "active",
@@ -18283,7 +18390,7 @@
           "title": "Επισκόπηση Προϊόντος",
           "labels": [
             "Χωρητικότητα σε Λίτρα",
-            "Διάμετρος Σκεύους σε Εκατοστά",
+            "Διάμετρος Σκεύους σε Εκατοστά.",
             "Υλικό Σκεύους",
             "Πηγή Θερμότητας",
             "Εσωτερική Επίστρωση",
@@ -18315,7 +18422,7 @@
       ]
     },
     {
-      "schema_id": "sha1:caaede637001f2316ade6c0f4502cc7d8c344b2e",
+      "schema_id": "sha1:4cf990f5a7eddde15b029ef5eecfcfe3efed2595",
       "source_system": "electronet",
       "template_id": "axesoyar_analosima",
       "authored_template_id": "axesoyar_analosima_electronet_labels_v1",
@@ -18324,6 +18431,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκούπισμα",
       "sub_category": "Αξεσουάρ-Αναλώσιμα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αξεσουάρ-Αναλώσιμα",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/aksesouar-analwsima",
       "template_status": "active",
@@ -18405,7 +18513,7 @@
       ]
     },
     {
-      "schema_id": "sha1:bdc8c08eec39d21a028f7ee939931aefa032517b",
+      "schema_id": "sha1:91354c36af1b8495313bebda0e0562ff16af02ed",
       "source_system": "electronet",
       "template_id": "atmokatharistes",
       "authored_template_id": "atmokatharistes_electronet_labels_v1",
@@ -18414,6 +18522,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκούπισμα",
       "sub_category": "Ατμοκαθαριστές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ατμοκαθαριστές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/atmokathharistes",
       "template_status": "active",
@@ -18492,7 +18601,7 @@
       ]
     },
     {
-      "schema_id": "sha1:41d4e1d08e82978687d40db7acfe37ec3bcc5fab",
+      "schema_id": "sha1:369b2cd0ca85d8707fc8a7e2feeebbe46c95a769",
       "source_system": "electronet",
       "template_id": "skoypakia",
       "authored_template_id": "skoypakia_electronet_labels_v1",
@@ -18501,6 +18610,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκούπισμα",
       "sub_category": "Σκουπάκια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σκουπάκια",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupakia",
       "template_status": "active",
@@ -18602,7 +18712,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -18616,7 +18726,7 @@
       ]
     },
     {
-      "schema_id": "sha1:e860a525b12059deb9e0d73c25c597ba3a006dcd",
+      "schema_id": "sha1:2f5bcea02e4b43c0a7c357fc869f3bdbcb76e038",
       "source_system": "electronet",
       "template_id": "skoypes",
       "authored_template_id": "skoypes_electronet_labels_v1",
@@ -18625,6 +18735,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκούπισμα",
       "sub_category": "Σκούπες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σκούπες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes",
       "template_status": "active",
@@ -18745,7 +18856,7 @@
             "Δυνατότητα Σακούλας",
             "Χρώμα",
             "Εγγύηση Κατασκευαστή",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ × Π × Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ × Π × Β)",
             "Βάρος Συσκευής σε Κιλά"
           ]
         }
@@ -18759,7 +18870,7 @@
       ]
     },
     {
-      "schema_id": "sha1:1fc367dfe6d6709d07db984b649ee44cc75b8f19",
+      "schema_id": "sha1:28f75505315dc5d9162d609aabb6cd5aac1979d9",
       "source_system": "electronet",
       "template_id": "skoypes_stick",
       "authored_template_id": "skoypes_stick_electronet_labels_v1",
@@ -18768,6 +18879,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκούπισμα",
       "sub_category": "Σκούπες Stick",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σκούπες Stick",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-stick",
       "template_status": "active",
@@ -18870,7 +18982,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -18884,7 +18996,7 @@
       ]
     },
     {
-      "schema_id": "sha1:f8946b92f12cb64ac319de114c2e5c850d916b79",
+      "schema_id": "sha1:b5330ef8dbe54c09f8086a34012bb1f41f30cda5",
       "source_system": "electronet",
       "template_id": "skoypes_rompot",
       "authored_template_id": "skoypes_rompot_electronet_labels_v1",
@@ -18893,6 +19005,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Σκούπισμα",
       "sub_category": "Σκούπες Ρομπότ",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σκούπες Ρομπότ",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/skoupisma/skoupes-robot",
       "template_status": "active",
@@ -18959,9 +19072,9 @@
         {
           "title": "Επισκόπηση προϊόντος",
           "labels": [
-            "Ισχύς (Pa",
+            "Ισχύς (Pa)",
             "Χρόνος φόρτισης μπαταρίας σε min",
-            "Χώρος Κάλυψης (m2",
+            "Χώρος Κάλυψης (m2)",
             "Χωρητικότητα σε λίτρα",
             "Τύπος δαπέδου",
             "Σφουγγάρισμα"
@@ -18977,7 +19090,7 @@
       ]
     },
     {
-      "schema_id": "sha1:2eedb0213b528ef32b7a917fdc436b1a9d19f763",
+      "schema_id": "sha1:112322d3064bcb22f36cfb6abd69f05a46ebf1c6",
       "source_system": "electronet",
       "template_id": "vrastires",
       "authored_template_id": "vrastires_electronet_labels_v1",
@@ -18986,6 +19099,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Βραστήρες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Βραστήρες",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/vrasthres",
       "template_status": "active",
@@ -19140,7 +19254,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -19154,7 +19268,7 @@
       ]
     },
     {
-      "schema_id": "sha1:d9dea745de8a37a14d73593871aba2a0d66e9cb9",
+      "schema_id": "sha1:fb1131d25741c0b005d22638cef2490d46c596c6",
       "source_system": "electronet",
       "template_id": "diafores_syskeyes",
       "authored_template_id": "diafores_syskeyes_electronet_labels_v1",
@@ -19163,6 +19277,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Διάφορες Συσκευές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Διάφορες Συσκευές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/diafores-syskeyes",
       "template_status": "active",
@@ -19248,7 +19363,7 @@
       ]
     },
     {
-      "schema_id": "sha1:b82bdc75c8785ba0f2e4456f2c0b111a6ce42099",
+      "schema_id": "sha1:3c0d0239a25f3f4b6027f1cf0ed25aa94698128f",
       "source_system": "electronet",
       "template_id": "zygaries_koyzinas",
       "authored_template_id": "zygaries_koyzinas_electronet_labels_v1",
@@ -19257,6 +19372,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Ζυγαριές Κουζίνας",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ζυγαριές Κουζίνας",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/zygaries-kouzinas",
       "template_status": "active",
@@ -19363,7 +19479,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -19377,7 +19493,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a567e471ff29cfcfaa60abc31d6a1ef8dba7f3cc",
+      "schema_id": "sha1:a66ad6af94a8f921b4ccfd61932b867e591d3a51",
       "source_system": "electronet",
       "template_id": "ilektrika_mprikia",
       "authored_template_id": "ilektrika_mprikia_electronet_labels_v1",
@@ -19386,6 +19502,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Ηλεκτρικά μπρίκια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ηλεκτρικά μπρίκια",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/brikia",
       "template_status": "active",
@@ -19483,7 +19600,7 @@
             "Τύπος Καφετιέρας",
             "Ισχύς σε Watts",
             "Χωρητικότητα σε Φλυτζάνια",
-            "Χωρητικότητα (ml",
+            "Χωρητικότητα (ml)",
             "Χρώμα"
           ]
         },
@@ -19500,7 +19617,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Εγγύηση Κατασκευαστή",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ × Π × Β)",
             "Βάρος Συσκευής σε Κιλά"
           ]
         }
@@ -19514,7 +19631,7 @@
       ]
     },
     {
-      "schema_id": "sha1:cd9ee57d9fa534540b89587b8b4f0384fb81bbf6",
+      "schema_id": "sha1:21900cbbba2af09c6714477724de6314abb43c23",
       "source_system": "electronet",
       "template_id": "ravdomplenter",
       "authored_template_id": "ravdomplenter_electronet_labels_v1",
@@ -19523,6 +19640,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Κοπτήρια-Ράβδοι",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ραβδομπλεντερ",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kopthria-ravdoi",
       "template_status": "active",
@@ -19645,7 +19763,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -19659,7 +19777,7 @@
       ]
     },
     {
-      "schema_id": "sha1:ab7f7f01069363c6c1087cd543c721dca45f5dcf",
+      "schema_id": "sha1:05bbda279bd88e0c6fb0fbe08fef6e7b6ea9d464",
       "source_system": "electronet",
       "template_id": "koyzinomixanes",
       "authored_template_id": "koyzinomixanes_electronet_labels_v1",
@@ -19668,6 +19786,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Κουζινομηχανές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Κουζινομηχανές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kouzinomhxanes",
       "template_status": "active",
@@ -19841,7 +19960,7 @@
       ]
     },
     {
-      "schema_id": "sha1:57b40ef0e66f093bce485e9b538c060b2fa70b0e",
+      "schema_id": "sha1:d36146d07a6c7b70b6bdc56441946ad8beb77841",
       "source_system": "electronet",
       "template_id": "kreatomixnes",
       "authored_template_id": "kreatomixnes_electronet_labels_v1",
@@ -19850,6 +19969,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Κρεατομηχανές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Κρεατομηχνές",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kreatomhxanes",
       "template_status": "active",
@@ -19948,7 +20068,7 @@
       ]
     },
     {
-      "schema_id": "sha1:b86315dad620d37ebb3f1de79973db72d907bcd4",
+      "schema_id": "sha1:4d7c8db5a60a03619db76b99204074d8225f0f5c",
       "source_system": "electronet",
       "template_id": "mixer",
       "authored_template_id": "mixer_electronet_labels_v1",
@@ -19957,6 +20077,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Μίξερ",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Μίξερ",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/mixer",
       "template_status": "active",
@@ -20064,20 +20185,20 @@
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
             "Εγγύηση Κατασκευαστή",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β"
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)"
           ]
         }
       ],
       "sentinel": {
         "last_section": "Γενικά Χαρακτηριστικά",
-        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β"
+        "last_label": "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)"
       },
       "source_files": [
         "mixer.json"
       ]
     },
     {
-      "schema_id": "sha1:f2704dfe227e48220c6b26f6a6393efb70f2a3ae",
+      "schema_id": "sha1:66a574291fd6089b796cf029fb5bbe746c089a1d",
       "source_system": "electronet",
       "template_id": "mplenter",
       "authored_template_id": "mplenter_electronet_labels_v1",
@@ -20086,6 +20207,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Μπλέντερ",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Μπλέντερ",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/blender",
       "template_status": "active",
@@ -20198,7 +20320,7 @@
           "labels": [
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά. (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -20212,7 +20334,7 @@
       ]
     },
     {
-      "schema_id": "sha1:b2283f49f4bcd9ca0aab5307232db4c90aa16b6c",
+      "schema_id": "sha1:024ec5e44a0fbead69fff620a4b5bff54a2a94b1",
       "source_system": "electronet",
       "template_id": "polymixer",
       "authored_template_id": "polymixer_electronet_labels_v1",
@@ -20221,6 +20343,7 @@
       "parent_category": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
       "leaf_category": "Συσκευές Κουζίνας",
       "sub_category": "Πολυμίξερ",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Πολυμίξερ",
       "cta_url": "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/multimixer",
       "template_status": "active",
@@ -20394,7 +20517,7 @@
       ]
     },
     {
-      "schema_id": "sha1:4adc55c46699eed4f655b08ecaa50f97ff2b06c1",
+      "schema_id": "sha1:a2b96d59407c538d7587a7242d83e5b2f050108a",
       "source_system": "electronet",
       "template_id": "kartes_mnimis",
       "authored_template_id": "kartes_mnimis_electronet_labels_v1",
@@ -20403,6 +20526,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Αποθηκευτικά Μέσα",
       "sub_category": "Κάρτες μνήμης",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Κάρτες μνήμης",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/apothikeutika-mesa/kartes-mnhmhs",
       "template_status": "active",
@@ -20469,7 +20593,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χωρητικότητα",
-            "Αποθηκευτικό Μέσο ( Κάρτα Μνήμης",
+            "Αποθηκευτικό Μέσο ( Κάρτα Μνήμης )",
             "Ταχύτα Εγγραφής MB/s",
             "Ταχύτητα Αναπαραγωγής MB/s",
             "SD Adapter",
@@ -20486,7 +20610,7 @@
       ]
     },
     {
-      "schema_id": "sha1:ce85b8f826d5442106d4e9297de7d31f35139430",
+      "schema_id": "sha1:8ffcffc21c6d0ce6a34778a4a95cb1c0ff79ade3",
       "source_system": "electronet",
       "template_id": "skliroi_diskoi",
       "authored_template_id": "skliroi_diskoi_electronet_labels_v1",
@@ -20495,6 +20619,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Αποθηκευτικά Μέσα",
       "sub_category": "Σκληροί δίσκοι",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Σκληροί δίσκοι",
       "cta_url": "https://www.etranoulis.gr/index.php?route=product/category&path=139_143_156",
       "template_status": "active",
@@ -20588,7 +20713,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a908908d049efeb54a1662b45602641e6048a9a1",
+      "schema_id": "sha1:69436b9e8bb04b54825d27790be665552aac84b5",
       "source_system": "electronet",
       "template_id": "ektypotes",
       "authored_template_id": "ektypotes_electronet_labels_v1",
@@ -20597,6 +20722,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Εκτυπωτές & Αναλώσιμα",
       "sub_category": "Εκτυπωτές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Εκτυπωτές",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/ektypwtws",
       "template_status": "active",
@@ -20732,7 +20858,7 @@
       ]
     },
     {
-      "schema_id": "sha1:c826ff14544d6f1f063407f9ecaebed9e44e56bb",
+      "schema_id": "sha1:0807099b65b11c8ae4f3641eb098c15feb7292e2",
       "source_system": "electronet",
       "template_id": "melania",
       "authored_template_id": "melania_electronet_labels_v1",
@@ -20741,6 +20867,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Εκτυπωτές & Αναλώσιμα",
       "sub_category": "Μελάνια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Μελάνια",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/melania",
       "template_status": "active",
@@ -20827,7 +20954,7 @@
       ]
     },
     {
-      "schema_id": "sha1:400ab1b6c2823bf33d6aa53e7cfcd605bc872330",
+      "schema_id": "sha1:d44c414097a28eacc1736b2639e6eda325d4557f",
       "source_system": "electronet",
       "template_id": "polymixanimata",
       "authored_template_id": "polymixanimata_electronet_labels_v1",
@@ -20836,6 +20963,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Εκτυπωτές & Αναλώσιμα",
       "sub_category": "Πολυμηχανήματα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Πολυμηχανήματα",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/ektypwtes-analwsima/polymhxanhmata",
       "template_status": "active",
@@ -20971,7 +21099,7 @@
       ]
     },
     {
-      "schema_id": "sha1:8b2edb87de7956e1895618e32968ea0d984a805e",
+      "schema_id": "sha1:ffb6d538aa790b61f807dd901614325bf1dd15e6",
       "source_system": "electronet",
       "template_id": "akoystika",
       "authored_template_id": "akoystika_electronet_labels_v1",
@@ -20980,6 +21108,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Περιφερειακά",
       "sub_category": "Ακουστικά",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ακουστικά",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/akoustika",
       "template_status": "active",
@@ -21080,7 +21209,7 @@
             "Ελεγχος Έντασης Ήχου",
             "Μήκος Καλωδίου σε m",
             "Εύρος Απόκρισης",
-            "Ευαισθησία(db",
+            "Ευαισθησία(db)",
             "Προτεινόμενη Χρήση",
             "Χρώμα",
             "Εγγύηση Κατασκευαστή"
@@ -21096,7 +21225,7 @@
       ]
     },
     {
-      "schema_id": "sha1:ec53b111b5ad215742172b04e55de12589cc4f64",
+      "schema_id": "sha1:2bb5136d42aa67cb9994cd62e44883d62a088786",
       "source_system": "electronet",
       "template_id": "axesoyar_perifereiakon",
       "authored_template_id": "axesoyar_perifereiakon_electronet_labels_v1",
@@ -21105,6 +21234,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Περιφερειακά",
       "sub_category": "Αξεσουάρ Περιφερειακών",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Αξεσουάρ Περιφερειακών",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/axesoyar",
       "template_status": "active",
@@ -21195,7 +21325,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Ανάλυση Βίντεο",
-            "Καρέ ανά δευτερόλεπτο (fps",
+            "Καρέ ανά δευτερόλεπτο (fps)",
             "Μικρόφωνο",
             "Συνδεση",
             "Autofocus",
@@ -21218,7 +21348,7 @@
       ]
     },
     {
-      "schema_id": "sha1:5a5d87d348d85542b43254a79c1e30f947f0a13e",
+      "schema_id": "sha1:26af6a88074bd357c0df75d5fdc4ec0165f2457e",
       "source_system": "electronet",
       "template_id": "othones",
       "authored_template_id": "othones_electronet_labels_v1",
@@ -21227,6 +21357,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Περιφερειακά",
       "sub_category": "Οθόνες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Οθόνες",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/othones",
       "template_status": "active",
@@ -21352,16 +21483,16 @@
         {
           "title": "Οθόνη",
           "labels": [
-            "Διαγώνιος Οθόνης ( Ίντσες",
+            "Διαγώνιος Οθόνης ( Ίντσες )",
             "Τεχνολογία Οθόνης",
             "Ανάλυση Οθόνης",
             "Αριθμός Pixels",
             "Χρόνος Απόκρισης",
             "Φορμά Εικόνας",
-            "Ρυθμός Ανανέωσης ( HZ",
+            "Ρυθμός Ανανέωσης ( HZ )",
             "Φωτεινότητα Εικόνας",
             "Λόγος Αντίθεσης",
-            "Γωνία Θέασης (Ορ./Κάθ",
+            "Γωνία Θέασης (Ορ./Κάθ.)",
             "Τύπος Συσκευής"
           ]
         },
@@ -21378,9 +21509,9 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Χρώμα",
-            "Διάκενο Βάσης Τοίχου Vesa (mm",
+            "Διάκενο Βάσης Τοίχου Vesa (mm)",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -21394,7 +21525,7 @@
       ]
     },
     {
-      "schema_id": "sha1:11269da9510c642383a73fed3298eae544a8b654",
+      "schema_id": "sha1:60b00745610989b2fd159c2d4513177a4102f518",
       "source_system": "electronet",
       "template_id": "pliktrologia",
       "authored_template_id": "pliktrologia_electronet_labels_v1",
@@ -21403,6 +21534,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Περιφερειακά",
       "sub_category": "Πληκτρολόγια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Πληκτρολόγια",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/plhktrologia",
       "template_status": "active",
@@ -21478,7 +21610,7 @@
       ]
     },
     {
-      "schema_id": "sha1:62b8a0d2ec9427845fa2e40966c2f6dda4220241",
+      "schema_id": "sha1:419ee2d583e6d9a63576fa6b9bd750c6fd06c8cd",
       "source_system": "electronet",
       "template_id": "pontikia",
       "authored_template_id": "pontikia_electronet_labels_v1",
@@ -21487,6 +21619,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Περιφερειακά",
       "sub_category": "Ποντίκια",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ποντίκια",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/pontikia",
       "template_status": "active",
@@ -21567,7 +21700,7 @@
       ]
     },
     {
-      "schema_id": "sha1:a8d61e803f4dfc943f8fc139d9db077a947fedb4",
+      "schema_id": "sha1:4fc0d0aec43db2663aaf02e9e0e38c06f545b884",
       "source_system": "electronet",
       "template_id": "prostateytika_reymatos",
       "authored_template_id": "prostateytika_reymatos_electronet_labels_v1",
@@ -21576,6 +21709,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Περιφερειακά",
       "sub_category": "Προστατευτικά Ρεύματος",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Προστατευτικά Ρεύματος",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/perifereiaka/prostateutika-reumatos",
       "template_status": "active",
@@ -21664,7 +21798,7 @@
       ]
     },
     {
-      "schema_id": "sha1:5a5312852ea2c18089176b5f593d336d647bfe38",
+      "schema_id": "sha1:0b8efed05136296f8774ec9aacf25916a2298093",
       "source_system": "electronet",
       "template_id": "desktops",
       "authored_template_id": "desktops_electronet_labels_v1",
@@ -21673,6 +21807,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Υπολογιστές",
       "sub_category": "Desktops",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Desktops",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/ypologistes/desktops",
       "template_status": "active",
@@ -21851,17 +21986,17 @@
             "Μάρκα Επεξεργαστή",
             "Τύπος Επεξεργαστή",
             "Μοντέλο Επεξεργαστή",
-            "Ταχύτητα Επεξεργαστή (GHz",
+            "Ταχύτητα Επεξεργαστή (GHz)",
             "Αριθμός Πυρήνων Επεξεργαστή",
-            "Μέγιστη Ταχύτητα Επεξεργαστή (GHz"
+            "Μέγιστη Ταχύτητα Επεξεργαστή (GHz)"
           ]
         },
         {
           "title": "Μνήμη",
           "labels": [
-            "Μνήμη Ram (GB",
+            "Μνήμη Ram (GB)",
             "Τύπος Μνήμης",
-            "Ταχύτητα Μνήμης (MHz"
+            "Ταχύτητα Μνήμης (MHz)"
           ]
         },
         {
@@ -21875,7 +22010,7 @@
         {
           "title": "Κάρτα Γραφικών",
           "labels": [
-            "Μνήμη Κάρτας Γραφικών(GB",
+            "Μνήμη Κάρτας Γραφικών(GB)",
             "Μοντέλο Κάρτας Γραφικών",
             "Τύπος Κάρτας Γραφικών"
           ]
@@ -21902,7 +22037,7 @@
             "Επιπλέον Εξοπλισμός",
             "Χρώμα",
             "Βάρος Συσκευής σε Κιλά",
-            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β",
+            "Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β)",
             "Εγγύηση Κατασκευαστή"
           ]
         }
@@ -21916,7 +22051,7 @@
       ]
     },
     {
-      "schema_id": "sha1:26a262d3ce3eb6dda44d98704d410362a4a526b9",
+      "schema_id": "sha1:d3c9893d514c0478fa2e4faacec5ea21badc57d0",
       "source_system": "electronet",
       "template_id": "laptops",
       "authored_template_id": "laptops_electronet_labels_v1",
@@ -21925,6 +22060,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Υπολογιστές",
       "sub_category": "Laptops",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Laptops",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/ypologistes/laptops",
       "template_status": "active",
@@ -22130,9 +22266,9 @@
         {
           "title": "Οθόνη",
           "labels": [
-            "Διαγώνιος Οθόνης ( Ίντσες",
+            "Διαγώνιος Οθόνης ( Ίντσες )",
             "Τεχνολογία Οθόνης",
-            "Διαγώνιος Οθόνης ( Εκατοστά",
+            "Διαγώνιος Οθόνης ( Εκατοστά )",
             "Ανάλυση Οθόνης",
             "Αριθμός Pixels",
             "Φορμά Εικόνας",
@@ -22145,17 +22281,17 @@
             "Μάρκα Επεξεργαστή",
             "Τύπος Επεξεργαστή",
             "Μοντέλο Επεξεργαστή",
-            "Ταχύτητα Επεξεργαστή (GHz",
-            "Μέγιστη Ταχύτητα Επεξεργαστή (GHz",
+            "Ταχύτητα Επεξεργαστή (GHz)",
+            "Μέγιστη Ταχύτητα Επεξεργαστή (GHz)",
             "Αριθμός Πυρήνων Επεξεργαστή"
           ]
         },
         {
           "title": "Μνήμη Ram",
           "labels": [
-            "Μνήμη Ram (GB",
+            "Μνήμη Ram (GB)",
             "Τύπος Μνήμης",
-            "Ταχύτητα Μνήμης (MHz"
+            "Ταχύτητα Μνήμης (MHz)"
           ]
         },
         {
@@ -22169,7 +22305,7 @@
         {
           "title": "Κάρτα Γραφικών",
           "labels": [
-            "Μνήμη Κάρτας Γραφικών(GB",
+            "Μνήμη Κάρτας Γραφικών(GB)",
             "Μοντέλο Κάρτας Γραφικών",
             "Τύπος Κάρτας Γραφικών"
           ]
@@ -22192,7 +22328,7 @@
           "labels": [
             "Χρώμα",
             "Φωτιζόμενο Πληκτρολόγιο",
-            "Ηχείο(α",
+            "Ηχείο(α)",
             "Οπτικά Μέσα",
             "Λειτουργικό",
             "Βάρος Συσκευής σε Κιλά",
@@ -22210,7 +22346,7 @@
       ]
     },
     {
-      "schema_id": "sha1:c93e9cc3b2eacb8da30d0d2fea5e3fa2e381ab1c",
+      "schema_id": "sha1:7ef4ab1f2103fc90201f85609325b9b4648d5e68",
       "source_system": "electronet",
       "template_id": "tsantes_laptop",
       "authored_template_id": "tsantes_laptop_electronet_labels_v1",
@@ -22219,6 +22355,7 @@
       "parent_category": "ΠΛΗΡΟΦΟΡΙΚΗ",
       "leaf_category": "Υπολογιστές",
       "sub_category": "Τσάντες Laptop",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Τσάντες Laptop",
       "cta_url": "https://www.etranoulis.gr/plhroforikh/ypologistes/tsantes-laptop",
       "template_status": "active",
@@ -22297,7 +22434,7 @@
       ]
     },
     {
-      "schema_id": "sha1:c525288c8ec147b5cc25fab39b18ff3e6ce416a9",
+      "schema_id": "sha1:24a5f0c936d0dde4af816b11d26cadadee1c4bbc",
       "source_system": "electronet",
       "template_id": "android",
       "authored_template_id": "android_electronet_labels_v1",
@@ -22306,6 +22443,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Smartphones",
       "sub_category": "Android",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Android",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/smartphones/android",
       "template_status": "active",
@@ -22566,7 +22704,7 @@
       ]
     },
     {
-      "schema_id": "sha1:cf8551111848e472650a0bf671fbb6a83b5cc812",
+      "schema_id": "sha1:2bed6cea2d9af7d0ceac5cb6c2932e9dad86ccc2",
       "source_system": "electronet",
       "template_id": "ios",
       "authored_template_id": "ios_electronet_labels_v1",
@@ -22575,6 +22713,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Smartphones",
       "sub_category": "iOS",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "iOS",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/smartphones/ios",
       "template_status": "active",
@@ -22835,7 +22974,7 @@
       ]
     },
     {
-      "schema_id": "sha1:03fe78ae5b526088d2ead2366b20a4cb92ed2a67",
+      "schema_id": "sha1:8a3453d3d9738783d72fc5f7acd51b8780adfcbf",
       "source_system": "electronet",
       "template_id": "tablets_tandroid",
       "authored_template_id": "tablets_tandroid_electronet_labels_v1",
@@ -22844,6 +22983,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Tablets",
       "sub_category": "Android",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Android",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/tablets/tandroid",
       "template_status": "active",
@@ -23090,7 +23230,7 @@
       ]
     },
     {
-      "schema_id": "sha1:ec4ebd8a08f0f18dc1269d4842d95bbd5297dcdf",
+      "schema_id": "sha1:68900481b8eddef33447591c25a07418f5993548",
       "source_system": "electronet",
       "template_id": "tablets_tios",
       "authored_template_id": "tablets_tios_electronet_labels_v1",
@@ -23099,6 +23239,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Tablets",
       "sub_category": "iOS",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "iOS",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/tablets/tios",
       "template_status": "active",
@@ -23344,7 +23485,7 @@
       ]
     },
     {
-      "schema_id": "sha1:73ed39cc19575097389a18a47deb94e55bdfa278",
+      "schema_id": "sha1:3f1081226c402b8d63c94f74380009e8470f6fe5",
       "source_system": "electronet",
       "template_id": "thikes",
       "authored_template_id": "thikes_electronet_labels_v1",
@@ -23353,6 +23494,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Tablets",
       "sub_category": "Θήκες",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Θήκες",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/tablets/thikes",
       "template_status": "active",
@@ -23438,7 +23580,7 @@
       ]
     },
     {
-      "schema_id": "sha1:4f4ab15c4d2d4902f817ff4909560a21ea1c0b02",
+      "schema_id": "sha1:901b3f9475af02ba5a1e34fe722cf34bc3900cf5",
       "source_system": "electronet",
       "template_id": "hands_free",
       "authored_template_id": "hands_free_electronet_labels_v1",
@@ -23447,6 +23589,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Αξεσουάρ κινητών",
       "sub_category": "Hands Free",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Hands Free",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/hands-free",
       "template_status": "active",
@@ -23530,7 +23673,7 @@
             "Ελεγχος Έντασης Ήχου",
             "Μήκος Καλωδίου σε m",
             "Εύρος Απόκρισης",
-            "Ευαισθησία(db",
+            "Ευαισθησία(db)",
             "Προτεινόμενη Χρήση",
             "Χρώμα",
             "Εγγύηση Κατασκευαστή"
@@ -23546,7 +23689,7 @@
       ]
     },
     {
-      "schema_id": "sha1:39ec2343597225020f849d0e1fe1d965916cebf3",
+      "schema_id": "sha1:1acad39f3efd1ba7f9cf39fcf777f66cb3a1ee16",
       "source_system": "electronet",
       "template_id": "power_banks",
       "authored_template_id": "power_banks_electronet_labels_v1",
@@ -23555,6 +23698,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Αξεσουάρ κινητών",
       "sub_category": "Power Bank",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Power Banks",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/power-bank",
       "template_status": "active",
@@ -23643,7 +23787,7 @@
       ]
     },
     {
-      "schema_id": "sha1:67a500e2e856178dd98f5e2a85eeb8738bf71a5f",
+      "schema_id": "sha1:9e1b06ca527495d4ebfeae0f4b535bdf9adb90c3",
       "source_system": "electronet",
       "template_id": "fortistes",
       "authored_template_id": "fortistes_electronet_labels_v1",
@@ -23652,6 +23796,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Αξεσουάρ κινητών",
       "sub_category": "Φορτιστές",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Φορτιστές",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/aksesouar-kinhtwn/fortistes",
       "template_status": "active",
@@ -23724,7 +23869,7 @@
           "title": "Γενικά Χαρακτηριστικά",
           "labels": [
             "Θύρες Εξόδου USB-C",
-            "Ένταση Ρεύματος Κύριας Θύρας (Max",
+            "Ένταση Ρεύματος Κύριας Θύρας (Max)",
             "Ισχύς Φόρτισης"
           ]
         }
@@ -23738,7 +23883,7 @@
       ]
     },
     {
-      "schema_id": "sha1:d66ede97de4ad5ca59d47e1f5eb8e72dd8c3b86d",
+      "schema_id": "sha1:96bb09d281162dd81875108868922329557b5290",
       "source_system": "electronet",
       "template_id": "asyrmata",
       "authored_template_id": "asyrmata_electronet_labels_v1",
@@ -23747,6 +23892,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Σταθέρα",
       "sub_category": "Ασύρματα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ασύρματα",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/stathera/asyrmata",
       "template_status": "active",
@@ -23876,7 +24022,7 @@
       ]
     },
     {
-      "schema_id": "sha1:c4fe60f83eafd5eab2dc4892fd0ca3a76423d5c6",
+      "schema_id": "sha1:cf24d175aadf6888de75c79f09250a4584751712",
       "source_system": "electronet",
       "template_id": "ensyrmata",
       "authored_template_id": "ensyrmata_electronet_labels_v1",
@@ -23885,6 +24031,7 @@
       "parent_category": "ΤΗΛΕΦΩΝΙΑ",
       "leaf_category": "Σταθέρα",
       "sub_category": "Ενσύρματα",
+      "subcategory_match_policy": "exact_subcategory",
       "cta_map_key": "Ενσύρματα",
       "cta_url": "https://www.etranoulis.gr/thlefwnia/stathera/ensyrmata",
       "template_status": "active",

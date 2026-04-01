@@ -8,6 +8,10 @@ from .repo_paths import SCHEMA_LIBRARY_PATH
 from .utils import read_json
 
 
+SUBCATEGORY_MATCH_POLICY_EXACT = "exact_subcategory"
+SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY = "leaf_family"
+
+
 class SchemaMatcher:
     def __init__(self, schema_path: str = str(SCHEMA_LIBRARY_PATH)) -> None:
         self.schema_path = schema_path
@@ -100,6 +104,7 @@ class SchemaMatcher:
             taxonomy_sub_category=taxonomy_sub_category,
         )
         candidate_template_ids = [str(schema.get("template_id", "")) for schema in category_pool if str(schema.get("template_id", "")).strip()]
+        pool_subcategory_match_policy = self._pool_subcategory_match_policy(category_pool)
         if not category_pool:
             return (
                 self._debug_result(
@@ -107,6 +112,7 @@ class SchemaMatcher:
                     matched_sub_category=taxonomy_sub_category,
                     score=0.0,
                     warnings=["no_safe_template_match"],
+                    subcategory_match_policy=pool_subcategory_match_policy,
                     resolved_category_path=resolved_category_path,
                     candidate_pool_size=0,
                     candidate_template_ids=[],
@@ -127,6 +133,7 @@ class SchemaMatcher:
                     matched_sub_category=taxonomy_sub_category,
                     score=0.0,
                     warnings=["no_safe_template_match"],
+                    subcategory_match_policy=pool_subcategory_match_policy,
                     resolved_category_path=resolved_category_path,
                     candidate_pool_size=len(category_pool),
                     candidate_template_ids=candidate_template_ids,
@@ -178,6 +185,7 @@ class SchemaMatcher:
                     matched_sub_category=taxonomy_sub_category,
                     score=0.0,
                     warnings=["no_safe_template_match"],
+                    subcategory_match_policy=pool_subcategory_match_policy,
                     resolved_category_path=resolved_category_path,
                     candidate_pool_size=len(category_pool),
                     candidate_template_ids=candidate_template_ids,
@@ -199,7 +207,16 @@ class SchemaMatcher:
         )
         selected = self.schemas_by_id.get(str(scored_candidates[0]["matched_schema_id"]).strip())
         if selected is None:
-            return SchemaMatchResult(None, taxonomy_sub_category, 0.0, ["no_safe_template_match"]), scored_candidates[:5]
+            return (
+                SchemaMatchResult(
+                    matched_schema_id=None,
+                    matched_sub_category=taxonomy_sub_category,
+                    score=0.0,
+                    warnings=["no_safe_template_match"],
+                    subcategory_match_policy=pool_subcategory_match_policy,
+                ),
+                scored_candidates[:5],
+            )
         return self.select_safe_template(
             selected,
             scored_candidates,
@@ -230,9 +247,13 @@ class SchemaMatcher:
                 taxonomy_sub_category,
             )
 
-        pool = list(self.schemas_by_category_path.get(normalized_taxonomy_path, [])) if normalized_taxonomy_path else []
-        if not pool and taxonomy_parent_category and taxonomy_leaf_category and taxonomy_sub_category:
-            pool = self._leaf_only_candidates(taxonomy_parent_category, taxonomy_leaf_category)
+        exact_pool = list(self.schemas_by_category_path.get(normalized_taxonomy_path, [])) if normalized_taxonomy_path else []
+        if exact_pool:
+            pool = exact_pool
+        elif taxonomy_parent_category and taxonomy_leaf_category and taxonomy_sub_category:
+            pool = self._leaf_family_fallback_candidates(taxonomy_parent_category, taxonomy_leaf_category)
+        else:
+            pool = []
 
         if not pool:
             return []
@@ -386,6 +407,9 @@ class SchemaMatcher:
                 matched_sub_category=schema.get("sub_category") or taxonomy_sub_category,
                 score=round(score, 4),
                 warnings=warnings,
+                subcategory_match_policy=self._normalized_subcategory_match_policy(
+                    schema.get("subcategory_match_policy", "")
+                ),
                 resolved_category_path=resolved_category_path,
                 candidate_pool_size=candidate_pool_size,
                 candidate_template_ids=candidate_template_ids,
@@ -431,6 +455,9 @@ class SchemaMatcher:
             "category_path": schema.get("category_path", ""),
             "template_status": schema.get("template_status", ""),
             "match_mode": schema.get("match_mode", ""),
+            "subcategory_match_policy": self._normalized_subcategory_match_policy(
+                schema.get("subcategory_match_policy", "")
+            ),
             "score": round(score, 4),
             "section_overlap": section_overlap,
             "label_overlap": label_overlap,
@@ -480,6 +507,14 @@ class SchemaMatcher:
             schema
             for schema in self.schemas_by_parent_leaf.get(parent_leaf_key, [])
             if not normalize_for_match(schema.get("sub_category", ""))
+        ]
+
+    def _leaf_family_fallback_candidates(self, parent_category: str | None, leaf_category: str | None) -> list[dict[str, Any]]:
+        return [
+            schema
+            for schema in self._leaf_only_candidates(parent_category, leaf_category)
+            if self._normalized_subcategory_match_policy(schema.get("subcategory_match_policy", ""))
+            == SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY
         ]
 
     def _normalized_source_files(self, schema: dict[str, Any]) -> set[str]:
@@ -541,6 +576,7 @@ class SchemaMatcher:
         matched_sub_category: str | None,
         score: float,
         warnings: list[str],
+        subcategory_match_policy: str,
         resolved_category_path: str,
         candidate_pool_size: int,
         candidate_template_ids: list[str],
@@ -558,6 +594,7 @@ class SchemaMatcher:
             matched_sub_category=matched_sub_category,
             score=score,
             warnings=warnings,
+            subcategory_match_policy=subcategory_match_policy,
             resolved_category_path=resolved_category_path,
             candidate_pool_size=candidate_pool_size,
             candidate_template_ids=candidate_template_ids,
@@ -577,6 +614,15 @@ class SchemaMatcher:
     def _pool_match_mode(self, category_pool: list[dict[str, Any]]) -> str:
         modes = [str(schema.get("match_mode", "")).strip() for schema in category_pool if str(schema.get("match_mode", "")).strip()]
         return modes[0] if len(set(modes)) == 1 and modes else ("mixed" if modes else "")
+
+    def _pool_subcategory_match_policy(self, category_pool: list[dict[str, Any]]) -> str:
+        policies = [
+            self._normalized_subcategory_match_policy(schema.get("subcategory_match_policy", ""))
+            for schema in category_pool
+        ]
+        if len(set(policies)) == 1 and policies:
+            return policies[0]
+        return "mixed" if policies else ""
 
     def _hard_gate_failures(self, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
         return [
@@ -613,3 +659,9 @@ class SchemaMatcher:
 
     def _normalized_template_status(self, value: Any) -> str:
         return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+
+    def _normalized_subcategory_match_policy(self, value: Any) -> str:
+        normalized = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if normalized == SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY:
+            return SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY
+        return SUBCATEGORY_MATCH_POLICY_EXACT

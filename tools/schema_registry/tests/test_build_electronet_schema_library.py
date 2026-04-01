@@ -40,42 +40,49 @@ def test_build_library_emits_category_bound_metadata_for_regression_families() -
             "parent_category": "ΕΙΚΟΝΑ & ΗΧΟΣ",
             "leaf_category": "Τηλεοράσεις",
             "sub_category": None,
+            "subcategory_match_policy": "leaf_family",
         },
         "koyzines": {
             "category_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > -",
             "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
             "leaf_category": "Κουζίνες",
             "sub_category": None,
+            "subcategory_match_policy": "leaf_family",
         },
         "plyntiria_piaton": {
             "category_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια Πιάτων > -",
             "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
             "leaf_category": "Πλυντήρια Πιάτων",
             "sub_category": None,
+            "subcategory_match_policy": "leaf_family",
         },
         "plyntiria_rouxwn": {
             "category_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Πλυντήρια-Στεγνωτήρια > Πλυντήρια Ρούχων",
             "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
             "leaf_category": "Πλυντήρια-Στεγνωτήρια",
             "sub_category": "Πλυντήρια Ρούχων",
+            "subcategory_match_policy": "exact_subcategory",
         },
         "entoixizomena_plyntiria_piaton": {
             "category_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Πλυντήρια Πιάτων",
             "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
             "leaf_category": "Εντοιχιζόμενες Συσκευές",
             "sub_category": "Πλυντήρια Πιάτων",
+            "subcategory_match_policy": "exact_subcategory",
         },
         "entoixizomena_plyntiria_royxon": {
             "category_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Πλυντήρια Ρούχων",
             "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
             "leaf_category": "Εντοιχιζόμενες Συσκευές",
             "sub_category": "Πλυντήρια Ρούχων",
+            "subcategory_match_policy": "exact_subcategory",
         },
         "entoixizomena_psygeia": {
             "category_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Ψυγεία",
             "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
             "leaf_category": "Εντοιχιζόμενες Συσκευές",
             "sub_category": "Ψυγεία",
+            "subcategory_match_policy": "exact_subcategory",
         },
     }
 
@@ -86,6 +93,7 @@ def test_build_library_emits_category_bound_metadata_for_regression_families() -
         "parent_category",
         "leaf_category",
         "sub_category",
+        "subcategory_match_policy",
         "cta_map_key",
         "template_status",
         "match_mode",
@@ -124,6 +132,7 @@ def test_build_library_emits_category_bound_metadata_for_regression_families() -
         assert schema["parent_category"] == binding["parent_category"]
         assert schema["leaf_category"] == binding["leaf_category"]
         assert schema["sub_category"] == binding["sub_category"]
+        assert schema["subcategory_match_policy"] == binding["subcategory_match_policy"]
         assert schema["fingerprint"]
         assert schema["section_names_exact"]
         assert schema["label_set_exact"]
@@ -144,6 +153,17 @@ def test_build_library_marks_placeholder_templates_manual_only() -> None:
         assert schema["forbidden_labels"] == []
         assert schema["min_section_overlap"] == 0
         assert schema["min_label_overlap"] == 0
+
+
+def test_build_library_emits_explicit_subcategory_match_policy_for_known_exceptions() -> None:
+    payload = _repo_payload()
+    schemas = _schemas_by_template_id(payload)
+
+    assert schemas["tileoraseis"]["subcategory_match_policy"] == "leaf_family"
+    assert schemas["koyzines"]["subcategory_match_policy"] == "leaf_family"
+    assert schemas["plyntiria_piaton"]["subcategory_match_policy"] == "leaf_family"
+    assert schemas["foyrnoi_mikrokymaton"]["subcategory_match_policy"] == "leaf_family"
+    assert schemas["plyntiria_rouxwn"]["subcategory_match_policy"] == "exact_subcategory"
 
 
 def test_build_library_preserves_authored_order_and_normalizes_safe_separators() -> None:

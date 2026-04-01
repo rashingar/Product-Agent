@@ -143,6 +143,29 @@ def test_compiled_library_generic_washing_machine_labels_cannot_escape_resolved_
     assert {candidate["template_id"] for candidate in candidates} == {"plyntiria_rouxwn"}
 
 
+def test_compiled_library_tv_leaf_family_policy_supports_subcategory_fallback() -> None:
+    tv_schema = _schema("tileoraseis")
+    matcher = SchemaMatcher()
+
+    result, candidates = matcher.match(
+        _spec_sections_from_schema(tv_schema),
+        taxonomy_sub_category="50'' & άνω",
+        taxonomy_path="ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
+        taxonomy_parent_category=tv_schema.get("parent_category"),
+        taxonomy_leaf_category=tv_schema.get("leaf_category"),
+    )
+
+    assert tv_schema["subcategory_match_policy"] == "leaf_family"
+    assert result.selected_template_id == "tileoraseis"
+    assert result.matched_schema_id == tv_schema["schema_id"]
+    assert result.subcategory_match_policy == "leaf_family"
+    assert result.fail_reason == ""
+    assert result.candidate_pool_size == 1
+    assert result.candidate_template_ids == ["tileoraseis"]
+    assert {candidate["template_id"] for candidate in candidates} == {"tileoraseis"}
+    assert candidates[0]["subcategory_match_policy"] == "leaf_family"
+
+
 def test_compiled_library_kitchen_specs_cannot_override_washing_machine_category_binding() -> None:
     washing_machine = _schema("plyntiria_rouxwn")
     kitchen = _schema("koyzines")
@@ -160,3 +183,9 @@ def test_compiled_library_kitchen_specs_cannot_override_washing_machine_category
     assert result.fail_reason == ""
     assert result.candidate_template_ids == ["plyntiria_rouxwn"]
     assert {candidate["template_id"] for candidate in candidates} == {"plyntiria_rouxwn"}
+
+
+def test_compiled_library_non_exception_subcategory_family_remains_exact() -> None:
+    washing_machine = _schema("plyntiria_rouxwn")
+
+    assert washing_machine["subcategory_match_policy"] == "exact_subcategory"

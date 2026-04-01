@@ -4951,3 +4951,36 @@ Validation:
 
 Risks, blockers, or skipped items:
 - validation still reports presentation warnings `presentation_sections_weak:3` and `requested_sections_reduced:11`, but these are warnings only and did not block render or publish
+
+## 2026-04-02 - Explicit subcategory match policy for Electronet schema matching
+
+What changed:
+- added explicit compiled `subcategory_match_policy` metadata to the Electronet schema library with a conservative exception map for `tileoraseis`, `koyzines`, `plyntiria_piaton`, and `foyrnoi_mikrokymaton`
+- updated `SchemaMatcher.build_candidate_pool()` to stay exact-path first and only allow leaf-only fallback when the resolved parent/leaf family has compiled `leaf_family` eligibility
+- surfaced `subcategory_match_policy` in matcher debug output and candidate diagnostics so normalized/report artifacts can carry the policy cleanly
+- added compiler, synthetic matcher, compiled-library TV fallback, and serialization regression coverage
+- regenerated `resources/schemas/electronet_schema_library.json` so runtime uses the explicit policy metadata
+
+Files changed:
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+- `resources/schemas/electronet_schema_library.json`
+- `scraper/pipeline/models.py`
+- `scraper/pipeline/schema_matcher.py`
+- `scraper/pipeline/tests/test_schema_matcher.py`
+- `scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+- `tools/schema_registry/build_electronet_schema_library.py`
+- `tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+Commands run:
+- `python tools/schema_registry/build_electronet_schema_library.py`
+- `python -m pytest tools/schema_registry/tests/test_build_electronet_schema_library.py scraper/pipeline/tests/test_schema_matcher.py scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py scraper/pipeline/tests/test_prepare_result_assembly_module.py -q`
+- `python -m pytest scraper/pipeline/tests/test_execution_models.py scraper/pipeline/tests/test_workflow.py -q`
+
+Validation:
+- compiler and matcher focused regressions passed: `32 passed`
+- execution model and workflow serialization regressions passed: `42 passed`
+- checked-in compiled library now emits `subcategory_match_policy` for every schema entry
+
+Risks, blockers, or skipped items:
+- this commit intentionally keeps the `leaf_family` exception set narrow and metadata-driven; broader mixed-family policy handling is still deferred

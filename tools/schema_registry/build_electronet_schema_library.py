@@ -18,6 +18,16 @@ DEFAULT_TAXONOMY_PATH = REPO_ROOT / "resources" / "mappings" / "catalog_taxonomy
 DEFAULT_OUTPUT_PATH = REPO_ROOT / "resources" / "schemas" / "electronet_schema_library.json"
 CURRENT_LIBRARY_PATH = DEFAULT_OUTPUT_PATH
 LIBRARY_VERSION = "2026-04-01"
+SUBCATEGORY_MATCH_POLICY_EXACT = "exact_subcategory"
+SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY = "leaf_family"
+LEAF_FAMILY_TEMPLATE_EXCEPTIONS = frozenset(
+    {
+        "tileoraseis",
+        "koyzines",
+        "plyntiria_piaton",
+        "foyrnoi_mikrokymaton",
+    }
+)
 
 NBSP_PATTERN = re.compile(r"[\u00A0\u202F\u2007]")
 WS_PATTERN = re.compile(r"\s+")
@@ -405,6 +415,12 @@ def _compiled_sections_from_authored(template: TemplateRecord) -> list[dict[str,
     ]
 
 
+def _subcategory_match_policy(template: TemplateRecord) -> str:
+    if template.template_id in LEAF_FAMILY_TEMPLATE_EXCEPTIONS:
+        return SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY
+    return SUBCATEGORY_MATCH_POLICY_EXACT
+
+
 def _derive_schema_id(
     template: TemplateRecord,
     taxonomy_binding: TaxonomyBinding,
@@ -531,6 +547,7 @@ def build_library_payload(
     for template in templates:
         taxonomy_binding = _resolve_taxonomy_binding(template, taxonomy_paths)
         compiled_sections = _compiled_sections_from_authored(template)
+        subcategory_match_policy = _subcategory_match_policy(template)
         n_rows_total = sum(len(section.get("labels", [])) for section in compiled_sections)
         schema_id = _derive_schema_id(template, taxonomy_binding, compiled_sections)
 
@@ -545,6 +562,7 @@ def build_library_payload(
                 "parent_category": taxonomy_binding.parent_category,
                 "leaf_category": taxonomy_binding.leaf_category,
                 "sub_category": taxonomy_binding.sub_category,
+                "subcategory_match_policy": subcategory_match_policy,
                 "cta_map_key": template.cta_map_key,
                 "cta_url": taxonomy_binding.cta_url or template.cta_url,
                 "template_status": template.template_status,
@@ -588,6 +606,7 @@ def build_library_payload(
                 "schema_id": entry["schema_id"],
                 "fingerprint": entry["fingerprint"],
                 "category_path": entry["category_path"],
+                "subcategory_match_policy": entry["subcategory_match_policy"],
                 "template_status": entry["template_status"],
                 "match_mode": entry["match_mode"],
             }

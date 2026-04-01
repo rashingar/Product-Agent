@@ -34,6 +34,7 @@ def _schema(
     sections: list[tuple[str, list[str]]],
     template_status: str = "active",
     match_mode: str = "direct_single",
+    subcategory_match_policy: str = "exact_subcategory",
     sibling_template_ids: list[str] | None = None,
     required_labels_any: list[str] | None = None,
     required_labels_all: list[str] | None = None,
@@ -60,6 +61,7 @@ def _schema(
         "sub_category": sub_category,
         "template_status": template_status,
         "match_mode": match_mode,
+        "subcategory_match_policy": subcategory_match_policy,
         "section_names_exact": [section for section, _labels in sections],
         "section_names_normalized": section_names_normalized,
         "label_set_exact": label_set_exact,
@@ -155,6 +157,7 @@ def test_direct_single_category_selects_only_active_safe_template(tmp_path: Path
     assert result.score == 1.0
     assert "weak_schema_match" not in result.warnings
     assert result.resolved_category_path == "Home > Laundry > Washing Machines"
+    assert result.subcategory_match_policy == "exact_subcategory"
     assert result.candidate_pool_size == 3
     assert result.candidate_template_ids == [
         "washing_machine_active",
@@ -174,6 +177,7 @@ def test_direct_single_category_selects_only_active_safe_template(tmp_path: Path
             "category_path": "Home > Laundry > Washing Machines",
             "template_status": "active",
             "match_mode": "direct_single",
+            "subcategory_match_policy": "exact_subcategory",
             "score": 1.0,
             "section_overlap": 2,
             "label_overlap": 4,
@@ -348,6 +352,138 @@ def test_wrong_category_schema_cannot_be_selected(tmp_path: Path) -> None:
     ]
     assert {candidate["matched_schema_id"] for candidate in candidates} == {"kettle-basic", "kettle-glass"}
     assert "wm-1" not in {candidate["matched_schema_id"] for candidate in candidates}
+
+
+def test_leaf_family_policy_allows_leaf_only_fallback_when_exact_subcategory_pool_is_absent(tmp_path: Path) -> None:
+    schema_path = _write_schema_library(
+        tmp_path,
+        [
+            _schema(
+                schema_id="tv-leaf",
+                template_id="tileoraseis",
+                category_path="Electronics > TVs > -",
+                parent_category="Electronics",
+                leaf_category="TVs",
+                sub_category=None,
+                subcategory_match_policy="leaf_family",
+                sections=[
+                    ("Overview", ["Screen Size", "Panel Type", "HDR"]),
+                    ("Connectivity", ["HDMI", "Wi-Fi"]),
+                ],
+                min_section_overlap=1,
+                min_label_overlap=2,
+            ),
+            _schema(
+                schema_id="audio-leaf",
+                template_id="soundbars",
+                category_path="Electronics > Audio > -",
+                parent_category="Electronics",
+                leaf_category="Audio",
+                sub_category=None,
+                subcategory_match_policy="leaf_family",
+                sections=[("Overview", ["Power Output", "Bluetooth"])],
+            ),
+        ],
+    )
+    matcher = SchemaMatcher(str(schema_path))
+
+    result, candidates = matcher.match(
+        _spec_sections(
+            ("Overview", ["Screen Size", "Panel Type", "HDR"]),
+            ("Connectivity", ["HDMI", "Wi-Fi"]),
+        ),
+        taxonomy_sub_category="50 Inches Plus",
+        taxonomy_path="Electronics > TVs > 50 Inches Plus",
+        taxonomy_parent_category="Electronics",
+        taxonomy_leaf_category="TVs",
+    )
+
+    assert result.matched_schema_id == "tv-leaf"
+    assert result.selected_template_id == "tileoraseis"
+    assert result.subcategory_match_policy == "leaf_family"
+    assert result.candidate_pool_size == 1
+    assert result.candidate_template_ids == ["tileoraseis"]
+    assert candidates[0]["subcategory_match_policy"] == "leaf_family"
+    assert all(candidate["category_path"] == "Electronics > TVs > -" for candidate in candidates)
+
+
+def test_exact_subcategory_policy_does_not_fall_back_to_leaf_only_template(tmp_path: Path) -> None:
+    schema_path = _write_schema_library(
+        tmp_path,
+        [
+            _schema(
+                schema_id="dishwasher-leaf",
+                template_id="dishwashers",
+                category_path="Home > Dishwashers > -",
+                parent_category="Home",
+                leaf_category="Dishwashers",
+                sub_category=None,
+                subcategory_match_policy="exact_subcategory",
+                sections=[
+                    ("Overview", ["Place Settings", "Programs", "Noise Level"]),
+                ],
+            ),
+        ],
+    )
+    matcher = SchemaMatcher(str(schema_path))
+
+    result, candidates = matcher.match(
+        _spec_sections(("Overview", ["Place Settings", "Programs", "Noise Level"])),
+        taxonomy_sub_category="45cm",
+        taxonomy_path="Home > Dishwashers > 45cm",
+        taxonomy_parent_category="Home",
+        taxonomy_leaf_category="Dishwashers",
+    )
+
+    assert result.matched_schema_id is None
+    assert result.fail_reason == "pool_empty_for_category"
+    assert result.candidate_pool_size == 0
+    assert result.candidate_template_ids == []
+    assert result.subcategory_match_policy == ""
+    assert candidates == []
+
+
+def test_leaf_family_fallback_remains_parent_leaf_bounded(tmp_path: Path) -> None:
+    schema_path = _write_schema_library(
+        tmp_path,
+        [
+            _schema(
+                schema_id="tv-leaf",
+                template_id="tileoraseis",
+                category_path="Electronics > TVs > -",
+                parent_category="Electronics",
+                leaf_category="TVs",
+                sub_category=None,
+                subcategory_match_policy="leaf_family",
+                sections=[("Overview", ["Screen Size", "HDR"])],
+            ),
+            _schema(
+                schema_id="range-leaf",
+                template_id="koyzines",
+                category_path="Home > Ranges > -",
+                parent_category="Home",
+                leaf_category="Ranges",
+                sub_category=None,
+                subcategory_match_policy="leaf_family",
+                sections=[("Overview", ["Burners", "Capacity"])],
+            ),
+        ],
+    )
+    matcher = SchemaMatcher(str(schema_path))
+
+    result, candidates = matcher.match(
+        _spec_sections(("Overview", ["Power Output", "Bluetooth"])),
+        taxonomy_sub_category="Portable",
+        taxonomy_path="Electronics > Audio > Portable",
+        taxonomy_parent_category="Electronics",
+        taxonomy_leaf_category="Audio",
+    )
+
+    assert result.matched_schema_id is None
+    assert result.fail_reason == "pool_empty_for_category"
+    assert result.candidate_pool_size == 0
+    assert result.candidate_template_ids == []
+    assert candidates == []
 
 
 def test_generic_overlap_fails_closed_instead_of_global_drift(tmp_path: Path) -> None:

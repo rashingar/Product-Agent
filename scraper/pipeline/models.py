@@ -261,6 +261,7 @@ class SchemaMatchResult:
     matched_sub_category: Optional[str] = None
     score: float = 0.0
     warnings: list[str] = field(default_factory=list)
+    subcategory_match_policy: str = ""
     resolved_category_path: str = ""
     candidate_pool_size: int = 0
     candidate_template_ids: list[str] = field(default_factory=list)
