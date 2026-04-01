@@ -3,6 +3,48 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Add standalone prepare taxonomy/enrichment seam without wiring it
+
+Goal:
+- add the extracted taxonomy-resolution plus manufacturer-enrichment module for the current branch
+- keep `scraper/pipeline/prepare_stage.py` behavior unchanged in this commit by not wiring the new seam yet
+- pin the new seam directly with focused tests while preserving the existing prepare-stage regressions
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py`
+
+Changes:
+- added `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- added the new internal typed result:
+  - `PrepareTaxonomyEnrichmentResult`
+- added the new internal seam:
+  - `execute_prepare_taxonomy_enrichment(...)`
+- the new module now owns standalone logic for:
+  - taxonomy resolver construction through `taxonomy_resolver_factory`
+  - `taxonomy_resolver.resolve(...)` orchestration using the current prepare-stage input contract
+  - Skroutz-only manufacturer-doc enrichment orchestration
+  - the current non-Skroutz default manufacturer-enrichment payload shape
+  - the typed handoff bundle for taxonomy, taxonomy candidates, and manufacturer-enrichment diagnostics
+- added focused direct tests for the seam in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py`
+
+Intentional temporary duplication left for the next commit:
+- `scraper/pipeline/prepare_stage.py` still contains the active inline taxonomy-resolution plus manufacturer-enrichment block
+- `scraper/pipeline/prepare_taxonomy_enrichment.py` currently mirrors that logic but is not called by `prepare_stage.py` yet
+- the non-Skroutz default manufacturer-enrichment payload currently exists in both places so the next commit can wire the seam first and de-duplicate second if needed
+
+Commands run:
+- `Get-Content scraper/pipeline/manufacturer_enrichment.py`
+- `Get-Content scraper/pipeline/taxonomy.py`
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment_module.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- the new taxonomy/enrichment seam module is covered directly without changing production behavior
+- existing prepare-stage taxonomy/enrichment characterization tests still pass unchanged
+- adjacent prepare-stage result-assembly tests still pass
+- this commit does not move result assembly, scrape persistence, or provider resolution
+
 ## 2026-04-01 - Add prepare-stage taxonomy/enrichment characterization tests
 
 Goal:
