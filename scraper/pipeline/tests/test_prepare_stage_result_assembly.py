@@ -7,6 +7,7 @@ from pipeline.prepare_provider_resolution import PrepareProviderResolutionResult
 from pipeline.prepare_result_assembly import PrepareResultAssemblyResult
 from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput, PrepareScrapePersistenceResult
 from pipeline.prepare_stage import execute_prepare_stage
+from pipeline.prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult
 
 
 def _build_manufacturer_enrichment_stub() -> dict[str, object]:
@@ -147,14 +148,21 @@ def test_execute_prepare_stage_calls_single_result_assembly_seam_with_prepared_i
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: (source.source_name or "unknown", True, "test_scope"),
         fetcher_factory=lambda: object(),
-        taxonomy_resolver_factory=lambda: StaticResolver(),
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
             source=source.source_name or "unknown",
             url=cli_arg.url,
             parsed=parsed,
             fetch_method="fixture",
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: PrepareTaxonomyEnrichmentResult(
+            taxonomy=TaxonomyResolution(
+                parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+                leaf_category="Εντοιχιζόμενες Συσκευές",
+                sub_category="Εστίες",
+            ),
+            taxonomy_candidates=[{"taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Εστίες"}],
+            manufacturer_enrichment=_build_manufacturer_enrichment_stub(),
+        ),
         assemble_prepare_result_fn=fake_assemble_prepare_result,
         persist_prepare_scrape_artifacts_fn=_persist_stub,
     )
@@ -232,14 +240,22 @@ def test_execute_prepare_stage_uses_result_assembly_output_for_persistence_and_r
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: (source.source_name or "unknown", True, "test_scope"),
         fetcher_factory=lambda: object(),
-        taxonomy_resolver_factory=lambda: StaticResolver(),
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
             source=source.source_name or "unknown",
             url=cli_arg.url,
             parsed=parsed,
             fetch_method="fixture",
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: PrepareTaxonomyEnrichmentResult(
+            taxonomy=TaxonomyResolution(
+                parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+                leaf_category="Τηλεοράσεις",
+                sub_category="50'' & άνω",
+                cta_url="https://www.etranoulis.gr/eikona-hxos/thleoraseis/50-anw",
+            ),
+            taxonomy_candidates=[],
+            manufacturer_enrichment=_build_manufacturer_enrichment_stub(),
+        ),
         assemble_prepare_result_fn=fake_assemble_prepare_result,
         persist_prepare_scrape_artifacts_fn=fake_persist,
     )

@@ -9,6 +9,7 @@ from pipeline.prepare_provider_resolution import PrepareProviderResolutionResult
 from pipeline.prepare_result_assembly import PrepareResultAssemblyResult
 from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput, PrepareScrapePersistenceResult
 from pipeline.prepare_stage import execute_prepare_stage
+from pipeline.prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult
 from pipeline.providers import ProviderInputIdentity, ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
 from pipeline.providers.models import (
     ProviderCapability,
@@ -44,6 +45,24 @@ def _build_manufacturer_enrichment_stub() -> dict[str, object]:
         "presentation_block_count": 0,
         "fallback_reason": "test_stub",
     }
+
+
+def _build_taxonomy_enrichment_result(
+    taxonomy: TaxonomyResolution | None = None,
+    *,
+    taxonomy_candidates: list[dict[str, object]] | None = None,
+    manufacturer_enrichment: dict[str, object] | None = None,
+) -> PrepareTaxonomyEnrichmentResult:
+    return PrepareTaxonomyEnrichmentResult(
+        taxonomy=taxonomy
+        or TaxonomyResolution(
+            parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+            leaf_category="Συσκευές Κουζίνας",
+            sub_category="Βραστήρες",
+        ),
+        taxonomy_candidates=taxonomy_candidates or [],
+        manufacturer_enrichment=manufacturer_enrichment or _build_manufacturer_enrichment_stub(),
+    )
 
 
 class DummyResolver:
@@ -246,7 +265,6 @@ def test_execute_prepare_stage_uses_test_injected_skroutz_provider(tmp_path: Pat
         model_dir=tmp_path / SAMPLE_MODEL,
         validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=DummyResolver,
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: (
             identity_calls.append(ProviderInputIdentity(model=cli_arg.model, url=cli_arg.url))
             or build_prepare_provider_resolution_result(
@@ -259,7 +277,7 @@ def test_execute_prepare_stage_uses_test_injected_skroutz_provider(tmp_path: Pat
                 fetch_method="fixture",
             )
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment_result(),
         assemble_prepare_result_fn=lambda **kwargs: PrepareResultAssemblyResult(
             schema_match=SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
             schema_candidates=[],
@@ -304,7 +322,6 @@ def test_execute_prepare_stage_reuses_injected_provider_resolution_payload(tmp_p
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: ("electronet", True, ""),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=DummyResolver,
         resolve_prepare_provider_input_fn=lambda cli_arg, **kwargs: (
             seam_calls.append((cli_arg, kwargs))
             or build_prepare_provider_resolution_result(
@@ -314,7 +331,9 @@ def test_execute_prepare_stage_reuses_injected_provider_resolution_payload(tmp_p
                 fetch_method="httpx",
             )
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {},
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment_result(
+            manufacturer_enrichment={}
+        ),
         assemble_prepare_result_fn=lambda **kwargs: PrepareResultAssemblyResult(
             schema_match=SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
             schema_candidates=[],
@@ -369,14 +388,15 @@ def test_execute_prepare_stage_calls_persistence_seam_once_with_typed_input(tmp_
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: ("electronet", True, ""),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=DummyResolver,
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: build_prepare_provider_resolution_result(
             source="electronet",
             url=cli_arg.url,
             parsed=parsed,
             fetch_method="httpx",
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {},
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment_result(
+            manufacturer_enrichment={}
+        ),
         assemble_prepare_result_fn=lambda **kwargs: PrepareResultAssemblyResult(
             schema_match=SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
             schema_candidates=[],
@@ -438,7 +458,6 @@ def test_execute_prepare_stage_routes_skroutz_through_provider_by_default(tmp_pa
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=DummyResolver,
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: (
             seam_calls.append(cli_arg)
             or build_prepare_provider_resolution_result(
@@ -449,7 +468,7 @@ def test_execute_prepare_stage_routes_skroutz_through_provider_by_default(tmp_pa
                 fallback_used=True,
             )
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment_result(),
         assemble_prepare_result_fn=lambda **kwargs: PrepareResultAssemblyResult(
             schema_match=SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
             schema_candidates=[],
@@ -533,7 +552,6 @@ def test_execute_prepare_stage_routes_manufacturer_tefal_through_provider_by_def
         model_dir=tmp_path / cli.model,
         validate_url_scope_fn=lambda _url: ("manufacturer_tefal", True, "manufacturer_tefal_product_path"),
         fetcher_factory=DummyFetcher,
-        taxonomy_resolver_factory=DummyManufacturerResolver,
         resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: (
             seam_calls.append(cli_arg)
             or build_prepare_provider_resolution_result(
@@ -543,7 +561,14 @@ def test_execute_prepare_stage_routes_manufacturer_tefal_through_provider_by_def
                 fetch_method="httpx",
             )
         ),
-        enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: {"applied": False, "documents": [], "presentation_applied": False},
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment_result(
+            taxonomy=TaxonomyResolution(
+                parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+                leaf_category="Μικροί Μάγειρες",
+                sub_category="Παγωτομηχανές",
+            ),
+            manufacturer_enrichment={"applied": False, "documents": [], "presentation_applied": False},
+        ),
         assemble_prepare_result_fn=lambda **kwargs: PrepareResultAssemblyResult(
             schema_match=SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
             schema_candidates=[],
@@ -578,11 +603,10 @@ def test_execute_prepare_stage_fails_fast_when_supported_source_has_no_provider(
             model_dir=tmp_path / SAMPLE_MODEL,
             validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
             fetcher_factory=DummyFetcher,
-            taxonomy_resolver_factory=DummyResolver,
             resolve_prepare_provider_input_fn=lambda _cli, **_kwargs: (_ for _ in ()).throw(
                 RuntimeError("Provider 'skroutz' is not registered")
             ),
-            enrich_source_from_manufacturer_docs_fn=lambda **_kwargs: _build_manufacturer_enrichment_stub(),
+            resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment_result(),
             assemble_prepare_result_fn=lambda **kwargs: PrepareResultAssemblyResult(
                 schema_match=SchemaMatchResult(matched_schema_id="schema-1", score=0.9),
                 schema_candidates=[],

@@ -3,6 +3,289 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-01 - Finalize docs for prepare-stage taxonomy/enrichment extraction
+
+Goal:
+- mark the taxonomy/enrichment extraction branch scope complete in the control docs
+- make the landed ownership boundary and landed test split explicit
+- keep this commit docs-only with no Python changes
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Landed state recorded:
+- landed internal seam module:
+  - `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- landed typed result:
+  - `PrepareTaxonomyEnrichmentResult`
+- landed narrowed `prepare_stage.py` responsibilities:
+  - provider-resolution ownership
+  - gallery download orchestration
+  - section-image/Besco download orchestration
+  - Skroutz section extraction and manufacturer-presentation fallback handling
+  - downstream result-assembly handoff
+  - scrape-artifact persistence handoff
+  - outward dict-shaped `execute_prepare_stage(...)` return payload compatibility
+- landed test coverage split:
+  - direct seam tests in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py`
+  - stage-isolation tests in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py`
+  - downstream deterministic stage-isolation tests in `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+  - prepare/workflow/provider regression coverage remains the higher-level unchanged-behavior backstop
+- landed injection boundary:
+  - `execute_prepare_stage(...)` now keeps one taxonomy/enrichment seam injection:
+    - `resolve_prepare_taxonomy_enrichment_fn`
+
+Next recommended branch:
+- the next real structural seam is still the remaining gallery/Besco plus Skroutz section-extraction orchestration in `prepare_stage.py`
+- naming polish is not yet the recommended next branch because that larger stage seam still remains
+
+Commands run:
+- `Get-Content PLAN.md | Select-Object -Skip 480 -First 80`
+- `Get-Content DOCUMENTATION.md -TotalCount 160`
+- `Get-Content README.md`
+
+Validation:
+- `PLAN.md` now records the taxonomy/enrichment extraction as landed rather than proposed
+- `DOCUMENTATION.md` now records the landed module name, typed result name, narrowed stage responsibilities, and test split
+- `README.md` was reviewed and left unchanged because it does not incorrectly describe internal prepare-stage ownership
+- this commit is docs-only and does not modify Python files
+
+## 2026-04-01 - Collapse prepare-stage taxonomy/enrichment to one injected seam
+
+Goal:
+- reduce the taxonomy/enrichment dependency surface in `execute_prepare_stage(...)` to one injected callable
+- remove the now-redundant lower-level stage injection surface because those helpers are internal to `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- keep workflow, prepare execution, and outward stage behavior unchanged
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py`
+- `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py`
+- `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `scraper/pipeline/tests/test_provider_selection.py`
+
+Changes:
+- `execute_prepare_stage(...)` now exposes one taxonomy/enrichment seam:
+  - `resolve_prepare_taxonomy_enrichment_fn=resolve_prepare_taxonomy_enrichment`
+- removed the old lower-level stage injection surface:
+  - `taxonomy_resolver_factory`
+  - `enrich_source_from_manufacturer_docs_fn`
+- `prepare_stage.py` now depends only on the single typed taxonomy/enrichment seam and no longer exposes the internal resolver/enrichment helpers in its signature
+- direct seam tests continue to target `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- stage-isolation tests now stub only `resolve_prepare_taxonomy_enrichment_fn` when isolating `execute_prepare_stage(...)`
+- docs now use the landed seam name:
+  - `resolve_prepare_taxonomy_enrichment(...)`
+
+Old vs new stage signature summary:
+- old:
+  - `execute_prepare_stage(..., taxonomy_resolver_factory=TaxonomyResolver, enrich_source_from_manufacturer_docs_fn=enrich_source_from_manufacturer_docs, ...)`
+- new:
+  - `execute_prepare_stage(..., resolve_prepare_taxonomy_enrichment_fn=resolve_prepare_taxonomy_enrichment, ...)`
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment_module.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+
+Validation:
+- direct taxonomy/enrichment seam tests still pass
+- stage-isolation tests now stub only the single taxonomy/enrichment seam
+- prepare-focused provider-selection regressions still pass
+- prepare-focused workflow regression coverage still passes
+- no public workflow or service entrypoint changed
+
+## 2026-04-01 - Wire prepare stage to the taxonomy/enrichment seam
+
+Goal:
+- route `scraper/pipeline/prepare_stage.py` through the new taxonomy-resolution plus manufacturer-enrichment seam
+- remove the now-redundant inline taxonomy/enrichment block from `prepare_stage.py`
+- preserve the outward `execute_prepare_stage(...)` payload, prepare/workflow behavior, and ownership boundaries
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+
+Changes:
+- wired `prepare_stage.py` to `resolve_prepare_taxonomy_enrichment(...)` in `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- removed the inline prepare-stage block that previously owned:
+  - local taxonomy resolver construction
+  - `taxonomy_resolver.resolve(...)` orchestration
+  - conditional `source == "skroutz"` manufacturer-doc enrichment orchestration
+  - the local unpacking/assembly of taxonomy plus manufacturer-enrichment handoff values
+- `prepare_stage.py` now:
+  - keeps gallery and Besco orchestration
+  - keeps any upstream shaping required before the taxonomy/enrichment seam
+  - receives typed taxonomy/enrichment outputs from the seam
+  - keeps the downstream handoff into result assembly
+  - keeps the outward dict-shaped return payload compatible with downstream callers
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `Get-Content scraper/pipeline/prepare_taxonomy_enrichment.py`
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment_module.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py pipeline/tests/test_provider_selection.py pipeline/tests/test_workflow.py -k "prepare"` from `scraper/`
+
+Validation:
+- direct taxonomy/enrichment seam tests still pass
+- existing prepare-stage taxonomy/enrichment characterization tests still pass
+- adjacent prepare-stage result-assembly tests still pass
+- prepare-focused provider-selection and workflow regressions still pass
+- outward `execute_prepare_stage(...)` return keys remain unchanged
+
+Logic intentionally still left in `prepare_stage.py`:
+- gallery download orchestration
+- section-image/Besco download orchestration
+- Skroutz section extraction and manufacturer-presentation fallback handling
+- downstream result-assembly handoff
+- scrape-artifact persistence handoff
+
+## 2026-04-01 - Add standalone prepare taxonomy/enrichment seam without wiring it
+
+Goal:
+- add the extracted taxonomy-resolution plus manufacturer-enrichment module for the current branch
+- keep `scraper/pipeline/prepare_stage.py` behavior unchanged in this commit by not wiring the new seam yet
+- pin the new seam directly with focused tests while preserving the existing prepare-stage regressions
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py`
+
+Changes:
+- added `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- added the new internal typed result:
+  - `PrepareTaxonomyEnrichmentResult`
+- added the new internal seam:
+  - `resolve_prepare_taxonomy_enrichment(...)`
+- the new module now owns standalone logic for:
+  - taxonomy resolver construction through `taxonomy_resolver_factory`
+  - `taxonomy_resolver.resolve(...)` orchestration using the current prepare-stage input contract
+  - Skroutz-only manufacturer-doc enrichment orchestration
+  - the current non-Skroutz default manufacturer-enrichment payload shape
+  - the typed handoff bundle for taxonomy, taxonomy candidates, and manufacturer-enrichment diagnostics
+- added focused direct tests for the seam in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment_module.py`
+
+Intentional temporary duplication left for the next commit:
+- `scraper/pipeline/prepare_stage.py` still contains the active inline taxonomy-resolution plus manufacturer-enrichment block
+- `scraper/pipeline/prepare_taxonomy_enrichment.py` currently mirrors that logic but is not called by `prepare_stage.py` yet
+- the non-Skroutz default manufacturer-enrichment payload currently exists in both places so the next commit can wire the seam first and de-duplicate second if needed
+
+Commands run:
+- `Get-Content scraper/pipeline/manufacturer_enrichment.py`
+- `Get-Content scraper/pipeline/taxonomy.py`
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment_module.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- the new taxonomy/enrichment seam module is covered directly without changing production behavior
+- existing prepare-stage taxonomy/enrichment characterization tests still pass unchanged
+- adjacent prepare-stage result-assembly tests still pass
+- this commit does not move result assembly, scrape persistence, or provider resolution
+
+## 2026-04-01 - Add prepare-stage taxonomy/enrichment characterization tests
+
+Goal:
+- pin the current taxonomy-resolution plus manufacturer-enrichment behavior inside `scraper/pipeline/prepare_stage.py`
+- add narrow characterization coverage before extracting the taxonomy/enrichment orchestration seam
+- keep this commit test-only with no production behavior changes
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py`
+
+Changes:
+- added focused prepare-stage seam characterization coverage for:
+  - the exact `taxonomy_resolver.resolve(...)` inputs currently passed by `prepare_stage.py`
+  - top-level and result-assembly propagation of `taxonomy_candidates`
+  - Skroutz-only manufacturer enrichment orchestration, including the current `output_dir=model_dir/"manufacturer"` contract
+  - the current non-Skroutz skip behavior and default fallback payload shape for:
+    - `electronet`
+    - `manufacturer_tefal`
+  - propagation of manufacturer-enrichment mutations on `parsed.source` into the later prepare-stage flow
+  - current warning/reason behavior with the real result-assembly path:
+    - taxonomy `reason` is appended to top-level report warnings
+    - manufacturer-enrichment warnings remain nested under `report["manufacturer_enrichment"]` and are not flattened into `report["warnings"]`
+  - the current top-level `execute_prepare_stage(...)` output shape relied on by downstream code
+
+Commands run:
+- `Get-Content scraper/pipeline/prepare_stage.py`
+- `Get-Content scraper/pipeline/prepare_result_assembly.py`
+- `Get-Content scraper/pipeline/services/prepare_execution.py`
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- the new taxonomy/enrichment characterization tests pass
+- adjacent prepare-stage result-assembly tests still pass
+- no production Python modules changed
+- no workflow behavior changed
+
+Ambiguities recorded:
+- current behavior does not flatten manufacturer-enrichment warnings into `report["warnings"]`; they remain only under `report["manufacturer_enrichment"]["warnings"]`
+- non-Skroutz sources currently receive a synthetic default manufacturer-enrichment payload rather than `None` or an omitted field, and the fallback reason differs by source (`not_applicable_non_skroutz` vs `direct_source_already_manufacturer`)
+
+## 2026-04-01 - Freeze prepare-stage taxonomy enrichment refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-taxonomy-enrichment`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, workflow entrypoints, or artifact contracts
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- branch goal:
+  - extract taxonomy resolution plus manufacturer-doc enrichment orchestration out of `scraper/pipeline/prepare_stage.py` while preserving current runtime behavior
+- exact non-goals:
+  - no public workflow or CLI behavior change
+  - no prepare/render ownership-boundary change
+  - no output artifact path or filename change
+  - no `prepare_execution.py` behavior change
+  - no provider-resolution reshuffle in this branch
+  - no scrape-persistence extraction or path redesign in this branch
+  - no result-assembly extraction or result-assembly ownership change in this branch
+  - no schema/result-assembly ownership change in this branch
+  - no render ownership change
+  - no naming-polish cleanup in this branch
+  - no split-task LLM handoff contract change
+- proposed module name:
+  - `scraper/pipeline/prepare_taxonomy_enrichment.py`
+- proposed typed result name:
+  - `PrepareTaxonomyEnrichmentResult`
+- what leaves `prepare_stage.py` in this branch:
+  - `taxonomy_resolver.resolve(...)`
+  - conditional manufacturer-doc enrichment orchestration
+  - the typed handoff carrying resolved taxonomy plus manufacturer-enriched section state back into `prepare_stage.py`
+- what stays in `prepare_stage.py` in this branch:
+  - provider-resolution ownership
+  - gallery and Besco orchestration
+  - scrape persistence seam invocation
+  - result-assembly seam invocation
+  - the outward dict-shaped `execute_prepare_stage(...)` payload
+- explicit branch boundary:
+  - result assembly remains outside this branch
+  - `prepare_execution.py` remains unchanged
+  - taxonomy and manufacturer enrichment move together as one orchestration seam
+
+Proposed test split for later commits:
+- add direct module-level coverage in `test_prepare_taxonomy_enrichment_module.py`
+- add stage-isolation coverage in `test_prepare_stage_taxonomy_enrichment.py`
+- keep existing prepare/workflow/provider regressions as the behavioral backstop for Electronet, Skroutz, and supported manufacturer flows
+- run targeted seam tests during each extraction step, then run the broader scraper suite before closing the branch
+
+Commands run:
+- `rg -n "Branch scope|prepare-stage result assembly refactor|recommended next branch|taxonomy/manufacturer-enrichment orchestration" PLAN.md DOCUMENTATION.md`
+- `Get-Content PLAN.md | Select-Object -Skip 350 -First 140`
+- `Get-Content DOCUMENTATION.md -TotalCount 140`
+- `Get-Content README.md`
+
+Validation:
+- the new branch scope is now recorded in `PLAN.md`
+- the engineering log now captures the branch goal, non-goals, proposed module/result names, ownership split, and planned test split
+- `README.md` was reviewed and did not require changes for this scope-freeze commit
+- this commit remains docs-only and does not modify Python files
+- this commit remains docs-only and does not modify test files
+
 ## 2026-04-01 - Finalize docs for prepare-stage result-assembly extraction
 
 Goal:
