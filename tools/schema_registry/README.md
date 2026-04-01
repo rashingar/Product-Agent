@@ -29,7 +29,7 @@ This toolchain solves that by introducing an editable template layer that can be
 ### Editable source-of-truth
 Located under:
 
-`resources/schemas/templates/electronet/`
+`resources/templates/electronet/`
 
 These template files are the human-maintained category templates.
 
@@ -67,8 +67,9 @@ Responsibilities:
 * load template files
 * validate against the shared JSON schema contract
 * enforce repo-level invariants
-* detect duplicate ids or suspicious category drift
+* detect duplicate authored ids and file/id drift
 * fail loudly when templates are invalid
+* support both authored Electronet template shapes currently present in the repo
 
 Use this first.
 
@@ -115,7 +116,7 @@ This is an audit/planning tool, not a runtime step.
 
 Typical workflow:
 
-1. Add or edit template files under `resources/schemas/templates/electronet/`
+1. Add or edit template files under `resources/templates/electronet/`
 2. Run template validation
 3. Build the compiled Electronet schema library
 4. Build the schema index
@@ -237,7 +238,7 @@ Those belong elsewhere in the repo.
 
 
 `tools/schema_registry/`
-`resources/schemas/templates/electronet/`
+`resources/templates/electronet/`
 `resources/schemas/`
 `docs/audits/`
 
@@ -245,7 +246,7 @@ Those belong elsewhere in the repo.
 Interpretation:
 
 * `tools/schema_registry/` = tooling
-* `resources/schemas/templates/electronet/` = editable templates
+* `resources/templates/electronet/` = editable templates
 * `resources/schemas/` = compiled runtime outputs
 * `docs/audits/` = human-readable coverage/audit reports
 
