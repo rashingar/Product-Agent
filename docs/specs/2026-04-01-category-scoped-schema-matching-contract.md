@@ -38,7 +38,7 @@ Every compiled runtime entry now includes these matcher-relevant fields:
 
 | Field | Meaning |
 | --- | --- |
-| `schema_id` | Stable schema identifier used by runtime selection and downstream render steps. |
+| `schema_id` | Stable deterministic identifier derived from current authored template structure and current taxonomy binding. |
 | `source_system` | Source family the compiled template belongs to. |
 | `template_id` | Stable compiled template identifier. |
 | `authored_template_id` | Authored template id from the source template file. |
@@ -66,7 +66,7 @@ Every compiled runtime entry now includes these matcher-relevant fields:
 | `source_template_file` | Source template path used to produce the compiled entry. |
 | `n_sections` | Count of compiled sections. |
 | `n_rows_total` | Count of compiled characteristic rows. |
-| `sections` | Compatibility section payload used by rendering and template materialization. |
+| `sections` | Compatibility section payload emitted from current authored template sections in authored order. |
 | `sentinel` | Sentinel section/label metadata used for diagnostics. |
 | `source_files` | Source filenames associated with the compiled entry. |
 

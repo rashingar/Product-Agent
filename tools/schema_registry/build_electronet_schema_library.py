@@ -325,20 +325,6 @@ def _resolve_taxonomy_binding(template: TemplateRecord, taxonomy_paths: list[dic
     )
 
 
-def _load_legacy_entries(existing_library_path: Path | None) -> dict[str, list[dict[str, Any]]]:
-    if existing_library_path is None or not existing_library_path.exists():
-        return {}
-    payload = load_json(existing_library_path)
-    by_source_file: dict[str, list[dict[str, Any]]] = {}
-    for schema in payload.get("schemas", []):
-        for source_file in schema.get("source_files", []):
-            key = normalize_whitespace(source_file)
-            if not key:
-                continue
-            by_source_file.setdefault(key, []).append(schema)
-    return by_source_file
-
-
 def _candidate_url_overlap_score(binding_hint_url: str, candidate: dict[str, Any]) -> int:
     if not binding_hint_url:
         return 0
@@ -409,29 +395,7 @@ def _pick_best_candidate_from_multiple(
     return best_candidates[0] if len(best_candidates) == 1 else None
 
 
-def _legacy_entry_for_template(
-    template: TemplateRecord,
-    legacy_entries_by_source_file: dict[str, list[dict[str, Any]]],
-) -> dict[str, Any] | None:
-    entries = legacy_entries_by_source_file.get(template.source_filename, [])
-    if len(entries) != 1:
-        return None
-    legacy_entry = entries[0]
-    if len(legacy_entry.get("source_files", [])) != 1:
-        return None
-    return legacy_entry
-
-
-def _compat_sections_from_legacy(legacy_entry: dict[str, Any] | None, template: TemplateRecord) -> list[dict[str, Any]]:
-    if legacy_entry is not None:
-        return [
-            {
-                "title": normalize_whitespace(section.get("title")),
-                "labels": [normalize_whitespace(label) for label in section.get("labels", []) if normalize_whitespace(label)],
-            }
-            for section in legacy_entry.get("sections", [])
-            if normalize_whitespace(section.get("title"))
-        ]
+def _compiled_sections_from_authored(template: TemplateRecord) -> list[dict[str, Any]]:
     return [
         {
             "title": section.name,
@@ -439,6 +403,29 @@ def _compat_sections_from_legacy(legacy_entry: dict[str, Any] | None, template: 
         }
         for section in template.authored_sections
     ]
+
+
+def _derive_schema_id(
+    template: TemplateRecord,
+    taxonomy_binding: TaxonomyBinding,
+    compiled_sections: list[dict[str, Any]],
+) -> str:
+    return _sha1_id(
+        {
+            "source_system": "electronet",
+            "template_id": template.template_id,
+            "authored_template_id": template.authored_template_id,
+            "category_gr": template.category_label,
+            "category_path": taxonomy_binding.category_path,
+            "parent_category": taxonomy_binding.parent_category,
+            "leaf_category": taxonomy_binding.leaf_category,
+            "sub_category": taxonomy_binding.sub_category,
+            "cta_map_key": template.cta_map_key,
+            "cta_url": taxonomy_binding.cta_url or template.cta_url,
+            "template_status": template.template_status,
+            "sections": compiled_sections,
+        }
+    )
 
 
 def _sentinel_for_sections(sections: list[dict[str, Any]]) -> dict[str, str]:
@@ -536,27 +523,16 @@ def build_library_payload(
 ) -> dict[str, Any]:
     templates = _load_templates(template_root)
     taxonomy_paths = _load_taxonomy_paths(taxonomy_path)
-    legacy_entries_by_source_file = _load_legacy_entries(existing_library_path)
+    # Kept for call-site compatibility only. Compiled schema content must not inherit
+    # structure or ids from any prior generated artifact.
+    _ = existing_library_path
 
     compiled_entries: list[dict[str, Any]] = []
     for template in templates:
         taxonomy_binding = _resolve_taxonomy_binding(template, taxonomy_paths)
-        legacy_entry = _legacy_entry_for_template(template, legacy_entries_by_source_file)
-        compat_sections = _compat_sections_from_legacy(legacy_entry, template)
-        n_rows_total = sum(len(section.get("labels", [])) for section in compat_sections)
-
-        schema_id = (
-            normalize_whitespace(legacy_entry.get("schema_id"))
-            if legacy_entry is not None
-            else _sha1_id(
-                {
-                    "source_system": "electronet",
-                    "template_id": template.template_id,
-                    "source_template_file": template.source_template_file,
-                    "sections": compat_sections,
-                }
-            )
-        )
+        compiled_sections = _compiled_sections_from_authored(template)
+        n_rows_total = sum(len(section.get("labels", [])) for section in compiled_sections)
+        schema_id = _derive_schema_id(template, taxonomy_binding, compiled_sections)
 
         compiled_entries.append(
             {
@@ -588,10 +564,10 @@ def build_library_payload(
                 "fingerprint": template.fingerprint,
                 "source_template_file": template.source_template_file,
                 "electronet_examples": list(template.electronet_examples),
-                "n_sections": len(compat_sections),
+                "n_sections": len(compiled_sections),
                 "n_rows_total": n_rows_total,
-                "sections": compat_sections,
-                "sentinel": _sentinel_for_sections(compat_sections),
+                "sections": compiled_sections,
+                "sentinel": _sentinel_for_sections(compiled_sections),
                 "source_files": [template.source_filename],
             }
         )

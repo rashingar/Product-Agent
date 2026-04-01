@@ -238,3 +238,115 @@ def test_build_library_uses_category_pool_for_multiple_active_siblings(tmp_path:
     assert entry_b["required_labels_any"] == ["Μοναδική Ετικέτα Β"]
     assert entry_a["forbidden_labels"] == ["Μοναδική Ετικέτα Β"]
     assert entry_b["forbidden_labels"] == ["Μοναδική Ετικέτα Α"]
+
+
+def test_build_library_is_source_of_truth_pure_against_existing_compiled_library(tmp_path: Path) -> None:
+    template_root = tmp_path / "templates"
+    template_root.mkdir()
+    taxonomy_path = tmp_path / "taxonomy.json"
+    existing_library_path = tmp_path / "existing_library.json"
+
+    taxonomy_payload = {
+        "paths": [
+            {
+                "parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+                "leaf_category": "Δοκιμαστική Κατηγορία",
+                "sub_category": None,
+                "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Δοκιμαστική Κατηγορία > -",
+                "cta_url": "https://example.test/demo",
+                "url": "https://example.test/demo",
+            }
+        ]
+    }
+    taxonomy_path.write_text(json.dumps(taxonomy_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    authored_template = {
+        "id": "demo_template_v1",
+        "category_gr": "Δοκιμαστική Κατηγορία",
+        "cta_map_key": "Δοκιμαστική Κατηγορία",
+        "cta_url": "https://example.test/demo",
+        "electronet_examples": ["https://example.test/product-a"],
+        "sections": [
+            {
+                "section": "Πρώτη Ενότητα",
+                "labels": ["Πρώτη Ετικέτα", "Δεύτερη Ετικέτα"],
+            },
+            {
+                "section": "Δεύτερη Ενότητα",
+                "labels": ["Τρίτη Ετικέτα"],
+            },
+        ],
+    }
+    (template_root / "demo.json").write_text(json.dumps(authored_template, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    existing_library_payload = {
+        "version": "stale",
+        "source_system": "electronet",
+        "schemas": [
+            {
+                "schema_id": "sha1:legacy-schema-id",
+                "template_id": "demo",
+                "source_files": ["demo.json"],
+                "sections": [
+                    {
+                        "title": "Παρωχημένη Ενότητα",
+                        "labels": ["Παρωχημένη Ετικέτα"],
+                    }
+                ],
+            }
+        ],
+    }
+    existing_library_path.write_text(
+        json.dumps(existing_library_payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    payload_without_existing = build_library_payload(
+        template_root=template_root,
+        taxonomy_path=taxonomy_path,
+        existing_library_path=None,
+    )
+    payload_with_existing = build_library_payload(
+        template_root=template_root,
+        taxonomy_path=taxonomy_path,
+        existing_library_path=existing_library_path,
+    )
+
+    assert payload_with_existing == payload_without_existing
+
+    schema = _schemas_by_template_id(payload_with_existing)["demo"]
+    assert schema["sections"] == [
+        {
+            "title": "Πρώτη Ενότητα",
+            "labels": ["Πρώτη Ετικέτα", "Δεύτερη Ετικέτα"],
+        },
+        {
+            "title": "Δεύτερη Ενότητα",
+            "labels": ["Τρίτη Ετικέτα"],
+        },
+    ]
+    assert schema["schema_id"] != "sha1:legacy-schema-id"
+
+    edited_root = tmp_path / "templates-edited"
+    edited_root.mkdir()
+    edited_template = dict(authored_template)
+    edited_template["sections"] = [
+        {
+            "section": "Πρώτη Ενότητα",
+            "labels": ["Πρώτη Ετικέτα", "Δεύτερη Ετικέτα", "Νέα Ετικέτα"],
+        },
+        {
+            "section": "Δεύτερη Ενότητα",
+            "labels": ["Τρίτη Ετικέτα"],
+        },
+    ]
+    (edited_root / "demo.json").write_text(json.dumps(edited_template, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    edited_payload = build_library_payload(
+        template_root=edited_root,
+        taxonomy_path=taxonomy_path,
+        existing_library_path=existing_library_path,
+    )
+    edited_schema = _schemas_by_template_id(edited_payload)["demo"]
+
+    assert edited_schema["schema_id"] != schema["schema_id"]

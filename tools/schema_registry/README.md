@@ -80,7 +80,8 @@ Compile validated Electronet templates into the compact runtime schema library.
 Responsibilities:
 
 * read template files
-* normalize them into the runtime schema shape
+* normalize current authored templates into the runtime schema shape
+* derive `sections` and `schema_id` only from current authored templates plus taxonomy binding
 * derive summary fields such as section counts and sentinel values
 * write `resources/schemas/electronet_schema_library.json`
 
@@ -141,6 +142,7 @@ python -m tools.schema_registry.refresh_template_coverage
 * Preserve section and label order.
 * Prefer deterministic output over convenience.
 * Fail clearly instead of guessing when template inputs are invalid.
+* Do not recover schema structure or ids from prior compiled artifacts.
 
 ## Landed runtime metadata
 

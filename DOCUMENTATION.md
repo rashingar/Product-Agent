@@ -3,6 +3,40 @@
 ## Current milestone
 Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
 
+## 2026-04-02 - Remove compiled-library state reuse from Electronet schema compilation
+
+Goal:
+- make the Electronet schema compiler source-of-truth pure so compiled schema structure never depends on prior generated library state
+- ensure compiled `sections` come only from authored templates and `schema_id` is derived deterministically from current authored inputs
+
+Files edited:
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+- `tools/schema_registry/README.md`
+- `tools/schema_registry/build_electronet_schema_library.py`
+- `tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+What changed:
+- removed the builder path that loaded prior compiled library entries to recover legacy `sections` or `schema_id`
+- deleted the legacy helper functions that matched compiled entries by source filename and reused prior compatibility sections
+- added pure helpers so compiled `sections` are emitted directly from authored template sections with authored section and label order preserved
+- `schema_id` is now always derived from a deterministic hash of current authored structure plus resolved taxonomy binding, not recovered from an existing compiled artifact
+- kept the existing category binding and matcher metadata generation behavior intact
+- added a regression test proving:
+  - `build_library_payload(...)` returns the same payload whether or not an existing compiled library path is provided
+  - emitted `sections` come from the authored template, not a stale compiled artifact
+  - changing authored template structure changes `schema_id`
+- tightened schema-registry docs so they state explicitly that compiled structure and ids are derived from current authored templates rather than prior compiled outputs
+
+Commands run:
+- `python -m pytest -q tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+Validation:
+- targeted Electronet schema builder tests passed after the refactor
+
+Risks, blockers, or skipped items:
+- `existing_library_path` remains in `build_library_payload(...)` for call-site compatibility, but it is now explicitly ignored for compiled schema semantics
+
 ## 2026-04-01 - Finalize category-scoped schema matching docs to match landed behavior
 
 Goal:
