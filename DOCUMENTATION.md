@@ -1,7 +1,96 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-Split-LLM intro validation timing and intro-only retry refactor completed on `feat/split-llm-intro-retry`. Render now resolves `seo_meta` first, then `intro_text`, validates intro immediately with intro-only retry for `llm_intro_text_word_count_invalid`, and blocks downstream candidate/render/publish work until intro validation succeeds.
+Category-scoped schema matching contract is now frozen in the control docs. This is a docs-only scope update; runtime schema selection behavior has not changed yet.
+
+## 2026-04-01 - Freeze category-scoped schema matching contract before code changes
+
+Goal:
+- update the control docs first before any runtime matcher work
+- define the exact branch contract for category-scoped schema matching so later runtime schema selection becomes fail closed once canonical category resolution is correct
+- keep this commit docs-only with no matcher behavior changes yet
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+
+Recorded problem statement:
+- the current failure mode is not category resolution drift alone; category match can be correct while schema selection still drifts to an unrelated template because matching is too global or too weakly constrained
+- the example failure class captured in the contract is a washing-machine product inheriting meat-grinder-like characteristics from an unrelated schema family
+
+Recorded design contract:
+- runtime schema selection must be category-scoped rather than global
+- compiled runtime metadata must include category binding plus hard-gating fields
+- deterministic direct selection must be used when a category has exactly one active safe template
+- if multiple templates exist in the same category family, only sibling templates in that family may compete
+- if hard gates fail, the matcher must return `no_safe_template_match` instead of borrowing another category's schema
+
+Recorded compiled metadata contract:
+- `PLAN.md` and the new spec now define these required compiled runtime fields:
+  - `source_system`
+  - `template_id`
+  - `category_path`
+  - `parent_category`
+  - `leaf_category`
+  - `sub_category`
+  - `cta_map_key`
+  - `template_status`
+  - `match_mode`
+  - `section_names_exact`
+  - `section_names_normalized`
+  - `label_set_exact`
+  - `label_set_normalized`
+  - `section_label_pairs_normalized`
+  - `discriminator_labels`
+  - `required_labels_any`
+  - `required_labels_all`
+  - `forbidden_labels`
+  - `min_section_overlap`
+  - `min_label_overlap`
+  - `sibling_template_ids`
+  - `fingerprint`
+  - `source_template_file`
+- `template_status` is now documented to distinguish at least:
+  - `active`
+  - `manual_only`
+  - `deprecated`
+  - `incomplete`
+- `match_mode` is now documented to distinguish at least:
+  - `direct_only`
+  - `sibling_scored`
+
+Recorded matcher behavior contract:
+- resolve canonical category first
+- build a category-scoped candidate pool from compiled metadata
+- drop `manual_only`, `deprecated`, and `incomplete` templates
+- direct-select when exactly one active safe template remains
+- otherwise apply intra-category hard gates and bounded sibling scoring only within the same category family
+- if no candidate satisfies the hard gates, return `no_safe_template_match`
+
+Recorded non-goals:
+- no global fuzzy fallback
+- no cross-category schema rescue
+- no category taxonomy rewrite in this branch
+- no category resolution behavior change in this branch
+- no public workflow entrypoint change in this branch
+- no unrelated prepare/render orchestration refactor in this branch
+
+Commands run:
+- `Get-ChildItem -Force`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-ChildItem docs -Recurse -File | Select-Object -ExpandProperty FullName`
+- `rg -n "schema|template|characteristics|matcher|match" PLAN.md DOCUMENTATION.md docs -S`
+- `Get-Content PLAN.md | Select-Object -Skip 360 -First 120`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 220`
+- `Get-Content DOCUMENTATION.md | Select-Object -Skip 560 -First 120`
+
+Validation:
+- `PLAN.md` now explicitly defines category-scoped candidate pools
+- `PLAN.md` and the new spec explicitly define fail-closed matcher behavior
+- the compiled metadata fields and required `match_mode` values are now documented
+- this commit changes docs only; no Python/runtime files changed and no matcher behavior changed yet
 
 ## 2026-04-01 - Land split-LLM intro validation timing and intro-only retry refactor
 

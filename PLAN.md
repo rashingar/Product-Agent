@@ -469,6 +469,87 @@ Landed injection boundary:
 Recommended next branch:
 1. Extract taxonomy/manufacturer-enrichment orchestration out of `scraper/pipeline/prepare_stage.py` as the next internal seam, without widening into workflow or handoff behavior changes.
 
+### Branch scope — category-scoped schema matching contract
+
+Status: pending
+
+Purpose:
+1. Freeze the exact branch contract for making runtime schema selection fail closed once canonical category resolution is already correct.
+2. Keep this work limited to schema/template compilation and runtime schema selection safety.
+3. Preserve category resolution behavior, public workflow entrypoints, and unrelated prepare/render orchestration in the scope-freeze commit.
+
+Problem statement:
+1. The current failure mode is not category resolution drift; category resolution can be correct while schema selection still drifts to an unrelated template because matching is too global or too weakly constrained.
+2. The concrete failure class to prevent is a correctly resolved washing-machine product borrowing meat-grinder-like characteristics because a global matcher can still score an unrelated template highly enough.
+
+Design contract:
+1. Runtime schema selection must be category-scoped, not global.
+2. Compiled runtime metadata must bind every selectable template to its resolved category family and expose hard-gating fields for runtime enforcement.
+3. When a category resolves to exactly one active safe template, runtime selection must use deterministic direct selection instead of fuzzy competition.
+4. When multiple templates exist in the same category family, only sibling templates inside that same category family may compete.
+5. If hard gates fail, the matcher must fail closed with `no_safe_template_match` instead of borrowing a schema from another category.
+
+Compiled runtime metadata contract:
+1. The compiled runtime manifest for each template entry introduced by this branch must include:
+   - `source_system`
+   - `template_id`
+   - `category_path`
+   - `parent_category`
+   - `leaf_category`
+   - `sub_category`
+   - `cta_map_key`
+   - `template_status`
+   - `match_mode`
+   - `section_names_exact`
+   - `section_names_normalized`
+   - `label_set_exact`
+   - `label_set_normalized`
+   - `section_label_pairs_normalized`
+   - `discriminator_labels`
+   - `required_labels_any`
+   - `required_labels_all`
+   - `forbidden_labels`
+   - `min_section_overlap`
+   - `min_label_overlap`
+   - `sibling_template_ids`
+   - `fingerprint`
+   - `source_template_file`
+2. `template_status` is the compiled safety gate for template eligibility and must distinguish at least:
+   - `active`
+   - `manual_only`
+   - `deprecated`
+   - `incomplete`
+3. `match_mode` is the compiled runtime-selection mode and must distinguish at least:
+   - `direct_only`
+   - `sibling_scored`
+4. Only `active` templates may enter the automatic runtime candidate pool.
+5. `sibling_template_ids` must enumerate only templates within the same category family that are allowed to compete when `match_mode` is `sibling_scored`.
+
+Matcher behavior contract:
+1. Resolve canonical category first.
+2. Build a category-scoped candidate pool from compiled metadata using the resolved category binding.
+3. Drop any candidate marked `manual_only`, `deprecated`, or `incomplete`.
+4. If exactly one active safe template remains, select it directly.
+5. Otherwise, apply only intra-category hard gates and bounded scoring across sibling candidates from that same category family.
+6. If no candidate satisfies the hard gates, return `no_safe_template_match`.
+
+Invariants that must not change in this branch:
+1. Category resolution behavior does not change in this branch.
+2. Public workflow entrypoints do not change in this branch.
+3. Prepare/render orchestration ownership does not change in this branch.
+4. This scope-freeze commit does not change runtime behavior yet.
+
+Explicit non-goals:
+1. No global fuzzy fallback.
+2. No cross-category schema rescue.
+3. No category taxonomy rewrite in this branch.
+4. No category resolution behavior change in this branch.
+5. No public workflow entrypoint change in this branch.
+6. No unrelated prepare/render orchestration refactor in this branch.
+
+Documentation home:
+1. The detailed field-by-field contract for this branch is recorded in `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`.
+
 ### Phase 4 — Hybrid RAG foundation
 
 Status: pending
