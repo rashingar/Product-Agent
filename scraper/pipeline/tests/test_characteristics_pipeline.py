@@ -11,15 +11,29 @@ from pipeline.html_builders import _normalize_characteristics_label
 from pipeline.mapping import build_row
 from pipeline.models import CLIInput, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.normalize import normalize_for_match
+from pipeline.repo_paths import SCHEMA_LIBRARY_PATH
 from pipeline.schema_matcher import SchemaMatcher
+from pipeline.utils import read_json
 
 
-TV_TEMPLATE_SCHEMA_ID = "sha1:954c8413f2da941e78f3ddce65df522654336c8c"
-HOOD_SCHEMA_ID = "sha1:0afca19ffd5ea62d89eedacca3c889e8d0e67b37"
-BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
-FRIDGE_FREEZER_SCHEMA_ID = "sha1:22347b4ccec0f85eaab6c1116d6ca8e5e40b9e3b"
-ICE_CREAM_MAKER_SCHEMA_ID = "sha1:fb24efeacf0495fc3359e8528122e32ba3f7ec00"
-WASHING_MACHINE_SCHEMA_ID = "sha1:5dd5b1d1398630b950232cbf39069774fbf003cc"
+_SCHEMA_LIBRARY = read_json(SCHEMA_LIBRARY_PATH)
+
+
+def _schema_id_for_source_file(source_file: str) -> str:
+    for schema in _SCHEMA_LIBRARY.get("schemas", []):
+        if source_file in schema.get("source_files", []):
+            schema_id = str(schema.get("schema_id", "")).strip()
+            if schema_id:
+                return schema_id
+    raise AssertionError(f"Schema id not found for source file {source_file!r}.")
+
+
+TV_TEMPLATE_SCHEMA_ID = _schema_id_for_source_file("tileoraseis.json")
+HOOD_SCHEMA_ID = _schema_id_for_source_file("aporrofitires.json")
+BUILT_IN_HOB_SCHEMA_ID = _schema_id_for_source_file("esties.json")
+FRIDGE_FREEZER_SCHEMA_ID = _schema_id_for_source_file("psygeiokatapsyktes.json")
+ICE_CREAM_MAKER_SCHEMA_ID = _schema_id_for_source_file("pagotomixanes.json")
+WASHING_MACHINE_SCHEMA_ID = _schema_id_for_source_file("plyntiria_rouxwn.json")
 
 
 def test_normalize_characteristics_label_keeps_balanced_parentheses_unchanged() -> None:
@@ -419,14 +433,23 @@ def test_schema_matcher_prefers_template_source_files_for_tv_sections() -> None:
     ]
     matcher = SchemaMatcher()
 
-    default_result, _default_candidates = matcher.match(sections, taxonomy_sub_category="50'' & άνω")
+    default_result, _default_candidates = matcher.match(
+        sections,
+        taxonomy_sub_category="50'' & άνω",
+        taxonomy_path="ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
+        taxonomy_parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+        taxonomy_leaf_category="Τηλεοράσεις",
+    )
     preferred_result, preferred_candidates = matcher.match(
         sections,
         taxonomy_sub_category="50'' & άνω",
         preferred_source_files=["tileoraseis.json"],
+        taxonomy_path="ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
+        taxonomy_parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+        taxonomy_leaf_category="Τηλεοράσεις",
     )
 
-    assert default_result.matched_schema_id != TV_TEMPLATE_SCHEMA_ID
+    assert default_result.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
     assert preferred_result.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
     assert preferred_candidates[0]["source_files"] == ["tileoraseis.json"]
 

@@ -53,7 +53,7 @@ python -m pipeline.workflow prepare \
   --boxnow 0 \
   --price 798
 ```
-
+<!--
 After `prepare`, inspect:
 - `work/{model}/scrape/{model}.raw.html`
 - `work/{model}/scrape/{model}.source.json`
@@ -64,7 +64,7 @@ After `prepare`, inspect:
 - `work/{model}/llm/intro_text.prompt.txt`
 - `work/{model}/llm/seo_meta.context.json`
 - `work/{model}/llm/seo_meta.prompt.txt`
-
+-->
 Prepare is scrape-only in the steady-state workflow:
 - it writes scrape artifacts under `work/{model}/scrape/`
 - it writes split-task handoff artifacts under `work/{model}/llm/`
@@ -75,7 +75,7 @@ The LLM stage now writes:
 - `work/{model}/llm/seo_meta.output.json`
 
 Rules:
-- `intro_text` is plain Greek text only, one paragraph, 120-180 words, with no HTML, bullets, or CTA language.
+- `intro_text` is plain Greek text only, one paragraph, 100-180 words, with no HTML, bullets, or CTA language.
 - `seo_meta.output.json` contains only `product.meta_description` and `product.meta_keywords`.
 - `product.meta_keywords` is structured JSON, not CSV text.
 - Presentation section titles/body copy are not LLM outputs.
@@ -85,7 +85,7 @@ Then run:
 ```bash
 python -m pipeline.workflow render --model 234385
 ```
-
+<!--
 After `render`, inspect:
 - `work/{model}/candidate/{model}.csv`
 - `work/{model}/candidate/{model}.normalized.json`
@@ -96,7 +96,7 @@ After `render`, inspect:
 - `work/{model}/publish.run.json` when the post-render publish phase runs
 - `work/{model}/upload.opencart.json` when the publish phase reaches image upload
 - `work/{model}/import.opencart.json` when the publish phase reaches CSV import
-
+-->
 On successful validation, `render` publishes `products/{model}.csv`, completes the render phase, and then starts a separate publish phase through `tools/run_opencart_pipeline.sh`. The publish wrapper runs image upload first and CSV import second, using `CURRENT_JOB_PRODUCT_FILE` for the exact current-job published CSV path. Render success remains render-only; publish status, stage, message, and report paths are reported separately.
 
 ## Deterministic Description Rendering

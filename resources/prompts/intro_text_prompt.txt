@@ -11,7 +11,7 @@ OUTPUT RULE
 
 WRITING RULES
 - Write exactly one paragraph in Greek.
-- Keep it between 120 and 180 words.
+- Keep it between 100 and 180 words.
 - Do not use HTML.
 - Do not use bullets or numbered lists.
 - Do not use CTA language or purchase prompts.

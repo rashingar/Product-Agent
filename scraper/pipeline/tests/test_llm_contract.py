@@ -89,14 +89,20 @@ def test_build_seo_meta_context_includes_required_keyword_evidence() -> None:
 
 
 def test_validate_intro_text_output_accepts_plain_text_only() -> None:
-    normalized, errors = validate_intro_text_output(" ".join(["λέξη"] * 120))
+    normalized, errors = validate_intro_text_output(" ".join(["λέξη"] * INTRO_MIN_WORDS))
 
     assert errors == []
     assert normalized.startswith("λέξη")
 
 
+def test_validate_intro_text_output_rejects_short_intro() -> None:
+    _, errors = validate_intro_text_output(" ".join(["λέξη"] * (INTRO_MIN_WORDS - 1)))
+
+    assert "llm_intro_text_word_count_invalid" in errors
+
+
 def test_validate_intro_text_output_rejects_html() -> None:
-    _, errors = validate_intro_text_output("<p>λέξη</p> " + " ".join(["λέξη"] * 119))
+    _, errors = validate_intro_text_output("<p>λέξη</p> " + " ".join(["λέξη"] * (INTRO_MIN_WORDS - 1)))
 
     assert "llm_intro_text_html_invalid" in errors
 

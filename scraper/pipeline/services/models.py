@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 
 class RunType(str, Enum):
@@ -76,7 +77,7 @@ class RunMetadata:
     requested_at: str | None = None
     started_at: str | None = None
     finished_at: str | None = None
-    context: dict[str, str | int | float | bool | None] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
     error_code: str | None = None
     error_detail: str | None = None
@@ -86,4 +87,4 @@ class RunMetadata:
 class ServiceResult:
     run: RunMetadata
     artifacts: RunArtifacts = field(default_factory=RunArtifacts)
-    details: dict[str, str | int | float | bool | None] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)

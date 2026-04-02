@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import shutil
-from collections.abc import Mapping
 from pathlib import Path
 
 from ..csv_writer import write_csv_row
@@ -15,6 +14,7 @@ from ..utils import ensure_directory, read_json, utcnow_iso, write_json, write_t
 from ..validator import validate_candidate_csv, write_validation_report
 from .execution_models import RenderExecutionResult, RenderExecutionValidationReport
 from .errors import ServiceErrorCode, service_error_from_exception
+from .llm_stage_execution import IntroTextResolver, SeoMetaResolver, SplitLLMStageResult, execute_split_llm_stage
 from .metadata import maybe_write_run_metadata
 from .models import RunArtifacts, RunStatus, RunType
 
@@ -27,6 +27,8 @@ def execute_render_workflow(
     *,
     work_root: Path = WORK_ROOT,
     products_root: Path = PRODUCTS_ROOT,
+    resolve_intro_text_fn: IntroTextResolver | None = None,
+    resolve_seo_meta_fn: SeoMetaResolver | None = None,
 ) -> RenderExecutionResult:
     model_root = work_root / model
     scrape_dir = model_root / "scrape"
@@ -41,6 +43,11 @@ def execute_render_workflow(
     characteristics_path = candidate_dir / "characteristics.html"
     normalized_candidate_path = candidate_dir / f"{model}.normalized.json"
     validation_report_path = candidate_dir / f"{model}.validation.json"
+    llm_artifact_paths = {
+        "intro_text_output_path": llm_dir / "intro_text.output.txt",
+        "intro_text_trace_path": llm_dir / "intro_text.retry_trace.json",
+        "seo_meta_output_path": llm_dir / "seo_meta.output.json",
+    }
     requested_at = utcnow_iso()
     started_at = requested_at
     try:
@@ -64,12 +71,15 @@ def execute_render_workflow(
         schema_match = SchemaMatchResult(**normalized.get("schema_match", {}))
         parsed = ParsedProduct(source=source)
 
-        llm_inputs = _load_render_llm_inputs(
-            model_root=model_root,
+        split_llm_result = execute_split_llm_stage(
             llm_dir=llm_dir,
             task_manifest_path=task_manifest_json,
+            resolve_intro_text_fn=resolve_intro_text_fn,
+            resolve_seo_meta_fn=resolve_seo_meta_fn,
         )
-        llm_product, llm_intro_text, llm_errors, llm_mode, llm_artifact_paths = _normalize_render_llm_inputs(llm_inputs)
+        llm_errors = _build_llm_validation_backstop_errors(split_llm_result)
+        llm_mode = "split_tasks"
+        llm_artifact_paths = split_llm_result.artifact_paths
 
         extracted_sections = extract_presentation_blocks(
             presentation_source_html=source.presentation_source_html,
@@ -95,8 +105,8 @@ def execute_render_workflow(
             schema_match=schema_match,
             downloaded_image_count=len(source.gallery_images),
             besco_filenames_by_section=besco_filenames_by_section,
-            llm_product=llm_product,
-            llm_intro_text=llm_intro_text,
+            llm_product=split_llm_result.llm_product,
+            llm_intro_text=split_llm_result.intro_text,
             deterministic_presentation_sections=render_sections,
         )
         headers, ordered_row = write_csv_row(row, candidate_csv_path)
@@ -167,6 +177,7 @@ def execute_render_workflow(
                 "validation_ok": validation_ok,
                 "published": validation_ok,
                 "llm_mode": llm_mode,
+                "intro_text_trace_path": str(llm_artifact_paths["intro_text_trace_path"]),
             },
         )
 
@@ -198,6 +209,8 @@ def execute_render_workflow(
                     source_json_path=source_json,
                     scrape_normalized_json_path=normalized_json,
                     llm_task_manifest_path=task_manifest_json if task_manifest_json.exists() else None,
+                    intro_text_output_path=llm_artifact_paths.get("intro_text_output_path"),
+                    seo_meta_output_path=llm_artifact_paths.get("seo_meta_output_path"),
                     candidate_csv_path=candidate_csv_path,
                     published_csv_path=published_csv_path,
                     candidate_normalized_json_path=normalized_candidate_path,
@@ -210,6 +223,7 @@ def execute_render_workflow(
                 finished_at=finished_at,
                 error_code=service_error.code,
                 error_detail=service_error.message,
+                details=dict(service_error.details),
             )
         raise
 
@@ -271,44 +285,18 @@ def load_source_product(path: str | Path) -> SourceProductData:
     )
 
 
-def _load_render_llm_inputs(
-    *,
-    model_root: Path,
-    llm_dir: Path,
-    task_manifest_path: Path,
-) -> dict[str, object]:
-    intro_text_output_path = llm_dir / "intro_text.output.txt"
-    seo_meta_output_path = llm_dir / "seo_meta.output.json"
-    manifest = read_json(task_manifest_path) if task_manifest_path.exists() else {}
-    tasks = manifest.get("primary_outputs", {}).get("tasks", {}) if isinstance(manifest, dict) else {}
-    if isinstance(tasks, dict):
-        intro_text_output_path = Path(tasks.get("intro_text", {}).get("expected_output_path", intro_text_output_path))
-        seo_meta_output_path = Path(tasks.get("seo_meta", {}).get("expected_output_path", seo_meta_output_path))
-
-    if not intro_text_output_path.exists() or not seo_meta_output_path.exists():
-        raise FileNotFoundError(f"Missing split-task LLM outputs in {llm_dir}")
-    return {
-        "mode": "split_tasks",
-        "intro_text_output_path": intro_text_output_path,
-        "seo_meta_output_path": seo_meta_output_path,
-        "intro_text_payload": intro_text_output_path.read_text(encoding="utf-8"),
-        "seo_meta_payload": read_json(seo_meta_output_path),
-    }
-
-
-def _normalize_render_llm_inputs(inputs: Mapping[str, object]) -> tuple[dict[str, object], str, list[str], str, dict[str, Path]]:
-    intro_text, intro_errors = validate_intro_text_output(inputs.get("intro_text_payload", ""))
-    normalized_seo, seo_errors = validate_seo_meta_output(inputs.get("seo_meta_payload", {}))
-    return (
-        normalized_seo.get("product", {}),
-        intro_text,
-        [*intro_errors, *seo_errors],
-        "split_tasks",
+def _build_llm_validation_backstop_errors(split_llm_result: SplitLLMStageResult) -> list[str]:
+    intro_text, intro_errors = validate_intro_text_output(split_llm_result.intro_text)
+    _, seo_errors = validate_seo_meta_output(
         {
-            "intro_text_output_path": Path(inputs["intro_text_output_path"]),
-            "seo_meta_output_path": Path(inputs["seo_meta_output_path"]),
-        },
+            "product": {
+                "meta_description": split_llm_result.llm_product.get("meta_description", ""),
+                "meta_keywords": split_llm_result.llm_product.get("meta_keywords", []),
+            }
+        }
     )
+    del intro_text
+    return [*intro_errors, *seo_errors]
 
 
 def _resolve_render_sections(

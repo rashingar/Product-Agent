@@ -1,7 +1,510 @@
 # Product-Agent Engineering Log
 
 ## Current milestone
-M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
+Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
+
+## 2026-04-02 - Regenerate stale schema index artifact
+
+Goal:
+- bring the checked-in schema index back into sync with the current compiled Electronet library and index contract
+- keep the fix limited to the stale derived artifact identified in merge review
+- avoid any matcher, compiler-policy, or coverage-report behavior changes
+
+Files changed:
+- `DOCUMENTATION.md`
+- `resources/schemas/schema_index.csv`
+
+What changed:
+- regenerated `resources/schemas/schema_index.csv` from the current compiled library using the existing schema-index tool
+- confirmed the checked-in compiled library did not change during regeneration
+- updated stale `subcategory_match_policy` rows in the index so the mixed air-conditioner and fan families now match the current compiled metadata
+
+Commands run:
+- `python -m tools.schema_registry.build_electronet_schema_library`
+- `python -m tools.schema_registry.build_schema_index`
+- `python -m pytest tools/schema_registry/tests/test_build_schema_index.py tools/schema_registry/tests/test_build_electronet_schema_library.py -q`
+
+Validation:
+- regenerated schema index diff is limited to stale `subcategory_match_policy` values in mixed-family rows
+- focused schema-index and compiler tests passed
+- no matcher/runtime/tool logic changed in this blocker-fix commit
+
+Risks, blockers, or skipped items:
+- no additional repo-state guard was added in this commit to keep the pre-merge fix minimal
+
+## 2026-04-02 - Disambiguate ambiguous coverage labels only when needed
+
+Goal:
+- keep the Electronet template coverage report compact while removing any chance of misleading duplicate-looking labels across taxonomy branches
+- make label disambiguation conditional on the actual rendered coverage rows instead of precomputing display labels during taxonomy load
+- keep matcher, compiler, and runtime workflow behavior unchanged
+
+Files changed:
+- `DOCUMENTATION.md`
+- `tools/schema_registry/refresh_template_coverage.py`
+- `tools/schema_registry/tests/test_refresh_template_coverage.py`
+
+What changed:
+- moved coverage-label rendering into a focused helper that counts collisions across the expected rows being rendered
+- kept unique labels compact and unchanged
+- kept colliding labels in the compact contextual format `label [parent > leaf]`
+- stopped storing pre-disambiguated labels in `ExpectedCategory.key`; coverage rows now derive their visible label at render time from taxonomy context
+- expanded focused tests to cover:
+  - unique labels staying compact
+  - Android/iOS-style branch collisions disambiguating deterministically
+  - non-colliding rows not being expanded when some labels in the report do collide
+- regenerated the live Electronet coverage report; the file content stayed stable because the already-rendered ambiguous branch labels still resolve to the same visible strings
+
+Commands run:
+- `python -m pytest tools/schema_registry/tests/test_refresh_template_coverage.py -q`
+- `python -m tools.schema_registry.refresh_template_coverage`
+
+Validation:
+- focused coverage tests passed: `5 passed`
+- coverage report regeneration completed successfully
+- no matcher, compiler, or runtime files changed
+
+Risks, blockers, or skipped items:
+- this commit intentionally keeps disambiguation context at `parent > leaf`; if a future taxonomy ever collides within the same parent/leaf branch, the coverage helper would need a narrower context format
+
+## 2026-04-02 - Remove compiled-library state reuse from Electronet schema compilation
+
+Goal:
+- make the Electronet schema compiler source-of-truth pure so compiled schema structure never depends on prior generated library state
+- ensure compiled `sections` come only from authored templates and `schema_id` is derived deterministically from current authored inputs
+
+Files edited:
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+- `tools/schema_registry/README.md`
+- `tools/schema_registry/build_electronet_schema_library.py`
+- `tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+What changed:
+- removed the builder path that loaded prior compiled library entries to recover legacy `sections` or `schema_id`
+- deleted the legacy helper functions that matched compiled entries by source filename and reused prior compatibility sections
+- added pure helpers so compiled `sections` are emitted directly from authored template sections with authored section and label order preserved
+- `schema_id` is now always derived from a deterministic hash of current authored structure plus resolved taxonomy binding, not recovered from an existing compiled artifact
+- kept the existing category binding and matcher metadata generation behavior intact
+- added a regression test proving:
+  - `build_library_payload(...)` returns the same payload whether or not an existing compiled library path is provided
+  - emitted `sections` come from the authored template, not a stale compiled artifact
+  - changing authored template structure changes `schema_id`
+- tightened schema-registry docs so they state explicitly that compiled structure and ids are derived from current authored templates rather than prior compiled outputs
+
+Commands run:
+- `python -m pytest -q tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+Validation:
+- targeted Electronet schema builder tests passed after the refactor
+
+Risks, blockers, or skipped items:
+- `existing_library_path` remains in `build_library_payload(...)` for call-site compatibility, but it is now explicitly ignored for compiled schema semantics
+
+## 2026-04-01 - Finalize category-scoped schema matching docs to match landed behavior
+
+Goal:
+- align the branch docs with the implementation that actually shipped
+- document the compiled runtime metadata shape, landed `match_mode` values, hard-gating rules, fail-closed semantics, and runtime debug inspection path
+- remove stale wording that still implied planned-state names or allowed global schema similarity fallback
+
+Files edited:
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+- `tools/schema_registry/README.md`
+
+What changed:
+- the category-scoped contract spec is now marked `implemented` instead of `planned`
+- stale planned-state matcher names such as `direct_only` / `sibling_scored` were replaced with the landed values:
+  - `direct_single`
+  - `category_pool`
+  - `manual_only`
+- the docs now describe the landed matcher flow:
+  - category-path scoped candidate pool
+  - same-family leaf-only fallback only when needed
+  - active-template filtering
+  - hard gates before sibling scoring
+  - bounded intra-category scoring only
+  - fail-closed `no_safe_template_match`
+- the docs now spell out where to inspect runtime matcher diagnostics:
+  - `work/{model}/scrape/{model}.normalized.json`
+  - `work/{model}/scrape/{model}.report.json`
+
+Validation:
+- docs updated to match the current implementation and regression coverage
+- stale wording implying global schema fallback or old matcher mode names was removed from the schema-matching spec and schema-registry runbook
+
+## 2026-04-01 - Add focused regression coverage for category-scoped schema safety
+
+Goal:
+- lock the new category-scoped schema safety behavior so correct category resolution cannot silently drift to the wrong characteristics template in future changes
+- cover the key direct-single template families from the compiled Electronet schema library
+- keep the coverage deterministic, cheap, and synthetic where runtime fixture extraction is sufficient
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+
+What changed:
+- added compiled-library matcher regressions for these direct-single template families:
+  - `tileoraseis`
+  - `koyzines`
+  - `plyntiria_piaton`
+  - `entoixizomena_plyntiria_piaton`
+  - `plyntiria_rouxwn`
+  - `entoixizomena_plyntiria_royxon`
+  - `entoixizomena_psygeia`
+- each regression test drives `SchemaMatcher` with deterministic synthetic extracted specs derived from the compiled schema metadata and asserts that the resolved family selects its own template
+- added compiled-library negative-path regressions proving that:
+  - generic washing-machine-family labels cannot escape the resolved washing-machine category
+  - kitchen/cooker-shaped extracted specs cannot override a washing-machine category binding
+- existing bounded sibling behavior remains pinned by:
+  - `scraper/pipeline/tests/test_schema_matcher.py` synthetic `category_pool` matcher tests
+  - `tools/schema_registry/tests/test_build_electronet_schema_library.py` compiler-side `category_pool` metadata test
+
+Commands run:
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+- `python -m pytest tools/schema_registry/tests/test_build_electronet_schema_library.py scraper/pipeline/tests/test_schema_matcher.py`
+- `python -m pytest scraper/pipeline/tests tools/schema_registry/tests`
+
+Validation:
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py` passed
+- `python -m pytest tools/schema_registry/tests/test_build_electronet_schema_library.py scraper/pipeline/tests/test_schema_matcher.py` passed
+- `python -m pytest scraper/pipeline/tests tools/schema_registry/tests` passed with `232 passed`
+
+Notes:
+- no schema-result field names or fail-reason enums changed in this milestone
+- the new coverage intentionally keeps the listed family tests on direct-single categories from the real compiled library and leaves sibling-pool behavior pinned by the existing synthetic matcher + compiler tests
+
+## 2026-04-01 - Add structured debug reporting for category-scoped schema matching
+
+Goal:
+- expose enough structured schema-selection detail to debug fail-closed outcomes quickly from existing report artifacts
+- keep the result envelope additive and backward-compatible while preserving fail-closed behavior
+- ensure success paths also emit the new metadata so selected-template decisions remain diagnosable
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/models.py`
+- `scraper/pipeline/schema_matcher.py`
+- `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `scraper/pipeline/tests/test_schema_matcher.py`
+
+What changed:
+- `SchemaMatchResult` now carries additive structured debug fields:
+  - `resolved_category_path`
+  - `candidate_pool_size`
+  - `candidate_template_ids`
+  - `selected_template_id`
+  - `match_mode`
+  - `hard_gate_failures`
+  - `fail_reason`
+  - `discriminator_hits`
+  - `discriminator_misses`
+  - `section_overlap_score`
+  - `label_overlap_score`
+- the matcher now populates those fields for:
+  - empty category pools
+  - manual-only categories
+  - categories with no active templates
+  - hard-gate failures
+  - successful direct selection
+  - successful bounded sibling selection
+- standard fail reasons are now surfaced through the result envelope:
+  - `pool_empty_for_category`
+  - `manual_only_category`
+  - `no_active_templates`
+  - `discriminator_miss`
+  - `insufficient_section_overlap`
+  - `insufficient_label_overlap`
+  - `no_safe_template_match`
+- `schema_resolution` in the prepare report now includes the expanded structured debug payload automatically via `SchemaMatchResult.to_dict()`
+- fail-closed behavior is unchanged:
+  - no unrelated fallback template is selected
+  - `selected_template_id` stays `null` when no safe match exists
+  - `no_safe_template_match` remains an explicit surfaced warning/result state rather than a silent continuation
+
+Test coverage added/updated:
+- matcher tests now assert specific surfaced fail reasons for:
+  - discriminator misses
+  - manual-only categories
+  - insufficient section overlap
+  - insufficient label overlap
+- success-path tests now assert that selected-template debug metadata is present in both `SchemaMatchResult` and the prepare report payload
+
+Commands run:
+- `Get-Content scraper\pipeline\models.py | Select-Object -Skip 248 -First 60`
+- `Get-Content scraper\pipeline\prepare_result_assembly.py | Select-Object -Skip 90 -First 90`
+- `Get-Content scraper\pipeline\tests\test_schema_matcher.py`
+- `Get-Content scraper\pipeline\tests\test_prepare_result_assembly_module.py | Select-Object -Skip 360 -First 90`
+- `Get-Content scraper\pipeline\services\render_execution.py | Select-Object -First 120`
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher.py`
+- `python -m pytest scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `python -m pytest scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_services.py`
+- `python -m pytest scraper/pipeline/tests`
+
+Validation:
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher.py` passed
+- `python -m pytest scraper/pipeline/tests/test_prepare_result_assembly_module.py` passed
+- `python -m pytest scraper/pipeline/tests/test_workflow.py scraper/pipeline/tests/test_services.py` passed
+- `python -m pytest scraper/pipeline/tests` passed with `218 passed`
+
+Risks / follow-up:
+- fail reasons are intentionally summarized to one primary reason in `SchemaMatchResult.fail_reason`; full per-template gate detail remains available in `hard_gate_failures`
+- direct-single categories expose real overlap metrics from the selected compiled template; those values are diagnostic, not a synthetic guarantee of `1.0`
+
+## 2026-04-01 - Implement category-scoped runtime schema selection with fail-closed sibling matching
+
+Goal:
+- replace the old global schema scoring path with category-scoped runtime selection that consumes the richer compiled metadata
+- keep category resolution unchanged while ensuring unrelated categories can never win once taxonomy resolution is correct
+- make direct-single categories deterministic and make sibling categories compete only inside their resolved category pool
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_result_assembly.py`
+- `scraper/pipeline/schema_matcher.py`
+- `scraper/pipeline/tests/test_characteristics_pipeline.py`
+- `scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `scraper/pipeline/tests/test_schema_matcher.py`
+
+What changed:
+- `SchemaMatcher` no longer scores across the full schema library
+- runtime candidate pools are now built from the resolved category binding using compiled `category_path`, `parent_category`, `leaf_category`, and `sub_category` metadata
+- if a resolved category path has no exact compiled schema entry but the family resolves to a leaf-only compiled template, the matcher falls back only to leaf-only templates in that same parent/leaf family
+- non-active templates are excluded from auto-selection by treating `template_status != active` as unsafe for runtime matching
+- categories with exactly one active safe template now select that schema directly with deterministic score `1.0`
+- sibling categories now apply hard gates before scoring:
+  - `required_labels_any`
+  - `required_labels_all`
+  - `forbidden_labels`
+  - `min_section_overlap`
+  - `min_label_overlap`
+- only candidates that survive those gates are scored, and scoring is bounded to the resolved sibling pool using:
+  - normalized section overlap
+  - normalized label overlap
+  - normalized section-label pair overlap
+  - discriminator-label overlap
+- when no safe category-scoped candidate survives, the matcher now returns `no_safe_template_match` instead of borrowing another category
+- `assemble_prepare_result()` now passes `taxonomy_path`, `parent_category`, and `leaf_category` into the matcher so runtime selection can scope itself without changing taxonomy resolution
+
+Test coverage added/updated:
+- direct deterministic selection when one active safe template remains in the resolved category
+- sibling-only competition inside one category pool
+- wrong-category schemas cannot be selected even if extracted specs resemble another template family
+- weak generic overlap fails closed instead of drifting globally
+- washing-machine-like extracted specs cannot select unrelated small-appliance templates
+- existing TV/runtime tests now assert the new category-scoped direct-selection behavior rather than weak global matching
+
+Commands run:
+- `rg -n "schema|template|characteristics|matcher|category.*schema|no_safe_template_match|required_labels_any|required_labels_all|forbidden_labels|min_section_overlap|min_label_overlap" scraper -S`
+- `Get-Content scraper\pipeline\schema_matcher.py`
+- `Get-Content scraper\pipeline\prepare_result_assembly.py | Select-Object -First 110`
+- `Get-Content scraper\pipeline\tests\test_schema_matcher.py`
+- `Get-Content scraper\pipeline\tests\test_characteristics_pipeline.py | Select-Object -Skip 320 -First 170`
+- `Get-Content scraper\pipeline\tests\test_prepare_result_assembly_module.py | Select-Object -Skip 240 -First 130`
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher.py`
+- `python -m pytest scraper/pipeline/tests/test_prepare_result_assembly_module.py`
+- `python -m pytest scraper/pipeline/tests/test_characteristics_pipeline.py`
+- `python -m pytest scraper/pipeline/tests/test_product_parser.py`
+- `python -m pytest scraper/pipeline/tests/test_prepare_provider_resolution.py`
+- `python -m pytest scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+- `python -m pytest scraper/pipeline/tests`
+
+Validation:
+- `python -m pytest scraper/pipeline/tests/test_schema_matcher.py` passed
+- `python -m pytest scraper/pipeline/tests/test_prepare_result_assembly_module.py` passed
+- `python -m pytest scraper/pipeline/tests/test_characteristics_pipeline.py` passed
+- `python -m pytest scraper/pipeline/tests/test_product_parser.py` passed
+- `python -m pytest scraper/pipeline/tests/test_prepare_provider_resolution.py` passed
+- `python -m pytest scraper/pipeline/tests/test_prepare_stage_result_assembly.py` passed
+- `python -m pytest scraper/pipeline/tests` passed with `215 passed`
+
+Risks / follow-up:
+- compiled metadata currently uses `match_mode` values such as `direct_single` and `category_pool`; runtime now consumes the safety metadata correctly, but a future cleanup can align naming with the docs contract if needed
+- leaf-only fallback is intentionally bounded to the resolved parent/leaf family so categories like TV size buckets still resolve safely without reopening cross-category rescue
+- no category resolver logic changed in this milestone
+
+## 2026-04-01 - Freeze category-scoped schema matching contract before code changes
+
+Goal:
+- update the control docs first before any runtime matcher work
+- define the exact branch contract for category-scoped schema matching so later runtime schema selection becomes fail closed once canonical category resolution is correct
+- keep this commit docs-only with no matcher behavior changes yet
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+
+Recorded problem statement:
+- the current failure mode is not category resolution drift alone; category match can be correct while schema selection still drifts to an unrelated template because matching is too global or too weakly constrained
+- the example failure class captured in the contract is a washing-machine product inheriting meat-grinder-like characteristics from an unrelated schema family
+
+Recorded design contract:
+- runtime schema selection must be category-scoped rather than global
+- compiled runtime metadata must include category binding plus hard-gating fields
+- deterministic direct selection must be used when a category has exactly one active safe template
+- if multiple templates exist in the same category family, only sibling templates in that family may compete
+- if hard gates fail, the matcher must return `no_safe_template_match` instead of borrowing another category's schema
+
+Recorded compiled metadata contract:
+- `PLAN.md` and the new spec now define these required compiled runtime fields:
+  - `source_system`
+  - `template_id`
+  - `category_path`
+  - `parent_category`
+  - `leaf_category`
+  - `sub_category`
+  - `cta_map_key`
+  - `template_status`
+  - `match_mode`
+  - `section_names_exact`
+  - `section_names_normalized`
+  - `label_set_exact`
+  - `label_set_normalized`
+  - `section_label_pairs_normalized`
+  - `discriminator_labels`
+  - `required_labels_any`
+  - `required_labels_all`
+  - `forbidden_labels`
+  - `min_section_overlap`
+  - `min_label_overlap`
+  - `sibling_template_ids`
+  - `fingerprint`
+  - `source_template_file`
+- `template_status` is now documented to distinguish at least:
+  - `active`
+  - `manual_only`
+  - `deprecated`
+  - `incomplete`
+- `match_mode` is now documented to distinguish at least:
+  - `direct_only`
+  - `sibling_scored`
+
+Recorded matcher behavior contract:
+- resolve canonical category first
+- build a category-scoped candidate pool from compiled metadata
+- drop `manual_only`, `deprecated`, and `incomplete` templates
+- direct-select when exactly one active safe template remains
+- otherwise apply intra-category hard gates and bounded sibling scoring only within the same category family
+- if no candidate satisfies the hard gates, return `no_safe_template_match`
+
+Recorded non-goals:
+- no global fuzzy fallback
+- no cross-category schema rescue
+- no category taxonomy rewrite in this branch
+- no category resolution behavior change in this branch
+- no public workflow entrypoint change in this branch
+- no unrelated prepare/render orchestration refactor in this branch
+
+Commands run:
+- `Get-ChildItem -Force`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-ChildItem docs -Recurse -File | Select-Object -ExpandProperty FullName`
+- `rg -n "schema|template|characteristics|matcher|match" PLAN.md DOCUMENTATION.md docs -S`
+- `Get-Content PLAN.md | Select-Object -Skip 360 -First 120`
+- `Get-Content DOCUMENTATION.md | Select-Object -First 220`
+- `Get-Content DOCUMENTATION.md | Select-Object -Skip 560 -First 120`
+
+Validation:
+- `PLAN.md` now explicitly defines category-scoped candidate pools
+- `PLAN.md` and the new spec explicitly define fail-closed matcher behavior
+- the compiled metadata fields and required `match_mode` values are now documented
+- this commit changes docs only; no Python/runtime files changed and no matcher behavior changed yet
+
+## 2026-04-01 - Land split-LLM intro validation timing and intro-only retry refactor
+
+Goal:
+- record the dedicated follow-up branch scope for the split-LLM orchestration refactor before changing Python code
+- move intro word-count enforcement earlier so candidate/render/publish work is gated on intro success instead of discovering failures first at late candidate validation time
+- keep `seo_meta` single-pass and allow it to complete before intro validation, without letting intro retries mutate it
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/llm_stage_execution.py`
+- `scraper/pipeline/services/metadata.py`
+- `scraper/pipeline/services/models.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/tests/test_llm_stage_execution.py`
+- `scraper/pipeline/tests/test_services.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+Recorded scope:
+- execution order becomes:
+  - `seo_meta` generation or resolution first
+  - `intro_text` generation or resolution second
+  - immediate intro validation
+  - intro-only retry on `llm_intro_text_word_count_invalid`
+  - only then existing render/validation/publish flow
+- `seo_meta` may complete before intro validation succeeds
+- intro validation is now an early hard gate for downstream candidate build, final render assembly, CSV publish, and OpenCart publish work
+- intro retries do not regenerate or mutate `seo_meta`
+- later candidate validation remains as a safety backstop, not the first intro word-count enforcement point
+- landed internal seam:
+  - `scraper/pipeline/services/llm_stage_execution.py`
+  - `run_intro_text_with_retry(...)`
+  - `execute_split_llm_stage(...)`
+- landed render-stage behavior:
+  - `render_execution.py` now resolves and validates `seo_meta` before intro execution
+  - intro retries are limited to 3 total attempts and only occur for `llm_intro_text_word_count_invalid`
+  - intro validation failures now stop the run before candidate CSV build, final render assembly, CSV publish copy, or OpenCart publish can begin
+  - successful intro retries unlock the downstream render path exactly once
+- landed intro failure typing and trace behavior:
+  - intro retry exhaustion now raises a typed `IntroTextRetryExhaustedError`
+  - the typed failure carries structured intro-specific data through `failure.stage`, `failure.code`, and `failure.attempts`
+  - `intro_text.retry_trace.json` is written under `work/{model}/llm/` with per-attempt `attempt`, `word_count`, `error_codes`, `status`, and `reason`
+  - render failure metadata now persists the intro stage trace details under `render.run.json`
+- landed atomic-write behavior:
+  - intro retry writes now use temp-file plus `os.replace(...)` semantics so a partial intro rewrite cannot be mistaken for a persisted invalid intro on the next validation pass
+- landed test coverage:
+  - direct helper coverage in `scraper/pipeline/tests/test_llm_stage_execution.py`
+  - workflow regressions proving early intro retry/success and early intro failure before candidate build
+  - regression proving `seo_meta.output.json` stays preserved and byte-for-byte unchanged across intro retries and final intro exhaustion
+  - rerun/idempotency regression proving render with already-valid `seo_meta` performs downstream work exactly once per render invocation when intro becomes valid on the first pass
+  - service regression proving early intro validation failures propagate as render-stage service failures
+
+Commands run:
+- `Get-Location; git branch --show-current; git status --short`
+- `rg --files PLAN.md DOCUMENTATION.md scraper/pipeline | sort`
+- `rg -n "render_execution|validate_intro_text_output|intro_text.output|seo_meta.output|llm_intro_text_word_count_invalid|split llm|intro_text" scraper/pipeline -S`
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content scraper/pipeline/services/render_execution.py`
+- `Get-Content scraper/pipeline/services/llm_stage_execution.py`
+- `Get-Content scraper/pipeline/services/metadata.py`
+- `Get-Content scraper/pipeline/services/models.py`
+- `Get-Content scraper/pipeline/llm_contract.py`
+- `Get-Content scraper/pipeline/services/errors.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 400 -First 120`
+- `Get-Content scraper/pipeline/tests/test_services.py | Select-Object -Skip 430 -First 170`
+- `Get-Content scraper/pipeline/services/__init__.py`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -First 220`
+- `Get-Content scraper/pipeline/tests/test_services.py | Select-Object -First 220`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 560 -First 220`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 940 -First 120`
+- `Get-Content scraper/pipeline/tests/test_workflow.py | Select-Object -Skip 1320 -First 90`
+- `rg -n "_load_render_llm_inputs|_normalize_render_llm_inputs|llm_stage_execution|execute_split_llm_stage|run_intro_text_with_retry" scraper/pipeline/tests scraper/pipeline -S`
+- `python -m pytest -q pipeline/tests/test_llm_stage_execution.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_services.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_llm_contract.py` from `scraper/`
+
+Validation:
+- `PLAN.md` now records the branch scope as completed
+- `seo_meta` is resolved first, remains single-pass, and is not regenerated during intro retries
+- intro word-count failures are now handled at the split-LLM stage instead of first surfacing during late candidate validation
+- downstream candidate/render/publish work is blocked until intro validation succeeds
+- intro retry exhaustion is now a typed error object with structured `stage`, intro-specific `code`, and `attempts` fields
+- per-attempt retry trace data is now persisted under `work/{model}/llm/intro_text.retry_trace.json` and copied into failure metadata details for inspection in CI and local runs
+- intro retry rewrites now use atomic replace semantics
+- targeted pytest results:
+  - `pipeline/tests/test_llm_stage_execution.py`: `9 passed`
+  - `pipeline/tests/test_workflow.py`: `40 passed`
+  - `pipeline/tests/test_services.py`: `21 passed`
+  - `pipeline/tests/test_llm_contract.py`: `10 passed`
 
 ## 2026-04-02 - Rewrite stale Skroutz helper test to target the extracted public seam
 
@@ -4966,3 +5469,101 @@ Validation:
 
 Risks, blockers, or skipped items:
 - validation still reports presentation warnings `presentation_sections_weak:3` and `requested_sections_reduced:11`, but these are warnings only and did not block render or publish
+
+## 2026-04-02 - Explicit subcategory match policy for Electronet schema matching
+
+What changed:
+- added explicit compiled `subcategory_match_policy` metadata to the Electronet schema library with a conservative exception map for `tileoraseis`, `koyzines`, `plyntiria_piaton`, and `foyrnoi_mikrokymaton`
+- updated `SchemaMatcher.build_candidate_pool()` to stay exact-path first and only allow leaf-only fallback when the resolved parent/leaf family has compiled `leaf_family` eligibility
+- surfaced `subcategory_match_policy` in matcher debug output and candidate diagnostics so normalized/report artifacts can carry the policy cleanly
+- added compiler, synthetic matcher, compiled-library TV fallback, and serialization regression coverage
+- regenerated `resources/schemas/electronet_schema_library.json` so runtime uses the explicit policy metadata
+
+Files changed:
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+- `resources/schemas/electronet_schema_library.json`
+- `scraper/pipeline/models.py`
+- `scraper/pipeline/schema_matcher.py`
+- `scraper/pipeline/tests/test_schema_matcher.py`
+- `scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+- `tools/schema_registry/build_electronet_schema_library.py`
+- `tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+Commands run:
+- `python tools/schema_registry/build_electronet_schema_library.py`
+- `python -m pytest tools/schema_registry/tests/test_build_electronet_schema_library.py scraper/pipeline/tests/test_schema_matcher.py scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py scraper/pipeline/tests/test_prepare_result_assembly_module.py -q`
+- `python -m pytest scraper/pipeline/tests/test_execution_models.py scraper/pipeline/tests/test_workflow.py -q`
+
+Validation:
+- compiler and matcher focused regressions passed: `32 passed`
+- execution model and workflow serialization regressions passed: `42 passed`
+- checked-in compiled library now emits `subcategory_match_policy` for every schema entry
+
+Risks, blockers, or skipped items:
+- this commit intentionally keeps the `leaf_family` exception set narrow and metadata-driven; broader mixed-family policy handling is still deferred
+
+## 2026-04-02 - Schema-registry validation, index, and coverage tools
+
+What changed:
+- finalized the schema-registry support tooling around the live repo layout and outputs
+- updated the schema index contract to emit `subcategory_match_policy` from the compiled Electronet library into `resources/schemas/schema_index.csv`
+- extended schema-index tests to cover the new column and malformed-library failure handling
+- extended coverage tests to lock in `REVIEW` status when multiple templates claim the same expected category
+- updated the schema-registry README so the documented emitted metadata matches the current compiled library and matcher debug surface
+
+Files changed:
+- `DOCUMENTATION.md`
+- `resources/schemas/schema_index.csv`
+- `tools/schema_registry/README.md`
+- `tools/schema_registry/build_schema_index.py`
+- `tools/schema_registry/tests/test_build_schema_index.py`
+- `tools/schema_registry/tests/test_refresh_template_coverage.py`
+
+Commands run:
+- `python -m tools.schema_registry.validate_templates`
+- `python -m tools.schema_registry.build_electronet_schema_library`
+- `python -m tools.schema_registry.build_schema_index`
+- `python -m tools.schema_registry.refresh_template_coverage`
+- `python -m pytest tools/schema_registry/tests/test_validate_templates.py tools/schema_registry/tests/test_build_schema_index.py tools/schema_registry/tests/test_refresh_template_coverage.py tools/schema_registry/tests/test_build_electronet_schema_library.py -q`
+
+Validation:
+- repo-root validation CLI passed against the live Electronet templates
+- repo-root build CLIs completed successfully for the compiled library, schema index, and coverage report
+- focused schema-registry test suite passed: `18 passed`
+
+Risks, blockers, or skipped items:
+- `refresh_template_coverage.py` still derives expected coverage from repository taxonomy inputs and bound templates only; it does not infer any broader multi-source coverage model beyond the current repo truth
+
+## 2026-04-02 - Mixed leaf and subcategory family policy normalization
+
+What changed:
+- extended the compiled `subcategory_match_policy` contract with a third value, `mixed_family`
+- mapped the mixed air-conditioner family templates (`klimatistika`, `toixoy`, `forita`, `ntoylapes`) and mixed fan family templates (`anemistires`, `mini`, `ydronefosis`, `orthostatis`, `epitrapezioi`, `orofis`, `air_coolers_epidapedioi`, `anemisthres_an_toixou`) to `mixed_family`
+- kept the existing `leaf_family` exceptions unchanged and preserved strict `exact_subcategory` behavior for non-exception families
+- updated `SchemaMatcher.build_candidate_pool()` so exact category-path pools always win first, while leaf-level fallback remains parent/leaf-bounded and is allowed only for `leaf_family` and `mixed_family`
+- added synthetic matcher regressions and compiled-library regressions covering exact-win, bounded fallback, and strict fail-closed behavior
+- regenerated `resources/schemas/electronet_schema_library.json` to reflect the new explicit policy values
+
+Files changed:
+- `DOCUMENTATION.md`
+- `docs/specs/2026-04-01-category-scoped-schema-matching-contract.md`
+- `resources/schemas/electronet_schema_library.json`
+- `scraper/pipeline/schema_matcher.py`
+- `scraper/pipeline/tests/test_schema_matcher.py`
+- `scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+- `tools/schema_registry/build_electronet_schema_library.py`
+- `tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+Commands run:
+- `python -m tools.schema_registry.build_electronet_schema_library`
+- `python -m tools.schema_registry.build_schema_index`
+- `python -m tools.schema_registry.refresh_template_coverage`
+- `python -m pytest tools/schema_registry/tests/test_build_electronet_schema_library.py scraper/pipeline/tests/test_schema_matcher.py scraper/pipeline/tests/test_schema_matcher_compiled_library_regressions.py tools/schema_registry/tests/test_build_schema_index.py tools/schema_registry/tests/test_refresh_template_coverage.py -q`
+
+Validation:
+- focused compiler, matcher, and related registry regressions passed: `41 passed`
+- regenerated compiled Electronet schema library now emits `mixed_family` for the intended air-conditioner and fan families
+
+Risks, blockers, or skipped items:
+- this commit keeps the `mixed_family` allowlist deliberately narrow and explicit; broader generic mixed-family inference remains out of scope

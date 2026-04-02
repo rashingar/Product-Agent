@@ -64,6 +64,9 @@ def assemble_prepare_result(
         effective_spec_sections,
         taxonomy.sub_category,
         preferred_source_files=preferred_schema_source_files,
+        taxonomy_path=taxonomy.taxonomy_path,
+        taxonomy_parent_category=taxonomy.parent_category,
+        taxonomy_leaf_category=taxonomy.leaf_category,
     )
 
     row, normalized, mapping_warnings = build_row(

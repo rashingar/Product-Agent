@@ -5,11 +5,23 @@ from pathlib import Path
 from pipeline.models import CLIInput, FetchResult, ParsedProduct, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.prepare_result_assembly import PrepareResultAssemblyResult, assemble_prepare_result
 from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput
+from pipeline.repo_paths import SCHEMA_LIBRARY_PATH
 from pipeline.schema_matcher import SchemaMatcher
+from pipeline.utils import read_json
 
 
-TV_TEMPLATE_SCHEMA_ID = "sha1:954c8413f2da941e78f3ddce65df522654336c8c"
-BUILT_IN_HOB_SCHEMA_ID = "sha1:5fd482e1bc95f854984188f4d55892e272bf6d82"
+def _schema_id_for_source_file(source_file: str) -> str:
+    payload = read_json(SCHEMA_LIBRARY_PATH)
+    for schema in payload.get("schemas", []):
+        if source_file in schema.get("source_files", []):
+            schema_id = str(schema.get("schema_id", "")).strip()
+            if schema_id:
+                return schema_id
+    raise AssertionError(f"Schema id not found for source file {source_file!r}.")
+
+
+TV_TEMPLATE_SCHEMA_ID = _schema_id_for_source_file("tileoraseis.json")
+BUILT_IN_HOB_SCHEMA_ID = _schema_id_for_source_file("esties.json")
 
 
 def _build_cli(tmp_path: Path, *, model: str, url: str) -> CLIInput:
@@ -71,6 +83,7 @@ def _build_tv_taxonomy() -> TaxonomyResolution:
         parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
         leaf_category="Τηλεοράσεις",
         sub_category="50'' & άνω",
+        taxonomy_path="ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω",
         cta_url="https://www.etranoulis.gr/eikona-hxos/thleoraseis/50-anw",
     )
 
@@ -246,15 +259,33 @@ def test_assemble_prepare_result_passes_effective_sections_and_schema_preference
             self._matcher = SchemaMatcher(*args, **kwargs)
             self.known_section_titles = self._matcher.known_section_titles
 
-        def match(self, spec_sections, taxonomy_sub_category=None, preferred_source_files=None):
+        def match(
+            self,
+            spec_sections,
+            taxonomy_sub_category=None,
+            preferred_source_files=None,
+            taxonomy_path=None,
+            taxonomy_parent_category=None,
+            taxonomy_leaf_category=None,
+        ):
             matcher_calls.append(
                 {
                     "section_titles": [section.section for section in spec_sections],
                     "taxonomy_sub_category": taxonomy_sub_category,
                     "preferred_source_files": list(preferred_source_files or []),
+                    "taxonomy_path": taxonomy_path,
+                    "taxonomy_parent_category": taxonomy_parent_category,
+                    "taxonomy_leaf_category": taxonomy_leaf_category,
                 }
             )
-            return self._matcher.match(spec_sections, taxonomy_sub_category, preferred_source_files)
+            return self._matcher.match(
+                spec_sections,
+                taxonomy_sub_category,
+                preferred_source_files,
+                taxonomy_path=taxonomy_path,
+                taxonomy_parent_category=taxonomy_parent_category,
+                taxonomy_leaf_category=taxonomy_leaf_category,
+            )
 
     result = assemble_prepare_result(
         cli=cli,
@@ -297,6 +328,9 @@ def test_assemble_prepare_result_passes_effective_sections_and_schema_preference
             ],
             "taxonomy_sub_category": "Εστίες",
             "preferred_source_files": ["esties.json"],
+            "taxonomy_path": "",
+            "taxonomy_parent_category": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+            "taxonomy_leaf_category": "Εντοιχιζόμενες Συσκευές",
         }
     ]
     assert result.schema_match.matched_schema_id == BUILT_IN_HOB_SCHEMA_ID
@@ -337,14 +371,25 @@ def test_assemble_prepare_result_pins_normalized_and_report_payloads(tmp_path: P
     )
 
     assert result.schema_match.matched_schema_id == TV_TEMPLATE_SCHEMA_ID
-    assert 0.0 < result.schema_match.score < 0.35
-    assert "weak_schema_match" in result.schema_match.warnings
+    assert result.schema_match.score == 1.0
+    assert "weak_schema_match" not in result.schema_match.warnings
+    assert result.schema_match.resolved_category_path == "ΕΙΚΟΝΑ & ΗΧΟΣ > Τηλεοράσεις > 50'' & άνω"
+    assert result.schema_match.candidate_pool_size == 1
+    assert result.schema_match.selected_template_id == "tileoraseis"
+    assert result.schema_match.match_mode == "direct_single"
+    assert result.schema_match.fail_reason == ""
+    assert isinstance(result.schema_match.section_overlap_score, float)
+    assert isinstance(result.schema_match.label_overlap_score, float)
+    assert result.schema_match.section_overlap_score >= 0.0
+    assert result.schema_match.label_overlap_score >= 0.0
     assert result.normalized["llm_product"] == {"meta_keywords": ["Hisense", "55A6Q"]}
     assert result.normalized["csv_row"] == result.row
     assert result.normalized["characteristics_diagnostics"]["matched_schema_id"] == TV_TEMPLATE_SCHEMA_ID
     assert result.report["schema_resolution"] == result.schema_match.to_dict()
-    assert result.report["critical_extractors"]["schema_match"] == "weak"
-    assert "weak_schema_match" in result.report["warnings"]
+    assert result.report["schema_resolution"]["selected_template_id"] == "tileoraseis"
+    assert result.report["schema_resolution"]["candidate_pool_size"] == 1
+    assert result.report["critical_extractors"]["schema_match"] == "matched"
+    assert "weak_schema_match" not in result.report["warnings"]
     assert result.report["schema_candidates"][0]["matched_schema_id"] == TV_TEMPLATE_SCHEMA_ID
     assert result.report["files_written"] == [
         str(tmp_path / cli.model / f"{cli.model}.raw.html"),
@@ -389,6 +434,8 @@ def test_assemble_prepare_result_preserves_no_spec_sections_semantics(tmp_path: 
     assert result.schema_match.matched_schema_id is None
     assert result.schema_match.score == 0.0
     assert result.schema_match.warnings == ["no_spec_sections_extracted"]
+    assert result.schema_match.selected_template_id is None
+    assert result.schema_match.fail_reason == "no_safe_template_match"
     assert result.normalized["schema_match"] == result.schema_match.to_dict()
     assert result.normalized["characteristics_diagnostics"]["mode"] == "raw_spec_sections"
     assert result.report["critical_extractors"]["taxonomy"] == "unresolved"
