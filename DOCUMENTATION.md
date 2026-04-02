@@ -3,6 +3,460 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-02 - Rewrite stale Skroutz helper test to target the extracted public seam
+
+Goal:
+- fix the failing scraper test suite after the section-assets extraction by removing a stale import from `prepare_stage.py`
+- keep the coverage intent, but assert through the extracted public seam instead of the removed private helper location
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+
+Changes:
+- replaced the stale import of `_select_skroutz_image_backed_sections` from `scraper/pipeline/prepare_stage.py`
+- rewrote the affected test to call `resolve_skroutz_section_assets(...)` from `scraper/pipeline/prepare_section_assets.py`
+- kept the original behavior under test:
+  - text-only rendered interludes are skipped
+  - image-backed sections are selected in stable order
+  - resolved image URLs flow into the selected Besco inputs on the public seam
+
+Commands run:
+- `python -m pytest -q scraper/pipeline/tests/test_skroutz_sections.py`
+- `python -m pytest -q scraper/pipeline/tests/test_prepare_section_assets.py scraper/pipeline/tests/test_prepare_section_assets_module.py scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py`
+- `python -m pytest -q` from `scraper/`
+
+Validation:
+- the stale collection failure on `test_skroutz_sections.py` is removed
+- the public-seam Skroutz test coverage remains in place
+- the full scraper suite passes after the test rewrite
+
+## 2026-04-01 - Finalize docs for prepare-stage section-assets extraction
+
+Goal:
+- mark the section-assets extraction branch scope complete in the control docs
+- make the landed module name, typed result name, narrowed stage responsibilities, and landed test split explicit
+- keep this commit docs-only with no Python changes
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Landed state recorded:
+- landed internal seam module:
+  - `scraper/pipeline/prepare_section_assets.py`
+- landed typed result:
+  - `PrepareSectionAssetsResult`
+- landed narrowed `prepare_stage.py` responsibilities:
+  - top-level routing for whether sections run at all
+  - direct-source / non-Skroutz section orchestration, still inline by design
+  - final `source_payload` creation
+  - downstream result-assembly handoff
+  - scrape-artifact persistence handoff
+  - outward dict-shaped `execute_prepare_stage(...)` return payload compatibility
+- landed test coverage split:
+  - direct helper and standalone seam tests in `scraper/pipeline/tests/test_prepare_section_assets_module.py` and `scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py`
+  - stage-isolation tests in `scraper/pipeline/tests/test_prepare_section_assets.py`
+  - downstream deterministic stage-isolation tests in `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`
+  - adjacent taxonomy-enrichment stage-isolation tests in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py`
+  - prepare-focused workflow regression coverage remains the higher-level unchanged-behavior backstop
+- landed injection boundary:
+  - `execute_prepare_stage(...)` now keeps one section-assets seam injection:
+    - `resolve_skroutz_section_assets_fn`
+
+Direct-source status recorded explicitly:
+- the direct-source / non-Skroutz section path still remains inline in `prepare_stage.py` by design after this branch
+
+Next recommended branch:
+- the next real section branch should be direct-source / non-Skroutz section extraction
+- naming polish is not yet the recommended next branch because one meaningful section seam still remains
+
+Commands run:
+- `Get-Content PLAN.md | Select-Object -Skip 550 -First 110`
+- `Get-Content DOCUMENTATION.md -TotalCount 220`
+- `Get-Content README.md -TotalCount 220`
+
+Validation:
+- `PLAN.md` now records the section-assets extraction as landed rather than planned
+- `DOCUMENTATION.md` now records the landed module name, typed result name, narrowed stage responsibilities, and landed test split
+- `README.md` was reviewed and left unchanged because it does not incorrectly describe internal prepare-stage ownership
+- this commit is docs-only and does not modify Python files
+
+## 2026-04-01 - Collapse prepare-stage section-assets dependency surface to one seam
+
+Goal:
+- narrow `execute_prepare_stage(...)` to one explicit injected section-assets seam
+- stop relying on module-level monkeypatching or any lower-level section helper exposure when isolating the stage
+- preserve workflow, prepare execution, and public runtime behavior unchanged
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_prepare_section_assets.py`
+
+Changes:
+- `execute_prepare_stage(...)` now exposes one section-assets seam:
+  - `resolve_skroutz_section_assets_fn=resolve_skroutz_section_assets`
+- stage internals now call that injected seam instead of referencing only the imported module function directly
+- no lower-level section helpers were added to the stage signature
+- updated prepare-stage section-assets tests so stage isolation now passes `resolve_skroutz_section_assets_fn=...` directly when isolating Skroutz section behavior
+- direct unit tests continue to target the extracted section-assets module itself
+
+Old vs new signature summary:
+- old:
+  - `execute_prepare_stage(..., resolve_prepare_taxonomy_enrichment_fn=..., assemble_prepare_result_fn=..., persist_prepare_scrape_artifacts_fn=...)`
+- new:
+  - `execute_prepare_stage(..., resolve_prepare_taxonomy_enrichment_fn=..., resolve_skroutz_section_assets_fn=resolve_skroutz_section_assets, assemble_prepare_result_fn=..., persist_prepare_scrape_artifacts_fn=...)`
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_skroutz_section_assets_module.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets_module.py pipeline/tests/test_prepare_section_assets.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "test_prepare_workflow_writes_prompt_artifacts"` from `scraper/`
+
+Validation:
+- direct section-assets module tests still passed
+- updated stage section-assets isolation tests still passed
+- adjacent taxonomy-enrichment and result-assembly isolation tests still passed
+- one prepare-workflow regression path still passed after the signature narrowing
+- no public workflow entrypoint changed
+- no `prepare_execution.py` behavior changed
+
+## 2026-04-01 - Wire prepare stage to the extracted Skroutz section-assets workflow
+
+Goal:
+- route `scraper/pipeline/prepare_stage.py` through `resolve_skroutz_section_assets(...)`
+- remove the now-redundant inline Skroutz section-asset workflow block from `prepare_stage.py`
+- preserve outward stage return keys, result-assembly inputs, persistence wiring, and public workflow behavior
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_prepare_section_assets.py`
+
+Changes:
+- `prepare_stage.py` now calls `resolve_skroutz_section_assets(...)` when:
+  - `source == "skroutz"`
+  - `cli.sections > 0`
+- removed the inline Skroutz block from `prepare_stage.py` that previously owned:
+  - manufacturer-first block selection
+  - fallback to `extract_skroutz_section_window(...)`
+  - rendered section-image record extraction
+  - `_select_skroutz_image_backed_sections(...)`
+  - resolved-image mutation on selected blocks
+  - optional `presentation_source_html` override
+  - strict Skroutz Besco download handling
+  - Skroutz diagnostics / `sections_artifact_payload` assembly
+- `prepare_stage.py` now keeps only the surrounding orchestration and consumes the extracted result fields from `resolve_skroutz_section_assets(...)`
+- updated stage characterization tests so Skroutz-focused stage coverage now stubs `resolve_skroutz_section_assets(...)` directly instead of patching the removed inline internals
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_skroutz_section_assets_module.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets_module.py pipeline/tests/test_prepare_section_assets.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- direct standalone Skroutz section-assets module tests still passed
+- updated stage characterization tests still passed after the wiring change
+- adjacent taxonomy-enrichment and result-assembly isolation tests still passed
+- outward `execute_prepare_stage(...)` return keys remained unchanged
+- no workflow/service/public entrypoint changed
+
+Section logic intentionally still left in `prepare_stage.py`:
+- top-level decision to run sections or not
+- direct-source / non-Skroutz section orchestration
+- final `source_payload` creation
+- final handoff into `assemble_prepare_result_fn(...)`
+- final handoff into `persist_prepare_scrape_artifacts_fn(...)`
+
+## 2026-04-01 - Add standalone Skroutz section-assets workflow module without wiring stage yet
+
+Goal:
+- add the extracted Skroutz section-asset workflow as a standalone internal module seam
+- keep this commit limited to the new typed result and direct module tests
+- avoid rerouting `prepare_stage.py` yet so the stage injection surface remains unchanged in this commit
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_section_assets.py`
+- `scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py`
+
+Changes:
+- extended `scraper/pipeline/prepare_section_assets.py` with:
+  - typed result `PrepareSectionAssetsResult`
+  - new entrypoint `resolve_skroutz_section_assets(...)`
+- the extracted standalone Skroutz workflow now owns, inside the new module:
+  - manufacturer-first block selection
+  - fallback to `extract_skroutz_section_window(...)`
+  - `fetcher.extract_skroutz_section_image_records(...)`
+  - an internal `_select_skroutz_image_backed_sections(...)`
+  - mutation of selected blocks with resolved image URLs
+  - optional `presentation_source_html_override` via `build_skroutz_presentation_source_html(...)`
+  - reuse of the shared `download_section_assets(...)` helper
+  - production of downstream section-asset outputs:
+    - `selected_presentation_blocks`
+    - `selected_besco_images`
+    - `downloaded_besco`
+    - `besco_warnings`
+    - `besco_files`
+    - `besco_filenames_by_section`
+    - `section_warnings`
+    - `section_image_candidates`
+    - `section_image_urls_resolved`
+    - `section_extraction_window`
+    - `sections_artifact_payload`
+    - `presentation_source_html_override`
+- added direct module tests in:
+  - `scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py`
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_skroutz_section_assets_module.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets_module.py pipeline/tests/test_prepare_section_assets.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- direct standalone Skroutz section-assets tests passed
+- existing section-assets helper and stage characterization tests still passed
+- no production wiring changed in `prepare_stage.py`
+- no public workflow or service behavior changed in this commit
+
+Intentional temporary duplication left for the next commit:
+- `prepare_stage.py` still contains the active inline Skroutz section-asset workflow
+- `resolve_skroutz_section_assets(...)` currently mirrors that live stage logic but is not called by `prepare_stage.py` yet
+- `_select_skroutz_image_backed_sections(...)` now exists in both `prepare_stage.py` and `prepare_section_assets.py` until the stage is wired over in the next commit
+
+## 2026-04-01 - Extract pure section diagnostics and `bescos_raw` payload builders
+
+Goal:
+- remove the deterministic section diagnostics / `bescos_raw` payload builders from `scraper/pipeline/prepare_stage.py`
+- keep the commit limited to pure helper extraction and wiring the existing Skroutz branches through those helpers
+- preserve current payload shapes, filenames, result-assembly inputs, and persistence wiring
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_section_assets.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_prepare_section_assets_module.py`
+
+Changes:
+- extended `scraper/pipeline/prepare_section_assets.py` with pure helpers:
+  - `build_section_image_candidates(...)`
+  - `build_section_image_urls_resolved(...)`
+  - `build_sections_artifact_payload(...)`
+- kept `download_section_assets(...)` in the same focused helper module
+- moved the duplicated deterministic payload shaping for both Skroutz branches out of `prepare_stage.py`:
+  - manufacturer-backed Skroutz section diagnostics now use the pure helpers
+  - fallback Skroutz section diagnostics and `sections_artifact_payload` now use the pure helpers after the existing resolved-image mutation step
+- preserved:
+  - exact `section_image_candidates` shape
+  - exact `section_image_urls_resolved` shape
+  - exact `sections_artifact_payload` / `bescos_raw` shape
+  - target filenames `besco{N}.jpg`
+  - existing `section_extraction_window` shaping and merge behavior
+  - existing result-assembly input keys and persistence wiring
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets_module.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- helper-module tests passed after adding direct coverage for the pure builders
+- existing section-assets characterization tests still passed
+- adjacent taxonomy-enrichment and result-assembly isolation tests still passed
+- no public workflow entrypoint changed
+- no output artifact paths changed
+
+Remaining orchestration intentionally still in `prepare_stage.py`:
+- direct-source / non-Skroutz section extraction
+- Skroutz manufacturer-first branch selection
+- Skroutz fallback extraction via `extract_skroutz_section_window(...)`
+- rendered-title reconciliation and the resolved-image mutation loop
+- `section_extraction_window` inline construction / merge behavior
+- outward `execute_prepare_stage(...)` return keys and persistence handoff
+
+## 2026-04-01 - Extract shared Besco section-download helper
+
+Goal:
+- remove the duplicated Besco / section-image download logic from `scraper/pipeline/prepare_stage.py`
+- keep the commit limited to one shared helper and wiring the two existing call sites through it
+- preserve current direct-path warning behavior, Skroutz strict-failure behavior, and outward stage payloads
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/prepare_section_assets.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_prepare_section_assets_module.py`
+
+Changes:
+- added focused helper module:
+  - `scraper/pipeline/prepare_section_assets.py`
+- added shared helper:
+  - `download_section_assets(...)`
+- added typed helper result:
+  - `SectionAssetDownloadResult`
+- moved the duplicated Besco download policy into the helper:
+  - `fetcher.download_besco_images(...)`
+  - direct-path warning-only `FetchError` handling
+  - Skroutz strict `FetchError` -> `RuntimeError` handling
+  - strict expected-count enforcement for Skroutz
+  - `besco_filenames_by_section` mapping
+  - returned bundle of:
+    - `downloaded_besco`
+    - `besco_warnings`
+    - `besco_files`
+    - `besco_filenames_by_section`
+- wired both existing `prepare_stage.py` call sites through the helper:
+  - direct / non-Skroutz section path
+  - Skroutz section path
+
+Behavior preserved explicitly:
+- direct / non-Skroutz path still converts `FetchError` into warning-only `besco_download_failed:...`
+- Skroutz path still raises `RuntimeError` on `FetchError`
+- Skroutz path still raises `RuntimeError` on incomplete Besco download
+- successful downloads still populate `besco_filenames_by_section` from downloaded image positions exactly as before
+- section diagnostics and `sections_artifact_payload` construction remain in `prepare_stage.py` in this commit
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets_module.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets.py pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- new helper-module tests passed
+- existing section-assets characterization tests still passed after the extraction
+- adjacent taxonomy-enrichment and result-assembly isolation tests still passed
+- no public workflow entrypoint changed
+- no output artifact paths changed
+
+Remaining duplicated / in-place section logic intentionally left for later commits:
+- direct-source / non-Skroutz section extraction still lives inline in `prepare_stage.py`
+- Skroutz manufacturer-first selection still lives inline in `prepare_stage.py`
+- Skroutz fallback extraction, rendered-title reconciliation, resolved-image mutation, and `sections_artifact_payload` construction still live inline in `prepare_stage.py`
+- outward `execute_prepare_stage(...)` return keys remain unchanged
+
+## 2026-04-01 - Add prepare-stage section-assets characterization tests
+
+Goal:
+- pin the current direct-source and Skroutz section-asset behavior inside `scraper/pipeline/prepare_stage.py`
+- add narrow characterization coverage before extracting the section-assets seam
+- keep this commit test-only with no production behavior changes
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/test_prepare_section_assets.py`
+
+Changes:
+- added focused prepare-stage characterization coverage for the direct-source / non-Skroutz section path:
+  - `selected_presentation_blocks` come from `extract_presentation_blocks(...)`
+  - only image-bearing blocks become `GalleryImage` Besco records
+  - direct-path Besco download `FetchError` stays warning-only and does not become a hard failure
+- added focused Skroutz manufacturer-first coverage:
+  - manufacturer presentation blocks are preferred when enough blocks exist
+  - manufacturer-backed section diagnostics and `sections_artifact_payload` / `bescos_raw` payload shape are pinned
+  - successful manufacturer-backed Besco downloads produce the current `downloaded_besco` and `besco_filenames_by_section` handoff values
+- added focused Skroutz fallback coverage:
+  - `extract_skroutz_section_window(...)` output is consumed
+  - rendered section image records are reconciled against parsed section titles in order
+  - selected blocks are mutated with resolved image URLs
+  - the merged `section_extraction_window` and `sections_artifact_payload` / `bescos_raw` payload shape are pinned
+  - fallback rebuilds `presentation_source_html` when manufacturer presentation was not applied
+- added strict-failure characterization for current Skroutz behavior:
+  - insufficient rendered image-record count
+  - title-order mismatch between parsed and rendered section lists
+  - incomplete Skroutz Besco download on the manufacturer-first path
+- pinned the exact values that currently feed downstream seams:
+  - `selected_presentation_blocks`
+  - `section_warnings`
+  - `section_image_candidates`
+  - `section_image_urls_resolved`
+  - `section_extraction_window`
+  - `selected_besco_images`
+  - `downloaded_besco`
+  - `besco_filenames_by_section`
+  - `sections_artifact_payload`
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets.py` from `scraper/`
+- `python -m pytest -q pipeline/tests/test_prepare_taxonomy_enrichment.py pipeline/tests/test_prepare_stage_result_assembly.py` from `scraper/`
+
+Validation:
+- new section-assets characterization tests passed: `6 passed`
+- adjacent taxonomy-enrichment and result-assembly isolation tests still passed: `8 passed`
+- no production Python modules changed
+- no workflow behavior changed
+
+Ambiguities recorded:
+- on the direct path, Besco download still uses `requested_sections=len(selected_presentation_blocks)` even when only a subset of selected blocks have images, so Besco positions can be sparse while the path remains warning-only on `FetchError`
+- on the Skroutz fallback path, `section_extraction_window` merges parsed and rendered window dictionaries asymmetrically: `candidate_count` and `duplicate_signatures_skipped` take the `max(...)`, while other overlapping keys are overwritten by the rendered-window payload
+- the section-asset diagnostics that later feed result assembly are not returned directly from `execute_prepare_stage(...)`; they are observable today only through the downstream seam inputs and persisted `bescos_raw` payload
+
+## 2026-04-01 - Freeze prepare-stage section-assets refactor scope
+
+Goal:
+- document the exact branch scope for `refactor/prepare-stage-section-assets`
+- update control docs first, before any Python extraction work
+- keep this commit docs-only and avoid changing runtime behavior, tests, imports, workflow entrypoints, or artifact contracts
+
+Files edited:
+- `PLAN.md`
+- `DOCUMENTATION.md`
+
+Recorded scope:
+- branch goal:
+  - extract the Skroutz/manufacturer-first section asset workflow out of `scraper/pipeline/prepare_stage.py` while preserving current runtime behavior
+- exact non-goals:
+  - no public workflow or CLI behavior change
+  - no prepare/render ownership-boundary change
+  - no output artifact path or filename change
+  - no `prepare_execution.py` behavior change
+  - no result-assembly ownership change in this branch
+  - no provider-resolution ownership change in this branch
+  - no render ownership change
+  - no extraction of the whole direct-source / non-Skroutz section path in this branch
+  - no extraction of `html_builders.extract_presentation_blocks(...)` in this branch
+  - no relocation of `skroutz_sections` helpers in this branch
+  - no naming-polish cleanup in this branch
+  - no split-task LLM handoff contract change
+- proposed module name:
+  - `scraper/pipeline/prepare_skroutz_section_assets.py`
+- proposed typed result name:
+  - `PrepareSkroutzSectionAssetsResult`
+- what leaves `prepare_stage.py` in this branch:
+  - the Skroutz/manufacturer-first section asset workflow
+  - the rendered-Skroutz image-backed section matching path
+  - the shared section-image download helper reused by both direct and Skroutz paths
+  - deterministic section diagnostics builders, including `section_image_candidates`, `section_image_urls_resolved`, `section_extraction_window`, and `bescos_raw` / sections-artifact payload shaping
+  - the typed handoff carrying section asset state back into `prepare_stage.py`
+- what stays in `prepare_stage.py` in this branch:
+  - top-level routing for whether sections run at all
+  - direct-source / non-Skroutz section orchestration except for reuse of the shared extracted downloader
+  - final handoff into `assemble_prepare_result_fn(...)`
+  - final handoff into `persist_prepare_scrape_artifacts_fn(...)`
+  - provider-resolution ownership
+  - outward dict-shaped `execute_prepare_stage(...)` payload compatibility
+- explicit branch boundary:
+  - `html_builders.extract_presentation_blocks(...)` stays where it is
+  - `skroutz_sections` helpers stay where they are
+  - direct-source section extraction itself is not fully extracted in this branch
+  - `prepare` stays scrape-only plus LLM-handoff-only
+  - render ownership does not change
+
+Planned test split for later commits:
+- add direct module-level coverage in `scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py`
+- add stage-isolation coverage in `scraper/pipeline/tests/test_prepare_stage_section_assets.py`
+- keep adjacent stage-isolation coverage in `test_prepare_taxonomy_enrichment.py` and `test_prepare_stage_result_assembly.py`
+- keep prepare/workflow/provider regressions as the unchanged-behavior backstop
+
+Commands run:
+- `Get-Content PLAN.md`
+- `Get-Content DOCUMENTATION.md`
+- `Get-Content README.md`
+- `rg -n "section|besco|download|skroutz|presentation|html_builders|extract_presentation_blocks|assemble_prepare_result_fn|persist_prepare_scrape_artifacts_fn" scraper/pipeline/prepare_stage.py`
+- `rg -n "extract_presentation_blocks|skroutz_sections|bescos_raw|section image|download" scraper/pipeline -g "*.py"`
+
+Validation:
+- `PLAN.md` now records the new branch goal, non-goals, proposed seam/module/result naming, ownership split, and later test split
+- `DOCUMENTATION.md` now captures the same scope freeze as the engineering log entry for this docs-only commit
+- `README.md` was reviewed and left unchanged because it does not describe the internal prepare-stage seam inaccurately
+- this commit does not modify Python files
+- this commit does not modify test files
+
 ## 2026-04-01 - Finalize docs for prepare-stage taxonomy/enrichment extraction
 
 Goal:

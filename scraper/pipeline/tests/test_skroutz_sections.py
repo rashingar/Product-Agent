@@ -6,9 +6,10 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+import pipeline.prepare_section_assets as section_assets_module
 from pipeline.fetcher import ElectronetFetcher
-from pipeline.models import CLIInput, FetchResult
-from pipeline.prepare_stage import _select_skroutz_image_backed_sections
+from pipeline.models import CLIInput, FetchResult, GalleryImage
+from pipeline.prepare_section_assets import resolve_skroutz_section_assets
 from pipeline.skroutz_sections import extract_skroutz_section_window, is_placeholder_image_url, resolve_skroutz_section_image_url
 from pipeline.workflow import prepare_workflow, render_workflow
 
@@ -119,7 +120,7 @@ def test_placeholder_urls_are_rejected_for_resolved_section_images(skroutz_fixtu
     assert all(is_placeholder_image_url(section["resolved_image_url"]) is False for section in rendered["sections"])
 
 
-def test_select_skroutz_image_backed_sections_skips_text_only_interludes() -> None:
+def test_resolve_skroutz_section_assets_skips_text_only_interludes(monkeypatch, tmp_path: Path) -> None:
     all_sections = [
         {"title": "Section 1", "paragraph": "Body 1", "image_candidates": []},
         {"title": "Section 2", "paragraph": "Body 2", "image_candidates": []},
@@ -133,17 +134,83 @@ def test_select_skroutz_image_backed_sections_skips_text_only_interludes() -> No
         {"title": "Section 4", "resolved_image_url": "https://example.com/4.jpg"},
     ]
 
-    selected_blocks, selected_rendered_sections = _select_skroutz_image_backed_sections(
-        all_sections=all_sections,
-        rendered_sections=rendered_sections,
-        requested_sections=3,
+    class RecordingFetcher:
+        def __init__(self) -> None:
+            self.rendered_calls = []
+            self.download_calls = []
+
+        def extract_skroutz_section_image_records(self, url: str):
+            self.rendered_calls.append(url)
+            return {
+                "window": {
+                    "candidate_count": 4,
+                    "duplicate_signatures_skipped": 0,
+                    "selected_container_index": 0,
+                    "start_anchor": "Description",
+                    "stop_anchor": "Manufacturer",
+                    "title_signature": [section["title"] for section in rendered_sections],
+                },
+                "sections": rendered_sections,
+            }
+
+        def download_besco_images(self, **kwargs):
+            self.download_calls.append(kwargs)
+            images = [
+                GalleryImage(
+                    url=image.url,
+                    alt=image.alt,
+                    position=image.position,
+                    local_filename=f"besco{image.position}.jpg",
+                    local_path=str(tmp_path / f"besco{image.position}.jpg"),
+                    downloaded=True,
+                )
+                for image in kwargs["images"]
+            ]
+            return images, [], [image.local_path for image in images]
+
+    fetcher = RecordingFetcher()
+
+    monkeypatch.setattr(
+        section_assets_module,
+        "extract_skroutz_section_window",
+        lambda *_args, **_kwargs: {
+            "warnings": [],
+            "window": {
+                "candidate_count": 4,
+                "duplicate_signatures_skipped": 0,
+                "selected_container_index": 0,
+                "start_anchor": "Description",
+                "stop_anchor": "Manufacturer",
+                "title_signature": [section["title"] for section in all_sections],
+            },
+            "sections": all_sections,
+        },
     )
 
-    assert [section["title"] for section in selected_blocks] == ["Section 1", "Section 3", "Section 4"]
-    assert [section["resolved_image_url"] for section in selected_rendered_sections] == [
+    result = resolve_skroutz_section_assets(
+        requested_sections=3,
+        fetch_html="<html></html>",
+        final_url=SAMPLE["url"],
+        canonical_url=SAMPLE["url"],
+        url=SAMPLE["url"],
+        presentation_source_html="",
+        presentation_source_text="",
+        manufacturer_enrichment={"presentation_applied": False},
+        fetcher=fetcher,
+        output_dir=tmp_path,
+    )
+
+    assert fetcher.rendered_calls == [SAMPLE["url"]]
+    assert [section["title"] for section in result.selected_presentation_blocks] == ["Section 1", "Section 3", "Section 4"]
+    assert [image.url for image in result.selected_besco_images] == [
         "https://example.com/1.jpg",
         "https://example.com/3.jpg",
         "https://example.com/4.jpg",
+    ]
+    assert result.section_image_urls_resolved == [
+        {"position": 1, "title": "Section 1", "url": "https://example.com/1.jpg"},
+        {"position": 2, "title": "Section 3", "url": "https://example.com/3.jpg"},
+        {"position": 3, "title": "Section 4", "url": "https://example.com/4.jpg"},
     ]
 
 
