@@ -34,6 +34,7 @@ BUILT_IN_HOB_SCHEMA_ID = _schema_id_for_source_file("esties.json")
 FRIDGE_FREEZER_SCHEMA_ID = _schema_id_for_source_file("psygeiokatapsyktes.json")
 ICE_CREAM_MAKER_SCHEMA_ID = _schema_id_for_source_file("pagotomixanes.json")
 WASHING_MACHINE_SCHEMA_ID = _schema_id_for_source_file("plyntiria_rouxwn.json")
+SOUND_BAR_SCHEMA_ID = _schema_id_for_source_file("sound_bars.json")
 
 
 def test_normalize_characteristics_label_keeps_balanced_parentheses_unchanged() -> None:
@@ -491,12 +492,12 @@ def test_characteristics_registry_prefers_soundbar_schema_for_skroutz() -> None:
     template = registry.select_template(
         source,
         taxonomy,
-        schema_match=SchemaMatchResult(matched_schema_id="sha1:108010e7d8977d4fcfae80de0cac1bd5a99171d1", score=0.9),
+        schema_match=SchemaMatchResult(matched_schema_id=SOUND_BAR_SCHEMA_ID, score=0.9),
     )
 
     assert preferred_source_files == ["sound_bars.json"]
     assert template is not None
-    assert template["matched_schema_id"] == "sha1:108010e7d8977d4fcfae80de0cac1bd5a99171d1"
+    assert template["matched_schema_id"] == SOUND_BAR_SCHEMA_ID
     assert template["preferred_schema_source_files"] == ["sound_bars.json"]
     assert template["template_source"] == "schema_library_with_custom_overrides"
     assert template["custom_template_id"] == "skroutz_soundbar_v1"

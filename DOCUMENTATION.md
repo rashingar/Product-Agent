@@ -3,6 +3,38 @@
 ## Current milestone
 Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
 
+## 2026-04-02 - Fix stale compiled-schema id assertion after Electronet label-set registry merge
+
+Goal:
+- unblock the local `main` merge of `feat/electronet-label-set-registry`
+- keep the branch behavior intact by fixing a stale test assertion rather than changing runtime schema selection
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/test_characteristics_pipeline.py`
+
+What changed:
+- replaced the hardcoded Skroutz soundbar schema id assertion with the same compiled-library lookup helper already used by the neighboring characteristics tests
+- kept the actual behavior under test unchanged:
+  - `sound_bars.json` remains the preferred schema source file
+  - the selected template remains `schema_library_with_custom_overrides`
+  - `skroutz_soundbar_v1` remains the custom overlay id
+
+Why this was needed:
+- the Electronet label-set registry branch regenerated the compiled schema library
+- the soundbar schema id changed in `resources/schemas/electronet_schema_library.json`
+- the old test still asserted a stale hardcoded `sha1:...` value and was the only remaining scraper-suite failure after merging the branch locally
+
+Commands run:
+- `python -m pytest -q scraper/pipeline/tests/test_characteristics_pipeline.py -k soundbar`
+- `python -m pytest -q` from `scraper/`
+- `python -m pytest -q tools/schema_registry/tests`
+
+Validation:
+- the soundbar characteristics regression now resolves against the current compiled schema library
+- the full scraper suite passes after the test fix
+- the schema-registry tool tests pass from repo root
+
 ## 2026-04-02 - Regenerate stale schema index artifact
 
 Goal:
