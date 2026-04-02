@@ -5788,3 +5788,38 @@ Validation:
 Risks, blockers, or skipped items:
 - `differentiator_priority_map.csv` remains in the repo for reference/backward auditability, but runtime ownership now belongs to `resources/mappings/name_rules.json`
 - the OpenCart config work was validated through compile/syntax checks and resolver execution only; no live admin upload/import run was performed in this pass
+
+Date: 2026-04-02
+
+Milestone: Generic deterministic unit assembly fix and live Electronet verification
+
+What changed:
+- fixed the generic deterministic differentiator resolver so partial spec-label matches can recover split label/value measurements like `Τάση Volt -> 18V` instead of degrading to bare alias tokens such as `Volt`
+- added matched-label-aware unit normalization for deterministic metadata outputs so names/meta titles/SEO now compact units consistently (`18V`, `9kg`, `60cm`, `305Lt`, `2200W`)
+- tightened fuzzy alias matching to avoid broad generic aliases like `Τύπος` incorrectly binding to unrelated spec labels such as `Τύπος Μπαταρίας`
+- preserved literal/title fallback behavior for non-spec differentiators while upgrading measurement fallback extraction to capture full numeric phrases when no spec label match exists
+- corrected stale corrupted Greek label literals in the source-scoped Skroutz deterministic helpers so soundbar, coffee-filter, kettle, ice-cream-maker, tabletop-hob, and fridge-freezer strategies resolve current spec labels deterministically again
+- reran the live Electronet workflow for model `331566`; the published CSV now uses `Black&Decker PV1820L-QW – Σκουπάκι 18V Ανθρακί` with aligned `meta_title`, `seo_keyword`, and `product_url`
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/deterministic_fields.py`
+- `scraper/pipeline/tests/test_deterministic_fields.py`
+
+Commands run:
+- `python -m pytest -q scraper/pipeline/tests/test_deterministic_fields.py`
+- `python -m pytest -q scraper/pipeline/tests/test_workflow.py`
+- `python -m pytest -q scraper/pipeline/tests/test_skroutz_integration.py`
+- `python -m pytest -q scraper/pipeline/tests/test_deterministic_fields.py scraper/pipeline/tests/test_skroutz_integration.py scraper/pipeline/tests/test_workflow.py`
+- `python -m pipeline.workflow prepare --model 331566 --url "https://www.electronet.gr/exoplismos-spitioy/skoypisma/skoypakia/skoypaki-black-decker-dustbuster-pivot-pv1820l-qw-18-volt" --photos 1 --sections 4 --skroutz-status 0 --boxnow 1 --price 99`
+- `python -m pipeline.workflow render --model 331566`
+
+Validation:
+- deterministic/workflow/integration regression suite passed: `60 passed`
+- live `331566` prepare completed successfully and regenerated LLM context with deterministic differentiators `18V`, `Ανθρακί`
+- live `331566` render validation reported `ok: true`
+- live OpenCart publish completed successfully with `publish_status: success` and `publish_stage: csv_import`
+
+Risks, blockers, or skipped items:
+- the compact-unit policy now changes deterministic names/slugs where old outputs used spaced units; additional baseline updates may be needed as more archived products are rerendered
+- the fix intentionally leaves LLM-owned `meta_description` and `meta_keyword` content untouched; only deterministic inputs and outputs were changed

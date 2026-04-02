@@ -1,4 +1,10 @@
-from pipeline.deterministic_fields import apply_name_rule, build_deterministic_product_fields, compose_name
+from pipeline.deterministic_fields import (
+    _build_preferred_spec_lookup,
+    apply_name_rule,
+    build_deterministic_product_fields,
+    compose_name,
+    resolve_name_rule_component,
+)
 from pipeline.mapping import derive_seo_keyword
 from pipeline.models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 
@@ -27,9 +33,9 @@ def test_skroutz_fridge_freezer_uses_requested_name_schema() -> None:
 
     fields = build_deterministic_product_fields(source, taxonomy, "229957", derive_seo_keyword)
 
-    assert fields["name"] == "Bosch KGN36NLEA – Ψυγειοκαταψύκτης Total No Frost 305 lt Inox 60 cm E"
-    assert fields["meta_title"] == "Bosch KGN36NLEA Ψυγειοκαταψύκτης Total No Frost 305 lt | eTranoulis"
-    assert fields["seo_keyword"] == "bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305-lt-inox-60-cm-e"
+    assert fields["name"] == "Bosch KGN36NLEA – Ψυγειοκαταψύκτης Total No Frost 305Lt Inox 60cm E"
+    assert fields["meta_title"] == "Bosch KGN36NLEA Ψυγειοκαταψύκτης Total No Frost 305Lt | eTranoulis"
+    assert fields["seo_keyword"] == "bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305lt-inox-60cm-e"
 
 
 def test_deterministic_name_and_meta_title_follow_business_rules() -> None:
@@ -129,9 +135,109 @@ def test_deterministic_fields_use_capacity_and_energy_for_dryers() -> None:
 
     fields = build_deterministic_product_fields(source, taxonomy, "235370", derive_seo_keyword)
 
-    assert fields["name"] == "LG RHX5009TWB – Στεγνωτήριο ρούχων 9 kg B"
-    assert fields["meta_title"] == "LG RHX5009TWB Στεγνωτήριο ρούχων 9 kg B | eTranoulis"
-    assert fields["seo_keyword"] == "lg-rhx5009twb-stegnotirio-rouchon-9-kg-b"
+    assert fields["name"] == "LG RHX5009TWB – Στεγνωτήριο ρούχων 9kg B"
+    assert fields["meta_title"] == "LG RHX5009TWB Στεγνωτήριο ρούχων 9kg B | eTranoulis"
+    assert fields["seo_keyword"] == "lg-rhx5009twb-stegnotirio-rouchon-9kg-b"
+
+
+def test_deterministic_fields_compact_voltage_differentiator_for_handheld_vacuums() -> None:
+    source = SourceProductData(
+        source_name="electronet",
+        brand="Black&Decker",
+        mpn="PV1820L-QW",
+        name="Σκουπάκι Black & Decker Dustbuster Pivot PV1820L-QW 18 Volt",
+        key_specs=[
+            SpecItem(label="Τάση Volt", value="18,00"),
+            SpecItem(label="Χρώμα", value="Ανθρακί"),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        leaf_category="Σκούπισμα",
+        sub_category="Σκουπάκια",
+    )
+
+    fields = build_deterministic_product_fields(source, taxonomy, "331566", derive_seo_keyword)
+
+    assert fields["name"] == "Black&Decker PV1820L-QW – Σκουπάκι 18V Ανθρακί"
+    assert fields["meta_title"] == "Black&Decker PV1820L-QW Σκουπάκι 18V Ανθρακί | eTranoulis"
+    assert fields["meta_description_draft"] == "Το Black&Decker PV1820L-QW είναι Σκουπάκι με 18V, Ανθρακί."
+    assert fields["seo_keyword"] == "black-decker-pv1820l-qw-skoupaki-18v-anthraki"
+
+
+def test_resolve_name_rule_component_prefers_partial_spec_label_match_before_title_fallback() -> None:
+    source = SourceProductData(
+        source_name="electronet",
+        brand="Black&Decker",
+        mpn="PV1820L-QW",
+        name="Σκουπάκι Black & Decker Dustbuster Pivot PV1820L-QW 18 Volt",
+        key_specs=[SpecItem(label="Τάση Volt", value="18,00")],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        leaf_category="Σκούπισμα",
+        sub_category="Σκουπάκια",
+    )
+
+    resolved = resolve_name_rule_component(
+        source,
+        _build_preferred_spec_lookup(source),
+        ["Τάση", "Volt", "V"],
+        "Σκουπάκι",
+        taxonomy,
+    )
+
+    assert resolved.source == "fuzzy_spec"
+    assert resolved.matched_label == "ταση volt"
+    assert resolved.value == "18V"
+
+
+def test_resolve_name_rule_component_compacts_power_and_dimensions_from_partial_labels() -> None:
+    source = SourceProductData(
+        brand="Example",
+        mpn="ABC123",
+        name="Παράδειγμα προϊόντος",
+        key_specs=[
+            SpecItem(label="Ισχύς σε Watts", value="1200"),
+            SpecItem(label="Πλάτος σε cm", value="60"),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        leaf_category="Συσκευές Κουζίνας",
+        sub_category="Μπλέντερ",
+    )
+    spec_lookup = _build_preferred_spec_lookup(source)
+
+    power = resolve_name_rule_component(source, spec_lookup, ["Ισχύς", "Ισχύς σε Watt", "Watt"], "Μπλέντερ", taxonomy)
+    width = resolve_name_rule_component(source, spec_lookup, ["Πλάτος", "Πλάτος σε cm"], "Μπλέντερ", taxonomy)
+
+    assert power.value == "1200W"
+    assert width.value == "60cm"
+
+
+def test_resolve_name_rule_component_does_not_fuzzy_match_generic_type_alias_to_unrelated_spec() -> None:
+    source = SourceProductData(
+        brand="Black&Decker",
+        mpn="PV1820L-QW",
+        name="Σκουπάκι Black & Decker Dustbuster Pivot PV1820L-QW 18 Volt",
+        key_specs=[SpecItem(label="Τύπος Μπαταρίας", value="Λιθίου")],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        leaf_category="Σκούπισμα",
+        sub_category="Σκουπάκια",
+    )
+
+    resolved = resolve_name_rule_component(
+        source,
+        _build_preferred_spec_lookup(source),
+        ["Τύπος", "Χειρός"],
+        "Σκουπάκι",
+        taxonomy,
+    )
+
+    assert resolved.value == ""
 
 
 def test_skroutz_name_prefers_manufacturer_evidence_when_specs_conflict() -> None:
@@ -171,16 +277,16 @@ def test_skroutz_name_prefers_manufacturer_evidence_when_specs_conflict() -> Non
     fields = build_deterministic_product_fields(source, taxonomy, "229957", derive_seo_keyword)
 
     assert "Total No Frost" in fields["name"]
-    assert "305 lt" in fields["name"]
+    assert "305Lt" in fields["name"]
     assert "Inox" in fields["name"]
-    assert "70 cm" in fields["name"]
+    assert "70cm" in fields["name"]
     assert fields["name"].endswith("E")
     assert "Low Frost" not in fields["name"]
-    assert "290 lt" not in fields["name"]
+    assert "290Lt" not in fields["name"]
     assert "Λευκό" not in fields["name"]
-    assert "60 cm" not in fields["name"]
-    assert fields["meta_title"] == "Bosch KGN36NLEA Ψυγειοκαταψύκτης Total No Frost 305 lt | eTranoulis"
-    assert fields["seo_keyword"] == "bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305-lt-inox-70-cm-e"
+    assert "60cm" not in fields["name"]
+    assert fields["meta_title"] == "Bosch KGN36NLEA Ψυγειοκαταψύκτης Total No Frost 305Lt | eTranoulis"
+    assert fields["seo_keyword"] == "bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305lt-inox-70cm-e"
 
 
 def test_tv_name_rule_uses_resolution_from_eukrineia_in_final_name() -> None:

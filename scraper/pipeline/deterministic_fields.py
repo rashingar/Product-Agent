@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from collections.abc import Mapping
 from typing import Any, Iterable
 
@@ -21,8 +22,30 @@ NUMERIC_RE = re.compile(r"\d+(?:[.,]\d+)?")
 ENERGY_CLASS_TOKEN_RE = re.compile(r"^[A-G](?:\+{1,3})?$", re.IGNORECASE)
 DEFAULT_MAX_NAME_DIFFERENTIATORS = 3
 DEFAULT_MAX_META_DESCRIPTION_DIFFERENTIATORS = 4
+FUZZY_SINGLE_TOKEN_ALLOWLIST = {
+    "βαθος",
+    "διαμετρος",
+    "ισχυς",
+    "καναλια",
+    "κιλα",
+    "πλατος",
+    "προτυπα",
+    "συνδεσιμοτητα",
+    "ταση",
+    "υψος",
+    "χωρητικοτητα",
+    "χρωμα",
+}
+FUZZY_ALIAS_DENYLIST = {"τυπος"}
 
 ARTICLE_MAP = {"fem": "Η", "neut": "Το", "masc": "Ο"}
+
+@dataclass(frozen=True, slots=True)
+class ResolvedNameComponent:
+    value: str
+    matched_label: str = ""
+    source: str = ""
+
 
 def _rule_value(rule: ResolvedGenericNameRule | GenericNameRule | Mapping[str, Any], key: str, default: Any = None) -> Any:
     if isinstance(rule, ResolvedGenericNameRule):
@@ -386,16 +409,16 @@ def _build_soundbar_deterministic_fields(
     spec_lookup: dict[str, str],
 ) -> dict[str, object]:
     category_phrase = rule.category_phrase
-    channels = normalize_value(spec_lookup, ["ΞΞ±Ξ½Ξ¬Ξ»ΞΉΞ±"])
-    meta_power = format_power(spec_lookup, ["Ξ™ΟƒΟ‡ΟΟ‚"]) or extract_soundbar_power(
+    channels = normalize_value(spec_lookup, ["Κανάλια"])
+    meta_power = format_power(spec_lookup, ["Ισχύς"]) or extract_soundbar_power(
         " ".join([source.presentation_source_html, source.hero_summary, raw_title])
     )
     components = {
         "channels": channels,
         "subwoofer": normalize_soundbar_subwoofer(normalize_value(spec_lookup, ["Subwoofer"])),
         "power": meta_power,
-        "standards_meta": normalize_soundbar_standards_for_meta(normalize_value(spec_lookup, ["Ξ ΟΟΟ„Ο…Ο€Ξ± Ξ‰Ο‡ΞΏΟ…"])),
-        "standards_seo": normalize_soundbar_standards_for_seo(normalize_value(spec_lookup, ["Ξ ΟΟΟ„Ο…Ο€Ξ± Ξ‰Ο‡ΞΏΟ…"])),
+        "standards_meta": normalize_soundbar_standards_for_meta(normalize_value(spec_lookup, ["Πρότυπα Ήχου"])),
+        "standards_seo": normalize_soundbar_standards_for_seo(normalize_value(spec_lookup, ["Πρότυπα Ήχου"])),
         "channels_seo": normalize_soundbar_channels_for_seo(channels),
     }
     differentiators = _source_rule_output_parts(rule, "name", components)
@@ -425,7 +448,7 @@ def _build_coffee_filter_deterministic_fields(
     category_phrase = rule.category_phrase
     components = {
         "power": format_power(spec_lookup),
-        "capacity": format_liters(spec_lookup, ["Ξ§Ο‰ΟΞ·Ο„ΞΉΞΊΟΟ„Ξ·Ο„Ξ± Ξ”ΞΏΟ‡ΞµΞ―ΞΏΟ… ΞΞµΟΞΏΟ ΟƒΞµ Ξ›Ξ―Ο„ΟΞ±"]),
+        "capacity": format_liters(spec_lookup, ["Χωρητικότητα Δοχείου Νερού σε Λίτρα"]),
         "cups": format_cups(spec_lookup),
     }
     differentiators = _source_rule_output_parts(rule, "name", components)
@@ -467,17 +490,21 @@ def _build_fridge_freezer_deterministic_fields(
     spec_lookup: dict[str, str],
 ) -> dict[str, object]:
     category_phrase = rule.category_phrase
-    cooling = normalize_fridge_cooling(normalize_value(spec_lookup, ["??????? ?????", "?????????? ?????"])) or normalize_fridge_cooling(
+    cooling = normalize_fridge_cooling(normalize_value(spec_lookup, ["Σύστημα Ψύξης", "Τεχνολογία Ψύξης"])) or normalize_fridge_cooling(
         extract_first_preferred_spec_value(source, [r"no\s*frost", r"nofrost", r"low\s*frost"])
     )
-    capacity = normalize_value(spec_lookup, ["???????? ????????????", "???????? ?????? ????????????", "????????????"]) or extract_first_preferred_spec_value(
-        source, [r"\b\d+(?:[.,]\d+)?\s*lt\b"]
+    capacity = format_liters(spec_lookup, ["Συνολική Χωρητικότητα", "Συνολική Καθαρή Χωρητικότητα", "Χωρητικότητα"]) or compact_unit_value(
+        extract_first_preferred_spec_value(source, [r"\b\d+(?:[.,]\d+)?\s*lt\b"]),
+        "Lt",
     )
-    color = normalize_value(spec_lookup, ["?????", "????? ????????", "????? / ?????????"]) or extract_first_preferred_spec_value(
+    color = normalize_value(spec_lookup, ["Χρώμα", "Χρώμα Συσκευής", "Χρώμα / Φινίρισμα"]) or extract_first_preferred_spec_value(
         source, [r"\binox\b", r"metal look", r"silver", r"black", r"white", r"gray", r"grey"]
     )
-    width = normalize_value(spec_lookup, ["??????"]) or extract_first_preferred_spec_value(source, [r"\b\d+(?:[.,]\d+)?\s*cm\b"])
-    energy_class = normalize_value(spec_lookup, ["?????????? ?????"]) or extract_energy_class_from_source(source)
+    width = format_centimeters(spec_lookup, ["Πλάτος"]) or compact_unit_value(
+        extract_first_preferred_spec_value(source, [r"\b\d+(?:[.,]\d+)?\s*cm\b"]),
+        "cm",
+    )
+    energy_class = normalize_value(spec_lookup, ["Ενεργειακή Κλάση"]) or extract_energy_class_from_source(source)
     differentiators = [item for item in [cooling, capacity, color, width, energy_class] if item]
     name = compose_name(brand, mpn, category_phrase, differentiators)
     meta_title = compose_meta_title(
@@ -503,7 +530,7 @@ def _build_kettle_deterministic_fields(
 ) -> dict[str, object]:
     category_phrase = rule.category_phrase
     components = {
-        "capacity": format_liters(spec_lookup, ["Ξ§Ο‰ΟΞ·Ο„ΞΉΞΊΟΟ„Ξ·Ο„Ξ± ΟƒΞµ Ξ›Ξ―Ο„ΟΞ±"]),
+        "capacity": format_liters(spec_lookup, ["Χωρητικότητα σε Λίτρα"]),
         "power": format_power(spec_lookup),
         "color": derive_kettle_color(raw_title, spec_lookup),
     }
@@ -532,11 +559,11 @@ def _build_ice_cream_maker_deterministic_fields(
     spec_lookup: dict[str, str],
 ) -> dict[str, object]:
     category_phrase = rule.category_phrase
-    bowls = format_count_differentiator(spec_lookup, ["Ξ‘ΟΞΉΞΈΞΌΟΟ‚ Ξ”ΞΏΟ‡ΞµΞ―Ο‰Ξ½"], singular="Ξ”ΞΏΟ‡ΞµΞ―ΞΏΟ…", plural="Ξ”ΞΏΟ‡ΞµΞ―Ο‰Ξ½")
-    color = normalize_value(spec_lookup, ["Ξ§ΟΟΞΌΞ±"])
+    bowls = format_count_differentiator(spec_lookup, ["Αριθμός Δοχείων"], singular="Δοχείου", plural="Δοχείων")
+    color = normalize_value(spec_lookup, ["Χρώμα"])
     components = {
-        "capacity": format_liters(spec_lookup, ["Ξ§Ο‰ΟΞ·Ο„ΞΉΞΊΟΟ„Ξ·Ο„Ξ±"]),
-        "programs": format_program_count(spec_lookup, ["Ξ‘ΟΞΉΞΈΞΌΟΟ‚ Ξ ΟΞΏΞ³ΟΞ±ΞΌΞΌΞ¬Ο„Ο‰Ξ½"]),
+        "capacity": format_liters(spec_lookup, ["Χωρητικότητα"]),
+        "programs": format_program_count(spec_lookup, ["Αριθμός Προγραμμάτων"]),
         "bowls_or_color": bowls or color,
         "bowls": bowls,
         "color": color,
@@ -570,8 +597,8 @@ def _build_tabletop_hob_deterministic_fields(
 ) -> dict[str, object]:
     category_phrase = rule.category_phrase
     burner_phrase = derive_hob_burner_phrase(spec_lookup, raw_title)
-    power = format_power(spec_lookup, ["Ξ™ΟƒΟ‡ΟΟ‚"])
-    surface = normalize_value(spec_lookup, ["Ξ¤ΟΟ€ΞΏΟ‚ Ξ•ΟƒΟ„Ξ―Ξ±Ο‚"])
+    power = format_power(spec_lookup, ["Ισχύς"])
+    surface = normalize_value(spec_lookup, ["Τύπος Εστίας"])
     components = {
         "burner_phrase": burner_phrase,
         "power": power,
@@ -780,6 +807,133 @@ def normalize_value(spec_lookup: dict[str, str], labels: list[str]) -> str:
     return ""
 
 
+def _normalize_rule_aliases(aliases: list[str]) -> list[str]:
+    normalized_aliases: list[str] = []
+    for alias in aliases:
+        normalized = normalize_for_match(alias) or normalize_whitespace(alias)
+        if normalized and normalized not in normalized_aliases:
+            normalized_aliases.append(normalized)
+    return normalized_aliases
+
+
+def _score_spec_label_match(label: str, normalized_aliases: list[str]) -> int:
+    normalized_label = normalize_for_match(label) or normalize_whitespace(label)
+    if not normalized_label:
+        return 0
+    label_tokens = [token for token in normalized_label.split() if len(token) >= 2]
+    best_score = 0
+    for alias in normalized_aliases:
+        alias_tokens = [token for token in alias.split() if len(token) >= 2]
+        if len(alias_tokens) == 1:
+            alias_token = alias_tokens[0]
+            if alias_token in FUZZY_ALIAS_DENYLIST:
+                continue
+            if alias_token not in FUZZY_SINGLE_TOKEN_ALLOWLIST and len(alias_token) < 8:
+                continue
+        if len(alias) >= 2 and (alias in normalized_label or normalized_label in alias):
+            best_score = max(best_score, 100 + len(alias))
+            continue
+        if not alias_tokens:
+            continue
+        overlap = sum(
+            1
+            for alias_token in alias_tokens
+            if any(
+                alias_token == label_token or alias_token in label_token or label_token in alias_token
+                for label_token in label_tokens
+            )
+        )
+        if overlap:
+            best_score = max(best_score, overlap * 10 + len(alias_tokens))
+    return best_score
+
+
+def resolve_spec_value(spec_lookup: dict[str, str], aliases: list[str]) -> ResolvedNameComponent:
+    normalized_aliases = _normalize_rule_aliases(aliases)
+    if not normalized_aliases:
+        return ResolvedNameComponent("")
+
+    for alias in normalized_aliases:
+        value = normalize_whitespace(spec_lookup.get(alias, ""))
+        if value:
+            return ResolvedNameComponent(value=value, matched_label=alias, source="exact_spec")
+
+    best_match: ResolvedNameComponent | None = None
+    best_score = 0
+    for label, value in spec_lookup.items():
+        normalized_value = normalize_whitespace(value)
+        if not normalized_value:
+            continue
+        score = _score_spec_label_match(label, normalized_aliases)
+        if score > best_score:
+            best_score = score
+            best_match = ResolvedNameComponent(value=normalized_value, matched_label=label, source="fuzzy_spec")
+    return best_match or ResolvedNameComponent("")
+
+
+def compact_numeric_string(value: str) -> str:
+    numeric = extract_numeric(value)
+    if not numeric:
+        return ""
+    return re.sub(r",0+$", "", numeric)
+
+
+def compact_unit_value(value: str, unit: str) -> str:
+    numeric = compact_numeric_string(value)
+    if not numeric:
+        return normalize_whitespace(value)
+    return f"{numeric}{unit}"
+
+
+def extract_measurement_from_text(text: str, aliases: list[str]) -> str:
+    normalized_text = normalize_whitespace(text)
+    alias_keys = set(_normalize_rule_aliases(aliases))
+    patterns: list[str] = []
+    if "volt" in alias_keys or "v" in alias_keys or any("Ο„Ξ±ΟƒΞ·" in alias for alias in alias_keys):
+        patterns.append(r"\b\d+(?:[.,]\d+)?\s*(?:volt|v)\b")
+    if "watt" in alias_keys or any("ΞΉΟƒΟ‡Ο…" in alias for alias in alias_keys):
+        patterns.append(r"\b\d+(?:[.,]\d+)?\s*(?:watt(?:s)?|w)\b")
+    if "lt" in alias_keys or any("Ξ»ΞΉΟ„Ο" in alias or "Ο‡Ο‰ΟΞ·Ο„ΞΉΞΊΟΟ„" in alias for alias in alias_keys):
+        patterns.append(r"\b\d+(?:[.,]\d+)?\s*(?:lt|l|λιτρα|λίτρα)\b")
+    if "kg" in alias_keys or any(token in alias for alias in alias_keys for token in ("ΞΊΞΉΞ»Ξ±", "Ο†ΞΏΟΟ„ΞΉ", "Ο€Ξ»Ο…ΟƒΞ·", "ΟƒΟ„ΞµΞ³Ξ½Ο‰ΞΌΞ±")):
+        patterns.append(r"\b\d+(?:[.,]\d+)?\s*(?:kg|κιλα|κιλό|κιλά)\b")
+    if "cm" in alias_keys or any(token in alias for alias in alias_keys for token in ("ΞµΞΊΞ±Ο„ΞΏΟƒΟ„", "Ο€Ξ»Ξ±Ο„ΞΏΟ‚", "Ξ²Ξ±ΞΈΞΏΟ‚", "Ο…ΟΞΏΟ‚", "Ξ΄ΞΉΞ±ΞΌΞµΟ„ΟΞΏ")):
+        patterns.append(r"\b\d+(?:[.,]\d+)?\s*(?:cm|εκατοστ(?:ά|α)|εκατοστά)\b")
+    for pattern in patterns:
+        match = re.search(pattern, normalized_text, flags=re.IGNORECASE)
+        if match:
+            return normalize_whitespace(match.group(0))
+    return ""
+
+
+def infer_measurement_unit(
+    aliases: list[str],
+    matched_label: str,
+    category_phrase: str,
+    taxonomy: TaxonomyResolution,
+    value: str = "",
+) -> str:
+    alias_keys = set(_normalize_rule_aliases(aliases))
+    label_context = normalize_for_match(" ".join([matched_label, *alias_keys, value]))
+    if "volt" in label_context or "ταση" in label_context or "v" in alias_keys:
+        return "V"
+    if "watt" in label_context or "ισχυ" in label_context:
+        return "W"
+    if "lt" in label_context or "λιτρ" in label_context:
+        return "Lt"
+    if "cm" in label_context or any(token in label_context for token in ("εκατοστ", "πλατος", "βαθος", "υψος", "διαμετρο")):
+        return "cm"
+    if "kg" in label_context or any(token in label_context for token in ("κιλα", "βαρος", "φορτι", "πλυση", "στεγνωμα")):
+        return "kg"
+    if "χωρητικοτ" in label_context:
+        inferred = infer_capacity_unit(category_phrase, taxonomy)
+        if inferred == "Kg":
+            return "kg"
+        if inferred == "Lt":
+            return "Lt"
+    return ""
+
+
 def resolve_name_rule_value(
     source: SourceProductData,
     spec_lookup: dict[str, str],
@@ -791,9 +945,9 @@ def resolve_name_rule_value(
     resolved_parts: list[str] = []
     for aliases in groups:
         resolved = resolve_name_rule_component(source, spec_lookup, [str(alias) for alias in aliases], category_phrase, taxonomy)
-        if not resolved:
+        if not resolved.value:
             return ""
-        resolved_parts.append(resolved)
+        resolved_parts.append(resolved.value)
     if not resolved_parts:
         return ""
     if len(resolved_parts) == 1:
@@ -807,22 +961,45 @@ def resolve_name_rule_component(
     aliases: list[str],
     category_phrase: str,
     taxonomy: TaxonomyResolution,
-) -> str:
-    direct_value = normalize_value(spec_lookup, aliases)
-    if direct_value:
-        return normalize_name_rule_value(direct_value, aliases, category_phrase, taxonomy)
+) -> ResolvedNameComponent:
+    spec_value = resolve_spec_value(spec_lookup, aliases)
+    if spec_value.value:
+        return ResolvedNameComponent(
+            value=normalize_name_rule_value(
+                spec_value.value,
+                aliases,
+                category_phrase,
+                taxonomy,
+                matched_label=spec_value.matched_label,
+            ),
+            matched_label=spec_value.matched_label,
+            source=spec_value.source,
+        )
 
     fallback_value = extract_alias_value_from_evidence(source, aliases)
     if fallback_value:
-        return normalize_name_rule_value(fallback_value, aliases, category_phrase, taxonomy)
-    return ""
+        return ResolvedNameComponent(
+            value=normalize_name_rule_value(fallback_value, aliases, category_phrase, taxonomy),
+            source="fallback_evidence",
+        )
+    return ResolvedNameComponent("")
 
 
-def normalize_name_rule_value(value: str, aliases: list[str], category_phrase: str, taxonomy: TaxonomyResolution) -> str:
+def normalize_name_rule_value(
+    value: str,
+    aliases: list[str],
+    category_phrase: str,
+    taxonomy: TaxonomyResolution,
+    *,
+    matched_label: str = "",
+) -> str:
     normalized = normalize_whitespace(value)
     if not normalized:
         return ""
     alias_keys = {normalize_for_match(alias) for alias in aliases}
+    unit = infer_measurement_unit(aliases, matched_label, category_phrase, taxonomy, normalized)
+    if unit and not _is_tv_scope(category_phrase, taxonomy):
+        return compact_unit_value(normalized, unit)
     if _is_tv_scope(category_phrase, taxonomy):
         normalized = _normalize_tv_name_rule_value(normalized, alias_keys) or normalized
     if any("ψυξης" in key for key in alias_keys):
@@ -982,6 +1159,9 @@ def extract_alias_value_from_evidence(source: SourceProductData, aliases: list[s
         if normalize_whitespace(item.value)
     ]
     for text in texts:
+        measurement = extract_measurement_from_text(text, aliases)
+        if measurement:
+            return measurement
         for alias in alias_candidates:
             match = re.search(re.escape(alias), text, flags=re.IGNORECASE)
             if match:
@@ -1043,7 +1223,11 @@ def format_capacity_differentiator(
     if numeric.endswith(".0"):
         numeric = numeric[:-2]
     unit = infer_capacity_unit(category_phrase, taxonomy)
-    return f"{numeric}{unit}" if unit else numeric
+    if unit == "Kg":
+        return compact_unit_value(numeric, "kg")
+    if unit == "Lt":
+        return compact_unit_value(numeric, "Lt")
+    return numeric
 
 
 def infer_capacity_unit(category_phrase: str, taxonomy: TaxonomyResolution) -> str:
@@ -1138,14 +1322,21 @@ def format_power(spec_lookup: dict[str, str], labels: list[str] | None = None) -
     raw = normalize_value(spec_lookup, labels or ["Ισχύς σε Watts", "Ισχύς"])
     if not raw:
         return ""
-    numeric = extract_numeric(raw)
-    return f"{numeric}W" if numeric else ""
+    return compact_unit_value(raw, "W")
 
 
 def format_liters(spec_lookup: dict[str, str], labels: list[str]) -> str:
     raw = normalize_value(spec_lookup, labels)
-    numeric = extract_numeric(raw)
-    return f"{numeric}Lt" if numeric else ""
+    if not raw:
+        return ""
+    return compact_unit_value(raw, "Lt")
+
+
+def format_centimeters(spec_lookup: dict[str, str], labels: list[str]) -> str:
+    raw = normalize_value(spec_lookup, labels)
+    if not raw:
+        return ""
+    return compact_unit_value(raw, "cm")
 
 
 def format_program_count(spec_lookup: dict[str, str], labels: list[str]) -> str:
