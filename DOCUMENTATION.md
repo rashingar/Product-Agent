@@ -5599,3 +5599,66 @@ Validation:
 
 Risks, blockers, or skipped items:
 - this commit keeps the `mixed_family` allowlist deliberately narrow and explicit; broader generic mixed-family inference remains out of scope
+
+## 2026-04-02 - Config-driven deterministic rules, schema policy metadata, and OpenCart config cleanup
+
+What changed:
+- promoted `resources/mappings/name_rules.json` to the active deterministic-rule source by adding validated loader/resolver code and switching `scraper/pipeline/deterministic_fields.py` to resolve generic rules and source-scoped strategy selection from JSON
+- migrated the generic JSON rule payloads to match the live `differentiator_priority_map.csv` differentiator ordering/coverage so the JSON ruleset now carries the same runtime rule content
+- kept the existing deterministic family formatters for the supported source-scoped families, but removed the hardcoded source/family gating from the active path in favor of config-backed rule lookup
+- added `resources/mappings/schema_policy_rules.json` and updated the Electronet schema compiler to derive `subcategory_match_policy` from authored metadata instead of hardcoded exception sets
+- regenerated `resources/schemas/electronet_schema_library.json` and `resources/schemas/schema_index.csv` from the new schema-policy config input with no intended behavior drift
+- added `tools/opencart_config.py` as the shared OpenCart runtime config resolver and rewired the importer/uploader Python tools plus the two Bash wrappers to use the same precedence model
+- updated the image uploader plan/report to build Besco HTML URLs from the resolved store base instead of a baked host literal
+- replaced the product-specific `resources/templates/TEMPLATE_presentation.html` sample with a neutral placeholder/example asset and documented that it is not a runtime content source
+- updated operator-facing docs/config comments for the canonical OpenCart config precedence path
+
+Files changed:
+- `DOCUMENTATION.md`
+- `README.md`
+- `opencart.env.example`
+- `resources/mappings/name_rules.json`
+- `resources/mappings/schema_policy_rules.json`
+- `resources/schemas/electronet_schema_library.json`
+- `resources/schemas/schema_index.csv`
+- `resources/templates/TEMPLATE_presentation.html`
+- `scraper/pipeline/deterministic_fields.py`
+- `scraper/pipeline/deterministic_rule_config.py`
+- `scraper/pipeline/repo_paths.py`
+- `scraper/pipeline/tests/test_utils_support_paths.py`
+- `tools/opencart_config.py`
+- `tools/opencart_import_csv_playwright.py`
+- `tools/opencart_upload_images.py`
+- `tools/run_opencart_image_upload.sh`
+- `tools/run_opencart_import_csv.sh`
+- `tools/schema_registry/build_electronet_schema_library.py`
+- `tools/schema_registry/tests/test_build_electronet_schema_library.py`
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_deterministic_fields.py`
+- `python -m pytest -q tools/schema_registry/tests/test_build_electronet_schema_library.py`
+- `python -m pytest -q pipeline/tests/test_utils_support_paths.py`
+- `python -m tools.schema_registry.build_electronet_schema_library`
+- `python -m tools.schema_registry.build_schema_index`
+- `python -m pytest -q pipeline/tests/test_schema_matcher_compiled_library_regressions.py`
+- `python -m pytest -q tools/schema_registry/tests/test_build_electronet_schema_library.py`
+- inline Python compile checks for:
+  - `scraper/pipeline/deterministic_fields.py`
+  - `scraper/pipeline/deterministic_rule_config.py`
+  - `tools/opencart_config.py`
+  - `tools/opencart_import_csv_playwright.py`
+  - `tools/opencart_upload_images.py`
+- `bash -n tools/run_opencart_import_csv.sh`
+- `bash -n tools/run_opencart_image_upload.sh`
+- `python tools/opencart_config.py export-shell --repo-root .`
+
+Validation:
+- deterministic naming regressions passed: `8 passed`
+- schema-registry builder tests passed: `9 passed`
+- compiled-library matcher regressions passed: `14 passed`
+- support-path regression passed: `1 passed`
+- shared OpenCart config resolver executed successfully and both updated Bash wrappers passed syntax validation
+
+Risks, blockers, or skipped items:
+- `differentiator_priority_map.csv` remains in the repo for reference/backward auditability, but runtime ownership now belongs to `resources/mappings/name_rules.json`
+- the OpenCart config work was validated through compile/syntax checks and resolver execution only; no live admin upload/import run was performed in this pass

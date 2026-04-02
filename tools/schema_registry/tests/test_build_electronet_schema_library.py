@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from tools.schema_registry.build_electronet_schema_library import build_library_payload
 
 
@@ -10,12 +12,14 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE_ROOT = REPO_ROOT / "resources" / "templates" / "electronet"
 TAXONOMY_PATH = REPO_ROOT / "resources" / "mappings" / "catalog_taxonomy.json"
 CURRENT_LIBRARY_PATH = REPO_ROOT / "resources" / "schemas" / "electronet_schema_library.json"
+SCHEMA_POLICY_RULES_PATH = REPO_ROOT / "resources" / "mappings" / "schema_policy_rules.json"
 
 
 def _repo_payload() -> dict[str, object]:
     return build_library_payload(
         template_root=TEMPLATE_ROOT,
         taxonomy_path=TAXONOMY_PATH,
+        schema_policy_rules_path=SCHEMA_POLICY_RULES_PATH,
         existing_library_path=CURRENT_LIBRARY_PATH,
     )
 
@@ -408,3 +412,26 @@ def test_build_library_is_source_of_truth_pure_against_existing_compiled_library
     edited_schema = _schemas_by_template_id(edited_payload)["demo"]
 
     assert edited_schema["schema_id"] != schema["schema_id"]
+
+
+def test_build_library_rejects_invalid_schema_policy_rules(tmp_path: Path) -> None:
+    bad_rules_path = tmp_path / "schema_policy_rules.json"
+    bad_rules_path.write_text(
+        json.dumps(
+            {
+                "default_policy": "exact_subcategory",
+                "overrides": {"tileoraseis": "unsupported_policy"},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Unsupported schema policy"):
+        build_library_payload(
+            template_root=TEMPLATE_ROOT,
+            taxonomy_path=TAXONOMY_PATH,
+            schema_policy_rules_path=bad_rules_path,
+            existing_library_path=CURRENT_LIBRARY_PATH,
+        )

@@ -11,10 +11,10 @@ from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
 
 import requests
+from tools.opencart_config import resolve_opencart_config
 
 TIMEOUT = 60
 ALLOWED_EXTS = {'.jpg', '.jpeg'}
-DEFAULT_ADMIN_PATH = '/ipadmin/index.php'
 
 
 class UploadError(RuntimeError):
@@ -97,7 +97,7 @@ def validate_besco_files(besco_dir: Path) -> list[Path]:
     return files
 
 
-def build_plan(repo_root: Path, model: str) -> dict[str, Any]:
+def build_plan(repo_root: Path, model: str, store_base: str) -> dict[str, Any]:
     if not is_valid_model(model):
         raise UploadError('Model must be exactly 6 digits.')
 
@@ -129,7 +129,7 @@ def build_plan(repo_root: Path, model: str) -> dict[str, Any]:
             'remote_dir': besco_remote_dir,
             'remote_files': [f'catalog/{besco_remote_dir}/{p.name}' for p in besco_files],
             'count': len(besco_files),
-            'html_base': f'https://www.etranoulis.gr/image/catalog/01_bescos/{model}/',
+            'html_base': f"{store_base.rstrip('/')}/image/catalog/01_bescos/{model}/",
         }
     }
 
@@ -306,10 +306,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Upload repo-native product images to OpenCart filemanager.')
     parser.add_argument('--model', required=True, help='6-digit model, e.g. 123456')
     parser.add_argument('--repo-root', default=None, help='Optional explicit repo root')
-    parser.add_argument('--store-base', default=os.environ.get('OPENCART_STORE_BASE', 'https://www.etranoulis.gr'))
-    parser.add_argument('--admin-path', default=os.environ.get('OPENCART_ADMIN_PATH', DEFAULT_ADMIN_PATH))
-    parser.add_argument('--username', default=os.environ.get('OPENCART_ADMIN_USER'))
-    parser.add_argument('--password', default=os.environ.get('OPENCART_ADMIN_PASS'))
+    parser.add_argument('--store-base', default=None)
+    parser.add_argument('--admin-path', default=None)
+    parser.add_argument('--username', default=None)
+    parser.add_argument('--password', default=None)
     parser.add_argument('--dry-run', action='store_true', help='Validate and auth-check only, do not upload')
     parser.add_argument('--report-file', default=None, help='Optional explicit report path. Default: work/{model}/upload.opencart.json')
     return parser.parse_args()
@@ -317,12 +317,19 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    if not args.username or not args.password:
+    repo_root = discover_repo_root(args.repo_root)
+    resolved_config = resolve_opencart_config(
+        repo_root=repo_root,
+        store_base=args.store_base,
+        admin_path=args.admin_path,
+        username=args.username,
+        password=args.password,
+    )
+    if not resolved_config['username'] or not resolved_config['password']:
         raise UploadError('Missing admin credentials. Pass --username/--password or set OPENCART_ADMIN_USER and OPENCART_ADMIN_PASS.')
 
-    repo_root = discover_repo_root(args.repo_root)
-    plan = build_plan(repo_root, args.model)
-    admin_index = build_admin_index(args.store_base, args.admin_path)
+    plan = build_plan(repo_root, args.model, resolved_config['store_base'])
+    admin_index = build_admin_index(resolved_config['store_base'], resolved_config['admin_path'])
     report_path = Path(args.report_file).expanduser().resolve() if args.report_file else (repo_root / 'work' / args.model / 'upload.opencart.json')
 
     result: dict[str, Any] = {'ok': False, 'dry_run': bool(args.dry_run), 'admin_index': admin_index, 'plan': plan}
@@ -339,7 +346,7 @@ def main() -> int:
     }, ensure_ascii=False, indent=2))
 
     session = requests.Session()
-    user_token = login(session, admin_index, args.username, args.password)
+    user_token = login(session, admin_index, resolved_config['username'], resolved_config['password'])
     result['login'] = {'ok': True, 'user_token_present': bool(user_token)}
 
     probe = permission_probe(session, admin_index, user_token)

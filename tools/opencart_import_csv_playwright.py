@@ -13,10 +13,8 @@ from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
+from tools.opencart_config import resolve_opencart_config
 
-DEFAULT_STORE_BASE = "https://www.etranoulis.gr"
-DEFAULT_ADMIN_PATH = "/ipadmin/index.php"
-DEFAULT_PROFILE = "product_new"
 DEFAULT_HEADLESS = True
 
 
@@ -107,11 +105,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", required=True, help="6-digit product model")
     parser.add_argument("--repo-root", default=None, help="Optional repo root")
     parser.add_argument("--csv-file", default=None, help="Optional explicit CSV file path")
-    parser.add_argument("--store-base", default=os.environ.get("OPENCART_STORE_BASE", DEFAULT_STORE_BASE))
-    parser.add_argument("--admin-path", default=os.environ.get("OPENCART_ADMIN_PATH", DEFAULT_ADMIN_PATH))
-    parser.add_argument("--username", default=os.environ.get("OPENCART_ADMIN_USER"))
-    parser.add_argument("--password", default=os.environ.get("OPENCART_ADMIN_PASS"))
-    parser.add_argument("--profile", default=os.environ.get("OPENCART_IMPORT_PROFILE", DEFAULT_PROFILE))
+    parser.add_argument("--store-base", default=None)
+    parser.add_argument("--admin-path", default=None)
+    parser.add_argument("--username", default=None)
+    parser.add_argument("--password", default=None)
+    parser.add_argument("--profile", default=None)
     parser.add_argument("--headless", dest="headless", action="store_true", default=DEFAULT_HEADLESS)
     parser.add_argument("--headed", dest="headless", action="store_false")
     parser.add_argument("--slow-mo-ms", type=int, default=0)
@@ -289,16 +287,22 @@ def write_report(report_path: Path, payload: dict[str, Any]) -> None:
 
 def main() -> int:
     args = parse_args()
-
-    if not args.username or not args.password:
+    repo_root = discover_repo_root(args.repo_root)
+    resolved_config = resolve_opencart_config(
+        repo_root=repo_root,
+        store_base=args.store_base,
+        admin_path=args.admin_path,
+        username=args.username,
+        password=args.password,
+        profile=args.profile,
+    )
+    if not resolved_config["username"] or not resolved_config["password"]:
         raise ImportErrorRuntime(
             "Missing admin credentials. Pass --username/--password or set OPENCART_ADMIN_USER and OPENCART_ADMIN_PASS."
         )
-
-    repo_root = discover_repo_root(args.repo_root)
     csv_path = resolve_csv_path(repo_root, args.model, args.csv_file)
     contract = csv_contract_check(csv_path, args.model)
-    admin_index = build_admin_index(args.store_base, args.admin_path)
+    admin_index = build_admin_index(resolved_config["store_base"], resolved_config["admin_path"])
     report_path = (
         Path(args.report_file).expanduser().resolve()
         if args.report_file
@@ -309,7 +313,7 @@ def main() -> int:
         'ok': False,
         'dry_run': bool(args.dry_run),
         'admin_index': admin_index,
-        'profile': args.profile,
+        'profile': resolved_config["profile"],
         'csv_file': str(csv_path),
         'csv_contract': contract,
         'model': args.model,
@@ -318,7 +322,7 @@ def main() -> int:
     print(json.dumps({
         'model': args.model,
         'csv_file': str(csv_path),
-        'profile': args.profile,
+        'profile': resolved_config["profile"],
         'admin_index': admin_index,
         'dry_run': args.dry_run,
     }, ensure_ascii=False, indent=2))
@@ -329,14 +333,14 @@ def main() -> int:
         page = context.new_page()
 
         try:
-            login(page, admin_index, args.username, args.password, args.timeout_ms)
+            login(page, admin_index, resolved_config["username"], resolved_config["password"], args.timeout_ms)
             result['login'] = {'ok': True, 'url_after_login': page.url}
 
-            open_import_page(page, admin_index, args.profile, args.timeout_ms)
+            open_import_page(page, admin_index, resolved_config["profile"], args.timeout_ms)
             result['step1_opened'] = {'ok': True, 'url': page.url}
 
             step1_upload_and_next(page, csv_path, args.timeout_ms)
-            step2_info = assert_step2_mapping(page, args.profile, args.timeout_ms)
+            step2_info = assert_step2_mapping(page, resolved_config["profile"], args.timeout_ms)
             result['step2'] = step2_info
 
             if not step2_info['mapping_ok']:

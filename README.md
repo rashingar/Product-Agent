@@ -99,6 +99,11 @@ After `render`, inspect:
 -->
 On successful validation, `render` publishes `products/{model}.csv`, completes the render phase, and then starts a separate publish phase through `tools/run_opencart_pipeline.sh`. The publish wrapper runs image upload first and CSV import second, using `CURRENT_JOB_PRODUCT_FILE` for the exact current-job published CSV path. Render success remains render-only; publish status, stage, message, and report paths are reported separately.
 
+OpenCart runtime config is centralized in `tools/opencart_config.py`.
+- Supported inputs remain `OPENCART_STORE_BASE`, `OPENCART_ADMIN_PATH`, `OPENCART_ADMIN_USER`, `OPENCART_ADMIN_PASS`, and `OPENCART_IMPORT_PROFILE`
+- Resolution precedence is explicit CLI args, then process env, then `.secrets/opencart.env`, then centralized compatibility defaults
+- `opencart.env.example` documents the canonical local env file shape
+
 ## Deterministic Description Rendering
 
 Render assembles the final `description` HTML in code from:

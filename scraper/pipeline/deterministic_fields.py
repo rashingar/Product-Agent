@@ -1,12 +1,19 @@
 from __future__ import annotations
 
-import csv
 import re
+from collections.abc import Mapping
 from typing import Any, Iterable
 
+from .deterministic_rule_config import (
+    GenericNameRule,
+    ResolvedGenericNameRule,
+    SourceScopedRule,
+    load_deterministic_rule_config,
+    resolve_generic_name_rule,
+    resolve_source_scoped_rule,
+)
 from .models import SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match, normalize_whitespace
-from .repo_paths import DIFFERENTIATOR_PRIORITY_MAP_PATH
 
 MODEL_TOKEN_RE = re.compile(r"^(?=.*[A-Z])(?=.*\d)[A-Z0-9][A-Z0-9._/-]{2,}$")
 PURE_NUMERIC_TOKEN_RE = re.compile(r"^\d+(?:[.,]\d+)?$")
@@ -17,86 +24,59 @@ DEFAULT_MAX_META_DESCRIPTION_DIFFERENTIATORS = 4
 
 ARTICLE_MAP = {"fem": "Η", "neut": "Το", "masc": "Ο"}
 
-_DIFFERENTIATOR_RULES_CACHE: dict[str, Any] | None = None
+def _rule_value(rule: ResolvedGenericNameRule | GenericNameRule | Mapping[str, Any], key: str, default: Any = None) -> Any:
+    if isinstance(rule, ResolvedGenericNameRule):
+        if key == "_matched_exact":
+            return rule.matched_exact
+        if key == "category_phrase":
+            return rule.rule.category_phrase
+        if key == "differentiator_specs":
+            return [[list(aliases) for aliases in group] for group in rule.rule.differentiator_specs]
+        if key == "max_differentiators":
+            return rule.rule.max_differentiators
+        if key == "outputs":
+            return {
+                "name": rule.outputs.name,
+                "meta_title": rule.outputs.meta_title,
+                "seo_keyword": rule.outputs.seo_keyword,
+            }
+        return default
+    if isinstance(rule, GenericNameRule):
+        if key == "category_phrase":
+            return rule.category_phrase
+        if key == "differentiator_specs":
+            return [[list(aliases) for aliases in group] for group in rule.differentiator_specs]
+        if key == "max_differentiators":
+            return rule.max_differentiators
+        return default
+    return rule.get(key, default)
 
 
-def _split_aliases(cell: str) -> list[str]:
-    return [normalize_whitespace(part) for part in str(cell or "").split("|") if normalize_whitespace(part)]
-
-
-def _parse_differentiator_cell(cell: str) -> list[list[str]]:
-    segments = [normalize_whitespace(part) for part in str(cell or "").split("+") if normalize_whitespace(part)]
-    return [_split_aliases(segment) for segment in segments if _split_aliases(segment)]
-
-
-def _load_differentiator_rules() -> dict[str, Any]:
-    global _DIFFERENTIATOR_RULES_CACHE
-    if _DIFFERENTIATOR_RULES_CACHE is None:
-        rules: list[dict[str, Any]] = []
-        default_rule: dict[str, Any] = {"differentiator_specs": []}
-        try:
-            with open(DIFFERENTIATOR_PRIORITY_MAP_PATH, "r", encoding="utf-8-sig", newline="") as handle:
-                reader = csv.DictReader(handle)
-                differentiator_columns = [field for field in reader.fieldnames or [] if field.startswith("differentiator_")]
-                for raw_row in reader:
-                    scope = normalize_for_match(raw_row.get("scope", "rule"))
-                    differentiator_specs = [
-                        parsed
-                        for column in differentiator_columns
-                        for parsed in [_parse_differentiator_cell(raw_row.get(column, ""))]
-                        if parsed
-                    ]
-                    row_rule = {
-                        "leaf_category": normalize_whitespace(raw_row.get("leaf_category", "")),
-                        "category_phrase": normalize_whitespace(raw_row.get("category_phrase", "")),
-                        "differentiator_specs": differentiator_specs,
-                        "max_differentiators": len(differentiator_specs) or DEFAULT_MAX_NAME_DIFFERENTIATORS,
-                    }
-                    if scope == "default":
-                        default_rule = row_rule
-                    else:
-                        rules.append(row_rule)
-        except FileNotFoundError:
-            pass
-        _DIFFERENTIATOR_RULES_CACHE = {"rules": rules, "default": default_rule}
-    return _DIFFERENTIATOR_RULES_CACHE
-
-
-def match_name_rule(taxonomy: TaxonomyResolution) -> dict[str, Any] | None:
-    rules_data = _load_differentiator_rules()
-    sub = taxonomy.sub_category or ""
-    leaf = taxonomy.leaf_category or ""
-    normalized_sub = normalize_for_match(sub)
-    normalized_leaf = normalize_for_match(leaf)
-
-    for rule in rules_data.get("rules", []):
-        target = normalize_for_match(rule.get("leaf_category", ""))
-        if not target:
-            continue
-        if normalized_sub == target or normalized_leaf == target:
-            return {**rule, "_matched_exact": True}
-
-    for rule in rules_data.get("rules", []):
-        target = normalize_for_match(rule.get("leaf_category", ""))
-        if not target:
-            continue
-        if target in normalized_sub or normalized_sub in target or target in normalized_leaf or normalized_leaf in target:
-            return {**rule, "_matched_exact": False}
-    return None
+def match_name_rule(
+    source: SourceProductData,
+    taxonomy: TaxonomyResolution,
+) -> ResolvedGenericNameRule | None:
+    return resolve_generic_name_rule(
+        source_name=source.source_name or "any",
+        leaf_category=taxonomy.leaf_category or "",
+        sub_category=taxonomy.sub_category or "",
+    )
 
 
 def apply_name_rule(
-    rule: dict[str, Any],
+    rule: ResolvedGenericNameRule | GenericNameRule | Mapping[str, Any],
     source: SourceProductData,
     brand: str,
     mpn: str,
     taxonomy: TaxonomyResolution,
 ) -> tuple[str, list[str]]:
-    category_phrase = rule.get("category_phrase", "")
-    spec_labels = rule.get("differentiator_specs", [])
-    max_differentiators = int(rule.get("max_differentiators", DEFAULT_MAX_NAME_DIFFERENTIATORS) or DEFAULT_MAX_NAME_DIFFERENTIATORS)
+    category_phrase = _rule_value(rule, "category_phrase", "")
+    spec_labels = _rule_value(rule, "differentiator_specs", [])
+    max_differentiators = int(
+        _rule_value(rule, "max_differentiators", DEFAULT_MAX_NAME_DIFFERENTIATORS) or DEFAULT_MAX_NAME_DIFFERENTIATORS
+    )
     spec_lookup = _build_preferred_spec_lookup(source)
-    exact_match = bool(rule.get("_matched_exact"))
+    exact_match = bool(_rule_value(rule, "_matched_exact"))
     if not exact_match:
         category_phrase = derive_category_phrase(source.name, brand, taxonomy) or category_phrase
     differentiators: list[str] = []
@@ -119,6 +99,15 @@ def apply_name_rule(
     if not differentiators:
         differentiators = derive_name_differentiators(source, category_phrase, taxonomy, brand, mpn)
     return category_phrase, differentiators
+
+
+def _select_generic_output_differentiators(differentiators: list[str], mode: str) -> list[str]:
+    normalized_mode = normalize_for_match(mode)
+    if normalized_mode == "first_1":
+        return differentiators[:1]
+    if normalized_mode == "first_2":
+        return differentiators[:2]
+    return differentiators
 
 
 def build_meta_description_draft(
@@ -149,17 +138,31 @@ def build_deterministic_product_fields(
     raw_title = normalize_whitespace(source.name)
     brand = normalize_whitespace(source.brand)
     mpn = normalize_whitespace(source.mpn) or extract_mpn_from_name(raw_title, brand)
-    name_rule = match_name_rule(taxonomy)
+    name_rule = match_name_rule(source, taxonomy)
+    output_profile = name_rule.outputs if name_rule else load_deterministic_rule_config().generic_outputs
     if name_rule:
         category_phrase, differentiators = apply_name_rule(name_rule, source, brand, mpn, taxonomy)
     else:
         category_phrase = derive_category_phrase(raw_title, brand, taxonomy)
         differentiators = derive_name_differentiators(source, category_phrase, taxonomy, brand, mpn)
-    composed_name = compose_name(brand, mpn, category_phrase, differentiators)
+    name_differentiators = _select_generic_output_differentiators(differentiators, output_profile.name)
+    meta_title_differentiators = _select_generic_output_differentiators(differentiators, output_profile.meta_title)
+    composed_name = compose_name(brand, mpn, category_phrase, name_differentiators)
     preserve_title = should_preserve_parsed_title(raw_title, brand, mpn, composed_name)
     name = composed_name or raw_title
-    meta_title = compose_meta_title(name, brand, mpn, category_phrase, differentiators, preserve_title)
-    seo_keyword = seo_keyword_builder(name, model)
+    meta_title = compose_meta_title(name, brand, mpn, category_phrase, meta_title_differentiators, preserve_title)
+    if normalize_for_match(output_profile.seo_keyword) == "name":
+        seo_keyword = seo_keyword_builder(name, model)
+    else:
+        seo_keyword = seo_keyword_builder(
+            compose_name(
+                brand,
+                mpn,
+                category_phrase,
+                _select_generic_output_differentiators(differentiators, output_profile.seo_keyword),
+            ),
+            model,
+        )
     tail_parts = [normalize_whitespace(category_phrase)] + [normalize_whitespace(d) for d in differentiators if d]
     name_draft_tail = normalize_whitespace(" ".join(p for p in tail_parts if p))
     meta_description_draft = build_meta_description_draft(
@@ -186,21 +189,34 @@ def build_skroutz_deterministic_fields(
     model: str,
     seo_keyword_builder,
 ) -> dict[str, object] | None:
-    normalized_source_name = normalize_for_match(source.source_name)
-    if normalized_source_name not in {
-        normalize_for_match("skroutz"),
-        normalize_for_match("manufacturer_tefal"),
-    }:
-        return None
-
     family = resolve_skroutz_family(taxonomy)
     if not family:
+        return None
+
+    source_rule = resolve_source_scoped_rule(
+        source_name=source.source_name or "",
+        family=family,
+        leaf_category=taxonomy.leaf_category or "",
+        sub_category=taxonomy.sub_category or "",
+    )
+    if source_rule is None:
         return None
 
     raw_title = normalize_whitespace(source.name)
     brand = normalize_whitespace(source.brand)
     mpn = normalize_whitespace(source.mpn) or extract_mpn_from_name(raw_title, brand)
     spec_lookup = _build_preferred_spec_lookup(source)
+    return build_source_scoped_deterministic_fields(
+        rule=source_rule,
+        source=source,
+        taxonomy=taxonomy,
+        model=model,
+        seo_keyword_builder=seo_keyword_builder,
+        raw_title=raw_title,
+        brand=brand,
+        mpn=mpn,
+        spec_lookup=spec_lookup,
+    )
 
     if family == "soundbar":
         category_phrase = "Soundbar"
@@ -247,7 +263,8 @@ def build_skroutz_deterministic_fields(
         capacity = normalize_value(spec_lookup, ["Συνολική Χωρητικότητα", "Συνολική Καθαρή Χωρητικότητα", "Χωρητικότητα"])
         color = normalize_value(spec_lookup, ["Χρώμα", "Χρώμα Συσκευής", "Χρώμα / Φινίρισμα"])
         width = normalize_value(spec_lookup, ["Πλάτος"])
-        energy_class = normalize_value(spec_lookup, ["Ενεργειακή Κλάση"])
+        title_tail = normalize_whitespace(source.name).split()[-1] if normalize_whitespace(source.name) else ""
+        energy_class = normalize_value(spec_lookup, ["?????????? ?????"]) or extract_energy_class_from_source(source) or (title_tail.upper() if ENERGY_CLASS_TOKEN_RE.fullmatch(title_tail) else "")
         differentiators = [item for item in [cooling, capacity, color, width, energy_class] if item]
         name = compose_name(brand, mpn, category_phrase, differentiators)
         meta_title = compose_meta_title(
@@ -317,6 +334,262 @@ def build_skroutz_deterministic_fields(
     )
     seo_name = compose_name(brand, mpn, category_phrase, [normalize_hob_burners_for_seo(burner_phrase), power, surface])
     seo_keyword = seo_keyword_builder(seo_name, model)
+    return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
+
+def build_source_scoped_deterministic_fields(
+    *,
+    rule: SourceScopedRule,
+    source: SourceProductData,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+    raw_title: str,
+    brand: str,
+    mpn: str,
+    spec_lookup: dict[str, str],
+) -> dict[str, object] | None:
+    strategy_id = rule.strategy_id
+    if strategy_id == "soundbar":
+        return _build_soundbar_deterministic_fields(rule, source, taxonomy, model, seo_keyword_builder, raw_title, brand, mpn, spec_lookup)
+    if strategy_id == "coffee_filter":
+        return _build_coffee_filter_deterministic_fields(rule, taxonomy, model, seo_keyword_builder, brand, mpn, spec_lookup)
+    if strategy_id == "fridge_freezer":
+        return _build_fridge_freezer_deterministic_fields(rule, source, taxonomy, model, seo_keyword_builder, brand, mpn, spec_lookup)
+    if strategy_id == "kettle":
+        return _build_kettle_deterministic_fields(rule, taxonomy, model, seo_keyword_builder, raw_title, brand, mpn, spec_lookup)
+    if strategy_id == "ice_cream_maker":
+        return _build_ice_cream_maker_deterministic_fields(rule, taxonomy, model, seo_keyword_builder, brand, mpn, spec_lookup)
+    if strategy_id == "tabletop_hob":
+        return _build_tabletop_hob_deterministic_fields(rule, taxonomy, model, seo_keyword_builder, raw_title, brand, mpn, spec_lookup)
+    raise ValueError(f"Unsupported deterministic source strategy: {rule.strategy_id}")
+
+
+def _source_rule_output_parts(rule: SourceScopedRule, output_key: str, components: Mapping[str, str]) -> list[str]:
+    return [
+        value
+        for component_id in rule.outputs.get(output_key, ())
+        for value in [normalize_whitespace(components.get(component_id, ""))]
+        if value
+    ]
+
+
+def _build_soundbar_deterministic_fields(
+    rule: SourceScopedRule,
+    source: SourceProductData,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+    raw_title: str,
+    brand: str,
+    mpn: str,
+    spec_lookup: dict[str, str],
+) -> dict[str, object]:
+    category_phrase = rule.category_phrase
+    channels = normalize_value(spec_lookup, ["ΞΞ±Ξ½Ξ¬Ξ»ΞΉΞ±"])
+    meta_power = format_power(spec_lookup, ["Ξ™ΟƒΟ‡ΟΟ‚"]) or extract_soundbar_power(
+        " ".join([source.presentation_source_html, source.hero_summary, raw_title])
+    )
+    components = {
+        "channels": channels,
+        "subwoofer": normalize_soundbar_subwoofer(normalize_value(spec_lookup, ["Subwoofer"])),
+        "power": meta_power,
+        "standards_meta": normalize_soundbar_standards_for_meta(normalize_value(spec_lookup, ["Ξ ΟΟΟ„Ο…Ο€Ξ± Ξ‰Ο‡ΞΏΟ…"])),
+        "standards_seo": normalize_soundbar_standards_for_seo(normalize_value(spec_lookup, ["Ξ ΟΟΟ„Ο…Ο€Ξ± Ξ‰Ο‡ΞΏΟ…"])),
+        "channels_seo": normalize_soundbar_channels_for_seo(channels),
+    }
+    differentiators = _source_rule_output_parts(rule, "name", components)
+    name = normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, *differentiators] if part))
+    meta_title_value = normalize_whitespace(
+        " ".join(part for part in [brand, mpn, category_phrase, *_source_rule_output_parts(rule, "meta_title", components)] if part)
+    )
+    meta_title = f"{meta_title_value} | eTranoulis" if meta_title_value else ""
+    seo_keyword = seo_keyword_builder(
+        normalize_whitespace(
+            " ".join(part for part in [brand, mpn, category_phrase, *_source_rule_output_parts(rule, "seo_keyword", components)] if part)
+        ),
+        model,
+    )
+    return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
+
+def _build_coffee_filter_deterministic_fields(
+    rule: SourceScopedRule,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+    brand: str,
+    mpn: str,
+    spec_lookup: dict[str, str],
+) -> dict[str, object]:
+    category_phrase = rule.category_phrase
+    components = {
+        "power": format_power(spec_lookup),
+        "capacity": format_liters(spec_lookup, ["Ξ§Ο‰ΟΞ·Ο„ΞΉΞΊΟΟ„Ξ·Ο„Ξ± Ξ”ΞΏΟ‡ΞµΞ―ΞΏΟ… ΞΞµΟΞΏΟ ΟƒΞµ Ξ›Ξ―Ο„ΟΞ±"]),
+        "cups": format_cups(spec_lookup),
+    }
+    differentiators = _source_rule_output_parts(rule, "name", components)
+    name = compose_name(brand, mpn, category_phrase, differentiators)
+    meta_title = compose_meta_title(
+        name=name,
+        brand=brand,
+        mpn=mpn,
+        category_phrase=category_phrase,
+        differentiators=_source_rule_output_parts(rule, "meta_title", components),
+        preserve_title=False,
+    )
+    seo_keyword = seo_keyword_builder(
+        normalize_whitespace(
+            " ".join(
+                part
+                for part in [
+                    brand,
+                    mpn,
+                    category_phrase,
+                    *_source_rule_output_parts(rule, "seo_keyword", {**components, "capacity_seo": format_capacity_for_seo(components["capacity"])}),
+                ]
+                if part
+            )
+        ),
+        model,
+    )
+    return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
+
+def _build_fridge_freezer_deterministic_fields(
+    rule: SourceScopedRule,
+    source: SourceProductData,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+    brand: str,
+    mpn: str,
+    spec_lookup: dict[str, str],
+) -> dict[str, object]:
+    category_phrase = rule.category_phrase
+    cooling = normalize_fridge_cooling(normalize_value(spec_lookup, ["??????? ?????", "?????????? ?????"])) or normalize_fridge_cooling(
+        extract_first_preferred_spec_value(source, [r"no\s*frost", r"nofrost", r"low\s*frost"])
+    )
+    capacity = normalize_value(spec_lookup, ["???????? ????????????", "???????? ?????? ????????????", "????????????"]) or extract_first_preferred_spec_value(
+        source, [r"\b\d+(?:[.,]\d+)?\s*lt\b"]
+    )
+    color = normalize_value(spec_lookup, ["?????", "????? ????????", "????? / ?????????"]) or extract_first_preferred_spec_value(
+        source, [r"\binox\b", r"metal look", r"silver", r"black", r"white", r"gray", r"grey"]
+    )
+    width = normalize_value(spec_lookup, ["??????"]) or extract_first_preferred_spec_value(source, [r"\b\d+(?:[.,]\d+)?\s*cm\b"])
+    energy_class = normalize_value(spec_lookup, ["?????????? ?????"]) or extract_energy_class_from_source(source)
+    differentiators = [item for item in [cooling, capacity, color, width, energy_class] if item]
+    name = compose_name(brand, mpn, category_phrase, differentiators)
+    meta_title = compose_meta_title(
+        name=name,
+        brand=brand,
+        mpn=mpn,
+        category_phrase=category_phrase,
+        differentiators=[item for item in [cooling, capacity] if item],
+        preserve_title=False,
+    )
+    seo_keyword = seo_keyword_builder(name, model)
+    return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
+def _build_kettle_deterministic_fields(
+    rule: SourceScopedRule,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+    raw_title: str,
+    brand: str,
+    mpn: str,
+    spec_lookup: dict[str, str],
+) -> dict[str, object]:
+    category_phrase = rule.category_phrase
+    components = {
+        "capacity": format_liters(spec_lookup, ["Ξ§Ο‰ΟΞ·Ο„ΞΉΞΊΟΟ„Ξ·Ο„Ξ± ΟƒΞµ Ξ›Ξ―Ο„ΟΞ±"]),
+        "power": format_power(spec_lookup),
+        "color": derive_kettle_color(raw_title, spec_lookup),
+    }
+    differentiators = _source_rule_output_parts(rule, "name", components)
+    name = compose_name(brand, mpn, category_phrase, differentiators)
+    meta_title_value = normalize_whitespace(
+        " ".join(part for part in [brand, mpn, category_phrase, *_source_rule_output_parts(rule, "meta_title", components)] if part)
+    )
+    meta_title = f"{meta_title_value} | eTranoulis" if meta_title_value else ""
+    seo_tail = extract_skroutz_tail_from_title(raw_title, category_phrase) or normalize_whitespace(" ".join(item for item in [category_phrase, *differentiators] if item))
+    seo_value = _source_rule_output_parts(rule, "seo_keyword", {"tail": seo_tail})
+    seo_keyword = seo_keyword_builder(
+        normalize_whitespace(" ".join(part for part in [brand, mpn, format_capacity_for_seo(seo_value[0] if seo_value else seo_tail)] if part)),
+        model,
+    )
+    return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
+
+def _build_ice_cream_maker_deterministic_fields(
+    rule: SourceScopedRule,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+    brand: str,
+    mpn: str,
+    spec_lookup: dict[str, str],
+) -> dict[str, object]:
+    category_phrase = rule.category_phrase
+    bowls = format_count_differentiator(spec_lookup, ["Ξ‘ΟΞΉΞΈΞΌΟΟ‚ Ξ”ΞΏΟ‡ΞµΞ―Ο‰Ξ½"], singular="Ξ”ΞΏΟ‡ΞµΞ―ΞΏΟ…", plural="Ξ”ΞΏΟ‡ΞµΞ―Ο‰Ξ½")
+    color = normalize_value(spec_lookup, ["Ξ§ΟΟΞΌΞ±"])
+    components = {
+        "capacity": format_liters(spec_lookup, ["Ξ§Ο‰ΟΞ·Ο„ΞΉΞΊΟΟ„Ξ·Ο„Ξ±"]),
+        "programs": format_program_count(spec_lookup, ["Ξ‘ΟΞΉΞΈΞΌΟΟ‚ Ξ ΟΞΏΞ³ΟΞ±ΞΌΞΌΞ¬Ο„Ο‰Ξ½"]),
+        "bowls_or_color": bowls or color,
+        "bowls": bowls,
+        "color": color,
+    }
+    differentiators = _source_rule_output_parts(rule, "name", components)
+    name = compose_name(brand, mpn, category_phrase, differentiators)
+    meta_title = compose_meta_title(
+        name=name,
+        brand=brand,
+        mpn=mpn,
+        category_phrase=category_phrase,
+        differentiators=_source_rule_output_parts(rule, "meta_title", components),
+        preserve_title=False,
+    )
+    seo_keyword = seo_keyword_builder(
+        normalize_whitespace(" ".join(part for part in [brand, mpn, category_phrase, *_source_rule_output_parts(rule, "seo_keyword", components)] if part)),
+        model,
+    )
+    return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
+
+def _build_tabletop_hob_deterministic_fields(
+    rule: SourceScopedRule,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+    raw_title: str,
+    brand: str,
+    mpn: str,
+    spec_lookup: dict[str, str],
+) -> dict[str, object]:
+    category_phrase = rule.category_phrase
+    burner_phrase = derive_hob_burner_phrase(spec_lookup, raw_title)
+    power = format_power(spec_lookup, ["Ξ™ΟƒΟ‡ΟΟ‚"])
+    surface = normalize_value(spec_lookup, ["Ξ¤ΟΟ€ΞΏΟ‚ Ξ•ΟƒΟ„Ξ―Ξ±Ο‚"])
+    components = {
+        "burner_phrase": burner_phrase,
+        "power": power,
+        "surface": surface,
+        "seo_name": compose_name(brand, mpn, category_phrase, [normalize_hob_burners_for_seo(burner_phrase), power, surface]),
+    }
+    differentiators = _source_rule_output_parts(rule, "name", components)
+    name = compose_name(brand, mpn, category_phrase, differentiators)
+    meta_title = compose_meta_title(
+        name=name,
+        brand=brand,
+        mpn=mpn,
+        category_phrase=category_phrase,
+        differentiators=_source_rule_output_parts(rule, "meta_title", components),
+        preserve_title=False,
+    )
+    seo_parts = _source_rule_output_parts(rule, "seo_keyword", components)
+    seo_keyword = seo_keyword_builder(seo_parts[0] if seo_parts else name, model)
     return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
 
 
@@ -395,12 +668,14 @@ def derive_name_differentiators(
     ordered: list[str] = []
 
     capacity = format_capacity_differentiator(spec_lookup, category_phrase, taxonomy)
+    title_tail = normalize_whitespace(source.name).split()[-1] if normalize_whitespace(source.name) else ""
+    energy_class = normalize_value(spec_lookup, ["?????????? ?????"]) or extract_energy_class_from_source(source) or (title_tail.upper() if ENERGY_CLASS_TOKEN_RE.fullmatch(title_tail) else "")
     cooling = normalize_value(spec_lookup, ["Τεχνολογία Ψύξης"])
     connectivity = normalize_connectivity(normalize_value(spec_lookup, ["Συνδεσιμότητα"]))
     family = extract_commercial_family_from_title(source.name, brand, mpn)
     color = normalize_color_differentiator(spec_lookup) or extract_title_suffix_differentiator(source.name, brand, mpn)
 
-    for value in [capacity, cooling, connectivity, family, color]:
+    for value in [cooling, capacity, energy_class, family, color, connectivity]:
         normalized = normalize_whitespace(value)
         if normalized and normalized not in ordered:
             ordered.append(normalized)
@@ -428,10 +703,52 @@ def _build_preferred_spec_lookup(source: SourceProductData) -> dict[str, str]:
     )
 
 
+def _preferred_spec_values(source: SourceProductData) -> list[str]:
+    prefer_manufacturer = _prefer_manufacturer_evidence(source)
+    return [
+        normalize_whitespace(item.value)
+        for item in iter_specs(
+            source.key_specs,
+            effective_spec_sections(source, manufacturer_first=prefer_manufacturer),
+            key_specs_last=prefer_manufacturer,
+        )
+        if normalize_whitespace(item.value)
+    ]
+
+
+def _extract_energy_class_from_value(value: str) -> str:
+    for token in re.findall(r"\b([A-G](?:\+{1,3})?)\b", normalize_whitespace(value), flags=re.IGNORECASE):
+        if ENERGY_CLASS_TOKEN_RE.fullmatch(token):
+            return token.upper()
+    return ""
+
+
+def extract_title_energy_class(value: str) -> str:
+    match = re.search(r"\b([A-G](?:\+{1,3})?)\b\s*$", normalize_whitespace(value), flags=re.IGNORECASE)
+    return match.group(1).upper() if match else ""
+
+
+def extract_energy_class_from_source(source: SourceProductData) -> str:
+    for value in _preferred_spec_values(source):
+        extracted = _extract_energy_class_from_value(value)
+        if extracted:
+            return extracted
+    return extract_title_energy_class(source.name) or _extract_energy_class_from_value(source.name)
+
+
+def extract_first_preferred_spec_value(source: SourceProductData, patterns: list[str]) -> str:
+    compiled = [re.compile(pattern, flags=re.IGNORECASE) for pattern in patterns]
+    for value in _preferred_spec_values(source):
+        normalized = normalize_whitespace(value)
+        if any(pattern.search(normalized) for pattern in compiled):
+            return normalized
+    return ""
+
+
 def build_spec_lookup(key_specs: list[SpecItem], spec_sections: list[SpecSection], *, key_specs_last: bool = False) -> dict[str, str]:
     lookup: dict[str, str] = {}
     for item in iter_specs(key_specs, spec_sections, key_specs_last=key_specs_last):
-        label = normalize_for_match(item.label)
+        label = normalize_for_match(item.label) or normalize_whitespace(item.label)
         value = normalize_whitespace(item.value)
         if label and value and label not in lookup:
             lookup[label] = value
@@ -451,7 +768,12 @@ def iter_specs(key_specs: list[SpecItem], spec_sections: list[SpecSection], *, k
 
 
 def normalize_value(spec_lookup: dict[str, str], labels: list[str]) -> str:
-    normalized_labels = {normalize_for_match(label) for label in labels}
+    normalized_labels = {
+        normalized
+        for label in labels
+        for normalized in [normalize_for_match(label) or normalize_whitespace(label)]
+        if normalized
+    }
     for label, value in spec_lookup.items():
         if label in normalized_labels and value:
             return normalize_whitespace(value)

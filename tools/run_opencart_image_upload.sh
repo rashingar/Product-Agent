@@ -9,24 +9,19 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
-ENV_FILE="${ENV_FILE:-${REPO_ROOT}/.secrets/opencart.env}"
-
-if [[ -f "${ENV_FILE}" ]]; then
-  # Accept CRLF-formatted env files from Windows editors.
-  # shellcheck disable=SC1090
-  set -a
-  source <(tr -d '\r' < "${ENV_FILE}")
-  set +a
-fi
 
 MODEL="${1:-${MODEL:-}}"
-STORE_BASE="${OPENCART_STORE_BASE:-https://www.etranoulis.gr}"
-ADMIN_PATH="${OPENCART_ADMIN_PATH:-/ipadmin/index.php}"
-ADMIN_USER="${OPENCART_ADMIN_USER:-}"
-ADMIN_PASS="${OPENCART_ADMIN_PASS:-}"
 DRY_RUN="${DRY_RUN:-0}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 PYTHON_SCRIPT="${PYTHON_SCRIPT:-${SCRIPT_DIR}/opencart_upload_images.py}"
+CONFIG_SCRIPT="${CONFIG_SCRIPT:-${SCRIPT_DIR}/opencart_config.py}"
+
+eval "$("${PYTHON_BIN}" "${CONFIG_SCRIPT}" export-shell --repo-root "${REPO_ROOT}")"
+
+STORE_BASE="${OPENCART_STORE_BASE:-}"
+ADMIN_PATH="${OPENCART_ADMIN_PATH:-}"
+ADMIN_USER="${OPENCART_ADMIN_USER:-}"
+ADMIN_PASS="${OPENCART_ADMIN_PASS:-}"
 
 if [[ -z "${MODEL}" ]]; then
   echo "ERROR: missing model. Usage: $0 123456" >&2

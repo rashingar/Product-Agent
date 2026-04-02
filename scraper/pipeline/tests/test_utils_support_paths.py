@@ -11,6 +11,7 @@ from pipeline.repo_paths import (
     REPO_ROOT,
     SCHEMA_LIBRARY_PATH,
     SCHEMA_INDEX_PATH,
+    SCHEMA_POLICY_RULES_PATH,
     SEO_META_PROMPT_PATH,
     TAXONOMY_MAPPING_TEMPLATE_PATH,
 )
@@ -29,6 +30,10 @@ def test_support_files_resolve_from_resources_layout() -> None:
         ),
         (FILTER_MAP_PATH, REPO_ROOT / "resources" / "mappings" / "filter_map.json"),
         (NAME_RULES_PATH, REPO_ROOT / "resources" / "mappings" / "name_rules.json"),
+        (
+            SCHEMA_POLICY_RULES_PATH,
+            REPO_ROOT / "resources" / "mappings" / "schema_policy_rules.json",
+        ),
         (
             DIFFERENTIATOR_PRIORITY_MAP_PATH,
             REPO_ROOT / "resources" / "mappings" / "differentiator_priority_map.csv",

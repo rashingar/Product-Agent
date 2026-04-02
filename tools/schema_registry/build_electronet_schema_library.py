@@ -15,36 +15,13 @@ from urllib.parse import urlparse
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TEMPLATE_ROOT = REPO_ROOT / "resources" / "templates" / "electronet"
 DEFAULT_TAXONOMY_PATH = REPO_ROOT / "resources" / "mappings" / "catalog_taxonomy.json"
+DEFAULT_SCHEMA_POLICY_RULES_PATH = REPO_ROOT / "resources" / "mappings" / "schema_policy_rules.json"
 DEFAULT_OUTPUT_PATH = REPO_ROOT / "resources" / "schemas" / "electronet_schema_library.json"
 CURRENT_LIBRARY_PATH = DEFAULT_OUTPUT_PATH
 LIBRARY_VERSION = "2026-04-01"
 SUBCATEGORY_MATCH_POLICY_EXACT = "exact_subcategory"
 SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY = "leaf_family"
 SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY = "mixed_family"
-LEAF_FAMILY_TEMPLATE_EXCEPTIONS = frozenset(
-    {
-        "tileoraseis",
-        "koyzines",
-        "plyntiria_piaton",
-        "foyrnoi_mikrokymaton",
-    }
-)
-MIXED_FAMILY_TEMPLATE_EXCEPTIONS = frozenset(
-    {
-        "klimatistika",
-        "toixoy",
-        "forita",
-        "ntoylapes",
-        "anemistires",
-        "mini",
-        "ydronefosis",
-        "orthostatis",
-        "epitrapezioi",
-        "orofis",
-        "air_coolers_epidapedioi",
-        "anemisthres_an_toixou",
-    }
-)
 
 NBSP_PATTERN = re.compile(r"[\u00A0\u202F\u2007]")
 WS_PATTERN = re.compile(r"\s+")
@@ -139,6 +116,31 @@ def normalize_key(text: str | None) -> str:
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def _load_schema_policy_rules(path: Path) -> dict[str, str]:
+    payload = load_json(path)
+    default_policy = normalize_whitespace(payload.get("default_policy")) or SUBCATEGORY_MATCH_POLICY_EXACT
+    allowed = {
+        SUBCATEGORY_MATCH_POLICY_EXACT,
+        SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY,
+        SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY,
+    }
+    if default_policy != SUBCATEGORY_MATCH_POLICY_EXACT:
+        raise ValueError(f"schema policy default_policy must be {SUBCATEGORY_MATCH_POLICY_EXACT!r}")
+    overrides_payload = payload.get("overrides")
+    if not isinstance(overrides_payload, dict):
+        raise ValueError("schema policy overrides must be an object")
+    overrides: dict[str, str] = {}
+    for template_id, raw_policy in overrides_payload.items():
+        normalized_template_id = normalize_whitespace(template_id)
+        normalized_policy = normalize_whitespace(raw_policy)
+        if not normalized_template_id:
+            raise ValueError("schema policy override keys must be non-empty template ids")
+        if normalized_policy not in allowed:
+            raise ValueError(f"Unsupported schema policy {raw_policy!r} for template {template_id!r}")
+        overrides[normalized_template_id] = normalized_policy
+    return overrides
 
 
 def _canonical_json(value: Any) -> str:
@@ -432,12 +434,8 @@ def _compiled_sections_from_authored(template: TemplateRecord) -> list[dict[str,
     ]
 
 
-def _subcategory_match_policy(template: TemplateRecord) -> str:
-    if template.template_id in LEAF_FAMILY_TEMPLATE_EXCEPTIONS:
-        return SUBCATEGORY_MATCH_POLICY_LEAF_FAMILY
-    if template.template_id in MIXED_FAMILY_TEMPLATE_EXCEPTIONS:
-        return SUBCATEGORY_MATCH_POLICY_MIXED_FAMILY
-    return SUBCATEGORY_MATCH_POLICY_EXACT
+def _subcategory_match_policy(template: TemplateRecord, policy_overrides: dict[str, str]) -> str:
+    return policy_overrides.get(template.template_id, SUBCATEGORY_MATCH_POLICY_EXACT)
 
 
 def _derive_schema_id(
@@ -554,10 +552,12 @@ def _compute_match_metadata(entries: list[dict[str, Any]]) -> None:
 def build_library_payload(
     template_root: Path = DEFAULT_TEMPLATE_ROOT,
     taxonomy_path: Path = DEFAULT_TAXONOMY_PATH,
+    schema_policy_rules_path: Path = DEFAULT_SCHEMA_POLICY_RULES_PATH,
     existing_library_path: Path | None = CURRENT_LIBRARY_PATH,
 ) -> dict[str, Any]:
     templates = _load_templates(template_root)
     taxonomy_paths = _load_taxonomy_paths(taxonomy_path)
+    schema_policy_overrides = _load_schema_policy_rules(schema_policy_rules_path)
     # Kept for call-site compatibility only. Compiled schema content must not inherit
     # structure or ids from any prior generated artifact.
     _ = existing_library_path
@@ -566,7 +566,7 @@ def build_library_payload(
     for template in templates:
         taxonomy_binding = _resolve_taxonomy_binding(template, taxonomy_paths)
         compiled_sections = _compiled_sections_from_authored(template)
-        subcategory_match_policy = _subcategory_match_policy(template)
+        subcategory_match_policy = _subcategory_match_policy(template, schema_policy_overrides)
         n_rows_total = sum(len(section.get("labels", [])) for section in compiled_sections)
         schema_id = _derive_schema_id(template, taxonomy_binding, compiled_sections)
 
