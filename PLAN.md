@@ -556,7 +556,7 @@ Recommended next branch:
 
 ### Branch scope — prepare-stage section assets refactor
 
-Status: planned
+Status: completed
 
 Purpose:
 1. Freeze the exact branch scope for extracting the Skroutz/manufacturer-first section asset workflow out of `scraper/pipeline/prepare_stage.py` without changing observable runtime behavior.
@@ -566,28 +566,29 @@ Purpose:
 Branch goal:
 1. Move the Skroutz/manufacturer-first section asset workflow behind one dedicated internal seam while keeping `python -m pipeline.workflow prepare ...` behavior unchanged.
 
-Proposed extracted module:
-1. `scraper/pipeline/prepare_skroutz_section_assets.py`
+Landed extracted module:
+1. `scraper/pipeline/prepare_section_assets.py`
 
-Proposed typed result:
-1. `PrepareSkroutzSectionAssetsResult`
+Landed typed result:
+1. `PrepareSectionAssetsResult`
 
-What leaves `prepare_stage.py` in this branch:
-1. The Skroutz/manufacturer-first section asset workflow that currently chooses between manufacturer presentation blocks and rendered Skroutz section assets.
-2. The rendered-Skroutz image-backed section matching path, including the current title-order validation and resolved-image selection behavior.
+What left `prepare_stage.py` in this branch:
+1. The whole Skroutz/manufacturer-first section asset workflow that chooses between manufacturer presentation blocks and rendered Skroutz section assets.
+2. The rendered-Skroutz image-backed section matching path, including title-order validation and resolved-image selection behavior.
 3. The shared section-image download helper used by both the direct-source and Skroutz section paths.
 4. Deterministic section diagnostics builders, including section-image candidate payloads, resolved-image payloads, extraction-window payload shaping, and `bescos_raw` / sections-artifact payload assembly.
-5. The typed handoff back into `prepare_stage.py` for selected presentation blocks, Besco images, download outputs, warnings, and deterministic diagnostics/artifact payloads.
+5. The typed handoff back into `prepare_stage.py` for selected presentation blocks, Besco images, download outputs, warnings, deterministic diagnostics/artifact payloads, and optional presentation HTML override.
 
-What stays in `prepare_stage.py` in this branch:
+What stays in `prepare_stage.py` after this branch:
 1. Top-level routing for whether sections run at all stays in `prepare_stage.py`.
-2. Direct-source / non-Skroutz section orchestration stays in `prepare_stage.py`, except that it reuses the shared extracted section-image downloader.
-3. Final handoff into `assemble_prepare_result_fn(...)` stays in `prepare_stage.py`.
-4. Final handoff into `persist_prepare_scrape_artifacts_fn(...)` stays in `prepare_stage.py`.
-5. Provider-resolution ownership stays in `prepare_stage.py`.
-6. Taxonomy resolution and manufacturer enrichment remain outside this branch and stay delegated through `scraper/pipeline/prepare_taxonomy_enrichment.py`.
-7. Result assembly remains outside this branch and stays delegated through `scraper/pipeline/prepare_result_assembly.py`.
-8. The outward `execute_prepare_stage(...)` return payload stays dict-shaped in this branch.
+2. Direct-source / non-Skroutz section orchestration stays inline in `prepare_stage.py` by design in this branch, while reusing the shared extracted section-image downloader.
+3. Final `source_payload` creation stays in `prepare_stage.py`.
+4. Final handoff into `assemble_prepare_result_fn(...)` stays in `prepare_stage.py`.
+5. Final handoff into `persist_prepare_scrape_artifacts_fn(...)` stays in `prepare_stage.py`.
+6. Provider-resolution ownership stays in `prepare_stage.py`.
+7. Taxonomy resolution and manufacturer enrichment remain outside this branch and stay delegated through `scraper/pipeline/prepare_taxonomy_enrichment.py`.
+8. Result assembly remains outside this branch and stays delegated through `scraper/pipeline/prepare_result_assembly.py`.
+9. The outward `execute_prepare_stage(...)` return payload stays dict-shaped in this branch.
 
 Explicit boundary statements:
 1. `html_builders.extract_presentation_blocks(...)` stays where it is in `scraper/pipeline/html_builders.py`.
@@ -621,11 +622,20 @@ Explicit non-goals:
 11. No naming-polish cleanup in this branch.
 12. No split-task LLM handoff contract changes.
 
-Planned test split for later commits:
-1. Add direct module-level coverage in `scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py` for manufacturer-first selection, rendered-section matching, shared section-image download behavior, and deterministic diagnostics / `bescos_raw` payload building.
-2. Add stage-isolation coverage in `scraper/pipeline/tests/test_prepare_stage_section_assets.py` and stub only the extracted Skroutz section-asset seam so `execute_prepare_stage(...)` stays focused on surrounding orchestration behavior.
-3. Keep adjacent stage-isolation coverage in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py` and `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`.
-4. Keep existing prepare/workflow/provider regression coverage as the higher-level unchanged-behavior backstop for Electronet, Skroutz, and supported manufacturer flows.
+Landed test coverage split:
+1. Direct helper and standalone seam coverage now lives in `scraper/pipeline/tests/test_prepare_section_assets_module.py` and `scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py`.
+2. Stage-isolation coverage now lives in `scraper/pipeline/tests/test_prepare_section_assets.py` and stubs only the single extracted Skroutz section-assets seam, `resolve_skroutz_section_assets_fn`, when isolating `execute_prepare_stage(...)`.
+3. Adjacent stage-isolation coverage remains in `scraper/pipeline/tests/test_prepare_taxonomy_enrichment.py` and `scraper/pipeline/tests/test_prepare_stage_result_assembly.py`.
+4. Prepare-focused workflow regression coverage remains the higher-level unchanged-behavior backstop, and the branch kept a targeted `test_prepare_workflow_writes_prompt_artifacts` smoke/regression path green.
+
+Landed injection boundary:
+1. `execute_prepare_stage(...)` now keeps one explicit section-assets seam injection, `resolve_skroutz_section_assets_fn`, and does not expose lower-level section helpers in its signature.
+
+Completion note:
+1. completed; Skroutz section assets now live behind `scraper/pipeline/prepare_section_assets.py`, `PrepareSectionAssetsResult` is the typed handoff back into `prepare_stage.py`, direct-source / non-Skroutz section extraction intentionally remains inline by design, and `execute_prepare_stage(...)` now exposes one injected section-assets seam via `resolve_skroutz_section_assets_fn` while preserving outward return keys and prepare/workflow behavior.
+
+Recommended next branch:
+1. Extract the remaining direct-source / non-Skroutz section orchestration out of `scraper/pipeline/prepare_stage.py` as the next real section seam; naming polish should stay secondary to that extraction.
 
 ## Root policy
 ### Keep in root
