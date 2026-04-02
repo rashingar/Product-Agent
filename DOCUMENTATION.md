@@ -3,6 +3,34 @@
 ## Current milestone
 M37 completed. The active runtime and active docs now expose only `python -m pipeline.workflow prepare ...` and `python -m pipeline.workflow render ...`, while the legacy `pipeline.cli` / full-run service surfaces remain preserved below only as historical engineering-log evidence.
 
+## 2026-04-02 - Rewrite stale Skroutz helper test to target the extracted public seam
+
+Goal:
+- fix the failing scraper test suite after the section-assets extraction by removing a stale import from `prepare_stage.py`
+- keep the coverage intent, but assert through the extracted public seam instead of the removed private helper location
+
+Files edited:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/tests/test_skroutz_sections.py`
+
+Changes:
+- replaced the stale import of `_select_skroutz_image_backed_sections` from `scraper/pipeline/prepare_stage.py`
+- rewrote the affected test to call `resolve_skroutz_section_assets(...)` from `scraper/pipeline/prepare_section_assets.py`
+- kept the original behavior under test:
+  - text-only rendered interludes are skipped
+  - image-backed sections are selected in stable order
+  - resolved image URLs flow into the selected Besco inputs on the public seam
+
+Commands run:
+- `python -m pytest -q scraper/pipeline/tests/test_skroutz_sections.py`
+- `python -m pytest -q scraper/pipeline/tests/test_prepare_section_assets.py scraper/pipeline/tests/test_prepare_section_assets_module.py scraper/pipeline/tests/test_prepare_skroutz_section_assets_module.py`
+- `python -m pytest -q` from `scraper/`
+
+Validation:
+- the stale collection failure on `test_skroutz_sections.py` is removed
+- the public-seam Skroutz test coverage remains in place
+- the full scraper suite passes after the test rewrite
+
 ## 2026-04-01 - Finalize docs for prepare-stage section-assets extraction
 
 Goal:
