@@ -129,6 +129,9 @@ def build_row(
             intro_text=str(llm_intro_text or ""),
             sections=list(deterministic_presentation_sections or []),
             besco_filenames_by_section=besco_filenames_by_section,
+            presentation_source_html=source.presentation_source_html,
+            presentation_source_text=source.presentation_source_text,
+            base_url=source.canonical_url or source.url,
         )
     else:
         description_html, desc_warnings = build_description_html(
@@ -141,6 +144,7 @@ def build_row(
             cta_url=taxonomy.cta_url,
             cta_label=cta_label,
             besco_filenames_by_section=besco_filenames_by_section,
+            base_url=source.canonical_url or source.url,
         )
     warnings.extend(desc_warnings)
     characteristics_html, characteristics_diagnostics, characteristics_warnings = build_characteristics_for_product(

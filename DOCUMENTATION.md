@@ -3,6 +3,132 @@
 ## Current milestone
 Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
 
+## 2026-04-02 - Preserve Electronet presentation lists, video embeds, and Besco GIF assets
+
+Goal:
+- improve Electronet presentation fidelity so deterministic output preserves source list formatting and the leading embedded video block instead of flattening them away
+- preserve animated Besco assets as `.gif` when Electronet serves them that way instead of converting them to `.jpg`
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/fetcher.py`
+- `scraper/pipeline/html_builders.py`
+- `scraper/pipeline/mapping.py`
+- `scraper/pipeline/parser_product_electronet.py`
+- `scraper/pipeline/tests/test_csv_writer.py`
+- `scraper/pipeline/tests/test_fetcher_gallery_download.py`
+- `scraper/pipeline/tests/test_product_parser.py`
+
+What changed:
+- Electronet presentation-source extraction now keeps `.ck-text.whole` blocks in the captured HTML so leading source video blocks survive into downstream rendering, while the reported presentation-section count still reflects only `.ck-text.inline` sections
+- presentation block extraction now preserves sanitized source body HTML for paragraph and list content
+- deterministic description rendering now prefers preserved source body HTML, so source bullet lists remain bullet lists in the final description instead of being flattened into a single paragraph
+- deterministic description rendering now inserts preserved source video/embed blocks ahead of the rendered section stack
+- Besco downloads now preserve `.gif` assets as `.gif`; other non-jpg formats still follow the existing conversion path
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_csv_writer.py -k "presentation_blocks_extract or preserves_video_embed"`
+- `python -m pytest -q pipeline/tests/test_product_parser.py -k "presentation_source_html or extracts_visible_code"`
+- `python -m pytest -q pipeline/tests/test_fetcher_gallery_download.py`
+
+Validation:
+- focused HTML builder tests now cover preserved list markup, preserved video embeds, and non-jpg Besco filename passthrough
+- focused parser test verifies the leading Electronet video block is retained in `presentation_source_html` while inline section counting remains stable
+- focused fetcher tests verify Besco `.gif` assets are preserved without conversion
+
+Risks, blockers, or skipped items:
+- preserved source body HTML is intentionally limited to safe presentation tags (`p`, `ul`, `ol`, `li`, `br`, emphasis tags`) and preserved media tags (`video`, `source`, `iframe`) rather than arbitrary source markup
+
+## 2026-04-02 - Fix Electronet presentation extraction for list-based sections
+
+Goal:
+- fix the actual Electronet extraction bug on product pages that still expose the expected four presentation sections but render three of them as bullet lists instead of paragraph tags
+- keep compatibility with the newer site layout where a video block may appear before the image-and-text section blocks
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/html_builders.py`
+- `scraper/pipeline/tests/test_csv_writer.py`
+
+What changed:
+- updated container-based presentation extraction so Electronet `.ck-text.inline` blocks now treat `<li>` items as valid deterministic body text in addition to `<p>` tags
+- kept the extractor scoped to `.ck-text.inline` blocks, so the leading video-only `.ck-text.whole` block does not displace the actual four image-and-text sections
+- added regression coverage for the live page shape:
+  - one leading video block
+  - four `.ck-text.inline` sections
+  - three sections using list-only copy
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_csv_writer.py -k "presentation_blocks_extract"`
+
+Validation:
+- focused presentation-block tests cover paragraph-based sections, alternating left/right banner layouts, and the current Electronet list-based section layout
+
+Risks, blockers, or skipped items:
+- this change does not attempt to render the leading video block as a product section; it preserves the current deterministic section contract and fixes the dropped text/image sections only
+
+## 2026-04-02 - Allow render to reduce deterministic presentation sections when source exposes fewer than requested
+
+Goal:
+- unblock live workflow runs where Electronet or other supported sources expose fewer usable deterministic presentation sections than the operator requested
+- keep the fail-fast behavior only for cases with zero usable deterministic sections
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+What changed:
+- removed the fatal render guard that raised when more than one normalized presentation section was missing
+- kept render failure behavior unchanged when no presentation source sections exist or none are usable
+- changed warning emission so any positive missing count is surfaced as `presentation_sections_missing:{n}`
+- added a workflow regression proving a `sections=4` request still renders successfully when only one deterministic section is usable
+
+Commands run:
+- `python -m pytest -q scraper/pipeline/tests/test_workflow.py -k "multiple_requested_sections_are_missing or one_requested_section_is_missing"`
+
+Validation:
+- the focused workflow regression covers the exact reduction path from four requested deterministic sections down to one usable section
+
+Risks, blockers, or skipped items:
+- render now degrades more permissively for section-short products by design; downstream consumers should rely on validation warnings rather than assuming requested section count always equals rendered section count
+
+## 2026-04-02 - Fix OpenCart publish wrapper module resolution under WSL
+
+Goal:
+- unblock the repo-native OpenCart publish phase after a successful render
+- fix the failure generically in the wrapper layer instead of patching individual Python scripts
+
+Files changed:
+- `DOCUMENTATION.md`
+- `tools/run_opencart_image_upload.sh`
+- `tools/run_opencart_import_csv.sh`
+
+What changed:
+- exported `PYTHONPATH` from both OpenCart Bash wrappers so repo-root imports such as `from tools.opencart_config ...` resolve correctly when the scripts are executed by path under Bash/WSL
+- normalized OpenCart admin-path inputs inside both Python publish entrypoints so MSYS/Git Bash path rewriting like `C:/Program Files/Git/ipadmin/index.php` is converted back to `/ipadmin/index.php` before login URLs are built
+- kept the existing wrapper contract, argument shape, and publish flow unchanged
+
+Why this was needed:
+- the publish phase invoked `tools/opencart_upload_images.py` directly from Bash
+- under WSL that process did not have the repo root on `sys.path`
+- the upload stage failed immediately with `ModuleNotFoundError: No module named 'tools'`
+- after fixing module resolution, the next live failure showed `/ipadmin/index.php` being rewritten into a Windows path and appended to the storefront base URL, producing a 404 admin login route
+
+Commands run:
+- `python -m pipeline.workflow prepare --model 000015 --url "https://www.skroutz.gr/s/60276903/tcl-smart-tileorasi-115-4k-uhd-mini-led-c7k-hdr-2025-115c7k.html" --photos 7 --sections 7 --skroutz-status 1 --boxnow 0 --price 9999`
+- `python -m pipeline.workflow render --model 000015`
+- `python -m pipeline.workflow render --model 000015`
+
+Validation:
+- render completed successfully for model `000015`
+- candidate validation reported `Validation ok: True`
+- the initial publish failure cause was isolated to wrapper module resolution at `image_upload`
+- the second publish failure cause was isolated to admin login URL construction after shell path rewriting of `OPENCART_ADMIN_PATH`
+
+Risks, blockers, or skipped items:
+- OpenCart publish still needs a rerun after this wrapper fix to confirm the next stage outcome in the live admin environment
+
 ## 2026-04-02 - Fix stale compiled-schema id assertion after Electronet label-set registry merge
 
 Goal:

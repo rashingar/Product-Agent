@@ -64,3 +64,36 @@ def test_product_parser_extracts_visible_code_and_specs() -> None:
     assert parsed.field_diagnostics["spec_sections"].value_present is True
     assert parsed.field_diagnostics["spec_sections"].selector_trace
 
+
+def test_product_parser_preserves_video_block_in_presentation_source_html() -> None:
+    matcher = SchemaMatcher()
+    parser = ElectronetProductParser(known_section_titles=matcher.known_section_titles)
+    html = """
+    <html>
+      <body>
+        <article class="product-page available">
+          <div id="product-presentation">
+            <h2>Παρουσίαση Προϊόντος</h2>
+            <div class="ck-text whole">
+              <h2>Video Title</h2>
+              <video autoplay="" loop="" muted="" playsinline="" style="width: 70%;"><source src="/media/demo.mp4" type="video/mp4" /></video>
+            </div>
+            <div class="ck-text inline"><h2>Section One</h2><p>Paragraph one.</p></div>
+            <div class="ck-text inline"><h2>Section Two</h2><ul><li>Bullet one.</li></ul></div>
+          </div>
+          <div id="product-details"><div class="prop-group-wrapper"><h3>Επισκόπηση Προϊόντος</h3></div></div>
+          <div id="product-brand-logo"><a href="/brand/rowenta">Rowenta</a></div>
+          <h1 class="product-title">Rowenta Example RH2099</h1>
+          <div id="cscp-sku">343700</div>
+          <div id="product-price"><span class="price">249,00 €</span></div>
+        </article>
+      </body>
+    </html>
+    """
+
+    parsed = parser.parse(html, "https://www.electronet.gr/example")
+
+    assert '<video autoplay="" loop="" muted="" playsinline="" style="width: 70%;"><source src="/media/demo.mp4" type="video/mp4"/></video>' in parsed.source.presentation_source_html
+    assert parsed.field_diagnostics["presentation_blocks"].value_present is True
+    assert parsed.field_diagnostics["presentation_blocks"].value_preview == "2"
+

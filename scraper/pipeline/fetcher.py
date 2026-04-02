@@ -345,7 +345,8 @@ class ElectronetFetcher:
             asset_position = image.position if image.position > 0 else fallback_position
             payload, content_type = self.fetch_binary(image.url)
             ext = guess_extension(content_type, image.url)
-            if ext != ".jpg":
+            preserve_besco_gif = output_subdir == "bescos" and ext == ".gif"
+            if ext != ".jpg" and not preserve_besco_gif:
                 try:
                     payload = convert_image_bytes_to_jpg(
                         payload,

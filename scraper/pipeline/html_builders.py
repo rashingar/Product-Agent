@@ -95,6 +95,7 @@ def build_description_html(
     cta_url: str,
     cta_label: str,
     besco_filenames_by_section: dict[int, str] | None = None,
+    base_url: str = "",
 ) -> tuple[str, list[str]]:
     warnings: list[str] = []
     if not product_name:
@@ -103,7 +104,7 @@ def build_description_html(
         return "", ["description_not_built_from_source", "cta_url_unresolved"]
 
     intro = normalize_whitespace(hero_summary)
-    blocks = extract_presentation_blocks(presentation_source_html, presentation_source_text)
+    blocks = extract_presentation_blocks(presentation_source_html, presentation_source_text, base_url=base_url)
     if not intro and blocks:
         intro = blocks[0]["paragraph"]
     if not intro:
@@ -136,6 +137,9 @@ def build_description_html(
     out.append('<hr />')
     out.append('<div class="etr-desc">')
     out.append('')
+    for media_html in extract_presentation_media_blocks(presentation_source_html, base_url=base_url):
+        out.append(media_html)
+        out.append('')
 
     for idx, block in enumerate(selected_blocks, start=1):
         cls = 'etr-sec rev' if idx % 2 == 0 else 'etr-sec'
@@ -143,7 +147,7 @@ def build_description_html(
         out.append(f'  <div class="{cls}">')
         out.append('    <div class="etr-text">')
         out.append(f'      <h2><span style="font-size:24px"><strong>{escape(block["title"])}</strong></span></h2>')
-        out.append(f'      <p><span style="font-size:22px">{escape(block["paragraph"])}</span></p>')
+        out.append(_render_section_body_html(block.get("body_html", ""), str(block.get("paragraph", ""))))
         out.append('    </div>')
         default_besco_filename = f"besco{idx}.jpg"
         besco_filename = besco_filenames_by_section.get(idx, "" if use_besco_asset_map else default_besco_filename)
@@ -237,6 +241,9 @@ def build_description_html_from_intro_and_sections(
     intro_text: str,
     sections: list[dict[str, str]],
     besco_filenames_by_section: dict[int, str] | None = None,
+    presentation_source_html: str = "",
+    presentation_source_text: str = "",
+    base_url: str = "",
 ) -> tuple[str, list[str]]:
     warnings: list[str] = []
     if not product_name:
@@ -264,6 +271,18 @@ def build_description_html_from_intro_and_sections(
     out.append("<hr />")
     out.append('<div class="etr-desc">')
     out.append("")
+    source_blocks = extract_presentation_blocks(
+        presentation_source_html=presentation_source_html,
+        presentation_source_text=presentation_source_text,
+        base_url=base_url,
+    )
+    source_block_map = {
+        index: block
+        for index, block in enumerate(source_blocks, start=1)
+    }
+    for media_html in extract_presentation_media_blocks(presentation_source_html, base_url=base_url):
+        out.append(media_html)
+        out.append("")
 
     for idx, block in enumerate(sections, start=1):
         title = normalize_whitespace(block.get("title", ""))
@@ -276,9 +295,10 @@ def build_description_html_from_intro_and_sections(
         out.append(f'  <div class="{cls}">')
         out.append('    <div class="etr-text">')
         out.append(f'      <h2><span style="font-size:24px"><strong>{escape(title)}</strong></span></h2>')
-        out.append(f'      <p><span style="font-size:22px">{escape(body_text)}</span></p>')
-        out.append('    </div>')
         source_index = int(block.get("source_index") or idx)
+        source_block = source_block_map.get(source_index, {})
+        out.append(_render_section_body_html(str(source_block.get("body_html", "")), body_text))
+        out.append('    </div>')
         default_besco_filename = f"besco{source_index}.jpg"
         besco_filename = besco_filenames_by_section.get(source_index, "" if use_besco_asset_map else default_besco_filename)
         if besco_filename:
@@ -305,6 +325,22 @@ def extract_presentation_blocks(
     if blocks:
         return blocks
     return _blocks_from_text(presentation_source_text)
+
+
+def extract_presentation_media_blocks(source_html: str, base_url: str = "") -> list[str]:
+    if not source_html.strip():
+        return []
+    soup = BeautifulSoup(source_html, "lxml")
+    rendered_blocks: list[str] = []
+    for container in soup.select(".ck-text.whole"):
+        if not isinstance(container, Tag):
+            continue
+        if container.find(["video", "iframe"]) is None:
+            continue
+        rendered = _normalize_media_container_html(container, base_url)
+        if rendered:
+            rendered_blocks.append(rendered)
+    return rendered_blocks
 
 
 
@@ -348,15 +384,15 @@ def _blocks_from_html_containers(soup: BeautifulSoup, base_url: str) -> list[dic
         if not isinstance(container, Tag):
             continue
         title = _select_presentation_title(container)
-        paragraphs = [normalize_whitespace(node.get_text(" ", strip=True)) for node in container.find_all("p")]
-        paragraph = normalize_whitespace(" ".join(text for text in paragraphs if text))
+        paragraph = _extract_container_body_text(container)
+        body_html = _extract_container_body_html(container)
         image_node = container.find("img")
         src = ""
         if isinstance(image_node, Tag):
             src = image_node.get("src") or image_node.get("data-src") or image_node.get("data-original") or ""
         image_url = make_absolute_url(src, base_url) if src else ""
         if title and paragraph:
-            blocks.append({"title": title, "paragraph": paragraph, "image_url": image_url})
+            blocks.append({"title": title, "paragraph": paragraph, "image_url": image_url, "body_html": body_html})
     return blocks
 
 
@@ -367,6 +403,83 @@ def _select_presentation_title(container: Tag) -> str:
             if text:
                 return text
     return ""
+
+
+def _extract_container_body_text(container: Tag) -> str:
+    body_parts: list[str] = []
+    paragraph_nodes = [
+        node
+        for node in container.find_all("p")
+        if normalize_whitespace(node.get_text(" ", strip=True))
+    ]
+    if paragraph_nodes:
+        body_parts.extend(normalize_whitespace(node.get_text(" ", strip=True)) for node in paragraph_nodes)
+
+    list_item_nodes = [
+        node
+        for node in container.find_all("li")
+        if normalize_whitespace(node.get_text(" ", strip=True))
+    ]
+    if list_item_nodes:
+        body_parts.extend(normalize_whitespace(node.get_text(" ", strip=True)) for node in list_item_nodes)
+
+    return normalize_whitespace(" ".join(body_parts))
+
+
+def _extract_container_body_html(container: Tag) -> str:
+    fragments: list[str] = []
+    seen: set[int] = set()
+    for node in container.find_all(["p", "ul", "ol"]):
+        if not isinstance(node, Tag):
+            continue
+        if node.find_parent(["p", "ul", "ol"]) is not None:
+            continue
+        if id(node) in seen:
+            continue
+        seen.add(id(node))
+        rendered = _sanitize_body_fragment_html(node)
+        if rendered:
+            fragments.append(rendered)
+    return "\n".join(fragments).strip()
+
+
+def _sanitize_body_fragment_html(node: Tag) -> str:
+    fragment = BeautifulSoup(str(node), "lxml")
+    body = fragment.body or fragment
+    for tag in body.find_all(True):
+        if tag.name not in {"p", "ul", "ol", "li", "br", "strong", "em", "b", "i"}:
+            tag.unwrap()
+            continue
+        if tag.name in {"p", "ul", "ol"}:
+            tag.attrs = {}
+        elif tag.name == "li":
+            tag.attrs = {}
+        elif tag.name == "br":
+            tag.attrs = {}
+    return "".join(str(child) for child in body.contents).strip()
+
+
+def _normalize_media_container_html(container: Tag, base_url: str) -> str:
+    fragment = BeautifulSoup(str(container), "lxml")
+    body = fragment.body or fragment
+    for tag in body.find_all(["video", "source", "iframe"]):
+        src = tag.get("src")
+        if src:
+            tag["src"] = make_absolute_url(src, base_url)
+        poster = tag.get("poster")
+        if poster:
+            tag["poster"] = make_absolute_url(poster, base_url)
+    for tag in body.find_all(True):
+        if tag.name not in {"div", "h1", "h2", "h3", "h4", "p", "video", "source", "iframe"}:
+            tag.unwrap()
+    return "".join(str(child) for child in body.contents).strip()
+
+
+def _render_section_body_html(body_html: str, body_text: str) -> str:
+    normalized_html = normalize_whitespace(BeautifulSoup(body_html, "lxml").get_text(" ", strip=True)) if body_html else ""
+    if normalized_html:
+        return f'      <div class="etr-copy" style="font-size:22px">{body_html}</div>'
+    return f'      <p><span style="font-size:22px">{escape(body_text)}</span></p>'
 
 
 

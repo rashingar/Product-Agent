@@ -114,6 +114,111 @@ def test_presentation_blocks_extract_images_from_left_and_right_banner_layouts()
     assert len(blocks) == 2
     assert blocks[0]["title"] == "Section One"
     assert blocks[0]["image_url"] == "https://www.electronet.gr/media/right.jpg"
+    assert blocks[0]["body_html"] == "<p>Paragraph one.</p>"
     assert blocks[1]["title"] == "Section Two"
     assert blocks[1]["image_url"] == "https://www.electronet.gr/media/left.jpg"
+    assert blocks[1]["body_html"] == "<p>Paragraph two.</p>"
+
+
+def test_presentation_blocks_extract_list_based_electronet_sections() -> None:
+    presentation_html = """
+    <div class="ck-text whole">
+      <iframe src="https://www.youtube.com/embed/example"></iframe>
+    </div>
+    <div class="ck-text inline">
+      <div class="middle-align">
+        <h2>Section One</h2>
+        <p>Paragraph one.</p>
+      </div>
+      <div class="image"><img src="/media/one.jpg" /></div>
+    </div>
+    <div class="ck-text inline left-banner">
+      <div class="image"><img src="/media/two.jpg" /></div>
+      <div class="middle-align">
+        <h2>Section Two</h2>
+        <ul>
+          <li>Bullet one.</li>
+          <li>Bullet two.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="ck-text inline">
+      <div class="middle-align">
+        <h2>Section Three</h2>
+        <ul>
+          <li>Bullet three.</li>
+          <li>Bullet four.</li>
+        </ul>
+      </div>
+      <div class="image"><img src="/media/three.jpg" /></div>
+    </div>
+    <div class="ck-text inline left-banner">
+      <div class="image"><img src="/media/four.jpg" /></div>
+      <div class="middle-align">
+        <h2>Section Four</h2>
+        <ul>
+          <li>Bullet five.</li>
+          <li>Bullet six.</li>
+        </ul>
+      </div>
+    </div>
+    """
+
+    blocks = extract_presentation_blocks(
+        presentation_source_html=presentation_html,
+        presentation_source_text="",
+        base_url="https://www.electronet.gr/product/example",
+    )
+
+    assert len(blocks) == 4
+    assert blocks[1]["title"] == "Section Two"
+    assert blocks[1]["paragraph"] == "Bullet one. Bullet two."
+    assert blocks[1]["image_url"] == "https://www.electronet.gr/media/two.jpg"
+    assert blocks[1]["body_html"] == "<ul>\n<li>Bullet one.</li>\n<li>Bullet two.</li>\n</ul>"
+    assert blocks[3]["title"] == "Section Four"
+    assert blocks[3]["paragraph"] == "Bullet five. Bullet six."
+    assert blocks[3]["image_url"] == "https://www.electronet.gr/media/four.jpg"
+    assert "<ul>" in blocks[3]["body_html"]
+
+
+def test_description_html_preserves_video_embed_and_list_markup() -> None:
+    presentation_html = """
+    <div class="ck-text whole">
+      <h2>Intro Video</h2>
+      <video autoplay="" loop="" muted="" playsinline="" style="width: 70%;">
+        <source src="/media/demo.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <div class="ck-text inline">
+      <div class="middle-align">
+        <h2>Section One</h2>
+        <ul>
+          <li>Bullet one.</li>
+          <li>Bullet two.</li>
+        </ul>
+      </div>
+      <div class="image"><img src="/media/right.jpg" /></div>
+    </div>
+    """
+
+    description, warnings = build_description_html(
+        product_name="Example Product",
+        hero_summary="Intro text",
+        presentation_source_html=presentation_html,
+        presentation_source_text="",
+        model="343700",
+        sections_requested=1,
+        cta_url="https://www.etranoulis.gr/example",
+        cta_label="Category",
+        besco_filenames_by_section={1: "besco1.gif"},
+        base_url="https://www.electronet.gr/product/example",
+    )
+
+    assert warnings == []
+    assert "<video" in description
+    assert "https://www.electronet.gr/media/demo.mp4" in description
+    assert description.index("<video") < description.index("<!-- SECTION 1 -->")
+    assert "<ul>" in description
+    assert "<li>Bullet one.</li>" in description
+    assert "01_bescos/343700/besco1.gif" in description
 

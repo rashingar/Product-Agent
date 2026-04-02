@@ -20,6 +20,14 @@ class ConvertingStubFetcher(ElectronetFetcher):
         return buffer.getvalue(), "image/png"
 
 
+class GifStubFetcher(ElectronetFetcher):
+    def fetch_binary(self, url: str) -> tuple[bytes, str]:
+        image = Image.new("P", (64, 64))
+        buffer = io.BytesIO()
+        image.save(buffer, format="GIF")
+        return buffer.getvalue(), "image/gif"
+
+
 
 def test_gallery_images_saved_in_model_folder_with_business_names(tmp_path: Path) -> None:
     fetcher = StubFetcher()
@@ -103,4 +111,21 @@ def test_besco_non_jpg_images_are_converted_and_resized_to_jpg(tmp_path: Path) -
     assert warnings == []
     assert [item.local_filename for item in downloaded] == ["besco1.jpg"]
     assert downloaded[0].content_type == "image/jpeg"
+
+
+def test_besco_gif_images_are_preserved_as_gif(tmp_path: Path) -> None:
+    fetcher = GifStubFetcher()
+    images = [GalleryImage(url="https://www.electronet.gr/image/anim.gif", alt="anim", position=1)]
+
+    downloaded, warnings, files_written = fetcher.download_besco_images(
+        images=images,
+        output_dir=tmp_path / "234385",
+        requested_sections=1,
+    )
+
+    assert warnings == []
+    assert [item.local_filename for item in downloaded] == ["besco1.gif"]
+    assert downloaded[0].content_type == "image/gif"
+    assert (tmp_path / "234385" / "bescos" / "besco1.gif").exists()
+    assert files_written == [str(tmp_path / "234385" / "bescos" / "besco1.gif")]
 

@@ -625,20 +625,28 @@ class ElectronetProductParser:
         soup: BeautifulSoup,
     ) -> tuple[str, str, int, str, float, list[SelectorTraceEntry]]:
         trace: list[SelectorTraceEntry] = []
-        blocks = product_root.select("#product-presentation .ck-text.inline")
+        all_blocks = product_root.select("#product-presentation .ck-text.whole, #product-presentation .ck-text.inline")
+        inline_blocks = [block for block in all_blocks if "inline" in (block.get("class") or [])]
         trace.append(
             self._trace_selector(
                 "dom",
-                "#product-presentation .ck-text.inline",
-                blocks,
-                blocks[0] if blocks else None,
-                note=f"{len(blocks)} blocks",
+                "#product-presentation .ck-text.whole, #product-presentation .ck-text.inline",
+                all_blocks,
+                all_blocks[0] if all_blocks else None,
+                note=f"{len(all_blocks)} blocks ({len(inline_blocks)} inline)",
             )
         )
-        if blocks:
-            chunks = [str(node) for node in blocks]
-            text_parts = [safe_text(node) for node in blocks if safe_text(node)]
-            return "\n".join(chunks).strip(), "\n".join(text_parts).strip(), len(blocks), "dom:#product-presentation .ck-text.inline", 0.95, trace
+        if all_blocks:
+            chunks = [str(node) for node in all_blocks]
+            text_parts = [safe_text(node) for node in all_blocks if safe_text(node)]
+            return (
+                "\n".join(chunks).strip(),
+                "\n".join(text_parts).strip(),
+                len(inline_blocks),
+                "dom:#product-presentation .ck-text.whole, #product-presentation .ck-text.inline",
+                0.95,
+                trace,
+            )
 
         html, text = self._extract_presentation_between_headings(soup)
         if html or text:

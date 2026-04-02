@@ -52,5 +52,6 @@ echo "[opencart-upload] repo_root=${REPO_ROOT} model=${MODEL} admin_path=${ADMIN
 # Prevent Git Bash / MSYS from rewriting web paths such as
 # `/ipadmin/index.php` into local Windows filesystem paths.
 export MSYS2_ARG_CONV_EXCL="${ADMIN_PATH}"
+export PYTHONPATH="${REPO_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 exec "${CMD[@]}"

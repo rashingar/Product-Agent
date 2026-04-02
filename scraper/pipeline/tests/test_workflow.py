@@ -1226,6 +1226,60 @@ def test_render_workflow_warns_and_continues_when_one_requested_section_is_missi
     assert "requested_sections_reduced:1" in result.validation_report.warnings
 
 
+def test_render_workflow_warns_and_continues_when_multiple_requested_sections_are_missing(tmp_path: Path, monkeypatch) -> None:
+    from pipeline import workflow
+
+    monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
+    monkeypatch.setattr(workflow, "PRODUCTS_ROOT", tmp_path / "products")
+    model = "331566"
+    scrape_dir = tmp_path / "work" / model / "scrape"
+    scrape_dir.mkdir(parents=True)
+    source = SourceProductData(
+        url="https://www.electronet.gr/example",
+        canonical_url="https://www.electronet.gr/example",
+        product_code=model,
+        brand="Black&Decker",
+        mpn="PV1820L-QW",
+        name="Black&Decker Example",
+        spec_sections=[SpecSection(section="Βασικά Χαρακτηριστικά", items=[SpecItem(label="Τάση Volt", value="18")])],
+        presentation_source_html="""
+        <section>
+          <h3>Περιστρεφόμενο ρύγχος</h3>
+          <p>Η ενότητα αυτή περιγράφει με σαφή, καθαρό και επαρκή τρόπο τη λειτουργία του σκουπακίου, την ευκολία πρόσβασης σε δύσκολα σημεία, την πρακτική καθημερινή χρήση και τη συνολικά αξιόπιστη εμπειρία που χρειάζεται η τελική προβολή στη σελίδα προϊόντος.</p>
+        </section>
+        """,
+        besco_images=[GalleryImage(url="https://example.com/besco1.jpg", position=1, local_filename="besco1.jpg", downloaded=True)],
+    )
+    (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    (scrape_dir / f"{model}.normalized.json").write_text(
+        json.dumps(
+            {
+                "input": {"model": model, "url": source.url, "photos": 1, "sections": 4, "skroutz_status": 0, "boxnow": 1, "price": "99"},
+                "taxonomy": TaxonomyResolution(parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", leaf_category="Σκούπισμα", sub_category="Σκουπάκια", taxonomy_path="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ > Σκούπισμα > Σκουπάκια", cta_url="https://example.com/skoupakia").to_dict(),
+                "schema_match": SchemaMatchResult().to_dict(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    write_split_llm_outputs(
+        tmp_path / "work" / model,
+        intro_text=build_intro(),
+        meta_description="Το Black&Decker PV1820L-QW είναι σκουπάκι χειρός με επαναφορτιζόμενη λειτουργία.",
+        meta_keywords=["Black&Decker", "PV1820L-QW"],
+    )
+
+    result = render_workflow(model)
+    description = result.description_path.read_text(encoding="utf-8")
+
+    assert result.run_status == RunStatus.COMPLETED
+    assert "Περιστρεφόμενο ρύγχος" in description
+    assert result.validation_report.ok is True
+    assert "presentation_sections_missing:3" in result.validation_report.warnings
+    assert "requested_sections_reduced:1" in result.validation_report.warnings
+
+
 def test_workflow_main_prepare_routes_through_prepare_service(monkeypatch, capsys, tmp_path: Path) -> None:
     from pipeline import workflow
 

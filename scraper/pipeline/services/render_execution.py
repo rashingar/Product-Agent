@@ -328,14 +328,11 @@ def _resolve_render_sections(
 
     if not usable_sections:
         raise ValueError("No usable deterministic presentation sections for requested render sections")
-    if missing_count > 1:
-        raise ValueError(f"Too many missing deterministic presentation sections: {missing_count}")
-
     warnings: list[str] = []
     if weak_count > 0:
         warnings.append(f"presentation_sections_weak:{weak_count}")
-    if missing_count == 1:
-        warnings.append("presentation_sections_missing:1")
+    if missing_count > 0:
+        warnings.append(f"presentation_sections_missing:{missing_count}")
     if len(usable_sections) < sections_requested:
         warnings.append(f"requested_sections_reduced:{len(usable_sections)}")
     return usable_sections[:sections_requested], warnings
