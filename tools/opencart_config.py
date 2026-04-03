@@ -6,10 +6,6 @@ import os
 import shlex
 from pathlib import Path
 
-DEFAULT_STORE_BASE = "https://www.etranoulis.gr"
-DEFAULT_ADMIN_PATH = "/ipadmin/index.php"
-DEFAULT_IMPORT_PROFILE = "product_new"
-
 
 def discover_repo_root(explicit_repo_root: str | None) -> Path:
     candidates: list[Path] = []
@@ -84,11 +80,11 @@ def resolve_opencart_config(
     env_file_values = load_env_file(env_file)
     return {
         "env_file": str(env_file),
-        "store_base": _resolve_value(store_base, "OPENCART_STORE_BASE", env_file_values, DEFAULT_STORE_BASE),
-        "admin_path": _resolve_value(admin_path, "OPENCART_ADMIN_PATH", env_file_values, DEFAULT_ADMIN_PATH),
+        "store_base": _resolve_value(store_base, "OPENCART_STORE_BASE", env_file_values, ""),
+        "admin_path": _resolve_value(admin_path, "OPENCART_ADMIN_PATH", env_file_values, ""),
         "username": _resolve_value(username, "OPENCART_ADMIN_USER", env_file_values, ""),
         "password": _resolve_value(password, "OPENCART_ADMIN_PASS", env_file_values, ""),
-        "profile": _resolve_value(profile, "OPENCART_IMPORT_PROFILE", env_file_values, DEFAULT_IMPORT_PROFILE),
+        "profile": _resolve_value(profile, "OPENCART_IMPORT_PROFILE", env_file_values, ""),
     }
 
 
