@@ -5,7 +5,7 @@ from typing import Any, Callable
 
 from .fetcher import ElectronetFetcher, FetchError
 from .html_builders import extract_presentation_blocks
-from .models import CLIInput, GalleryImage
+from .models import CLIInput, GalleryImage, SourceProductData
 from .prepare_provider_resolution import PrepareProviderResolutionResult, resolve_prepare_provider_resolution
 from .prepare_result_assembly import assemble_prepare_result
 from .prepare_section_assets import (
@@ -60,13 +60,15 @@ def execute_prepare_stage(
     gallery_warnings: list[str] = []
     gallery_files: list[str] = []
     downloaded_gallery: list[GalleryImage] = []
-    if parsed.source.gallery_images:
+    gallery_images_for_download = _inject_energy_label_into_gallery(parsed.source)
+    gallery_requested_photos = _resolve_requested_gallery_photos(cli.photos, parsed.source)
+    if gallery_images_for_download:
         try:
             downloaded_gallery, gallery_warnings, gallery_files = fetcher.download_gallery_images(
-                images=parsed.source.gallery_images,
+                images=gallery_images_for_download,
                 model=cli.model,
                 output_dir=resolved_model_dir,
-                requested_photos=cli.photos,
+                requested_photos=gallery_requested_photos,
             )
             if downloaded_gallery:
                 parsed.source.gallery_images = downloaded_gallery
@@ -221,3 +223,43 @@ def execute_prepare_stage(
         "downloaded_besco": downloaded_besco,
         "besco_filenames_by_section": besco_filenames_by_section,
     }
+
+
+def _inject_energy_label_into_gallery(source: SourceProductData) -> list[GalleryImage]:
+    gallery_images = list(getattr(source, "gallery_images", []) or [])
+    energy_label_asset_url = str(getattr(source, "energy_label_asset_url", "") or "").strip()
+    if not gallery_images or not energy_label_asset_url:
+        return gallery_images
+
+    primary_image = gallery_images[0]
+    remaining_images = gallery_images[1:]
+    injected_images = [
+        GalleryImage(
+            url=primary_image.url,
+            alt=primary_image.alt,
+            position=1,
+        ),
+        GalleryImage(
+            url=energy_label_asset_url,
+            alt="Energy Label",
+            position=2,
+        ),
+    ]
+    for index, image in enumerate(remaining_images, start=3):
+        injected_images.append(
+            GalleryImage(
+                url=image.url,
+                alt=image.alt,
+                position=index,
+            )
+        )
+    return injected_images
+
+
+def _resolve_requested_gallery_photos(requested_photos: int, source: SourceProductData) -> int:
+    requested = max(int(requested_photos), 0)
+    if requested <= 0:
+        return requested
+    if not str(source.energy_label_asset_url or "").strip():
+        return requested
+    return requested + 1

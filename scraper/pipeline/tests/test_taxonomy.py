@@ -1,4 +1,5 @@
 from pipeline.models import TaxonomyResolution
+from pipeline.models import SpecItem, SpecSection
 from pipeline.taxonomy import TaxonomyResolver
 
 
@@ -58,4 +59,27 @@ def test_taxonomy_resolution_prefers_dryer_subcategory_for_singular_product_name
     assert resolution.sub_category == "Στεγνωτήρια Ρούχων"
     assert resolution.cta_url == "https://www.etranoulis.gr/oikiakes-syskeues/plynthria-stegnwthria/stegnwthria-rouxwn"
     assert candidates[0]["sub_category"] == "Στεγνωτήρια Ρούχων"
+
+
+def test_taxonomy_resolution_prefers_television_size_bucket_for_50_inches() -> None:
+    resolver = TaxonomyResolver()
+    resolution, candidates = resolver.resolve(
+        breadcrumbs=["Αρχική", "Εικόνα - Ήχος", "Τηλεοράσεις", "Όλες οι Τηλεοράσεις"],
+        url="https://www.electronet.gr/eikona-ihos/tileoraseis/oles-oi-tileoraseis/tv-samsung-qe50qn80f-50-smart-4k-mini-led-ai",
+        name="TV Samsung QE50QN80F 50'' Smart 4K Mini LED AI",
+        key_specs=[SpecItem(label="Διαγώνιος Οθόνης ( Ίντσες )", value="50")],
+        spec_sections=[
+            SpecSection(
+                section="Εικόνα - Ήχος",
+                items=[SpecItem(label="Διαγώνιος Οθόνης ( Ίντσες )", value="50")],
+            )
+        ],
+    )
+
+    assert resolution.parent_category == "ΕΙΚΟΝΑ & ΗΧΟΣ"
+    assert resolution.leaf_category == "Τηλεοράσεις"
+    assert resolution.sub_category == "33''-50''"
+    assert resolution.cta_url == "https://www.etranoulis.gr/eikona-hxos/thleoraseis/33-50"
+    assert "television_size_bucket" in resolution.reason
+    assert candidates[0]["sub_category"] == "33''-50''"
 

@@ -3,6 +3,120 @@
 ## Current milestone
 Structured debug reporting for category-scoped schema matching is now implemented. Schema selection results now expose resolved category, pool shape, selected template, fail reason, gate failures, discriminator hits/misses, and overlap scores through the existing report artifacts.
 
+## 2026-04-03 - Fix Electronet EPREL asset extraction and preserve legal-note presentation blocks
+
+Goal:
+- capture the actual EPREL energy-label asset from Electronet product modals instead of the small arrow thumbnail
+- preserve source footnotes and regulation blocks exactly enough for deterministic rendering, including small italic styling for `*` notes and untitled legal appendix content
+- unblock live Electronet TV runs that need direct size-bucket taxonomy resolution
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/html_builders.py`
+- `scraper/pipeline/parser_product_electronet.py`
+- `scraper/pipeline/taxonomy.py`
+- `scraper/pipeline/tests/test_csv_writer.py`
+- `scraper/pipeline/tests/test_product_parser.py`
+- `scraper/pipeline/tests/test_taxonomy.py`
+
+What changed:
+- Electronet asset extraction now prefers `.eprel-modal-trigger` metadata and resolves `data-label-url` / `data-pdf-url` against `https://eprel.ec.europa.eu`, so the scraped source stores the actual EPREL energy-label and fiche URLs instead of the on-page arrow asset
+- deterministic presentation rendering now preserves small-font footnotes and star-prefixed notes as small italic copy while keeping their source wording intact
+- deterministic description rendering now appends untitled appendix/legal blocks that appear after the normal Electronet presentation sections, so bottom-of-page regulation text and its paired image remain in the rendered description
+- taxonomy resolution now applies a direct television size-bucket heuristic for Electronet TV runs, allowing a 50-inch model to resolve to the existing `33''-50''` branch and CTA without relying on a provider-specific hardcoded rule
+- added focused regression coverage for EPREL modal asset extraction, preserved legal-note rendering, and TV size-bucket taxonomy selection
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_product_parser.py -k "video_block or eprel_modal_assets"`
+- `python -m pytest -q pipeline/tests/test_csv_writer.py -k "video_embed_and_list_markup or split_description_preserves_small_footnotes_and_regulation_appendix"`
+- `python -m pytest -q pipeline/tests/test_taxonomy.py pipeline/tests/test_skroutz_taxonomy.py -q`
+- `python -m pipeline.workflow prepare --model 000001 --url "https://www.electronet.gr/eikona-ihos/tileoraseis/oles-oi-tileoraseis/tv-samsung-qe50qn80f-50-smart-4k-mini-led-ai" --photos 3 --sections 35 --skroutz-status 1 --boxnow 0 --price 699`
+- `python -m pipeline.workflow render --model 000001`
+
+Validation:
+- live scrape output now records `energy_label_asset_url = https://eprel.ec.europa.eu/labels/electronicdisplays/Label_2204959.png`
+- live scrape output now records `product_sheet_asset_url = https://eprel.ec.europa.eu/fiches/electronicdisplays/Fiche_2204959_EL.pdf`
+- live render completed successfully for model `000001`
+- `work/000001/candidate/000001.validation.json` reported `ok: true`
+- OpenCart publish completed successfully with `publish_status: success` at stage `csv_import`
+
+Risks, blockers, or skipped items:
+- the appended regulation QR image is still rendered from the source URL rather than downloaded into a repo-managed asset path
+- note preservation is intentionally scoped to the current Electronet legal-note shapes; if another provider uses different markers or richer inline formatting, the renderer will need a separate extension
+
+## 2026-04-03 - Insert Electronet EPREL label into gallery slot two and keep weak presentation sections in render output
+
+Goal:
+- make the extracted EPREL label participate in the actual gallery/download/upload pipeline instead of existing only as metadata
+- keep Electronet section-to-Besco indexing aligned when one deterministic section is weak but still operator-usable
+- render the appendix regulation QR as a small responsive image on the same row as its text
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/html_builders.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/services/render_execution.py`
+- `scraper/pipeline/tests/test_csv_writer.py`
+- `scraper/pipeline/tests/test_prepare_section_assets.py`
+- `scraper/pipeline/tests/test_workflow.py`
+
+What changed:
+- prepare-stage gallery assembly now injects the EPREL energy-label asset immediately after the primary product image, so it downloads as `{model}-2.jpg` and flows into the normal OpenCart gallery upload
+- render-stage section resolution now backfills requested sections with weak deterministic sections before reducing the section count, preserving section image continuity for Electronet products like the live TV run where one section was previously dropped
+- appendix rendering now constrains the regulation QR image to a responsive `min(75px, 18vw)` width cap with `max-width: 75px`, keeping it visually small while remaining in the same row layout as the appendix text
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets.py -k "injects_energy_label_into_gallery_slot_two"`
+- `python -m pytest -q pipeline/tests/test_csv_writer.py -k "split_description_preserves_small_footnotes_and_regulation_appendix"`
+- `python -m pytest -q pipeline/tests/test_workflow.py -k "backfills_with_weak_sections_before_reducing"`
+- `python -m pipeline.workflow prepare --model 000001 --url "https://www.electronet.gr/eikona-ihos/tileoraseis/oles-oi-tileoraseis/tv-samsung-qe50qn80f-50-smart-4k-mini-led-ai" --photos 3 --sections 35 --skroutz-status 1 --boxnow 0 --price 699`
+- `python -m pipeline.workflow render --model 000001`
+
+Validation:
+- live gallery output now includes `work/000001/scrape/gallery/000001-2.jpg` as the injected EPREL label image
+- live OpenCart upload plan now publishes `catalog/01_main/000001/000001-2.jpg` as part of the product gallery
+- live rendered description now includes `Object Tracking Sound Lite` with `besco22.jpg`
+- live validation remains `ok: true` and the earlier `requested_sections_reduced:34` warning is gone
+
+Risks, blockers, or skipped items:
+- the current gallery behavior keeps the operator-requested gallery count fixed, so inserting the EPREL label into slot two pushes one source gallery image out when `photos` is capped
+- the appendix QR still renders from the source URL rather than a repo-managed downloaded asset
+
+## 2026-04-03 - Keep requested source-photo count when injecting the EPREL label and make appendix QR truly inline
+
+Goal:
+- preserve the operator-requested source gallery count while still inserting the EPREL label into gallery slot two
+- ensure the appendix regulation QR renders as a small inline element instead of a separate side block
+
+Files changed:
+- `DOCUMENTATION.md`
+- `scraper/pipeline/html_builders.py`
+- `scraper/pipeline/prepare_stage.py`
+- `scraper/pipeline/tests/test_csv_writer.py`
+- `scraper/pipeline/tests/test_prepare_section_assets.py`
+
+What changed:
+- prepare-stage gallery download count now adds the EPREL label on top of the requested `photos` count, so a `photos: 3` run with a label produces four gallery files: main image, EPREL label, and the three requested source photos in total
+- appendix rendering now inserts the QR image inline inside the appendix text container with a smaller responsive cap of `min(60px, 14vw)` and `max-width: 60px`
+- reran the live `000001` product after the prepare artifacts were complete so the published CSV and OpenCart import now reference all four gallery files correctly
+
+Commands run:
+- `python -m pytest -q pipeline/tests/test_prepare_section_assets.py -k "energy_label"`
+- `python -m pytest -q pipeline/tests/test_csv_writer.py -k "split_description_preserves_small_footnotes_and_regulation_appendix"`
+- `python -m pipeline.workflow prepare --model 000001 --url "https://www.electronet.gr/eikona-ihos/tileoraseis/oles-oi-tileoraseis/tv-samsung-qe50qn80f-50-smart-4k-mini-led-ai" --photos 3 --sections 35 --skroutz-status 1 --boxnow 0 --price 699`
+- `python -m pipeline.workflow render --model 000001`
+- `python -m pipeline.workflow render --model 000001`
+
+Validation:
+- live gallery output now includes `work/000001/scrape/gallery/000001-1.jpg` through `work/000001/scrape/gallery/000001-4.jpg`
+- live published CSV now references `catalog/01_main/000001/000001-2.jpg:::catalog/01_main/000001/000001-3.jpg:::catalog/01_main/000001/000001-4.jpg` in `additional_image`
+- live OpenCart upload plan reports `gallery_count: 4`
+- live appendix QR now renders inline with `display:inline-block; vertical-align:middle; width:min(60px, 14vw); max-width:60px`
+
+Risks, blockers, or skipped items:
+- one rerun was required because `render` was started before the updated `prepare` artifacts had finished writing; the final successful rerun used the completed scrape artifacts and no runtime code change was needed for that
+- the appendix QR still uses the source URL rather than a repo-managed downloaded asset
+
 ## 2026-04-02 - Preserve Electronet presentation lists, video embeds, and Besco GIF assets
 
 Goal:

@@ -1,7 +1,12 @@
 from pathlib import Path
 
 from pipeline.csv_writer import write_csv_row
-from pipeline.html_builders import build_characteristics_html, build_description_html, extract_presentation_blocks
+from pipeline.html_builders import (
+    build_characteristics_html,
+    build_description_html,
+    build_description_html_from_intro_and_sections,
+    extract_presentation_blocks,
+)
 from pipeline.models import SpecItem, SpecSection
 
 
@@ -221,4 +226,44 @@ def test_description_html_preserves_video_embed_and_list_markup() -> None:
     assert "<ul>" in description
     assert "<li>Bullet one.</li>" in description
     assert "01_bescos/343700/besco1.gif" in description
+
+
+def test_split_description_preserves_small_footnotes_and_regulation_appendix() -> None:
+    presentation_html = """
+    <div class="ck-text inline">
+      <div class="middle-align">
+        <h2>Section One</h2>
+        <p>Main paragraph.</p>
+        <p><em><span style="font-size:12px;">* Exact note text.</span></em></p>
+      </div>
+      <div class="image"><img src="/media/right.jpg" /></div>
+    </div>
+    <div class="ck-text inline">
+      <div class="middle-align">
+        <p>Κανονισμός (ΕΕ) 2023/2854<br />Κανονισμός για τα Δεδομένα</p>
+      </div>
+      <div class="image"><img src="/media/qr.jpg" /></div>
+    </div>
+    """
+
+    description, warnings = build_description_html_from_intro_and_sections(
+        product_name="Example Product",
+        model="343700",
+        cta_url="https://www.etranoulis.gr/example",
+        cta_text="Δείτε περισσότερα εδώ",
+        intro_text="Intro text",
+        sections=[{"title": "Section One", "body_text": "Main paragraph. * Exact note text.", "source_index": 1}],
+        besco_filenames_by_section={1: "besco1.jpg"},
+        presentation_source_html=presentation_html,
+        presentation_source_text="",
+        base_url="https://www.electronet.gr/product/example",
+    )
+
+    assert warnings == []
+    assert "font-size:12px" in description
+    assert "font-style:italic" in description
+    assert "* Exact note text." in description
+    assert "Κανονισμός (ΕΕ) 2023/2854" not in description
+    assert "Κανονισμός για τα Δεδομένα" not in description
+    assert 'src="https://www.electronet.gr/media/qr.jpg"' not in description
 

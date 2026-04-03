@@ -838,3 +838,104 @@ def test_prepare_stage_skroutz_manufacturer_path_keeps_besco_download_incomplete
     assert str(excinfo.value) == "Skroutz besco image download incomplete: expected 2, downloaded 1"
     assert len(resolve_calls) == 1
     assert fetcher.besco_download_calls == []
+
+
+def test_prepare_stage_injects_energy_label_into_gallery_slot_two(tmp_path: Path) -> None:
+    cli = _build_cli(tmp_path, url="https://www.electronet.gr/example", sections=0)
+    source = _build_source(source_name="electronet", url=cli.url)
+    source.gallery_images = [
+        GalleryImage(url="https://cdn.example/main.jpg", alt="main", position=1),
+        GalleryImage(url="https://cdn.example/second.jpg", alt="second", position=2),
+        GalleryImage(url="https://cdn.example/third.jpg", alt="third", position=3),
+    ]
+    source.energy_label_asset_url = "https://eprel.ec.europa.eu/labels/example.png"
+    parsed = _build_parsed(source)
+    persistence_calls: list[PrepareScrapePersistenceInput] = []
+
+    class GalleryRecordingFetcher(RecordingFetcher):
+        def __init__(self) -> None:
+            super().__init__()
+            self.gallery_download_calls: list[dict[str, Any]] = []
+
+        def download_gallery_images(self, **kwargs: Any):
+            self.gallery_download_calls.append(kwargs)
+            return [], [], []
+
+    fetcher = GalleryRecordingFetcher()
+
+    execute_prepare_stage(
+        cli,
+        model_dir=tmp_path / cli.model,
+        validate_url_scope_fn=lambda _url: ("electronet", True, "electronet_product_path"),
+        fetcher_factory=lambda: fetcher,
+        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
+            source="electronet",
+            url=cli_arg.url,
+            parsed=parsed,
+        ),
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment(
+            manufacturer_enrichment=_build_manufacturer_enrichment(
+                presentation_applied=False,
+                fallback_reason="not_applicable_non_skroutz",
+            )
+        ),
+        assemble_prepare_result_fn=_build_assembly_result,
+        persist_prepare_scrape_artifacts_fn=_capture_persist(persistence_calls),
+    )
+
+    assert len(fetcher.gallery_download_calls) == 1
+    assert fetcher.gallery_download_calls[0]["requested_photos"] == 3
+    assert [item.position for item in fetcher.gallery_download_calls[0]["images"]] == [1, 2, 3, 4]
+    assert [item.url for item in fetcher.gallery_download_calls[0]["images"]] == [
+        "https://cdn.example/main.jpg",
+        "https://eprel.ec.europa.eu/labels/example.png",
+        "https://cdn.example/second.jpg",
+        "https://cdn.example/third.jpg",
+    ]
+
+
+def test_prepare_stage_adds_energy_label_on_top_of_requested_photo_count(tmp_path: Path) -> None:
+    cli = _build_cli(tmp_path, url="https://www.electronet.gr/example", sections=0)
+    source = _build_source(source_name="electronet", url=cli.url)
+    source.gallery_images = [
+        GalleryImage(url="https://cdn.example/main.jpg", alt="main", position=1),
+        GalleryImage(url="https://cdn.example/second.jpg", alt="second", position=2),
+        GalleryImage(url="https://cdn.example/third.jpg", alt="third", position=3),
+    ]
+    source.energy_label_asset_url = "https://eprel.ec.europa.eu/labels/example.png"
+    parsed = _build_parsed(source)
+    persistence_calls: list[PrepareScrapePersistenceInput] = []
+
+    class GalleryRecordingFetcher(RecordingFetcher):
+        def __init__(self) -> None:
+            super().__init__()
+            self.gallery_download_calls: list[dict[str, Any]] = []
+
+        def download_gallery_images(self, **kwargs: Any):
+            self.gallery_download_calls.append(kwargs)
+            return [], [], []
+
+    fetcher = GalleryRecordingFetcher()
+
+    execute_prepare_stage(
+        cli,
+        model_dir=tmp_path / cli.model,
+        validate_url_scope_fn=lambda _url: ("electronet", True, "electronet_product_path"),
+        fetcher_factory=lambda: fetcher,
+        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
+            source="electronet",
+            url=cli_arg.url,
+            parsed=parsed,
+        ),
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment(
+            manufacturer_enrichment=_build_manufacturer_enrichment(
+                presentation_applied=False,
+                fallback_reason="not_applicable_non_skroutz",
+            )
+        ),
+        assemble_prepare_result_fn=_build_assembly_result,
+        persist_prepare_scrape_artifacts_fn=_capture_persist(persistence_calls),
+    )
+
+    assert len(fetcher.gallery_download_calls) == 1
+    assert fetcher.gallery_download_calls[0]["requested_photos"] == 3

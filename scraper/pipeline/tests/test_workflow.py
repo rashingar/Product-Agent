@@ -1653,3 +1653,19 @@ def test_workflow_main_render_hard_failure_prints_service_error_only(monkeypatch
     assert captured.out == ""
     assert "Render completed but required artifacts are missing: validation_report_path=" in captured.err
 
+
+def test_resolve_render_sections_backfills_with_weak_sections_before_reducing() -> None:
+    from pipeline.services import render_execution
+
+    sections, warnings = render_execution._resolve_render_sections(
+        extracted_sections=[
+            {"title": "Usable", "body_text": " ".join(f"λέξη{i}" for i in range(30)), "image_url": "https://example.com/1.jpg"},
+            {"title": "Weak", "body_text": " ".join(f"όρος{i}" for i in range(12)), "image_url": "https://example.com/2.jpg"},
+        ],
+        sections_requested=2,
+    )
+
+    assert [section["title"] for section in sections] == ["Usable", "Weak"]
+    assert "presentation_sections_weak:1" in warnings
+    assert not any(warning.startswith("requested_sections_reduced:") for warning in warnings)
+

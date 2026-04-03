@@ -323,16 +323,33 @@ def _resolve_render_sections(
         for section in normalized_sections
         if section.quality == "usable"
     ]
+    weak_sections = [
+        {
+            "title": section.title,
+            "body_text": section.body_text,
+            "quality": section.quality,
+            "reason": section.reason,
+            "metrics": section.metrics.to_dict(),
+            "source_index": section.source_index,
+            "image_url": section.image_url,
+        }
+        for section in normalized_sections
+        if section.quality == "weak"
+    ]
     missing_count = sum(1 for section in normalized_sections if section.quality == "missing")
     weak_count = sum(1 for section in normalized_sections if section.quality == "weak")
 
-    if not usable_sections:
+    selected_sections = usable_sections[:]
+    if len(selected_sections) < sections_requested:
+        selected_sections.extend(weak_sections[: max(sections_requested - len(selected_sections), 0)])
+
+    if not selected_sections:
         raise ValueError("No usable deterministic presentation sections for requested render sections")
     warnings: list[str] = []
     if weak_count > 0:
         warnings.append(f"presentation_sections_weak:{weak_count}")
     if missing_count > 0:
         warnings.append(f"presentation_sections_missing:{missing_count}")
-    if len(usable_sections) < sections_requested:
-        warnings.append(f"requested_sections_reduced:{len(usable_sections)}")
-    return usable_sections[:sections_requested], warnings
+    if len(selected_sections) < sections_requested:
+        warnings.append(f"requested_sections_reduced:{len(selected_sections)}")
+    return selected_sections[:sections_requested], warnings

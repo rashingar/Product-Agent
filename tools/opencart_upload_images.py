@@ -10,7 +10,10 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, urlparse
 
-import requests
+try:
+    import requests
+except ModuleNotFoundError:  # pragma: no cover - unit tests may import helpers without runtime deps installed
+    requests = None
 from tools.opencart_config import resolve_opencart_config
 
 TIMEOUT = 60
@@ -290,7 +293,13 @@ def ensure_remote_nested_dir(session: requests.Session, admin_index: str, user_t
         parent = f'{parent}/{part}'.strip('/')
 
 
-def upload_files(session: requests.Session, admin_index: str, user_token: str, remote_dir: str, file_paths: list[str]) -> dict[str, Any]:
+def chunked_file_paths(file_paths: list[str], batch_size: int | None) -> list[list[str]]:
+    if not batch_size or batch_size <= 0 or len(file_paths) <= batch_size:
+        return [file_paths]
+    return [file_paths[index:index + batch_size] for index in range(0, len(file_paths), batch_size)]
+
+
+def _upload_file_batch(session: requests.Session, admin_index: str, user_token: str, remote_dir: str, file_paths: list[str]) -> dict[str, Any]:
     url = f"{admin_index}?route=common/filemanager/upload&user_token={quote(user_token)}&directory={quote(remote_dir)}"
     handles = []
     files = []
@@ -309,6 +318,33 @@ def upload_files(session: requests.Session, admin_index: str, user_token: str, r
     finally:
         for fh in handles:
             fh.close()
+
+
+def upload_files(
+    session: requests.Session,
+    admin_index: str,
+    user_token: str,
+    remote_dir: str,
+    file_paths: list[str],
+    *,
+    batch_size: int | None = None,
+) -> dict[str, Any]:
+    batches = chunked_file_paths(file_paths, batch_size)
+    if len(batches) == 1:
+        return _upload_file_batch(session, admin_index, user_token, remote_dir, batches[0])
+
+    batch_results: list[dict[str, Any]] = []
+    for batch in batches:
+        batch_results.append(_upload_file_batch(session, admin_index, user_token, remote_dir, batch))
+
+    success_messages = [str(result.get('success', '')).strip() for result in batch_results if str(result.get('success', '')).strip()]
+    return {
+        'success': success_messages[-1] if success_messages else 'Batch upload completed.',
+        'batch_count': len(batch_results),
+        'batch_size': batch_size,
+        'uploaded_count': len(file_paths),
+        'batches': batch_results,
+    }
 
 
 def write_report(report_path: Path, payload: dict[str, Any]) -> None:
@@ -330,6 +366,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    if requests is None:
+        raise UploadError('Missing dependency: requests')
     args = parse_args()
     repo_root = discover_repo_root(args.repo_root)
     resolved_config = resolve_opencart_config(
@@ -383,7 +421,14 @@ def main() -> int:
 
     if plan['bescos']['count'] > 0:
         ensure_remote_nested_dir(session, admin_index, user_token, plan['bescos']['remote_dir'])
-        uploads['bescos'] = upload_files(session, admin_index, user_token, plan['bescos']['remote_dir'], plan['bescos']['local_files'])
+        uploads['bescos'] = upload_files(
+            session,
+            admin_index,
+            user_token,
+            plan['bescos']['remote_dir'],
+            plan['bescos']['local_files'],
+            batch_size=20,
+        )
     else:
         uploads['bescos'] = {'skipped': True, 'reason': 'No besco images found.'}
 

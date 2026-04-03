@@ -97,3 +97,37 @@ def test_product_parser_preserves_video_block_in_presentation_source_html() -> N
     assert parsed.field_diagnostics["presentation_blocks"].value_present is True
     assert parsed.field_diagnostics["presentation_blocks"].value_preview == "2"
 
+
+def test_product_parser_prefers_eprel_modal_assets_over_arrow_thumbnail() -> None:
+    matcher = SchemaMatcher()
+    parser = ElectronetProductParser(known_section_titles=matcher.known_section_titles)
+    html = """
+    <html>
+      <body>
+        <article class="product-page available">
+          <div class="eprel-modal-links-wrapper">
+            <a
+              href="#"
+              class="eprel-modal-trigger"
+              data-label-url="/labels/electronicdisplays/Label_2204959.png"
+              data-pdf-url="/fiches/electronicdisplays/Fiche_2204959_EL.pdf"
+              data-open="energy-label-modal"
+            >
+              <img src="/modules/custom/custom_eprel/energy_arrows/G-Left-Red-WithAGScale.svg" alt="Energy Class G" />
+            </a>
+          </div>
+          <div id="product-brand-logo"><a href="/brand/samsung">Samsung</a></div>
+          <h1 class="product-title">TV Samsung QE50QN80F 50'' Smart 4K Mini LED AI</h1>
+          <div id="cscp-sku">142687</div>
+          <div id="product-price"><span class="price">699,00 €</span></div>
+          <div id="product-details"><div class="prop-group-wrapper"><h3>Εικόνα - Ήχος</h3></div></div>
+        </article>
+      </body>
+    </html>
+    """
+
+    parsed = parser.parse(html, "https://www.electronet.gr/example")
+
+    assert parsed.source.energy_label_asset_url == "https://eprel.ec.europa.eu/labels/electronicdisplays/Label_2204959.png"
+    assert parsed.source.product_sheet_asset_url == "https://eprel.ec.europa.eu/fiches/electronicdisplays/Fiche_2204959_EL.pdf"
+

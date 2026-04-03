@@ -343,6 +343,36 @@ def extract_presentation_media_blocks(source_html: str, base_url: str = "") -> l
     return rendered_blocks
 
 
+def extract_presentation_appendix_blocks(source_html: str, base_url: str = "") -> list[dict[str, str]]:
+    if not source_html.strip():
+        return []
+    soup = BeautifulSoup(source_html, "lxml")
+    appendix_blocks: list[dict[str, str]] = []
+    for container in soup.select(".ck-text.inline"):
+        if not isinstance(container, Tag):
+            continue
+        title = _select_presentation_title(container)
+        if title:
+            continue
+        paragraph = _extract_container_body_text(container)
+        body_html = _extract_container_body_html(container)
+        if not paragraph and not body_html:
+            continue
+        image_node = container.find("img")
+        src = ""
+        if isinstance(image_node, Tag):
+            src = image_node.get("src") or image_node.get("data-src") or image_node.get("data-original") or ""
+        appendix_blocks.append(
+            {
+                "title": "",
+                "paragraph": paragraph,
+                "body_html": body_html,
+                "image_url": make_absolute_url(src, base_url) if src else "",
+            }
+        )
+    return appendix_blocks
+
+
 
 def _blocks_from_html(source_html: str, base_url: str = "") -> list[dict[str, str]]:
     if not source_html.strip():
@@ -447,7 +477,7 @@ def _sanitize_body_fragment_html(node: Tag) -> str:
     fragment = BeautifulSoup(str(node), "lxml")
     body = fragment.body or fragment
     for tag in body.find_all(True):
-        if tag.name not in {"p", "ul", "ol", "li", "br", "strong", "em", "b", "i"}:
+        if tag.name not in {"p", "ul", "ol", "li", "br", "strong", "em", "b", "i", "span"}:
             tag.unwrap()
             continue
         if tag.name in {"p", "ul", "ol"}:
@@ -456,6 +486,9 @@ def _sanitize_body_fragment_html(node: Tag) -> str:
             tag.attrs = {}
         elif tag.name == "br":
             tag.attrs = {}
+        elif tag.name == "span":
+            style = _filter_supported_inline_style(tag.get("style", ""))
+            tag.attrs = {"style": style} if style else {}
     return "".join(str(child) for child in body.contents).strip()
 
 
@@ -475,11 +508,70 @@ def _normalize_media_container_html(container: Tag, base_url: str) -> str:
     return "".join(str(child) for child in body.contents).strip()
 
 
-def _render_section_body_html(body_html: str, body_text: str) -> str:
+def _render_section_body_html(body_html: str, body_text: str, *, force_note_style: bool = False) -> str:
     normalized_html = normalize_whitespace(BeautifulSoup(body_html, "lxml").get_text(" ", strip=True)) if body_html else ""
     if normalized_html:
-        return f'      <div class="etr-copy" style="font-size:22px">{body_html}</div>'
+        return f'      <div class="etr-copy" style="font-size:22px">{_apply_preserved_note_styles(body_html, force_note_style=force_note_style)}</div>'
     return f'      <p><span style="font-size:22px">{escape(body_text)}</span></p>'
+
+
+def _render_appendix_block(block: dict[str, str]) -> list[str]:
+    out = ['  <div class="etr-sec appendix">', '    <div class="etr-text">']
+    out.append(_render_section_body_html(str(block.get("body_html", "")), str(block.get("paragraph", "")), force_note_style=True))
+    image_url = normalize_whitespace(block.get("image_url", ""))
+    if image_url:
+        out.append(
+            f'      <img alt="" src="{escape(image_url, quote=True)}" '
+            'style="display:inline-block; vertical-align:middle; width:min(60px, 14vw); max-width:60px; height:auto; margin-left:12px;" />'
+        )
+    out.append('    </div>')
+    out.append('  </div>')
+    out.append('')
+    return out
+
+
+def _apply_preserved_note_styles(body_html: str, *, force_note_style: bool = False) -> str:
+    fragment = BeautifulSoup(body_html, "lxml")
+    body = fragment.body or fragment
+    for tag in body.find_all(["p", "li"]):
+        text = normalize_whitespace(tag.get_text(" ", strip=True))
+        if not text:
+            continue
+        if force_note_style or _looks_like_preserved_note(text):
+            tag["style"] = _merge_inline_styles(tag.get("style", ""), "font-size:12px; font-style:italic;")
+    return "".join(str(child) for child in body.contents).strip()
+
+
+def _looks_like_preserved_note(text: str) -> bool:
+    return text.startswith("*")
+
+
+def _filter_supported_inline_style(raw_style: str) -> str:
+    allowed_properties = {"font-size"}
+    cleaned_parts: list[str] = []
+    for part in str(raw_style or "").split(";"):
+        if ":" not in part:
+            continue
+        key, value = part.split(":", 1)
+        normalized_key = normalize_whitespace(key).lower()
+        normalized_value = normalize_whitespace(value)
+        if normalized_key in allowed_properties and normalized_value:
+            cleaned_parts.append(f"{normalized_key}:{normalized_value}")
+    return "; ".join(cleaned_parts)
+
+
+def _merge_inline_styles(existing: str, addition: str) -> str:
+    merged: dict[str, str] = {}
+    for style in [existing, addition]:
+        for part in str(style or "").split(";"):
+            if ":" not in part:
+                continue
+            key, value = part.split(":", 1)
+            normalized_key = normalize_whitespace(key).lower()
+            normalized_value = normalize_whitespace(value)
+            if normalized_key and normalized_value:
+                merged[normalized_key] = normalized_value
+    return "; ".join(f"{key}:{value}" for key, value in merged.items()) + (";" if merged else "")
 
 
 

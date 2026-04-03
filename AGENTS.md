@@ -76,6 +76,10 @@ treat it as a request to run the full pipeline.
 10. After both task outputs are written, run:
    `python -m pipeline.workflow render --model {model}`
    Run from `scraper/`.
+   Execution ordering is strict:
+   - never start `render` before `prepare` has finished successfully
+   - never run `prepare` and `render` concurrently for the same model
+   - after `prepare`, verify the updated scrape artifacts exist on disk before starting `render`
 11. After a successful render publish to `products/{model}.csv`, the runtime must start the repo-native OpenCart publish phase by invoking:
    `tools/run_opencart_pipeline.sh`
    Run from repo root with `CURRENT_JOB_PRODUCT_FILE` set to the exact `products/{model}.csv` path created in the current job.

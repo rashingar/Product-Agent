@@ -40,6 +40,7 @@ CODE_RE = re.compile(r"ΚΩΔΙΚΟΣ\s+ΠΡΟΪΟΝΤΟΣ\s*:?\s*([0-9]{6})", r
 MODEL_TOKEN_RE = re.compile(r"^(?=.*[A-Z])(?=.*\d)[A-Z0-9][A-Z0-9._/-]{2,}$")
 PURE_NUMERIC_TOKEN_RE = re.compile(r"^\d+(?:[.,]\d+)?$")
 STRIP_PUNCT_RE = re.compile(r"^[^\w]+|[^\w+./-]+$")
+EPREL_HOST = "https://eprel.ec.europa.eu"
 
 
 class ElectronetProductParser:
@@ -908,6 +909,13 @@ class ElectronetProductParser:
         energy_label = ""
         product_sheet = ""
         for scope in [product_root, soup]:
+            for trigger in scope.select(".eprel-modal-trigger"):
+                label_candidate = self._resolve_eprel_asset_url(trigger.get("data-label-url"), url)
+                if label_candidate and not energy_label:
+                    energy_label = label_candidate
+                sheet_candidate = self._resolve_eprel_asset_url(trigger.get("data-pdf-url"), url)
+                if sheet_candidate and not product_sheet:
+                    product_sheet = sheet_candidate
             for link in scope.find_all("a", href=True):
                 text = normalize_for_match(link.get_text(" ", strip=True))
                 img = link.find("img")
@@ -921,6 +929,14 @@ class ElectronetProductParser:
             if energy_label or product_sheet:
                 break
         return energy_label, product_sheet
+
+    def _resolve_eprel_asset_url(self, raw_url: Any, page_url: str) -> str:
+        candidate = normalize_whitespace(raw_url)
+        if not candidate:
+            return ""
+        if candidate.startswith("/labels/") or candidate.startswith("/fiches/"):
+            return f"{EPREL_HOST}{candidate}"
+        return make_absolute_url(candidate, page_url)
 
     def _extract_mpn(
         self,

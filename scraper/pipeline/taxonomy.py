@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+import re
 from typing import Any
 from urllib.parse import urlparse
 
@@ -19,6 +20,19 @@ ALIASES = {
     normalize_for_match("Σταθερά Dect"): "Σταθέρα",
     normalize_for_match("Εντοιχιζόμενες"): "Εντοιχιζόμενες Συσκευές",
     normalize_for_match("Σκούπα Stick"): "Σκούπες Stick",
+}
+TV_LEAF = normalize_for_match("Τηλεοράσεις")
+TV_SIZE_BUCKETS = {
+    "Έως 32''": (0, 32),
+    "33''-50''": (33, 50),
+    "50'' & άνω": (51, None),
+}
+TV_NAME_INCHES_RE = re.compile(r"(?<!\d)(\d{2,3})(?:\s*(?:''|\"|”|ιντσ(?:ες|ών)?))(?!\d)", re.IGNORECASE)
+TV_INCH_LABELS = {
+    normalize_for_match("Διαγώνιος Οθόνης ( Ίντσες )"),
+    normalize_for_match("Διαγώνιος Οθόνης"),
+    normalize_for_match("Διαγώνιος"),
+    normalize_for_match("Μέγεθος Οθόνης"),
 }
 
 
@@ -77,6 +91,7 @@ class TaxonomyResolver:
             for item in section.items
             if item.label
         }
+        tv_size_bucket = self._resolve_tv_size_bucket(name=name, key_specs=key_specs, spec_sections=spec_sections)
 
         candidates: list[dict[str, Any]] = []
         for candidate in self.paths:
@@ -122,6 +137,10 @@ class TaxonomyResolver:
             if sub_overlap:
                 score += 2.0 * (sub_overlap / max(len(sub_tokens), 1))
                 reasons.append("sub_name_overlap")
+
+            if leaf_norm == TV_LEAF and tv_size_bucket and (sub or "") == tv_size_bucket:
+                score += 3.5
+                reasons.append("television_size_bucket")
 
             filter_row = self.filter_by_path.get(candidate_path_norm)
             if filter_row:
@@ -204,3 +223,57 @@ class TaxonomyResolver:
         if "κοπτηρια" in normalized and "ραβδο" in normalized:
             return "Κοπτήρια-Ράβδοι"
         return ALIASES.get(normalized, value)
+
+    def _resolve_tv_size_bucket(
+        self,
+        *,
+        name: str,
+        key_specs: list[dict[str, Any]] | list[Any],
+        spec_sections: list[SpecSection],
+    ) -> str:
+        inches = self._extract_tv_inches(name=name, key_specs=key_specs, spec_sections=spec_sections)
+        if inches is None:
+            return ""
+        for bucket, (minimum, maximum) in TV_SIZE_BUCKETS.items():
+            if inches < minimum:
+                continue
+            if maximum is not None and inches > maximum:
+                continue
+            return bucket
+        return ""
+
+    def _extract_tv_inches(
+        self,
+        *,
+        name: str,
+        key_specs: list[dict[str, Any]] | list[Any],
+        spec_sections: list[SpecSection],
+    ) -> int | None:
+        for item in key_specs:
+            label = normalize_for_match(self._item_value(item, "label"))
+            value = self._item_value(item, "value")
+            if label in TV_INCH_LABELS:
+                extracted = self._extract_int(value)
+                if extracted is not None:
+                    return extracted
+        for section in spec_sections:
+            for item in section.items:
+                if normalize_for_match(item.label) in TV_INCH_LABELS:
+                    extracted = self._extract_int(item.value or "")
+                    if extracted is not None:
+                        return extracted
+        match = TV_NAME_INCHES_RE.search(name)
+        if match:
+            return int(match.group(1))
+        return None
+
+    def _item_value(self, item: Any, field: str) -> str:
+        if isinstance(item, dict):
+            return str(item.get(field, "") or "")
+        return str(getattr(item, field, "") or "")
+
+    def _extract_int(self, value: str) -> int | None:
+        match = re.search(r"(\d{2,3})", str(value or ""))
+        if not match:
+            return None
+        return int(match.group(1))
