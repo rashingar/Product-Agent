@@ -3,9 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable
 
-from .fetcher import ElectronetFetcher, FetchError
+from .fetcher import ElectronetFetcher
 from .html_builders import extract_presentation_blocks
-from .models import CLIInput, GalleryImage, SourceProductData
+from .models import CLIInput, GalleryImage
 from .prepare_provider_resolution import PrepareProviderResolutionResult, resolve_prepare_provider_resolution
 from .prepare_result_assembly import assemble_prepare_result
 from .prepare_section_assets import (
@@ -19,6 +19,8 @@ from .prepare_scrape_persistence import (
     persist_prepare_scrape_artifacts,
 )
 from .prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult, resolve_prepare_taxonomy_enrichment
+from .source_acquisition_models import SourceAcquisitionResult
+from .source_acquisition_stage import execute_source_acquisition_stage
 from .source_detection import validate_url_scope
 from .utils import ensure_directory
 
@@ -30,23 +32,51 @@ def execute_prepare_stage(
     validate_url_scope_fn: Callable[[str], tuple[str, bool, str]] = validate_url_scope,
     fetcher_factory: Callable[[], ElectronetFetcher] = ElectronetFetcher,
     resolve_prepare_provider_input_fn: Callable[..., PrepareProviderResolutionResult] = resolve_prepare_provider_resolution,
+    execute_source_acquisition_stage_fn: Callable[..., SourceAcquisitionResult] = execute_source_acquisition_stage,
+    resolve_prepare_taxonomy_enrichment_fn: Callable[..., PrepareTaxonomyEnrichmentResult] = resolve_prepare_taxonomy_enrichment,
+    resolve_skroutz_section_assets_fn: Callable[..., PrepareSectionAssetsResult] = resolve_skroutz_section_assets,
+    assemble_prepare_result_fn: Callable[..., Any] = assemble_prepare_result,
+    persist_prepare_scrape_artifacts_fn: Callable[[PrepareScrapePersistenceInput], PrepareScrapePersistenceResult] = persist_prepare_scrape_artifacts,
+) -> dict[str, Any]:
+    resolved_model_dir = ensure_directory(model_dir or (Path(cli.out) / cli.model))
+    acquisition = execute_source_acquisition_stage_fn(
+        model=cli.model,
+        url=cli.url,
+        photos=cli.photos,
+        model_dir=resolved_model_dir,
+        validate_url_scope_fn=validate_url_scope_fn,
+        fetcher_factory=fetcher_factory,
+        resolve_prepare_provider_input_fn=resolve_prepare_provider_input_fn,
+    )
+    return execute_prepare_from_acquisition(
+        cli,
+        acquisition,
+        validate_url_scope_fn=validate_url_scope_fn,
+        fetcher_factory=fetcher_factory,
+        resolve_prepare_taxonomy_enrichment_fn=resolve_prepare_taxonomy_enrichment_fn,
+        resolve_skroutz_section_assets_fn=resolve_skroutz_section_assets_fn,
+        assemble_prepare_result_fn=assemble_prepare_result_fn,
+        persist_prepare_scrape_artifacts_fn=persist_prepare_scrape_artifacts_fn,
+    )
+
+
+def execute_prepare_from_acquisition(
+    cli: CLIInput,
+    acquisition: SourceAcquisitionResult,
+    *,
+    validate_url_scope_fn: Callable[[str], tuple[str, bool, str]] = validate_url_scope,
+    fetcher_factory: Callable[[], ElectronetFetcher] = ElectronetFetcher,
     resolve_prepare_taxonomy_enrichment_fn: Callable[..., PrepareTaxonomyEnrichmentResult] = resolve_prepare_taxonomy_enrichment,
     resolve_skroutz_section_assets_fn: Callable[..., PrepareSectionAssetsResult] = resolve_skroutz_section_assets,
     assemble_prepare_result_fn: Callable[..., Any] = assemble_prepare_result,
     persist_prepare_scrape_artifacts_fn: Callable[[PrepareScrapePersistenceInput], PrepareScrapePersistenceResult] = persist_prepare_scrape_artifacts,
 ) -> dict[str, Any]:
     fetcher = fetcher_factory()
-    provider_resolution = resolve_prepare_provider_input_fn(
-        cli,
-        validate_url_scope_fn=validate_url_scope_fn,
-        fetcher_factory=lambda: fetcher,
-    )
-    source = provider_resolution.source
-    fetch = provider_resolution.fetch
-    parsed = provider_resolution.parsed
+    source = acquisition.source
+    fetch = acquisition.fetch
+    parsed = acquisition.parsed
     final_source, final_scope_ok, final_scope_reason = validate_url_scope_fn(fetch.final_url)
-
-    resolved_model_dir = ensure_directory(model_dir or (Path(cli.out) / cli.model))
+    resolved_model_dir = ensure_directory(acquisition.model_dir)
     scrape_persistence_input = PrepareScrapePersistenceInput(
         model=cli.model,
         scrape_dir=resolved_model_dir,
@@ -56,24 +86,10 @@ def execute_prepare_stage(
         report_payload={},
     )
 
-    extracted_gallery_count = len(parsed.source.gallery_images)
-    gallery_warnings: list[str] = []
-    gallery_files: list[str] = []
-    downloaded_gallery: list[GalleryImage] = []
-    gallery_images_for_download = _inject_energy_label_into_gallery(parsed.source)
-    gallery_requested_photos = _resolve_requested_gallery_photos(cli.photos, parsed.source)
-    if gallery_images_for_download:
-        try:
-            downloaded_gallery, gallery_warnings, gallery_files = fetcher.download_gallery_images(
-                images=gallery_images_for_download,
-                model=cli.model,
-                output_dir=resolved_model_dir,
-                requested_photos=gallery_requested_photos,
-            )
-            if downloaded_gallery:
-                parsed.source.gallery_images = downloaded_gallery
-        except FetchError as exc:
-            gallery_warnings.append(f"gallery_download_failed:{exc}")
+    extracted_gallery_count = acquisition.extracted_gallery_count
+    gallery_warnings = list(acquisition.gallery_warnings)
+    gallery_files = list(acquisition.gallery_files)
+    downloaded_gallery = list(acquisition.downloaded_gallery)
 
     selected_presentation_blocks = []
     selected_besco_images: list[GalleryImage] = []
@@ -223,43 +239,3 @@ def execute_prepare_stage(
         "downloaded_besco": downloaded_besco,
         "besco_filenames_by_section": besco_filenames_by_section,
     }
-
-
-def _inject_energy_label_into_gallery(source: SourceProductData) -> list[GalleryImage]:
-    gallery_images = list(getattr(source, "gallery_images", []) or [])
-    energy_label_asset_url = str(getattr(source, "energy_label_asset_url", "") or "").strip()
-    if not gallery_images or not energy_label_asset_url:
-        return gallery_images
-
-    primary_image = gallery_images[0]
-    remaining_images = gallery_images[1:]
-    injected_images = [
-        GalleryImage(
-            url=primary_image.url,
-            alt=primary_image.alt,
-            position=1,
-        ),
-        GalleryImage(
-            url=energy_label_asset_url,
-            alt="Energy Label",
-            position=2,
-        ),
-    ]
-    for index, image in enumerate(remaining_images, start=3):
-        injected_images.append(
-            GalleryImage(
-                url=image.url,
-                alt=image.alt,
-                position=index,
-            )
-        )
-    return injected_images
-
-
-def _resolve_requested_gallery_photos(requested_photos: int, source: SourceProductData) -> int:
-    requested = max(int(requested_photos), 0)
-    if requested <= 0:
-        return requested
-    if not str(source.energy_label_asset_url or "").strip():
-        return requested
-    return requested + 1

@@ -4,12 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from pipeline.models import CLIInput, FetchResult, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from pipeline.models import CLIInput, FetchResult, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from pipeline.prepare_provider_resolution import PrepareProviderResolutionResult
 from pipeline.prepare_result_assembly import PrepareResultAssemblyResult
 from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput, PrepareScrapePersistenceResult
 from pipeline.prepare_stage import execute_prepare_stage
 from pipeline.prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult
+from pipeline.source_acquisition_stage import execute_source_acquisition_stage
 from pipeline.providers import ProviderInputIdentity, ProviderRegistry, bootstrap_runtime_provider_registry, source_to_provider_id
 from pipeline.providers.models import (
     ProviderCapability,
@@ -116,6 +117,70 @@ def build_prepare_provider_resolution_result(
         ),
         parsed=parsed,
     )
+
+
+def test_execute_source_acquisition_stage_returns_provider_identity_and_snapshot_provenance(tmp_path: Path) -> None:
+    model_dir = tmp_path / SAMPLE_MODEL
+    parsed = ParsedProduct(
+        source=SourceProductData(
+            source_name="skroutz",
+            page_type="product",
+            url=SAMPLE_URL,
+            canonical_url=SAMPLE_URL,
+            product_code=SAMPLE_MODEL,
+            brand="Estia",
+            mpn="06-24567",
+            name="Estia 06-24567",
+            gallery_images=[GalleryImage(url="https://cdn.example/1.jpg", alt="main", position=1)],
+        )
+    )
+    gallery_downloads = [
+        GalleryImage(
+            url="https://cdn.example/1.jpg",
+            alt="main",
+            position=1,
+            local_filename=f"{SAMPLE_MODEL}-1.jpg",
+            local_path=str(model_dir / "gallery" / f"{SAMPLE_MODEL}-1.jpg"),
+            downloaded=True,
+        )
+    ]
+
+    class GalleryFetcher:
+        def __init__(self) -> None:
+            self.gallery_calls: list[dict[str, object]] = []
+
+        def download_gallery_images(self, **kwargs):
+            self.gallery_calls.append(kwargs)
+            return gallery_downloads, [], [str(model_dir / "gallery" / f"{SAMPLE_MODEL}-1.jpg")]
+
+    fetcher = GalleryFetcher()
+
+    result = execute_source_acquisition_stage(
+        model=SAMPLE_MODEL,
+        url=SAMPLE_URL,
+        photos=1,
+        model_dir=model_dir,
+        validate_url_scope_fn=lambda _url: ("skroutz", True, "skroutz_product_path"),
+        fetcher_factory=lambda: fetcher,
+        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: build_prepare_provider_resolution_result(
+            source="skroutz",
+            url=cli_arg.url,
+            parsed=parsed,
+            fetch_method="fixture",
+        ),
+    )
+
+    assert not hasattr(result, "cli")
+    assert result.source == "skroutz"
+    assert result.provider_id == "skroutz"
+    assert result.downloaded_gallery == gallery_downloads
+    assert result.parsed.source.gallery_images == gallery_downloads
+    assert result.snapshot_provenance["detected_source"] == "skroutz"
+    assert result.snapshot_provenance["provider_id"] == "skroutz"
+    assert result.snapshot_provenance["fetch_method"] == "fixture"
+    assert result.snapshot_provenance["gallery_requested_photos"] == 1
+    assert result.snapshot_provenance["gallery_downloaded_count"] == 1
+    assert len(fetcher.gallery_calls) == 1
 
 
 def test_bootstrap_runtime_provider_registry_registers_active_providers() -> None:
@@ -343,7 +408,15 @@ def test_execute_prepare_stage_reuses_injected_provider_resolution_payload(tmp_p
         ),
     )
 
-    assert seam_calls and seam_calls[0][0] is cli
+    assert seam_calls
+    assert seam_calls[0][0].model == cli.model
+    assert seam_calls[0][0].url == cli.url
+    assert seam_calls[0][0].photos == cli.photos
+    assert seam_calls[0][0].sections == 0
+    assert seam_calls[0][0].skroutz_status == 0
+    assert seam_calls[0][0].boxnow == 0
+    assert seam_calls[0][0].price == 0
+    assert seam_calls[0][0].out == str(tmp_path / cli.model)
     assert result["parsed"] is parsed
     assert result["parsed"].warnings == []
     assert result["report"]["source"] == "electronet"
@@ -478,7 +551,15 @@ def test_execute_prepare_stage_routes_skroutz_through_provider_by_default(tmp_pa
         ),
     )
 
-    assert seam_calls == [cli]
+    assert len(seam_calls) == 1
+    assert seam_calls[0].model == cli.model
+    assert seam_calls[0].url == cli.url
+    assert seam_calls[0].photos == cli.photos
+    assert seam_calls[0].sections == 0
+    assert seam_calls[0].skroutz_status == 0
+    assert seam_calls[0].boxnow == 0
+    assert seam_calls[0].price == 0
+    assert seam_calls[0].out == str(tmp_path / cli.model)
     assert result["report"]["source"] == "skroutz"
     assert result["report"]["fetch_mode"] == "playwright"
     assert result["fetch"].method == "playwright"
@@ -578,7 +659,15 @@ def test_execute_prepare_stage_routes_manufacturer_tefal_through_provider_by_def
         ),
     )
 
-    assert seam_calls == [cli]
+    assert len(seam_calls) == 1
+    assert seam_calls[0].model == cli.model
+    assert seam_calls[0].url == cli.url
+    assert seam_calls[0].photos == cli.photos
+    assert seam_calls[0].sections == 0
+    assert seam_calls[0].skroutz_status == 0
+    assert seam_calls[0].boxnow == 0
+    assert seam_calls[0].price == 0
+    assert seam_calls[0].out == str(tmp_path / cli.model)
     assert result["parsed"].source.source_name == "manufacturer_tefal"
     assert result["report"]["fetch_mode"] == "httpx"
     assert result["fetch"].method == "httpx"
