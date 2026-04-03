@@ -3,7 +3,7 @@
 ## What stays in root
 
 Keep these at repo root:
-- control docs such as `AGENTS.md`, `RULES.md`, `PLAN.md`, `IMPLEMENT.md`, and `DOCUMENTATION.md`
+- control docs such as `AGENTS.md` and `RULES.md`
 - `scraper/` for the runnable product pipeline code and tests
 - `resources/` for shared support assets
 - `products/` for final CSV deliverables

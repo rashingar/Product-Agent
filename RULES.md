@@ -2,7 +2,6 @@
 
 This file defines runtime input validation rules for the template-triggered workflow.
 
-It is not the architecture roadmap and should not be used to constrain planned provider expansion beyond current runtime support.
 
 ## Trigger
 

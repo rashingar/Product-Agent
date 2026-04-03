@@ -2,8 +2,6 @@
 
 This file governs runtime and operator-facing execution behavior for the current product pipeline.
 
-Milestone sequencing, implementation policy, and architecture rollout belong to `PLAN.md` and `IMPLEMENT.md`, not this file.
-
 ## Trigger
 
 When the user sends a filled template in this exact shape:
@@ -26,6 +24,10 @@ treat it as a request to run the full pipeline.
 2. If `url` is a currently supported product URL recognized by the runtime source-detection layer, run:
    `python -m pipeline.workflow prepare --model {model} --url "{url}" --photos {photos} --sections {sections} --skroutz-status {skroutz_status} --boxnow {boxnow} --price {price}`
    Run from `scraper/`.
+   Execution ordering is strict:
+   - never start `render` before `prepare` has finished successfully
+   - never run `prepare` and `render` concurrently for the same model
+   - after `prepare`, verify the updated scrape artifacts exist on disk before starting `render`
 3. Read:
    - `work/{model}/llm/task_manifest.json`
    - `work/{model}/llm/intro_text.context.json`
@@ -39,9 +41,9 @@ treat it as a request to run the full pipeline.
    - `work/{model}/llm/intro_text.output.txt`
    - `work/{model}/llm/seo_meta.output.json`
 6. The assistant must write only the LLM-owned fields:
-   - `intro_text`
    - `product.meta_description`
    - `product.meta_keywords`
+   - `intro_text`
 7. Do not invent deterministic fields already owned by local code:
    - brand
    - mpn
@@ -83,16 +85,8 @@ treat it as a request to run the full pipeline.
 11. After a successful render publish to `products/{model}.csv`, the runtime must start the repo-native OpenCart publish phase by invoking:
    `tools/run_opencart_pipeline.sh`
    Run from repo root with `CURRENT_JOB_PRODUCT_FILE` set to the exact `products/{model}.csv` path created in the current job.
-12. Inspect:
-   - `work/{model}/candidate/{model}.csv`
-   - `work/{model}/candidate/{model}.validation.json`
-   - `work/{model}/candidate/description.html`
-   - `work/{model}/candidate/characteristics.html`
-   - `work/{model}/publish.run.json`
-   - `work/{model}/upload.opencart.json`
-   - `work/{model}/import.opencart.json`
-13. If validation fails, debug the pipeline and rerun until the output is complete and the failure cause is understood.
-14. If the OpenCart publish phase warns or fails after render succeeds, keep the successful render outputs, report the publish status/stage/message clearly, and debug the publish phase separately.
+12. If validation fails, debug the pipeline until the failure cause is understood then fixed and rerun until the output is complete.
+13. If the OpenCart publish phase warns or fails after render succeeds, keep the successful render outputs, report the publish status/stage/message clearly, and debug the publish phase separately.
 
 ## Validation Expectations
 
@@ -107,9 +101,10 @@ treat it as a request to run the full pipeline.
 
 After the pipeline completes successfully, reply in chat with this fixed completion template first, then add any extra notes if needed:
 
+- `Warnings`
+- `Unresolved Source-Null Fields`
+- `Category Filters`
 - `Model`
-- `Source URL`
-- `Final CSV`
 - `Validation`
 - `Taxonomy`
 - `Product SEO`
@@ -118,9 +113,6 @@ After the pipeline completes successfully, reply in chat with this fixed complet
   - `meta_description`
   - `seo_keyword`
   - `product_url`
-- `Warnings`
-- `Unresolved Source-Null Fields`
-- `Category Filters`
 
 Rules for the completion message:
 
@@ -138,7 +130,6 @@ Rules for the completion message:
   - Skroutz product URLs
   - supported manufacturer product URLs already implemented in the codebase
 - Do not invent unsupported provider behavior.
-- Future provider expansion must follow the milestones in `PLAN.md`.
 
 ## Working Rules
 
@@ -148,59 +139,3 @@ Rules for the completion message:
 - Keep rendered outputs in `work/{model}/candidate/`.
 - When the user asks for testing or debugging on a sample model, rerun the actual workflow instead of reasoning from stale files.
 - If a bug appears on one product, fix it generically in the pipeline and verify against the committed regression samples under `scraper/pipeline/tests/fixtures/...`.
-
-## Execution docs policy
-
-Use these files as follows:
-
-### PLAN.md
-Update `PLAN.md` only when one of these is true:
-- a milestone status changed
-- a planned step must be revised based on evidence
-- a new dependency/order/risk changes the execution plan
-- a milestone is split, merged, postponed, or removed
-
-Do not rewrite `PLAN.md` wholesale.
-Do not make cosmetic edits.
-Treat `PLAN.md` as the milestone source of truth.
-
-### IMPLEMENT.md
-Update `IMPLEMENT.md` only when one of these is true:
-- you discovered a recurring execution rule that should apply to future milestones
-- validation procedure needs a permanent correction
-- a repo-wide guardrail is missing and should become standing guidance
-- a repeated failure suggests a durable process change
-
-Do not update `IMPLEMENT.md` for one-off task notes.
-Do not use it as a changelog.
-
-### DOCUMENTATION.md
-Update `DOCUMENTATION.md` on every milestone that changes files, directories, validation steps, or decisions.
-
-Record:
-- what was changed
-- which files/directories were affected
-- commands run
-- validation results
-- risks, blockers, or skipped items
-- any follow-up needed for the next milestone
-
-Treat `DOCUMENTATION.md` as the running engineering log.
-
-### Priority rule
-If a fact belongs to:
-- execution plan/order -> `PLAN.md`
-- durable operating rule -> `IMPLEMENT.md`
-- milestone history/results -> `DOCUMENTATION.md`
-
-If unsure, prefer updating `DOCUMENTATION.md` instead of changing `PLAN.md` or `IMPLEMENT.md`.
-
-### Edit discipline
-Do not create duplicate versions of these files.
-Do not overwrite them wholesale.
-Make targeted edits only.
-
-## Scope boundary
-This file defines how to operate the current runtime.
-
-It does not define milestone order, future provider rollout order, service-layer design, or RAG sequencing.
