@@ -14,6 +14,7 @@ from pipeline.prepare_section_assets import PrepareSectionAssetsResult
 from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput, PrepareScrapePersistenceResult
 from pipeline.prepare_stage import execute_prepare_stage
 from pipeline.prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult
+from pipeline.source_acquisition_models import SourceAcquisitionResult
 
 
 def _build_cli(tmp_path: Path, *, model: str = "100001", url: str, sections: int) -> CLIInput:
@@ -180,6 +181,112 @@ class RecordingFetcher:
         if self.rendered_error is not None:
             raise self.rendered_error
         return self.rendered_section_data
+
+
+def test_prepare_stage_can_start_from_prebuilt_source_acquisition_result(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    cli = _build_cli(tmp_path, url="https://www.electronet.gr/example", sections=1)
+    source = _build_source(
+        source_name="electronet",
+        url=cli.url,
+        canonical_url="https://www.electronet.gr/example/canonical",
+        presentation_source_html="<section>source html</section>",
+        presentation_source_text="source text",
+    )
+    parsed = _build_parsed(source)
+    fetcher = RecordingFetcher()
+    acquisition_calls: list[dict[str, Any]] = []
+    assembly_calls: list[dict[str, Any]] = []
+    persistence_calls: list[PrepareScrapePersistenceInput] = []
+
+    prebuilt_acquisition = SourceAcquisitionResult(
+        model_dir=tmp_path / cli.model,
+        source="electronet",
+        provider_id="electronet",
+        fetch=FetchResult(
+            url=cli.url,
+            final_url=cli.url,
+            html="<html>front block</html>",
+            status_code=200,
+            method="fixture",
+            fallback_used=False,
+        ),
+        parsed=parsed,
+        extracted_gallery_count=0,
+        requested_gallery_photos=2,
+        downloaded_gallery=[],
+        gallery_warnings=[],
+        gallery_files=[],
+        snapshot_provenance={
+            "requested_url": cli.url,
+            "detected_source": "electronet",
+            "provider_id": "electronet",
+            "final_url": cli.url,
+            "status_code": 200,
+            "fetch_method": "fixture",
+            "fallback_used": False,
+            "response_headers": {},
+            "gallery_requested_photos": 2,
+            "gallery_downloaded_count": 0,
+        },
+    )
+
+    def fake_extract_presentation_blocks(
+        presentation_source_html: str,
+        presentation_source_text: str,
+        *,
+        base_url: str,
+    ) -> list[dict[str, Any]]:
+        assert presentation_source_html == "<section>source html</section>"
+        assert presentation_source_text == "source text"
+        assert base_url == "https://www.electronet.gr/example/canonical"
+        return [{"title": "Direct One", "paragraph": "Paragraph 1", "image_url": "https://cdn.example/direct-1.jpg"}]
+
+    def fake_assemble_prepare_result(**kwargs: Any) -> PrepareResultAssemblyResult:
+        assembly_calls.append(kwargs)
+        return _build_assembly_result(**kwargs)
+
+    monkeypatch.setattr(prepare_stage_module, "extract_presentation_blocks", fake_extract_presentation_blocks)
+
+    result = execute_prepare_stage(
+        cli,
+        model_dir=tmp_path / cli.model,
+        validate_url_scope_fn=lambda _url: ("electronet", True, "electronet_product_path"),
+        fetcher_factory=lambda: fetcher,
+        execute_source_acquisition_stage_fn=lambda **kwargs: acquisition_calls.append(kwargs) or prebuilt_acquisition,
+        resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: _build_taxonomy_enrichment(
+            manufacturer_enrichment=_build_manufacturer_enrichment(
+                presentation_applied=False,
+                fallback_reason="not_applicable_non_skroutz",
+            )
+        ),
+        assemble_prepare_result_fn=fake_assemble_prepare_result,
+        persist_prepare_scrape_artifacts_fn=_capture_persist(persistence_calls),
+    )
+
+    assert acquisition_calls == [
+        {
+            "model": cli.model,
+            "url": cli.url,
+            "photos": cli.photos,
+            "model_dir": tmp_path / cli.model,
+            "validate_url_scope_fn": acquisition_calls[0]["validate_url_scope_fn"],
+            "fetcher_factory": acquisition_calls[0]["fetcher_factory"],
+            "resolve_prepare_provider_input_fn": acquisition_calls[0]["resolve_prepare_provider_input_fn"],
+        }
+    ]
+    assert len(fetcher.besco_download_calls) == 1
+    assert fetcher.besco_download_calls[0]["requested_sections"] == 1
+    assert assembly_calls[0]["source"] == "electronet"
+    assert assembly_calls[0]["selected_presentation_blocks"] == [
+        {"title": "Direct One", "paragraph": "Paragraph 1", "image_url": "https://cdn.example/direct-1.jpg"}
+    ]
+    assert len(persistence_calls) == 1
+    assert result["selected_presentation_blocks"] == [
+        {"title": "Direct One", "paragraph": "Paragraph 1", "image_url": "https://cdn.example/direct-1.jpg"}
+    ]
 
 
 def test_prepare_stage_direct_section_assets_use_extracted_blocks_and_keep_besco_failures_warning_only(

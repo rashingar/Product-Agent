@@ -40,6 +40,13 @@ Removed legacy runtime entrypoints:
 
 Run the current prepare/render workflow from `scraper/`.
 
+Internal stage model:
+- public entrypoint remains `python -m pipeline.workflow`
+- the `prepare` command now sequences `initialize -> source_acquisition -> prepare`
+- `source_acquisition` owns supported source detection, provider bootstrap, fetch, raw snapshot provenance, provider parse/normalize into the shared parsed-product shape, and plain gallery acquisition
+- `prepare` begins only after a shared acquisition result exists and keeps taxonomy resolution, manufacturer enrichment, section/Besco preparation, schema matching, deterministic prepared-context assembly, and compatibility artifact persistence
+- `work/{model}/scrape/` remains the compatibility artifact namespace for this slice even though new code uses the `source_acquisition` stage name internally
+
 Prepare:
 
 ```bash
@@ -65,7 +72,7 @@ After `prepare`, inspect:
 - `work/{model}/llm/seo_meta.context.json`
 - `work/{model}/llm/seo_meta.prompt.txt`
 -->
-Prepare is scrape-only in the steady-state workflow:
+Prepare remains the pre-render workflow command:
 - it writes scrape artifacts under `work/{model}/scrape/`
 - it writes split-task handoff artifacts under `work/{model}/llm/`
 - it does not write candidate CSVs, validation reports, description HTML, characteristics HTML, or publish outputs

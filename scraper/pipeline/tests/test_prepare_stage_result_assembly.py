@@ -6,8 +6,9 @@ from pipeline.models import CLIInput, FetchResult, ParsedProduct, SourceProductD
 from pipeline.prepare_provider_resolution import PrepareProviderResolutionResult
 from pipeline.prepare_result_assembly import PrepareResultAssemblyResult
 from pipeline.prepare_scrape_persistence import PrepareScrapePersistenceInput, PrepareScrapePersistenceResult
-from pipeline.prepare_stage import execute_prepare_stage
+from pipeline.prepare_stage import execute_prepare_from_acquisition
 from pipeline.prepare_taxonomy_enrichment import PrepareTaxonomyEnrichmentResult
+from pipeline.source_acquisition_models import SourceAcquisitionResult
 
 
 def _build_manufacturer_enrichment_stub() -> dict[str, object]:
@@ -48,6 +49,48 @@ def _build_prepare_provider_resolution_result(
             fallback_used=False,
         ),
         parsed=parsed,
+    )
+
+
+def _build_source_acquisition_result(
+    *,
+    model_dir: Path,
+    source: str,
+    provider_id: str,
+    url: str,
+    parsed: ParsedProduct,
+    fetch_method: str,
+) -> SourceAcquisitionResult:
+    return SourceAcquisitionResult(
+        model_dir=model_dir,
+        source=source,
+        provider_id=provider_id,
+        fetch=FetchResult(
+            url=url,
+            final_url=url,
+            html="<html></html>",
+            status_code=200,
+            method=fetch_method,
+            fallback_used=False,
+        ),
+        parsed=parsed,
+        extracted_gallery_count=0,
+        requested_gallery_photos=2,
+        downloaded_gallery=[],
+        gallery_warnings=[],
+        gallery_files=[],
+        snapshot_provenance={
+            "requested_url": url,
+            "detected_source": source,
+            "provider_id": provider_id,
+            "final_url": url,
+            "status_code": 200,
+            "fetch_method": fetch_method,
+            "fallback_used": False,
+            "response_headers": {},
+            "gallery_requested_photos": 2,
+            "gallery_downloaded_count": 0,
+        },
     )
 
 
@@ -112,18 +155,15 @@ def test_execute_prepare_stage_calls_single_result_assembly_seam_with_prepared_i
     )
     cli = _build_cli(tmp_path, model="344424", url=source.url)
     parsed = _build_parsed(source)
+    acquisition = _build_source_acquisition_result(
+        model_dir=tmp_path / cli.model,
+        source="skroutz",
+        provider_id="skroutz",
+        url=source.url,
+        parsed=parsed,
+        fetch_method="fixture",
+    )
     assembly_calls: list[dict[str, object]] = []
-
-    class StaticResolver:
-        def resolve(self, **_kwargs):
-            return (
-                TaxonomyResolution(
-                    parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
-                    leaf_category="Εντοιχιζόμενες Συσκευές",
-                    sub_category="Εστίες",
-                ),
-                [{"taxonomy_path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Εντοιχιζόμενες Συσκευές > Εστίες"}],
-            )
 
     class SchemaMatchStub:
         matched_schema_id = "schema-stub"
@@ -143,17 +183,11 @@ def test_execute_prepare_stage_calls_single_result_assembly_seam_with_prepared_i
             report={"source": kwargs["source"], "warnings": [], "identity_checks": {"source": kwargs["source"]}},
         )
 
-    result = execute_prepare_stage(
+    result = execute_prepare_from_acquisition(
         cli,
-        model_dir=tmp_path / cli.model,
+        acquisition,
         validate_url_scope_fn=lambda _url: (source.source_name or "unknown", True, "test_scope"),
         fetcher_factory=lambda: object(),
-        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
-            source=source.source_name or "unknown",
-            url=cli_arg.url,
-            parsed=parsed,
-            fetch_method="fixture",
-        ),
         resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: PrepareTaxonomyEnrichmentResult(
             taxonomy=TaxonomyResolution(
                 parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
@@ -193,19 +227,15 @@ def test_execute_prepare_stage_uses_result_assembly_output_for_persistence_and_r
     )
     cli = _build_cli(tmp_path, model="143051", url=source.url)
     parsed = _build_parsed(source)
+    acquisition = _build_source_acquisition_result(
+        model_dir=tmp_path / cli.model,
+        source="skroutz",
+        provider_id="skroutz",
+        url=source.url,
+        parsed=parsed,
+        fetch_method="fixture",
+    )
     persistence_calls: list[PrepareScrapePersistenceInput] = []
-
-    class StaticResolver:
-        def resolve(self, **_kwargs):
-            return (
-                TaxonomyResolution(
-                    parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
-                    leaf_category="Τηλεοράσεις",
-                    sub_category="50'' & άνω",
-                    cta_url="https://www.etranoulis.gr/eikona-hxos/thleoraseis/50-anw",
-                ),
-                [],
-            )
 
     class SchemaMatchStub:
         matched_schema_id = "schema-stub"
@@ -235,17 +265,11 @@ def test_execute_prepare_stage_uses_result_assembly_output_for_persistence_and_r
             bescos_raw_path=persistence_input.bescos_raw_path,
         )
 
-    result = execute_prepare_stage(
+    result = execute_prepare_from_acquisition(
         cli,
-        model_dir=tmp_path / cli.model,
+        acquisition,
         validate_url_scope_fn=lambda _url: (source.source_name or "unknown", True, "test_scope"),
         fetcher_factory=lambda: object(),
-        resolve_prepare_provider_input_fn=lambda cli_arg, **_kwargs: _build_prepare_provider_resolution_result(
-            source=source.source_name or "unknown",
-            url=cli_arg.url,
-            parsed=parsed,
-            fetch_method="fixture",
-        ),
         resolve_prepare_taxonomy_enrichment_fn=lambda **_kwargs: PrepareTaxonomyEnrichmentResult(
             taxonomy=TaxonomyResolution(
                 parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
