@@ -550,12 +550,24 @@ def test_execute_render_workflow_stops_before_candidate_build_when_intro_retries
 
 def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_path: Path, monkeypatch) -> None:
     from pipeline import workflow
+    import pipeline.services.llm_stage_execution as llm_stage_execution
 
     monkeypatch.setattr(workflow, "WORK_ROOT", tmp_path / "work")
 
+    def fail_missing_openai_key():
+        raise ServiceError(
+            ServiceErrorCode.UNEXPECTED_FAILURE.value,
+            "Missing OPENAI_API_KEY. Set it in the environment or repo-root .secrets/.env.local.",
+        )
+
+    monkeypatch.setattr(llm_stage_execution, "load_openai_llm_config", fail_missing_openai_key)
+
     model = "233541"
     scrape_dir = tmp_path / "work" / model / "scrape"
+    llm_dir = tmp_path / "work" / model / "llm"
     scrape_dir.mkdir(parents=True)
+    llm_dir.mkdir(parents=True)
+    (llm_dir / "seo_meta.prompt.txt").write_text("seo prompt", encoding="utf-8")
     source = SourceProductData(url="https://www.electronet.gr/example", canonical_url="https://www.electronet.gr/example", product_code=model, brand="LG", name="LG Example")
     (scrape_dir / f"{model}.source.json").write_text(json.dumps(source.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
     (scrape_dir / f"{model}.normalized.json").write_text(
@@ -581,16 +593,17 @@ def test_render_workflow_writes_failed_metadata_when_llm_output_is_missing(tmp_p
 
     try:
         render_workflow(model)
-    except FileNotFoundError as exc:
-        assert str(exc) == f"Missing seo_meta output artifact: {tmp_path / 'work' / model / 'llm' / 'seo_meta.output.json'}"
+    except ServiceError as exc:
+        assert exc.code == ServiceErrorCode.UNEXPECTED_FAILURE.value
+        assert "Missing OPENAI_API_KEY" in exc.message
     else:
-        raise AssertionError("Expected FileNotFoundError")
+        raise AssertionError("Expected ServiceError")
 
     metadata_path = tmp_path / "work" / model / "render.run.json"
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     assert metadata["run"]["status"] == "failed"
-    assert metadata["run"]["error_code"] == ServiceErrorCode.MISSING_ARTIFACT.value
-    assert "Missing seo_meta output artifact" in metadata["run"]["error_detail"]
+    assert metadata["run"]["error_code"] == ServiceErrorCode.UNEXPECTED_FAILURE.value
+    assert "Missing OPENAI_API_KEY" in metadata["run"]["error_detail"]
 
 
 def test_render_workflow_builds_description_from_split_outputs_and_deterministic_sections(tmp_path: Path, monkeypatch) -> None:

@@ -6,5 +6,6 @@ __pycache__/
 venv/
 env/
 .secrets/*
+.env.local
 /products/*
 products/*

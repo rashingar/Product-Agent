@@ -17,6 +17,7 @@ from ..llm_contract import (
 )
 from ..utils import read_json
 from .errors import ServiceError, ServiceErrorCode
+from .llm_config import load_openai_llm_config
 
 INTRO_TEXT_STAGE = "intro_text"
 SEO_META_STAGE = "seo_meta"
@@ -317,10 +318,15 @@ def _resolve_intro_text_output(
     intro_text_output_path: Path,
     attempt: int,
 ) -> str:
-    del intro_text_context_path, intro_text_prompt_path, attempt
-    if not intro_text_output_path.exists():
-        raise FileNotFoundError(f"Missing intro_text output artifact: {intro_text_output_path}")
-    return _read_llm_output_text(intro_text_output_path)
+    del intro_text_context_path
+    if intro_text_output_path.exists() and attempt == 1:
+        return _read_llm_output_text(intro_text_output_path)
+    if not intro_text_prompt_path.exists():
+        raise FileNotFoundError(f"Missing intro_text prompt artifact: {intro_text_prompt_path}")
+    return _request_openai_text(
+        prompt_path=intro_text_prompt_path,
+        retry_note=_intro_retry_note(attempt),
+    )
 
 
 def _resolve_seo_meta_output(
@@ -329,10 +335,13 @@ def _resolve_seo_meta_output(
     seo_meta_prompt_path: Path,
     seo_meta_output_path: Path,
 ) -> dict[str, Any]:
-    del seo_meta_context_path, seo_meta_prompt_path
-    if not seo_meta_output_path.exists():
-        raise FileNotFoundError(f"Missing seo_meta output artifact: {seo_meta_output_path}")
-    payload = json.loads(_read_llm_output_text(seo_meta_output_path))
+    del seo_meta_context_path
+    if seo_meta_output_path.exists():
+        payload = json.loads(_read_llm_output_text(seo_meta_output_path))
+    else:
+        if not seo_meta_prompt_path.exists():
+            raise FileNotFoundError(f"Missing seo_meta prompt artifact: {seo_meta_prompt_path}")
+        payload = json.loads(_request_openai_text(prompt_path=seo_meta_prompt_path))
     if not isinstance(payload, dict):
         raise ServiceError(
             ServiceErrorCode.VALIDATION_FAILURE.value,
@@ -345,6 +354,49 @@ def _resolve_seo_meta_output(
             },
         )
     return payload
+
+
+def _request_openai_text(*, prompt_path: Path, retry_note: str = "") -> str:
+    prompt = prompt_path.read_text(encoding="utf-8")
+    if retry_note:
+        prompt = f"{prompt}\n\n{retry_note}"
+    config = load_openai_llm_config()
+    client = _build_openai_client(api_key=config.api_key)
+    request_payload: dict[str, Any] = {
+        "model": config.model,
+        "input": prompt,
+    }
+    if config.reasoning_effort:
+        request_payload["reasoning"] = {"effort": config.reasoning_effort}
+    response = client.responses.create(**request_payload)
+    output_text = getattr(response, "output_text", "")
+    if not isinstance(output_text, str) or not output_text.strip():
+        raise ServiceError(
+            ServiceErrorCode.UNEXPECTED_FAILURE.value,
+            "OpenAI Responses API returned empty output text.",
+        )
+    return output_text.strip()
+
+
+def _build_openai_client(*, api_key: str):
+    try:
+        from openai import OpenAI
+    except ImportError as exc:
+        raise ServiceError(
+            ServiceErrorCode.UNEXPECTED_FAILURE.value,
+            "OpenAI Python SDK is not installed. Install dependencies from requirements.txt.",
+            cause=exc,
+        ) from exc
+    return OpenAI(api_key=api_key)
+
+
+def _intro_retry_note(attempt: int) -> str:
+    if attempt <= 1:
+        return ""
+    return (
+        "Previous intro_text output failed validation for word count. "
+        f"Regenerate attempt {attempt} so the final plain Greek paragraph is {INTRO_MIN_WORDS}-{INTRO_MAX_WORDS} words."
+    )
 
 
 def _persist_text_if_needed(path: Path, value: str, *, force_write: bool = False) -> None:
