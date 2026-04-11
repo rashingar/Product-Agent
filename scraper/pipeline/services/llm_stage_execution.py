@@ -22,6 +22,8 @@ INTRO_TEXT_STAGE = "intro_text"
 SEO_META_STAGE = "seo_meta"
 INTRO_TEXT_WORD_COUNT_ERROR = "llm_intro_text_word_count_invalid"
 MAX_INTRO_ATTEMPTS = 3
+LLM_OUTPUT_ENCODING = "utf-8"
+UTF8_BOM = b"\xef\xbb\xbf"
 
 
 @dataclass(slots=True)
@@ -318,7 +320,7 @@ def _resolve_intro_text_output(
     del intro_text_context_path, intro_text_prompt_path, attempt
     if not intro_text_output_path.exists():
         raise FileNotFoundError(f"Missing intro_text output artifact: {intro_text_output_path}")
-    return intro_text_output_path.read_text(encoding="utf-8")
+    return _read_llm_output_text(intro_text_output_path)
 
 
 def _resolve_seo_meta_output(
@@ -330,7 +332,7 @@ def _resolve_seo_meta_output(
     del seo_meta_context_path, seo_meta_prompt_path
     if not seo_meta_output_path.exists():
         raise FileNotFoundError(f"Missing seo_meta output artifact: {seo_meta_output_path}")
-    payload = read_json(seo_meta_output_path)
+    payload = json.loads(_read_llm_output_text(seo_meta_output_path))
     if not isinstance(payload, dict):
         raise ServiceError(
             ServiceErrorCode.VALIDATION_FAILURE.value,
@@ -346,14 +348,16 @@ def _resolve_seo_meta_output(
 
 
 def _persist_text_if_needed(path: Path, value: str, *, force_write: bool = False) -> None:
-    current = path.read_text(encoding="utf-8") if path.exists() else None
-    if force_write or current != value:
+    has_bom = _has_utf8_bom(path) if path.exists() else False
+    current = _read_llm_output_text(path) if path.exists() else None
+    if force_write or has_bom or current != value:
         _write_text_atomic(path, value)
 
 
 def _persist_json_if_needed(path: Path, payload: Mapping[str, Any]) -> None:
-    current = read_json(path) if path.exists() else None
-    if current != dict(payload):
+    has_bom = _has_utf8_bom(path) if path.exists() else False
+    current = json.loads(_read_llm_output_text(path)) if path.exists() else None
+    if has_bom or current != dict(payload):
         _write_json_atomic(path, dict(payload))
 
 
@@ -402,7 +406,7 @@ def _write_temp_file(*, path: Path, payload: str) -> Path:
     try:
         with NamedTemporaryFile(
             "w",
-            encoding="utf-8",
+            encoding=LLM_OUTPUT_ENCODING,
             dir=path.parent,
             delete=False,
             prefix=f"{path.name}.",
@@ -415,6 +419,15 @@ def _write_temp_file(*, path: Path, payload: str) -> Path:
         if temp_path is not None and temp_path.exists():
             temp_path.unlink(missing_ok=True)
         raise
+
+
+def _read_llm_output_text(path: Path) -> str:
+    text = path.read_text(encoding=LLM_OUTPUT_ENCODING)
+    return text[1:] if text.startswith("\ufeff") else text
+
+
+def _has_utf8_bom(path: Path) -> bool:
+    return path.read_bytes().startswith(UTF8_BOM)
 
 
 def _build_intro_word_count_reason(intro_text: str) -> str:

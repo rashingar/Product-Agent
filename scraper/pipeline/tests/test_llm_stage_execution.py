@@ -255,6 +255,35 @@ def test_execute_split_llm_stage_uses_existing_valid_outputs_without_extra_regen
     assert (llm_dir / "intro_text.output.txt").read_text(encoding="utf-8") == valid_intro
 
 
+def test_execute_split_llm_stage_rewrites_existing_bom_outputs_as_utf8(tmp_path: Path) -> None:
+    llm_dir = tmp_path / "work" / "233541" / "llm"
+    task_manifest_path = _write_task_manifest(llm_dir)
+    valid_intro = _build_intro(100)
+    valid_seo = {
+        "product": {
+            "meta_description": "Valid generated meta description.",
+            "meta_keywords": ["LG", "Example"],
+        }
+    }
+    intro_path = llm_dir / "intro_text.output.txt"
+    seo_path = llm_dir / "seo_meta.output.json"
+    intro_path.write_bytes(b"\xef\xbb\xbf" + valid_intro.encode("utf-8"))
+    seo_path.write_bytes(b"\xef\xbb\xbf" + json.dumps(valid_seo, ensure_ascii=False, indent=2).encode("utf-8"))
+
+    result = execute_split_llm_stage(
+        llm_dir=llm_dir,
+        task_manifest_path=task_manifest_path,
+    )
+
+    assert result.intro_text == valid_intro
+    assert result.seo_meta_payload["product"]["meta_description"] == valid_seo["product"]["meta_description"]
+    assert result.seo_meta_payload["product"]["meta_keywords"] == valid_seo["product"]["meta_keywords"]
+    assert not intro_path.read_bytes().startswith(b"\xef\xbb\xbf")
+    assert not seo_path.read_bytes().startswith(b"\xef\xbb\xbf")
+    assert intro_path.read_text(encoding="utf-8") == valid_intro
+    assert json.loads(seo_path.read_text(encoding="utf-8")) == valid_seo
+
+
 def test_run_intro_text_with_retry_writes_output_atomically(tmp_path: Path, monkeypatch) -> None:
     import pipeline.services.llm_stage_execution as llm_stage_execution
 
