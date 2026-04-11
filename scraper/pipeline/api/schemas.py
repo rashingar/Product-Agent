@@ -39,6 +39,7 @@ class JobResponse(BaseModel):
     finished_at: str | None = None
     message: str | None = None
     error: str | None = None
+    error_code: str | None = None
 
     @classmethod
     def from_record(cls, record: JobRecord) -> JobResponse:
@@ -53,6 +54,7 @@ class JobResponse(BaseModel):
             finished_at=record.finished_at,
             message=record.message,
             error=record.error,
+            error_code=record.error_code,
         )
 
 
@@ -74,6 +76,16 @@ class JobArtifact(BaseModel):
 class JobArtifactsResponse(BaseModel):
     job_id: str
     artifacts: list[JobArtifact] = Field(default_factory=list)
+
+    @classmethod
+    def from_record(cls, record: JobRecord) -> JobArtifactsResponse:
+        return cls(
+            job_id=record.job_id,
+            artifacts=[
+                JobArtifact(name=name, path=path)
+                for name, path in sorted(record.artifacts.items())
+            ],
+        )
 
 
 class ErrorResponse(BaseModel):

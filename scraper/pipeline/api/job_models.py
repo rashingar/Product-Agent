@@ -44,7 +44,9 @@ class JobRecord:
     finished_at: str | None = None
     message: str | None = None
     error: str | None = None
+    error_code: str | None = None
     log_path: str | None = None
+    artifacts: dict[str, str] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -59,7 +61,9 @@ class JobRecord:
             "finished_at": self.finished_at,
             "message": self.message,
             "error": self.error,
+            "error_code": self.error_code,
             "log_path": self.log_path,
+            "artifacts": self.artifacts,
         }
 
     @classmethod
@@ -67,6 +71,9 @@ class JobRecord:
         job_payload = payload.get("payload", {})
         if not isinstance(job_payload, dict):
             job_payload = {}
+        artifacts = payload.get("artifacts", {})
+        if not isinstance(artifacts, dict):
+            artifacts = {}
         return cls(
             job_id=str(payload["job_id"]),
             job_type=coerce_job_type(payload["job_type"]),
@@ -79,7 +86,9 @@ class JobRecord:
             finished_at=_optional_str(payload.get("finished_at")),
             message=_optional_str(payload.get("message")),
             error=_optional_str(payload.get("error")),
+            error_code=_optional_str(payload.get("error_code")),
             log_path=_optional_str(payload.get("log_path")),
+            artifacts={str(key): str(value) for key, value in artifacts.items()},
         )
 
 

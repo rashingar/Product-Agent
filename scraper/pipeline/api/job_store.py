@@ -72,7 +72,14 @@ class JobStore:
             self._write_record(record)
             return record
 
-    def mark_succeeded(self, job_id: str, *, message: str | None = None) -> JobRecord:
+    def mark_succeeded(
+        self,
+        job_id: str,
+        *,
+        message: str | None = None,
+        error: str | None = None,
+        error_code: str | None = None,
+    ) -> JobRecord:
         now = utc_now_iso()
         with self._lock:
             record = self._require_job(job_id)
@@ -80,11 +87,19 @@ class JobStore:
             record.finished_at = now
             record.updated_at = now
             record.message = message
-            record.error = None
+            record.error = error
+            record.error_code = error_code
             self._write_record(record)
             return record
 
-    def mark_failed(self, job_id: str, error: str, *, message: str | None = None) -> JobRecord:
+    def mark_failed(
+        self,
+        job_id: str,
+        error: str,
+        *,
+        message: str | None = None,
+        error_code: str | None = None,
+    ) -> JobRecord:
         now = utc_now_iso()
         with self._lock:
             record = self._require_job(job_id)
@@ -93,6 +108,19 @@ class JobStore:
             record.updated_at = now
             record.message = message
             record.error = error
+            record.error_code = error_code
+            self._write_record(record)
+            return record
+
+    def update_artifacts(self, job_id: str, artifacts: Mapping[str, object | None]) -> JobRecord:
+        with self._lock:
+            record = self._require_job(job_id)
+            record.artifacts = {
+                str(name): str(path)
+                for name, path in artifacts.items()
+                if path is not None
+            }
+            record.updated_at = utc_now_iso()
             self._write_record(record)
             return record
 

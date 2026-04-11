@@ -106,5 +106,10 @@ def get_job_logs(job_id: str, api_request: Request) -> JobLogsResponse:
 
 @router.get("/{job_id}/artifacts", response_model=JobArtifactsResponse, responses=_NOT_FOUND_RESPONSE)
 def get_job_artifacts(job_id: str, api_request: Request) -> JobArtifactsResponse:
-    _get_job_response(api_request, job_id)
-    return JobArtifactsResponse(job_id=job_id, artifacts=[])
+    try:
+        record = _job_store(api_request).get_job(job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found.") from exc
+    if record is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found.")
+    return JobArtifactsResponse.from_record(record)

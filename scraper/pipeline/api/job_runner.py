@@ -1,26 +1,97 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field, fields
 import queue
 import threading
 import time
 from collections.abc import Callable
 
-from .job_models import JobRecord, JobStatus
+from ..services import PrepareRequest, ServiceError, ServiceResult, prepare_product
+from ..services.models import RunStatus
+from .job_models import JobRecord, JobStatus, JobType
 from .job_store import JobStore
 
 
 LogCallback = Callable[[str], None]
-JobRunnerCallback = Callable[[JobRecord, LogCallback], None]
+JobRunnerCallback = Callable[[JobRecord, LogCallback], "JobRunResult | None"]
+
+
+@dataclass(slots=True)
+class JobRunResult:
+    status: JobStatus = JobStatus.SUCCEEDED
+    message: str | None = None
+    error: str | None = None
+    error_code: str | None = None
+    artifacts: dict[str, str] = field(default_factory=dict)
 
 
 def stub_runner_callback(record: JobRecord, log: LogCallback) -> None:
     log(f"Stub runner accepted {record.job_type.value} job; pipeline services were not invoked.")
 
 
+def service_runner_callback(record: JobRecord, log: LogCallback) -> JobRunResult | None:
+    if record.job_type == JobType.PREPARE:
+        return run_prepare_job(record, log)
+    return stub_runner_callback(record, log)
+
+
+def run_prepare_job(
+    record: JobRecord,
+    log: LogCallback,
+    *,
+    prepare_product_fn: Callable[[PrepareRequest], ServiceResult] | None = None,
+) -> JobRunResult:
+    prepare_product_fn = prepare_product_fn or prepare_product
+    request = PrepareRequest(
+        model=str(record.payload["model"]),
+        url=str(record.payload["url"]),
+        photos=record.payload.get("photos", 1),
+        sections=record.payload.get("sections", 0),
+        skroutz_status=record.payload.get("skroutz_status", 0),
+        boxnow=record.payload.get("boxnow", 0),
+        price=record.payload.get("price", 0),
+    )
+    log("Calling prepare service.")
+    result = prepare_product_fn(request)
+    log(f"Prepare service returned status: {result.run.status.value}")
+    for warning in result.run.warnings:
+        log(f"Prepare warning: {warning}")
+    if result.run.error_code:
+        log(f"Prepare service error code: {result.run.error_code}")
+    if result.run.error_detail:
+        log(f"Prepare service error detail: {result.run.error_detail}")
+
+    artifacts = _artifact_paths(result)
+    if result.run.status == RunStatus.FAILED:
+        return JobRunResult(
+            status=JobStatus.FAILED,
+            message="Prepare job failed.",
+            error=result.run.error_detail or "Prepare service returned failed status.",
+            error_code=result.run.error_code,
+            artifacts=artifacts,
+        )
+    return JobRunResult(
+        status=JobStatus.SUCCEEDED,
+        message="Prepare job succeeded.",
+        error=result.run.error_detail,
+        error_code=result.run.error_code,
+        artifacts=artifacts,
+    )
+
+
+def _artifact_paths(result: ServiceResult) -> dict[str, str]:
+    paths: dict[str, str] = {}
+    for field in fields(result.artifacts):
+        value = getattr(result.artifacts, field.name)
+        if value is not None:
+            paths[field.name] = str(value)
+    return paths
+
+
 class SequentialJobRunner:
     def __init__(self, store: JobStore, callback: JobRunnerCallback | None = None) -> None:
         self._store = store
-        self._callback = callback or stub_runner_callback
+        self._callback = callback or service_runner_callback
         self._queue: queue.Queue[str | None] = queue.Queue()
         self._condition = threading.Condition(threading.RLock())
         self._thread: threading.Thread | None = None
@@ -98,13 +169,37 @@ class SequentialJobRunner:
 
         try:
             log(f"Started {record.job_type.value} job.")
-            self._callback(record, log)
+            result = self._callback(record, log) or JobRunResult()
+            if result.artifacts:
+                self._store.update_artifacts(job_id, result.artifacts)
+        except ServiceError as exc:
+            log(f"Failed {record.job_type.value} job [{exc.code}]: {exc.message}")
+            self._store.mark_failed(
+                job_id,
+                exc.message,
+                message="Job failed.",
+                error_code=exc.code,
+            )
         except Exception as exc:
             log(f"Failed {record.job_type.value} job: {exc}")
             self._store.mark_failed(job_id, str(exc), message="Job failed.")
         else:
+            if result.status == JobStatus.FAILED:
+                log(f"Failed {record.job_type.value} job: {result.error}")
+                self._store.mark_failed(
+                    job_id,
+                    result.error or "Job failed.",
+                    message=result.message or "Job failed.",
+                    error_code=result.error_code,
+                )
+                return
             log(f"Finished {record.job_type.value} job.")
-            self._store.mark_succeeded(job_id, message="Job succeeded.")
+            self._store.mark_succeeded(
+                job_id,
+                message=result.message or "Job succeeded.",
+                error=result.error,
+                error_code=result.error_code,
+            )
 
     def _is_idle_locked(self) -> bool:
         return self._pending_count == 0 and self._active_job_id is None

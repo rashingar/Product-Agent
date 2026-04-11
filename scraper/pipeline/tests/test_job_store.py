@@ -34,6 +34,7 @@ def test_enqueue_persists_job_metadata_and_log_file(tmp_path: Path) -> None:
     assert payload["model"] == "233541"
     assert payload["payload"]["photos"] == 6
     assert payload["log_path"] == str(log_path)
+    assert payload["artifacts"] == {}
 
 
 def test_store_lists_and_gets_jobs_from_disk(tmp_path: Path) -> None:
@@ -62,6 +63,8 @@ def test_store_updates_statuses_and_reads_logs(tmp_path: Path) -> None:
     assert running.started_at is not None
     assert succeeded.status == JobStatus.SUCCEEDED
     assert succeeded.finished_at is not None
+    assert succeeded.error is None
+    assert succeeded.error_code is None
     assert loaded == succeeded
     assert store.read_logs(record.job_id) == ["line one", "line two"]
 
@@ -74,5 +77,27 @@ def test_store_marks_failed_with_error_detail(tmp_path: Path) -> None:
 
     assert failed.status == JobStatus.FAILED
     assert failed.error == "boom"
+    assert failed.error_code is None
     assert failed.message == "failed"
     assert failed.finished_at is not None
+
+
+def test_store_persists_artifact_paths(tmp_path: Path) -> None:
+    store = JobStore(tmp_path / "jobs")
+    record = store.enqueue(JobType.PREPARE, {"model": "233541"}, job_id="job-1")
+
+    updated = store.update_artifacts(
+        record.job_id,
+        {
+            "scrape_dir": tmp_path / "work" / "233541" / "scrape",
+            "llm_dir": tmp_path / "work" / "233541" / "llm",
+            "metadata_path": None,
+        },
+    )
+
+    loaded = store.get_job(record.job_id)
+    assert updated.artifacts == {
+        "scrape_dir": str(tmp_path / "work" / "233541" / "scrape"),
+        "llm_dir": str(tmp_path / "work" / "233541" / "llm"),
+    }
+    assert loaded == updated
