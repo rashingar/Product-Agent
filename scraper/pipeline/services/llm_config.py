@@ -25,9 +25,9 @@ def load_openai_llm_config(
     file_values = _read_env_file(env_file or (REPO_ROOT / ".secrets" / ".env.local"))
     api_key = str(source_env.get("OPENAI_API_KEY") or file_values.get("OPENAI_API_KEY") or "").strip()
     model = str(source_env.get("OPENAI_MODEL") or file_values.get("OPENAI_MODEL") or "").strip()
-    reasoning_effort = str(
+    reasoning_effort = _normalize_reasoning_effort(
         source_env.get("OPENAI_REASONING_EFFORT") or file_values.get("OPENAI_REASONING_EFFORT") or ""
-    ).strip()
+    )
     if not api_key:
         raise ServiceError(
             ServiceErrorCode.UNEXPECTED_FAILURE.value,
@@ -41,7 +41,7 @@ def load_openai_llm_config(
     return OpenAILLMConfig(
         api_key=api_key,
         model=model,
-        reasoning_effort=reasoning_effort or None,
+        reasoning_effort=reasoning_effort,
     )
 
 
@@ -66,3 +66,10 @@ def _strip_env_value(value: str) -> str:
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         return value[1:-1]
     return value
+
+
+def _normalize_reasoning_effort(value: object) -> str | None:
+    normalized = str(value or "").strip()
+    if normalized.lower() in {"", "none"}:
+        return None
+    return normalized

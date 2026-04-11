@@ -312,6 +312,47 @@ def test_tv_name_rule_uses_resolution_from_eukrineia_in_final_name() -> None:
     assert fields["name"] == 'TCL 115C7K – Τηλεόραση Mini LED 115" 4K Google TV'
 
 
+def test_tv_name_rule_prefers_logismiko_platform_over_boolean_hbbtv() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="TCL",
+        mpn="115C7K",
+        name='TCL Smart Τηλεόραση 115" 4K UHD Mini LED C7K HDR (2025) 115C7K',
+        key_specs=[
+            SpecItem(label="Διαγώνιος", value='115 "'),
+            SpecItem(label="Ευκρίνεια", value="4K Ultra HD"),
+            SpecItem(label="Τύπος Panel", value="Mini LED"),
+            SpecItem(label="Local Dimming", value="Ναι"),
+        ],
+        spec_sections=[
+            SpecSection(
+                section="Δυνατότητες & Λειτουργίες",
+                items=[
+                    SpecItem(label="HbbTV", value="Ναι"),
+                    SpecItem(label="VRR", value="Ναι"),
+                ],
+            ),
+            SpecSection(
+                section="Smart Δυνατότητες",
+                items=[
+                    SpecItem(label="Λογισμικό", value="Google TV"),
+                    SpecItem(label="Smart Assistant", value="Google Assistant"),
+                ],
+            ),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΕΙΚΟΝΑ & ΗΧΟΣ",
+        leaf_category="Τηλεοράσεις",
+        sub_category="50'' & άνω",
+    )
+
+    fields = build_deterministic_product_fields(source, taxonomy, "000004", derive_seo_keyword)
+
+    assert fields["name"] == 'TCL 115C7K – Τηλεόραση Mini LED 115" 4K Google TV'
+    assert "Ναι" not in fields["name"]
+
+
 def test_apply_name_rule_dedupes_tv_resolution_and_prefers_concrete_platform_from_analysi_othonis() -> None:
     source = SourceProductData(
         brand="TCL",

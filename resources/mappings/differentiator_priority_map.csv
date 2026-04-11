@@ -1,5 +1,5 @@
 scope,leaf_category,category_phrase,differentiator_1_aliases,differentiator_2_aliases,differentiator_3_aliases,differentiator_4_aliases,differentiator_5_aliases
-rule,Τηλεοράσεις,Τηλεόραση,Τεχνολογία Οθόνης | Τύπος Panel | Τεχνολογία Panel,Διαγώνιος Οθόνης | Διαγώνιος | Μέγεθος Οθόνης,Ανάλυση | Ανάλυση Οθόνης | Ευκρίνεια,Λειτουργικό Σύστημα | Πλατφόρμα Smart TV | Smart Platform | Google TV | webOS | Tizen | Android TV | Smart TV,
+rule,Τηλεοράσεις,Τηλεόραση,Τεχνολογία Οθόνης | Τύπος Panel | Τεχνολογία Panel,Διαγώνιος Οθόνης | Διαγώνιος | Μέγεθος Οθόνης,Ανάλυση | Ανάλυση Οθόνης | Ευκρίνεια,Λειτουργικό Σύστημα | Λογισμικό | OS | Operating System | Πλατφόρμα Smart TV | Smart Platform | Google TV | webOS | Tizen | Android TV | Smart TV,
 rule,Sound Bars,Soundbar,Κανάλια | Channel Configuration | Διαμόρφωση Καναλιών,Ισχύς | Συνολική Ισχύς | Watt,Dolby Atmos | DTS:X | Τεχνολογία Ήχου | Audio Technology,,
 rule,Ηχεία,Ηχείο,Τύπος | Συνδεσιμότητα | Bluetooth,Ισχύς | Ισχύς σε Watt | Watt,Κανάλια | Channel Configuration | 2.1ch,,
 rule,Ενισχυτές,Ενισχυτής,Ισχύς,Κανάλια,,,

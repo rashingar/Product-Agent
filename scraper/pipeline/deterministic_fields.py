@@ -1001,7 +1001,10 @@ def normalize_name_rule_value(
     if unit and not _is_tv_scope(category_phrase, taxonomy):
         return compact_unit_value(normalized, unit)
     if _is_tv_scope(category_phrase, taxonomy):
-        normalized = _normalize_tv_name_rule_value(normalized, alias_keys) or normalized
+        tv_normalized = _normalize_tv_name_rule_value(normalized, alias_keys)
+        if _is_tv_platform_alias(alias_keys):
+            return tv_normalized
+        normalized = tv_normalized or normalized
     if any("ψυξης" in key for key in alias_keys):
         normalized = re.sub(r"\bNoFrost\b", "No Frost", normalized, flags=re.IGNORECASE)
     if any("χωρητικοτητα" in key or "κιλα" in key for key in alias_keys):
@@ -1030,9 +1033,28 @@ def _normalize_tv_name_rule_value(value: str, alias_keys: set[str]) -> str:
             return f'{inches}"'
     if any(token in alias_text for token in ("αναλυση", "ευκριν")):
         return _normalize_tv_resolution(normalized_value)
-    if any(token in alias_text for token in ("λειτουργικ", "πλατφορμ", "smart platform", "google tv", "webos", "tizen", "android tv", "smart tv")):
+    if _is_tv_platform_alias(alias_keys):
         return _normalize_tv_platform(normalized_value)
     return normalized_value
+
+
+def _is_tv_platform_alias(alias_keys: set[str]) -> bool:
+    alias_text = " ".join(sorted(alias_keys))
+    return any(
+        token in alias_text
+        for token in (
+            "λειτουργικ",
+            "λογισμικ",
+            "πλατφορμ",
+            "operating system",
+            "smart platform",
+            "google tv",
+            "webos",
+            "tizen",
+            "android tv",
+            "smart tv",
+        )
+    )
 
 
 def _normalize_tv_resolution(value: str) -> str:
@@ -1050,6 +1072,8 @@ def _normalize_tv_resolution(value: str) -> str:
 
 def _normalize_tv_platform(value: str) -> str:
     normalized = normalize_for_match(value)
+    if normalized in {"ναι", "οχι", "υποστηριζεται", "supported", "yes", "no", "true", "false"}:
+        return ""
     if "google tv" in normalized:
         return "Google TV"
     if "android tv" in normalized:

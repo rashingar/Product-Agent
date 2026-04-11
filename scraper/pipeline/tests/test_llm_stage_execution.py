@@ -65,6 +65,18 @@ def test_load_openai_llm_config_reads_env_file_without_secret_defaults(tmp_path:
     assert config.reasoning_effort == "low"
 
 
+def test_load_openai_llm_config_treats_none_reasoning_effort_as_unset(tmp_path: Path) -> None:
+    env_file = tmp_path / ".env.local"
+    env_file.write_text(
+        "OPENAI_API_KEY='test-key'\nOPENAI_MODEL=\"gpt-test\"\nOPENAI_REASONING_EFFORT=none\n",
+        encoding="utf-8",
+    )
+
+    config = load_openai_llm_config(env={}, env_file=env_file)
+
+    assert config.reasoning_effort is None
+
+
 def test_load_openai_llm_config_requires_key_and_model(tmp_path: Path) -> None:
     env_file = tmp_path / ".env.local"
     env_file.write_text("OPENAI_MODEL=gpt-test\n", encoding="utf-8")
@@ -263,7 +275,9 @@ def test_run_intro_text_with_retry_does_not_retry_unrelated_intro_failure(tmp_pa
     assert attempts == [1]
     assert excinfo.value.code == ServiceErrorCode.VALIDATION_FAILURE.value
     assert excinfo.value.details["stage"] == "intro_text"
-    assert "llm_intro_text_html_invalid" in excinfo.value.details["error_codes"]
+    error_codes = excinfo.value.details["error_codes"]
+    assert isinstance(error_codes, list)
+    assert "llm_intro_text_html_invalid" in error_codes
 
 
 def test_execute_split_llm_stage_keeps_seo_meta_single_pass_during_intro_retries(tmp_path: Path) -> None:
