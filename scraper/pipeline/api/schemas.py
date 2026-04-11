@@ -1,21 +1,8 @@
 from __future__ import annotations
 
-from enum import Enum
-
 from pydantic import BaseModel, Field
 
-
-class JobType(str, Enum):
-    PREPARE = "prepare"
-    RENDER = "render"
-    PUBLISH = "publish"
-
-
-class JobStatus(str, Enum):
-    QUEUED = "queued"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
+from .job_models import JobRecord, JobStatus, JobType
 
 
 class HealthResponse(BaseModel):
@@ -47,9 +34,26 @@ class JobResponse(BaseModel):
     status: JobStatus
     model: str
     created_at: str | None = None
+    updated_at: str | None = None
     started_at: str | None = None
     finished_at: str | None = None
     message: str | None = None
+    error: str | None = None
+
+    @classmethod
+    def from_record(cls, record: JobRecord) -> JobResponse:
+        return cls(
+            job_id=record.job_id,
+            job_type=record.job_type,
+            status=record.status,
+            model=record.model,
+            created_at=record.created_at,
+            updated_at=record.updated_at,
+            started_at=record.started_at,
+            finished_at=record.finished_at,
+            message=record.message,
+            error=record.error,
+        )
 
 
 class JobListResponse(BaseModel):
