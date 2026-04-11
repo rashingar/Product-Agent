@@ -1,12 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, fields
+from pathlib import Path
 import queue
 import threading
 import time
 from collections.abc import Callable
 
-from ..services import PrepareRequest, ServiceError, ServiceResult, prepare_product
+from ..services import (
+    PrepareRequest,
+    PublishRequest,
+    RenderRequest,
+    ServiceError,
+    ServiceResult,
+    prepare_product,
+    publish_product,
+    render_product,
+)
 from ..services.models import RunStatus
 from .job_models import JobRecord, JobStatus, JobType
 from .job_store import JobStore
@@ -32,6 +42,10 @@ def stub_runner_callback(record: JobRecord, log: LogCallback) -> None:
 def service_runner_callback(record: JobRecord, log: LogCallback) -> JobRunResult | None:
     if record.job_type == JobType.PREPARE:
         return run_prepare_job(record, log)
+    if record.job_type == JobType.RENDER:
+        return run_render_job(record, log)
+    if record.job_type == JobType.PUBLISH:
+        return run_publish_job(record, log)
     return stub_runner_callback(record, log)
 
 
@@ -53,26 +67,85 @@ def run_prepare_job(
     )
     log("Calling prepare service.")
     result = prepare_product_fn(request)
-    log(f"Prepare service returned status: {result.run.status.value}")
+    return _job_result_from_service_result(
+        "prepare",
+        result,
+        log,
+        success_message="Prepare job succeeded.",
+        failure_message="Prepare job failed.",
+    )
+
+
+def run_render_job(
+    record: JobRecord,
+    log: LogCallback,
+    *,
+    render_product_fn: Callable[[RenderRequest], ServiceResult] | None = None,
+) -> JobRunResult:
+    render_product_fn = render_product_fn or render_product
+    request = RenderRequest(model=str(record.payload["model"]))
+    log("Calling render service.")
+    result = render_product_fn(request)
+    return _job_result_from_service_result(
+        "render",
+        result,
+        log,
+        success_message="Render job succeeded.",
+        failure_message="Render job failed.",
+    )
+
+
+def run_publish_job(
+    record: JobRecord,
+    log: LogCallback,
+    *,
+    publish_product_fn: Callable[[PublishRequest], ServiceResult] | None = None,
+) -> JobRunResult:
+    publish_product_fn = publish_product_fn or publish_product
+    current_job_product_file = record.payload.get("current_job_product_file")
+    request = PublishRequest(
+        model=str(record.payload["model"]),
+        current_job_product_file=Path(str(current_job_product_file)) if current_job_product_file else None,
+    )
+    log("Calling publish service.")
+    result = publish_product_fn(request)
+    return _job_result_from_service_result(
+        "publish",
+        result,
+        log,
+        success_message="Publish job succeeded.",
+        failure_message="Publish job failed.",
+    )
+
+
+def _job_result_from_service_result(
+    operation: str,
+    result: ServiceResult,
+    log: LogCallback,
+    *,
+    success_message: str,
+    failure_message: str,
+) -> JobRunResult:
+    log(f"{operation.capitalize()} service returned status: {result.run.status.value}")
     for warning in result.run.warnings:
-        log(f"Prepare warning: {warning}")
+        log(f"{operation.capitalize()} warning: {warning}")
     if result.run.error_code:
-        log(f"Prepare service error code: {result.run.error_code}")
+        log(f"{operation.capitalize()} service error code: {result.run.error_code}")
     if result.run.error_detail:
-        log(f"Prepare service error detail: {result.run.error_detail}")
+        log(f"{operation.capitalize()} service error detail: {result.run.error_detail}")
 
     artifacts = _artifact_paths(result)
     if result.run.status == RunStatus.FAILED:
         return JobRunResult(
             status=JobStatus.FAILED,
-            message="Prepare job failed.",
-            error=result.run.error_detail or "Prepare service returned failed status.",
+            message=failure_message,
+            error=result.run.error_detail or f"{operation.capitalize()} service returned failed status.",
             error_code=result.run.error_code,
             artifacts=artifacts,
         )
     return JobRunResult(
         status=JobStatus.SUCCEEDED,
-        message="Prepare job succeeded.",
+        message=success_message,
         error=result.run.error_detail,
         error_code=result.run.error_code,
         artifacts=artifacts,
@@ -85,6 +158,9 @@ def _artifact_paths(result: ServiceResult) -> dict[str, str]:
         value = getattr(result.artifacts, field.name)
         if value is not None:
             paths[field.name] = str(value)
+    for name, value in result.details.items():
+        if name.endswith("_path") and value is not None:
+            paths[name] = str(value)
     return paths
 
 

@@ -4,6 +4,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request, status
 
+from .artifact_resolver import resolve_job_artifacts
 from .job_models import JobType
 from .job_runner import SequentialJobRunner
 from .job_store import JobStore
@@ -112,4 +113,4 @@ def get_job_artifacts(job_id: str, api_request: Request) -> JobArtifactsResponse
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found.") from exc
     if record is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found.")
-    return JobArtifactsResponse.from_record(record)
+    return JobArtifactsResponse.from_artifacts(job_id, resolve_job_artifacts(record))

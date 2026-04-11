@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+from .artifact_resolver import ResolvedArtifact
 from .job_models import JobRecord, JobStatus, JobType
 
 
@@ -78,12 +79,12 @@ class JobArtifactsResponse(BaseModel):
     artifacts: list[JobArtifact] = Field(default_factory=list)
 
     @classmethod
-    def from_record(cls, record: JobRecord) -> JobArtifactsResponse:
+    def from_artifacts(cls, job_id: str, artifacts: list[ResolvedArtifact]) -> JobArtifactsResponse:
         return cls(
-            job_id=record.job_id,
+            job_id=job_id,
             artifacts=[
-                JobArtifact(name=name, path=path)
-                for name, path in sorted(record.artifacts.items())
+                JobArtifact(name=artifact.name, path=artifact.path, kind=artifact.kind)
+                for artifact in artifacts
             ],
         )
 

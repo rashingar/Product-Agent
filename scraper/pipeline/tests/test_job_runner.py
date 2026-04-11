@@ -10,6 +10,8 @@ from pipeline.api.job_runner import LogCallback, SequentialJobRunner
 from pipeline.api.job_store import JobStore
 from pipeline.services import (
     PrepareRequest,
+    PublishRequest,
+    RenderRequest,
     RunArtifacts,
     RunMetadata,
     RunStatus,
@@ -193,3 +195,148 @@ def test_default_runner_marks_prepare_service_error_failed(tmp_path: Path, monke
     assert failed.error_code == ServiceErrorCode.PARSE_FAILURE.value
     assert "Calling prepare service." in logs
     assert "Failed prepare job [parse_failure]: bad source" in logs
+
+
+def test_default_runner_calls_render_service_and_captures_artifacts(tmp_path: Path, monkeypatch) -> None:
+    store = JobStore(tmp_path / "jobs")
+    calls: list[RenderRequest] = []
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        calls.append(request)
+        return ServiceResult(
+            run=RunMetadata(
+                model=request.model,
+                run_type=RunType.RENDER,
+                status=RunStatus.COMPLETED,
+            ),
+            artifacts=RunArtifacts(
+                candidate_dir=tmp_path / "work" / request.model / "candidate",
+                candidate_csv_path=tmp_path / "work" / request.model / "candidate" / f"{request.model}.csv",
+                published_csv_path=tmp_path / "products" / f"{request.model}.csv",
+                validation_report_path=tmp_path / "work" / request.model / "candidate" / f"{request.model}.validation.json",
+                metadata_path=tmp_path / "work" / request.model / "render.run.json",
+            ),
+            details={"validation_ok": True, "published": True},
+        )
+
+    monkeypatch.setattr(job_runner, "render_product", fake_render_product)
+    runner = SequentialJobRunner(store)
+    record = store.enqueue(JobType.RENDER, {"model": "233541"}, job_id="job-1")
+
+    try:
+        runner.enqueue(record.job_id)
+
+        assert runner.wait_until_idle(timeout=2.0)
+    finally:
+        runner.stop()
+
+    loaded = store.get_job(record.job_id)
+    logs = store.read_logs(record.job_id)
+    assert calls == [RenderRequest(model="233541")]
+    assert loaded.status == JobStatus.SUCCEEDED
+    assert loaded.message == "Render job succeeded."
+    assert loaded.artifacts == {
+        "candidate_dir": str(tmp_path / "work" / "233541" / "candidate"),
+        "candidate_csv_path": str(tmp_path / "work" / "233541" / "candidate" / "233541.csv"),
+        "published_csv_path": str(tmp_path / "products" / "233541.csv"),
+        "validation_report_path": str(tmp_path / "work" / "233541" / "candidate" / "233541.validation.json"),
+        "metadata_path": str(tmp_path / "work" / "233541" / "render.run.json"),
+    }
+    assert "Calling render service." in logs
+    assert "Render service returned status: completed" in logs
+
+
+def test_default_runner_marks_render_service_failed_status_failed(tmp_path: Path, monkeypatch) -> None:
+    store = JobStore(tmp_path / "jobs")
+
+    def fake_render_product(request: RenderRequest) -> ServiceResult:
+        return ServiceResult(
+            run=RunMetadata(
+                model=request.model,
+                run_type=RunType.RENDER,
+                status=RunStatus.FAILED,
+                error_code=ServiceErrorCode.VALIDATION_FAILURE.value,
+                error_detail="Candidate validation failed",
+            ),
+            artifacts=RunArtifacts(
+                validation_report_path=tmp_path / "work" / request.model / "candidate" / f"{request.model}.validation.json",
+            ),
+        )
+
+    monkeypatch.setattr(job_runner, "render_product", fake_render_product)
+    runner = SequentialJobRunner(store)
+    record = store.enqueue(JobType.RENDER, {"model": "233541"}, job_id="job-1")
+
+    try:
+        runner.enqueue(record.job_id)
+
+        assert runner.wait_until_idle(timeout=2.0)
+    finally:
+        runner.stop()
+
+    failed = store.get_job(record.job_id)
+    assert failed.status == JobStatus.FAILED
+    assert failed.error == "Candidate validation failed"
+    assert failed.error_code == ServiceErrorCode.VALIDATION_FAILURE.value
+    assert failed.artifacts == {
+        "validation_report_path": str(tmp_path / "work" / "233541" / "candidate" / "233541.validation.json")
+    }
+
+
+def test_default_runner_calls_publish_service_and_captures_artifacts(tmp_path: Path, monkeypatch) -> None:
+    store = JobStore(tmp_path / "jobs")
+    calls: list[PublishRequest] = []
+
+    def fake_publish_product(request: PublishRequest) -> ServiceResult:
+        calls.append(request)
+        return ServiceResult(
+            run=RunMetadata(
+                model=request.model,
+                run_type=RunType.PUBLISH,
+                status=RunStatus.COMPLETED,
+            ),
+            artifacts=RunArtifacts(
+                model_root=tmp_path / "work" / request.model,
+                published_csv_path=request.current_job_product_file,
+                metadata_path=tmp_path / "work" / request.model / "publish.run.json",
+            ),
+            details={
+                "publish_status": "success",
+                "upload_report_path": str(tmp_path / "work" / request.model / "upload.opencart.json"),
+                "import_report_path": str(tmp_path / "work" / request.model / "import.opencart.json"),
+            },
+        )
+
+    monkeypatch.setattr(job_runner, "publish_product", fake_publish_product)
+    runner = SequentialJobRunner(store)
+    product_file = tmp_path / "products" / "233541.csv"
+    record = store.enqueue(
+        JobType.PUBLISH,
+        {
+            "model": "233541",
+            "current_job_product_file": str(product_file),
+        },
+        job_id="job-1",
+    )
+
+    try:
+        runner.enqueue(record.job_id)
+
+        assert runner.wait_until_idle(timeout=2.0)
+    finally:
+        runner.stop()
+
+    loaded = store.get_job(record.job_id)
+    logs = store.read_logs(record.job_id)
+    assert calls == [PublishRequest(model="233541", current_job_product_file=product_file)]
+    assert loaded.status == JobStatus.SUCCEEDED
+    assert loaded.message == "Publish job succeeded."
+    assert loaded.artifacts == {
+        "model_root": str(tmp_path / "work" / "233541"),
+        "published_csv_path": str(product_file),
+        "metadata_path": str(tmp_path / "work" / "233541" / "publish.run.json"),
+        "upload_report_path": str(tmp_path / "work" / "233541" / "upload.opencart.json"),
+        "import_report_path": str(tmp_path / "work" / "233541" / "import.opencart.json"),
+    }
+    assert "Calling publish service." in logs
+    assert "Publish service returned status: completed" in logs

@@ -111,6 +111,31 @@ OpenCart runtime config is centralized in `tools/opencart_config.py`.
 - Resolution precedence is explicit CLI args, then process env, then `.secrets/opencart.env`, then centralized compatibility defaults
 - `opencart.env.example` documents the canonical local env file shape
 
+## Local Jobs API
+
+The local API is a thin FastAPI wrapper around the existing service entrypoints. Run it from `scraper/` with an ASGI server such as Uvicorn:
+
+```bash
+cd scraper
+python -m uvicorn pipeline.api.app:app --host 127.0.0.1 --port 8000 --reload
+```
+
+The API keeps file-backed job metadata under `work/api/jobs/`:
+- `work/api/jobs/{job_id}.json` for job records
+- `work/api/jobs/{job_id}.log` for job logs
+
+Endpoints:
+- `GET /api/health`
+- `POST /api/jobs/prepare`
+- `POST /api/jobs/render`
+- `POST /api/jobs/publish`
+- `GET /api/jobs`
+- `GET /api/jobs/{job_id}`
+- `GET /api/jobs/{job_id}/logs`
+- `GET /api/jobs/{job_id}/artifacts`
+
+Jobs run sequentially in the local API process. `prepare`, `render`, and `publish` jobs call the existing service layer; the workflow CLI remains unchanged.
+
 ## Deterministic Description Rendering
 
 Render assembles the final `description` HTML in code from:

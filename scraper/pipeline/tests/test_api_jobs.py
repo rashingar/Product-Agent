@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from pipeline.api.job_models import JobRecord, JobStatus
+from pipeline.api.artifact_resolver import resolve_job_artifacts
+from pipeline.api.job_models import JobRecord, JobStatus, JobType
 from pipeline.api.job_runner import LogCallback, SequentialJobRunner
 from pipeline.api.job_store import JobStore
 
@@ -17,7 +18,10 @@ def test_prepare_route_enqueues_job_and_exposes_logs_and_artifacts(tmp_path: Pat
 
     def fake_callback(record: JobRecord, log: LogCallback) -> None:
         log(f"fake callback for {record.job_id}")
-        store.update_artifacts(record.job_id, {"source_json_path": tmp_path / "work" / record.model / "scrape" / f"{record.model}.source.json"})
+        store.update_artifacts(
+            record.job_id,
+            {"source_json_path": tmp_path / "work" / record.model / "scrape" / f"{record.model}.source.json"},
+        )
 
     runner = SequentialJobRunner(store, fake_callback)
     app = create_app(job_store=store, job_runner=runner)
@@ -58,4 +62,49 @@ def test_prepare_route_enqueues_job_and_exposes_logs_and_artifacts(tmp_path: Pat
             "path": str(tmp_path / "work" / "233541" / "scrape" / "233541.source.json"),
             "kind": None,
         }
+    ]
+
+
+def test_artifact_resolver_returns_existing_render_compatibility_paths(tmp_path: Path) -> None:
+    candidate_dir = tmp_path / "work" / "233541" / "candidate"
+    candidate_dir.mkdir(parents=True)
+    csv_path = candidate_dir / "233541.csv"
+    csv_path.write_text("csv\n", encoding="utf-8")
+    validation_path = candidate_dir / "233541.validation.json"
+    validation_path.write_text("{}\n", encoding="utf-8")
+
+    record = JobRecord(
+        job_id="job-1",
+        job_type=JobType.RENDER,
+        status=JobStatus.SUCCEEDED,
+        model="233541",
+    )
+
+    artifacts = resolve_job_artifacts(record, repo_root=tmp_path)
+
+    assert {artifact.name: artifact.kind for artifact in artifacts} == {
+        "candidate_csv_path": "file",
+        "candidate_dir": "directory",
+        "model_root": "directory",
+        "validation_report_path": "file",
+    }
+
+
+def test_artifact_resolver_includes_stored_publish_detail_paths(tmp_path: Path) -> None:
+    record = JobRecord(
+        job_id="job-1",
+        job_type=JobType.PUBLISH,
+        status=JobStatus.SUCCEEDED,
+        model="233541",
+        artifacts={
+            "upload_report_path": str(tmp_path / "work" / "233541" / "upload.opencart.json"),
+            "import_report_path": str(tmp_path / "work" / "233541" / "import.opencart.json"),
+        },
+    )
+
+    artifacts = resolve_job_artifacts(record, repo_root=tmp_path)
+
+    assert [(artifact.name, artifact.path, artifact.kind) for artifact in artifacts] == [
+        ("import_report_path", str(tmp_path / "work" / "233541" / "import.opencart.json"), None),
+        ("upload_report_path", str(tmp_path / "work" / "233541" / "upload.opencart.json"), None),
     ]
