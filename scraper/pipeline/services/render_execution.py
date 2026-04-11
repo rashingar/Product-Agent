@@ -7,12 +7,12 @@ from ..csv_writer import write_csv_row
 from ..html_builders import extract_presentation_blocks
 from ..llm_contract import validate_intro_text_output, validate_seo_meta_output
 from ..mapping import build_row
-from ..models import CLIInput, GalleryImage, ParsedProduct, SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
+from ..models import GalleryImage, SourceProductData, SpecItem, SpecSection
 from ..presentation_sections import normalize_presentation_sections
 from ..repo_paths import REPO_ROOT
 from ..utils import ensure_directory, read_json, utcnow_iso, write_json, write_text
 from ..validator import validate_candidate_csv, write_validation_report
-from .execution_models import RenderExecutionResult, RenderExecutionValidationReport
+from .execution_models import PreparedProductContext, RenderExecutionResult, RenderExecutionValidationReport
 from .errors import ServiceErrorCode, service_error_from_exception
 from .llm_stage_execution import IntroTextResolver, SeoMetaResolver, SplitLLMStageResult, execute_split_llm_stage
 from .metadata import maybe_write_run_metadata
@@ -31,11 +31,12 @@ def execute_render_workflow(
     resolve_seo_meta_fn: SeoMetaResolver | None = None,
 ) -> RenderExecutionResult:
     model_root = work_root / model
-    scrape_dir = model_root / "scrape"
-    llm_dir = model_root / "llm"
-    source_json = scrape_dir / f"{model}.source.json"
-    normalized_json = scrape_dir / f"{model}.normalized.json"
-    task_manifest_json = llm_dir / "task_manifest.json"
+    prepared_context = PreparedProductContext.from_model(model, model_root=model_root)
+    scrape_dir = prepared_context.scrape_dir
+    llm_dir = prepared_context.llm_dir
+    source_json = prepared_context.source_json_path
+    normalized_json = prepared_context.scrape_normalized_json_path
+    task_manifest_json = prepared_context.task_manifest_path
     candidate_dir = model_root / "candidate"
     candidate_csv_path = candidate_dir / f"{model}.csv"
     published_csv_path = products_root / f"{model}.csv"
@@ -54,22 +55,17 @@ def execute_render_workflow(
         if not source_json.exists() or not normalized_json.exists():
             raise FileNotFoundError(f"Missing scrape artifacts in {scrape_dir}")
 
-        source = load_source_product(source_json)
-        normalized = read_json(normalized_json)
-        input_data = normalized.get("input", {})
-        cli = CLIInput(
-            model=str(input_data.get("model", model)),
-            url=str(input_data.get("url", "")),
-            photos=int(input_data.get("photos", 1)),
-            sections=int(input_data.get("sections", 0)),
-            skroutz_status=int(input_data.get("skroutz_status", 0)),
-            boxnow=int(input_data.get("boxnow", 0)),
-            price=input_data.get("price", 0),
-            out=str(model_root / "candidate"),
+        prepared_context = prepared_context.load_for_render(
+            source_loader=load_source_product,
+            json_loader=read_json,
         )
-        taxonomy = TaxonomyResolution(**normalized.get("taxonomy", {}))
-        schema_match = SchemaMatchResult(**normalized.get("schema_match", {}))
-        parsed = ParsedProduct(source=source)
+        source = prepared_context.source_product
+        if source is None:
+            raise ValueError("Prepared product context is missing source product data")
+        cli = prepared_context.build_render_cli(candidate_out=candidate_dir)
+        taxonomy = prepared_context.require_taxonomy()
+        schema_match = prepared_context.require_schema_match()
+        parsed = prepared_context.require_parsed()
 
         split_llm_result = execute_split_llm_stage(
             llm_dir=llm_dir,

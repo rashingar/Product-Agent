@@ -14,7 +14,7 @@ from ..models import CLIInput
 from ..prepare_stage import execute_prepare_stage
 from ..repo_paths import INTRO_TEXT_PROMPT_PATH, REPO_ROOT, SEO_META_PROMPT_PATH
 from ..utils import ensure_directory, utcnow_iso, write_json, write_text
-from .execution_models import PrepareExecutionResult, PrepareExecutionScrapeResult
+from .execution_models import PreparedProductContext, PrepareExecutionResult, PrepareExecutionScrapeResult
 from .errors import service_error_from_exception
 from .metadata import maybe_write_run_metadata
 from .models import RunArtifacts, RunStatus, RunType
@@ -39,22 +39,27 @@ def execute_prepare_workflow(
     model_root = ensure_directory(work_root / cli.model)
     scrape_dir = ensure_directory(model_root / "scrape")
     llm_dir = ensure_directory(model_root / "llm")
-    task_manifest_path = llm_dir / "task_manifest.json"
-    intro_text_context_path = llm_dir / "intro_text.context.json"
-    intro_text_prompt_path = llm_dir / "intro_text.prompt.txt"
-    intro_text_output_path = llm_dir / "intro_text.output.txt"
-    seo_meta_context_path = llm_dir / "seo_meta.context.json"
-    seo_meta_prompt_path = llm_dir / "seo_meta.prompt.txt"
-    seo_meta_output_path = llm_dir / "seo_meta.output.json"
+    prepared_context = PreparedProductContext.from_model(cli.model, model_root=model_root)
+    task_manifest_path = prepared_context.task_manifest_path
+    intro_text_context_path = prepared_context.intro_text_context_path
+    intro_text_prompt_path = prepared_context.intro_text_prompt_path
+    intro_text_output_path = prepared_context.intro_text_output_path
+    seo_meta_context_path = prepared_context.seo_meta_context_path
+    seo_meta_prompt_path = prepared_context.seo_meta_prompt_path
+    seo_meta_output_path = prepared_context.seo_meta_output_path
     scrape_cli = CLIInput(**{**cli.to_dict(), "out": str(scrape_dir)})
     try:
         stage_result = execute_prepare_stage_fn(scrape_cli, model_dir=scrape_dir)
-        normalized_payload = stage_result.get("normalized")
-        normalized_dict = normalized_payload if isinstance(normalized_payload, Mapping) else {}
-        deterministic_product_payload = normalized_dict.get("deterministic_product")
-        deterministic_product = deterministic_product_payload if isinstance(deterministic_product_payload, Mapping) else {}
-        parsed = stage_result["parsed"]
-        taxonomy = stage_result["taxonomy"]
+        prepared_context = PreparedProductContext.from_prepare_stage_result(
+            cli=scrape_cli,
+            model_root=model_root,
+            scrape_dir=scrape_dir,
+            llm_dir=llm_dir,
+            stage_result=stage_result,
+        )
+        deterministic_product = prepared_context.deterministic_product
+        parsed = prepared_context.require_parsed()
+        taxonomy = prepared_context.require_taxonomy()
         intro_text_context = build_intro_text_context(
             cli=scrape_cli,
             parsed=parsed,
