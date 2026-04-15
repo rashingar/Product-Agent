@@ -7,7 +7,7 @@ from .mapping import serialize_meta_keywords
 from .models import CLIInput, ParsedProduct, TaxonomyResolution
 from .normalize import normalize_whitespace
 
-INTRO_MIN_WORDS = 100
+INTRO_MIN_WORDS = 80
 INTRO_MAX_WORDS = 180
 HTML_TAG_RE = re.compile(r"<[^>]+>")
 HTML_DETECT_RE = re.compile(r"<[^>]+>")

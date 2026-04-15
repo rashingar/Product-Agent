@@ -442,7 +442,7 @@ def test_execute_render_workflow_retries_short_intro_before_candidate_build(tmp_
 
     def resolve_intro_text(**kwargs):
         events.append(f"intro:{kwargs['attempt']}")
-        return build_intro(99 if kwargs["attempt"] == 1 else 100)
+        return build_intro(79 if kwargs["attempt"] == 1 else 80)
 
     monkeypatch.setattr(render_execution, "build_row", tracking_build_row)
 
@@ -459,7 +459,7 @@ def test_execute_render_workflow_retries_short_intro_before_candidate_build(tmp_
     assert result.published_csv_path == products_dir / f"{model}.csv"
     assert result.validation_report.ok is True
     assert (llm_dir / "seo_meta.output.json").exists()
-    assert (llm_dir / "intro_text.output.txt").read_text(encoding="utf-8") == build_intro(100)
+    assert (llm_dir / "intro_text.output.txt").read_text(encoding="utf-8") == build_intro(80)
 
 
 def test_execute_render_workflow_stops_before_candidate_build_when_intro_retries_exhaust(tmp_path: Path, monkeypatch) -> None:
@@ -512,7 +512,7 @@ def test_execute_render_workflow_stops_before_candidate_build_when_intro_retries
 
     def resolve_intro_text(**kwargs):
         events.append(f"intro:{kwargs['attempt']}")
-        return build_intro(99)
+        return build_intro(79)
 
     monkeypatch.setattr(render_execution, "build_row", fail_if_build_row_called)
 

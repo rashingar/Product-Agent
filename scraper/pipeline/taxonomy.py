@@ -20,6 +20,8 @@ ALIASES = {
     normalize_for_match("Σταθερά Dect"): "Σταθέρα",
     normalize_for_match("Εντοιχιζόμενες"): "Εντοιχιζόμενες Συσκευές",
     normalize_for_match("Σκούπα Stick"): "Σκούπες Stick",
+    normalize_for_match("Γυναικεία Φροντίδα"): "Προσωπική Φροντίδα",
+    normalize_for_match("Βούρτσες - Ψαλίδια"): "Βούρτσες-Ψαλίδια-ισιωτικά",
 }
 TV_LEAF = normalize_for_match("Τηλεοράσεις")
 TV_SIZE_BUCKETS = {

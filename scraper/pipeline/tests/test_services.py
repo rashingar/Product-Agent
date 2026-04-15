@@ -571,7 +571,7 @@ def test_render_product_propagates_early_intro_validation_failure(tmp_path: Path
             (
                 "LLM stage validation failed: stage=intro_text; "
                 "error_code=llm_intro_text_word_count_invalid; attempt_count=3; "
-                "reason=word count 99 is outside 100-180"
+                "reason=word count 79 is outside 80-180"
             ),
             details={
                 "stage": "intro_text",

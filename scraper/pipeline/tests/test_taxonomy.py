@@ -46,6 +46,23 @@ def test_taxonomy_resolution_maps_koptiria_ravdomplenter_to_exact_subcategory() 
     assert resolution.cta_url == "https://www.etranoulis.gr/oikiakos-eksoplismos/syskeues-kouzinas/kopthria-ravdoi"
 
 
+def test_taxonomy_resolution_maps_electronet_womens_care_brushes_to_personal_care() -> None:
+    resolver = TaxonomyResolver()
+    resolution, candidates = resolver.resolve(
+        breadcrumbs=["Αρχική", "Εξοπλισμός Σπιτιού", "Γυναικεία Φροντίδα", "Βούρτσες - Ψαλίδια"],
+        url="https://www.electronet.gr/exoplismos-spitioy/gynaikeia-frontida/boyrtses-psalidia/boyrtsa-mallion-philips-bha71000",
+        name="Βούρτσα Μαλλιών Philips BHA710/00",
+        key_specs=[],
+        spec_sections=[],
+    )
+
+    assert resolution.parent_category == "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ"
+    assert resolution.leaf_category == "Προσωπική Φροντίδα"
+    assert resolution.sub_category == "Βούρτσες-Ψαλίδια-ισιωτικά"
+    assert resolution.cta_url == "https://www.etranoulis.gr/oikiakos-eksoplismos/proswpikh-frontida/vourtses-psalidia"
+    assert candidates[0]["sub_category"] == "Βούρτσες-Ψαλίδια-ισιωτικά"
+
+
 def test_taxonomy_resolution_prefers_dryer_subcategory_for_singular_product_name() -> None:
     resolver = TaxonomyResolver()
     resolution, candidates = resolver.resolve(
