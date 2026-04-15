@@ -82,7 +82,7 @@ The LLM stage now writes:
 - `work/{model}/llm/seo_meta.output.json`
 
 Rules:
-- `intro_text` is plain Greek text only, one paragraph, 100-180 words, with no HTML, bullets, or CTA language.
+- `intro_text` is plain Greek text only, one paragraph, 80-180 words, with no HTML, bullets, or CTA language.
 - `seo_meta.output.json` contains only `product.meta_description` and `product.meta_keywords`.
 - `product.meta_keywords` is structured JSON, not CSV text.
 - Presentation section titles/body copy are not LLM outputs.
@@ -113,12 +113,24 @@ OpenCart runtime config is centralized in `tools/opencart_config.py`.
 
 ## Local Jobs API
 
-The local API is a thin FastAPI wrapper around the existing service entrypoints. Run it from `scraper/` with an ASGI server such as Uvicorn:
+The local API is a thin FastAPI wrapper around the existing service entrypoints. Start the backend before using the local web UI so browser calls to `/api/...` have a running target.
 
-```bash
+From PowerShell on Windows:
+
+```powershell
+cd C:\Users\user\Documents\VS_Projects\tranoulis\Product-Agent
+.\.venv\Scripts\Activate.ps1
 cd scraper
 python -m uvicorn pipeline.api.app:app --host 127.0.0.1 --port 8000 --reload
 ```
+
+Verify the backend is reachable:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/health
+```
+
+The local web UI should call the API at `http://127.0.0.1:8000`. If the UI runs on a different local port and the browser reports a CORS error, configure the UI dev server to proxy `/api` to `http://127.0.0.1:8000` or add CORS middleware for the UI origin.
 
 The API keeps file-backed job metadata under `work/api/jobs/`:
 - `work/api/jobs/{job_id}.json` for job records
