@@ -35,6 +35,7 @@ FRIDGE_FREEZER_SCHEMA_ID = _schema_id_for_source_file("psygeiokatapsyktes.json")
 ICE_CREAM_MAKER_SCHEMA_ID = _schema_id_for_source_file("pagotomixanes.json")
 WASHING_MACHINE_SCHEMA_ID = _schema_id_for_source_file("plyntiria_rouxwn.json")
 SOUND_BAR_SCHEMA_ID = _schema_id_for_source_file("sound_bars.json")
+AIR_CONDITIONER_SCHEMA_ID = _schema_id_for_source_file("toixoy.json")
 
 
 def test_normalize_characteristics_label_keeps_balanced_parentheses_unchanged() -> None:
@@ -113,6 +114,169 @@ def test_skroutz_fridge_freezer_characteristics_keep_electronet_shape() -> None:
     assert values[(normalize_for_match("Κατάψυξη"), normalize_for_match("Λειτουργία Ταχείας Κατάψυξης"))] == "Ναι"
     assert values[(normalize_for_match("Γενικά χαρακτηριστικά"), normalize_for_match("Διαστάσεις Συσκευής σε Εκατοστά (Υ χ Π χ Β"))] == "186 x 60 x 66 cm"
     assert values[(normalize_for_match("Γενικά χαρακτηριστικά"), normalize_for_match("Εγγύηση Κατασκευαστή"))] == "10 χρόνια στον Συμπιεστή"
+
+
+def test_skroutz_wall_air_conditioner_characteristics_keep_electronet_shape() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="Toyotomi",
+        mpn="OTN/OTG-09QINV",
+        name="Toyotomi Ora Κλιματιστικό Inverter 9000 BTU A++/A+ με Ιονιστή και WiFi",
+        hero_summary=(
+            "Το Toyotomi Ora είναι κλιματιστικό Inverter με WiFi, Voice Control, Turbo Mode, Sleep & Silence Mode, "
+            "i-Clean στους 56°C, λειτουργία Αφύγρανσης, Smart Defrost, Autorestart, Smooth Start, Hotel Menu και 8°C Heating."
+        ),
+        presentation_source_text="Η λειτουργία Follow Me προσαρμόζει τη θερμοκρασία στο σημείο που βρίσκεσαι.",
+        key_specs=[
+            SpecItem(label="Κωδικός Προϊόντος", value="OTN/OTG-09QINV"),
+            SpecItem(label="Απόδοση (BTU)", value="9000 BTU"),
+            SpecItem(label="Ισχύς Ψύξης", value="9000 BTU"),
+            SpecItem(label="Ισχύς Θέρμανσης", value="9000 BTU"),
+            SpecItem(label="WiFi", value="Ναι"),
+            SpecItem(label="WiFi Ready", value="Όχι"),
+            SpecItem(label="Φίλτρα Αέρα", value="Ναι"),
+            SpecItem(label="Ιονιστής", value="Ναι"),
+        ],
+        spec_sections=[
+            SpecSection(section="Γενικά", items=[SpecItem(label="Κωδικός Προϊόντος", value="OTN/OTG-09QINV")]),
+            SpecSection(
+                section="Απόδοση",
+                items=[
+                    SpecItem(label="Απόδοση (BTU)", value="9000 BTU"),
+                    SpecItem(label="Ισχύς Ψύξης", value="9000 BTU"),
+                    SpecItem(label="Ισχύς Θέρμανσης", value="9000 BTU"),
+                ],
+            ),
+            SpecSection(
+                section="Δυνατότητες & Λειτουργίες",
+                items=[
+                    SpecItem(label="WiFi", value="Ναι"),
+                    SpecItem(label="WiFi Ready", value="Όχι"),
+                    SpecItem(label="Φίλτρα Αέρα", value="Ναι"),
+                    SpecItem(label="Ιονιστής", value="Ναι"),
+                    SpecItem(label="Τύπος Φίλτρων", value="Antivirus, Active Carbon, Προ φίλτρο Υψηλής Πυκνότητας"),
+                    SpecItem(label="Οικολογικό Ψυκτικό Υγρό (R32)", value="Ναι"),
+                    SpecItem(label="με Τεχνητή Νοημοσύνη", value="Όχι"),
+                    SpecItem(label="Λειτουργία Follow Me", value="Ναι"),
+                    SpecItem(label="Χρώμα", value="Λευκό"),
+                ],
+            ),
+            SpecSection(
+                section="Ενεργειακή Κλάση",
+                items=[
+                    SpecItem(label="Ψύξης", value="A++"),
+                    SpecItem(label="Θέρμανσης (Μέση Ζώνη)", value="A+"),
+                    SpecItem(label="Βαθμός Απόδοσης Ψύξης (SEER)", value="6,1 W/W"),
+                    SpecItem(label="Βαθμός Απόδοσης Θέρμανσης (SCOP)", value="4 W/W"),
+                    SpecItem(label="Κατανάλωση Ψύξης", value="150 kWh/y"),
+                    SpecItem(label="Κατανάλωση Θέρμανσης", value="735 kWh/y"),
+                    SpecItem(label="Θέρμανσης (Θερμή Ζώνη)", value="A+++"),
+                    SpecItem(label="Βαθμός Απόδοσης Θέρμανσης (SCOP) Θερμή Ζώνη", value="5,1 W/W"),
+                ],
+            ),
+            SpecSection(
+                section="Ισχύς Θορύβου",
+                items=[
+                    SpecItem(label="Εσωτερικής Μονάδας", value="52 dB"),
+                    SpecItem(label="Εξωτερικής Μονάδας", value="59 dB"),
+                ],
+            ),
+            SpecSection(
+                section="Φυσικές Διαστάσεις",
+                items=[
+                    SpecItem(label="Μήκος Εσωτερικής Μονάδας", value="70,8 cm"),
+                    SpecItem(label="Ύψος Εσωτερικής Μονάδας", value="28,1 cm"),
+                    SpecItem(label="Βάθος Εσωτερικής Μονάδας", value="19,2 cm"),
+                    SpecItem(label="Μήκος Εξωτερικής Μονάδας", value="72,7 cm"),
+                    SpecItem(label="Ύψος Εξωτερικής Μονάδας", value="45,6 cm"),
+                    SpecItem(label="Βάθος Εξωτερικής Μονάδας", value="27,8 cm"),
+                ],
+            ),
+            SpecSection(
+                section="Εγγύηση",
+                items=[
+                    SpecItem(
+                        label="Επιμέρους Εγγύηση Κατασκευαστή",
+                        value="10 χρόνια σε όλα τα ηλεκτρικά και μηχανικά μέρη, 10 χρόνια στον Συμπιεστή",
+                    )
+                ],
+            ),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+        leaf_category="Κλιματιστικά",
+        sub_category="Τοίχου",
+    )
+
+    html, diagnostics, warnings = build_characteristics_for_product(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=AIR_CONDITIONER_SCHEMA_ID, score=0.95),
+    )
+
+    soup = BeautifulSoup(html, "lxml")
+    values = {
+        (normalize_for_match(field["section"]), normalize_for_match(field["label"])): field["value"]
+        for field in diagnostics["fields"]
+    }
+    extra_features = values[
+        (
+            normalize_for_match("Επιπλέον Χαρακτηριστικά"),
+            normalize_for_match("Πρόσθετες Λειτουργίες Κλιματιστικού"),
+        )
+    ]
+
+    assert diagnostics["template_source"] == "schema_library_with_custom_overrides"
+    assert diagnostics["custom_template_id"] == "skroutz_wall_air_conditioner_v1"
+    assert diagnostics["matched_schema_id"] == AIR_CONDITIONER_SCHEMA_ID
+    assert diagnostics["preferred_schema_source_files"] == ["toixoy.json"]
+    assert diagnostics["unresolved_count"] < 20
+    assert f"characteristics_template_used:schema:{AIR_CONDITIONER_SCHEMA_ID}" in warnings
+    assert normalize_for_match("Ψυκτική / Θερμική Απόδοση") in [
+        normalize_for_match(node.get_text(" ", strip=True)) for node in soup.select("thead strong")
+    ]
+    assert values[(normalize_for_match("Ψυκτική / Θερμική Απόδοση"), normalize_for_match("Ονομαστική Απόδοση (Btu/h)"))] == "9000 BTU"
+    assert values[(normalize_for_match("Ψυκτική / Θερμική Απόδοση"), normalize_for_match("Ψυκτική Απόδοση ( Btu/h )"))] == "9000 BTU"
+    assert values[(normalize_for_match("Βαθμοί Εποχιακής Απόδοσης"), normalize_for_match("Βαθμός Εποχιακής Απόδοσης Ψύξης - SEER"))] == "6,1 W/W"
+    assert values[(normalize_for_match("Βαθμοί Εποχιακής Απόδοσης"), normalize_for_match("Ενεργειακή Κλάση Ψύξης"))] == "A++"
+    assert values[
+        (
+            normalize_for_match("Βαθμοί Εποχιακής Απόδοσης"),
+            normalize_for_match("Ενεργειακή Κλάση Θέρμανσης Θερμότερης Εποχής"),
+        )
+    ] == "A+++"
+    assert values[
+        (
+            normalize_for_match("Καταναλώσεις"),
+            normalize_for_match("Ετήσια Κατανάλωση Θέρμανσης Μέσης Εποχής ( kWh / a )"),
+        )
+    ] == "735 kWh/y"
+    assert values[(normalize_for_match("Επιπλέον Χαρακτηριστικά"), normalize_for_match("Τεχνολογία Κλιματιστικού"))] == "Inverter"
+    assert values[(normalize_for_match("Επιπλέον Χαρακτηριστικά"), normalize_for_match("Ψυκτικό Υγρό"))] == "R32"
+    assert values[(normalize_for_match("Επιπλέον Χαρακτηριστικά"), normalize_for_match("Αφύγρανση"))] == "Ναι"
+    assert values[(normalize_for_match("Επιπλέον Χαρακτηριστικά"), normalize_for_match("Φίλτρα"))] == (
+        "Antivirus, Active Carbon, Προ φίλτρο Υψηλής Πυκνότητας"
+    )
+    assert "WiFi" in extra_features
+    assert "Follow Me" in extra_features
+    assert "Voice Control" in extra_features
+    assert "Self Clean 56°C" in extra_features
+    assert values[(normalize_for_match("Διαστάσεις και Βάρος"), normalize_for_match("Ύψος Εσωτερικής Μονάδας ( mm )"))] == "281"
+    assert values[(normalize_for_match("Διαστάσεις και Βάρος"), normalize_for_match("Πλάτος Εσωτερικής Μονάδας ( mm )"))] == "708"
+    assert values[(normalize_for_match("Διαστάσεις και Βάρος"), normalize_for_match("Βάθος Εξωτερικής Μονάδας ( mm )"))] == "278"
+    assert values[
+        (
+            normalize_for_match("Γενικά Χαρακτηριστικά"),
+            normalize_for_match("Εγγύηση Κατασκευαστή ( Εσωτερική μονάδα ) - Έτη"),
+        )
+    ] == "10"
+    assert values[
+        (
+            normalize_for_match("Γενικά Χαρακτηριστικά"),
+            normalize_for_match("Εγγύηση Κατασκευαστή ( Συμπιεστής ) - Έτη"),
+        )
+    ] == "10"
 
 
 def test_labels_related_treats_dimension_separators_as_equivalent() -> None:
@@ -477,6 +641,30 @@ def test_characteristics_registry_prefers_built_in_hob_schema_for_skroutz() -> N
     assert template["preferred_schema_source_files"] == ["esties.json"]
     assert template["template_source"] == "schema_library_with_custom_overrides"
     assert template["custom_template_id"] == "skroutz_built_in_hob_v1"
+
+
+def test_characteristics_registry_prefers_air_conditioner_schema_for_skroutz() -> None:
+    registry = CharacteristicsTemplateRegistry()
+    source = SourceProductData(source_name="skroutz", name="Toyotomi Air Conditioner")
+    taxonomy = TaxonomyResolution(
+        parent_category="ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+        leaf_category="Κλιματιστικά",
+        sub_category="Τοίχου",
+    )
+
+    preferred_source_files = registry.preferred_schema_source_files(source, taxonomy)
+    template = registry.select_template(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=AIR_CONDITIONER_SCHEMA_ID, score=0.9),
+    )
+
+    assert preferred_source_files == ["toixoy.json"]
+    assert template is not None
+    assert template["matched_schema_id"] == AIR_CONDITIONER_SCHEMA_ID
+    assert template["preferred_schema_source_files"] == ["toixoy.json"]
+    assert template["template_source"] == "schema_library_with_custom_overrides"
+    assert template["custom_template_id"] == "skroutz_wall_air_conditioner_v1"
 
 
 def test_characteristics_registry_prefers_soundbar_schema_for_skroutz() -> None:

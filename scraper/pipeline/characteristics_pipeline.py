@@ -1397,7 +1397,152 @@ def _resolve_fridge_warranty(context: _ResolutionContext, _field: dict[str, Any]
     return "", "unresolved"
 
 
+def _resolve_air_conditioner_technology(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    if value:
+        return value, source
+    if _contains_any(" ".join([context.source.name, context.combined_text]), "inverter"):
+        return "Inverter", "combined_text:technology"
+    return "", "unresolved"
+
+
+def _resolve_air_conditioner_refrigerant(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    aliases = list(field.get("aliases", []))
+    refrigerant_code = normalize_whitespace(str(field.get("refrigerant_code", ""))).upper()
+    for alias in aliases:
+        value, source = _first_value_from_aliases(context, [alias])
+        if not value:
+            continue
+        direct_match = re.search(r"\b(R[0-9A-Z]+)\b", value, flags=re.IGNORECASE)
+        if direct_match:
+            return direct_match.group(1).upper(), source
+        alias_match = re.search(r"\((R[0-9A-Z]+)\)", alias, flags=re.IGNORECASE)
+        if alias_match and _normalize_yes_no(value) == "Ναι":
+            return alias_match.group(1).upper(), source
+        if refrigerant_code and _normalize_yes_no(value) == "Ναι":
+            return refrigerant_code, source
+    if refrigerant_code and _contains_any(context.combined_text, refrigerant_code):
+        return refrigerant_code, "combined_text:refrigerant"
+    return "", "unresolved"
+
+
+def _resolve_air_conditioner_dehumidification(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(context.combined_text, "αφύγρανση", "αφυγρανση"):
+        return "Ναι", "combined_text:dehumidification"
+    return "", "unresolved"
+
+
+def _resolve_air_conditioner_extra_features(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    features: list[str] = []
+    sources: list[str] = []
+
+    def add_feature(display: str, source: str) -> None:
+        if display not in features:
+            features.append(display)
+        if source and source not in sources:
+            sources.append(source)
+
+    wifi_value, wifi_source = _first_value_from_aliases(context, ["WiFi"])
+    if _normalize_yes_no(wifi_value) == "Ναι":
+        add_feature("WiFi", wifi_source or "spec_alias:WiFi")
+
+    follow_me_value, follow_me_source = _first_value_from_aliases(context, ["Λειτουργία Follow Me"])
+    if _normalize_yes_no(follow_me_value) == "Ναι":
+        add_feature("Follow Me", follow_me_source or "spec_alias:Λειτουργία Follow Me")
+
+    combined_candidates = [
+        ("Voice Control", ("voice control",)),
+        ("Timer", ("timer",)),
+        ("Turbo Mode", ("turbo mode",)),
+        ("Sleep Mode", ("sleep mode",)),
+        ("Silence Mode", ("silence mode",)),
+        ("Smart Defrost", ("smart defrost",)),
+        ("Auto Restart", ("autorestart", "auto restart")),
+        ("Smooth Start", ("smooth start",)),
+        ("Self Clean 56°C", ("i-clean", "self clean", "56°c", "56 c")),
+        ("Hotel Menu", ("hotel menu",)),
+        ("8°C Heating", ("8°c heating", "8 c heating")),
+        ("I-Feel", ("i-feel", "i sense", "i-sense")),
+    ]
+    for display, tokens in combined_candidates:
+        if any(_contains_any(context.combined_text, token) for token in tokens):
+            add_feature(display, "combined_text:ac_features")
+
+    return (", ".join(features), ",".join(sources)) if features else ("", "unresolved")
+
+
+def _format_air_conditioner_dimension_mm(value: str) -> str:
+    number = _extract_first_number(value)
+    if number is None:
+        return ""
+    normalized = normalize_for_match(value)
+    if "cm" in normalized or "εκατοστ" in normalized:
+        number *= 10
+    elif "mm" in normalized or "χιλιοστ" in normalized:
+        pass
+    elif number < 100:
+        number *= 10
+    return _format_decimal(number)
+
+
+def _resolve_air_conditioner_dimension_mm(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, field.get("aliases", []))
+    formatted = _format_air_conditioner_dimension_mm(value)
+    return (formatted, source) if formatted else ("", "unresolved")
+
+
+def _extract_air_conditioner_warranty_years(text: str, target: str) -> str:
+    normalized = normalize_whitespace(text)
+    if not normalized:
+        return ""
+
+    if target == "compressor":
+        match = re.search(r"(\d+)\s*χρ(?:ο|ό)ν(?:ια|ος)?[^,.;]*συμπιεστ", normalized, flags=re.IGNORECASE)
+        if match:
+            return match.group(1)
+        if "συμπιεστ" in normalize_for_match(normalized):
+            fallback = re.search(r"(\d+)\s*χρ(?:ο|ό)ν(?:ια|ος)?", normalized, flags=re.IGNORECASE)
+            if fallback:
+                return fallback.group(1)
+        return ""
+
+    unit_patterns = [
+        r"(\d+)\s*χρ(?:ο|ό)ν(?:ια|ος)?[^,.;]*(?:ηλεκτρικ|μηχανικ|μέρ|μερη)",
+        r"(\d+)\s*χρ(?:ο|ό)ν(?:ια|ος)?\s+σε\s+όλα",
+    ]
+    for pattern in unit_patterns:
+        match = re.search(pattern, normalized, flags=re.IGNORECASE)
+        if match:
+            return match.group(1)
+    if "συμπιεστ" not in normalize_for_match(normalized):
+        fallback = re.search(r"(\d+)\s*χρ(?:ο|ό)ν(?:ια|ος)?", normalized, flags=re.IGNORECASE)
+        if fallback:
+            return fallback.group(1)
+    return ""
+
+
+def _resolve_air_conditioner_warranty_years(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    aliases = list(field.get("aliases", [])) or ["Επιμέρους Εγγύηση Κατασκευαστή", "Εγγύηση Κατασκευαστή"]
+    target = normalize_for_match(str(field.get("warranty_target", ""))) or "unit"
+    value, source = _first_value_from_aliases(context, aliases)
+    for candidate_text, candidate_source in [(value, source), (context.combined_text, "combined_text:warranty")]:
+        years = _extract_air_conditioner_warranty_years(candidate_text, target)
+        if years:
+            return years, candidate_source
+    return "", "unresolved"
+
+
 _RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, str]]] = {
+    "air_conditioner_technology": _resolve_air_conditioner_technology,
+    "air_conditioner_refrigerant": _resolve_air_conditioner_refrigerant,
+    "air_conditioner_dehumidification": _resolve_air_conditioner_dehumidification,
+    "air_conditioner_extra_features": _resolve_air_conditioner_extra_features,
+    "air_conditioner_dimension_mm": _resolve_air_conditioner_dimension_mm,
+    "air_conditioner_warranty_years": _resolve_air_conditioner_warranty_years,
     "fridge_temperature_control": _resolve_fridge_temperature_control,
     "fridge_installation_type": _resolve_fridge_installation_type,
     "fridge_dual_cooling_circuits": _resolve_fridge_dual_cooling_circuits,
