@@ -38,6 +38,70 @@ def test_skroutz_fridge_freezer_uses_requested_name_schema() -> None:
     assert fields["seo_keyword"] == "bosch-kgn36nlea-psygeiokatapsyktis-total-no-frost-305lt-inox-60cm-e"
 
 
+def test_skroutz_air_conditioner_uses_compact_requested_name_schema() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="Toyotomi",
+        mpn="OTN/OTG-24QINV",
+        name="Toyotomi Ora Κλιματιστικό Inverter 24000 BTU A++/A+ με Ιονιστή και WiFi",
+        key_specs=[
+            SpecItem(label="Απόδοση (BTU)", value="24000 BTU"),
+            SpecItem(label="Ιονιστής", value="Ναι"),
+        ],
+        spec_sections=[
+            SpecSection(
+                section="Ενεργειακή Κλάση",
+                items=[
+                    SpecItem(label="Ψύξης", value="A++"),
+                    SpecItem(label="Θέρμανσης (Μέση Ζώνη)", value="A+"),
+                ],
+            )
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+        leaf_category="Κλιματιστικά",
+        sub_category="Τοίχου",
+    )
+
+    fields = build_deterministic_product_fields(source, taxonomy, "414833", derive_seo_keyword)
+
+    assert fields["name"] == "Toyotomi OTN/OTG-24QINV – Κλιματιστικό 24000 BTU A++/A+ με Ιονιστή"
+    assert fields["meta_title"] == "Toyotomi OTN/OTG-24QINV Κλιματιστικό 24000 BTU A++/A+ | eTranoulis"
+    assert fields["seo_keyword"] == "toyotomi-otn-otg-24qinv-klimatistiko-24000-btu-a-a-me-ionisti"
+
+
+def test_skroutz_air_conditioner_omits_ionizer_when_not_supported() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="Toyotomi",
+        mpn="GTN/GTG-18CMW",
+        name="Toyotomi Gosai Κλιματιστικό Inverter 18000 BTU A+++/A++ με WiFi",
+        key_specs=[SpecItem(label="Απόδοση (BTU)", value="18000 BTU")],
+        spec_sections=[
+            SpecSection(
+                section="Ενεργειακή Κλάση",
+                items=[
+                    SpecItem(label="Ψύξης", value="A+++"),
+                    SpecItem(label="Θέρμανσης (Μέση Ζώνη)", value="A++"),
+                ],
+            ),
+            SpecSection(section="Δυνατότητες & Λειτουργίες", items=[SpecItem(label="Ιονιστής", value="Όχι")]),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΚΛΙΜΑΤΙΣΜΟΣ ΘΕΡΜΑΝΣΗ",
+        leaf_category="Κλιματιστικά",
+        sub_category="Τοίχου",
+    )
+
+    fields = build_deterministic_product_fields(source, taxonomy, "415899", derive_seo_keyword)
+
+    assert fields["name"] == "Toyotomi GTN/GTG-18CMW – Κλιματιστικό 18000 BTU A+++/A++"
+    assert fields["meta_title"] == "Toyotomi GTN/GTG-18CMW Κλιματιστικό 18000 BTU A+++/A++ | eTranoulis"
+    assert fields["seo_keyword"] == "toyotomi-gtn-gtg-18cmw-klimatistiko-18000-btu-a-a"
+
+
 def test_deterministic_name_and_meta_title_follow_business_rules() -> None:
     source = SourceProductData(
         brand="LG",

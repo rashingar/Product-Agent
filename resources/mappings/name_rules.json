@@ -146,6 +146,32 @@
         "skroutz"
       ],
       "match": {
+        "family": "air_conditioner"
+      },
+      "category_phrase": "Κλιματιστικό",
+      "strategy_id": "air_conditioner",
+      "outputs": {
+        "name": [
+          "btu",
+          "energy_class",
+          "ionizer"
+        ],
+        "meta_title": [
+          "btu",
+          "energy_class"
+        ],
+        "seo_keyword": [
+          "btu",
+          "energy_class",
+          "ionizer"
+        ]
+      }
+    },
+    {
+      "source_scope": [
+        "skroutz"
+      ],
+      "match": {
         "family": "tabletop_hob"
       },
       "category_phrase": "Επιτραπέζια Εστία",

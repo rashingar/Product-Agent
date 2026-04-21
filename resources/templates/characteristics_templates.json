@@ -336,6 +336,211 @@
       ]
     },
     {
+      "template_id": "skroutz_wall_air_conditioner_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_leaf": "Κλιματιστικά",
+        "taxonomy_sub": "Τοίχου"
+      },
+      "preferred_schema_source_files": [
+        "toixoy.json"
+      ],
+      "sections": [
+        {
+          "title": "Ψυκτική / Θερμική Απόδοση",
+          "fields": [
+            {
+              "label": "Ονομαστική Απόδοση (Btu/h)",
+              "aliases": [
+                "Απόδοση (BTU)"
+              ]
+            },
+            {
+              "label": "Ψυκτική Απόδοση ( Btu/h )",
+              "aliases": [
+                "Ισχύς Ψύξης"
+              ]
+            },
+            {
+              "label": "Θερμική Απόδοση ( Btu/h )",
+              "aliases": [
+                "Ισχύς Θέρμανσης"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Βαθμοί Εποχιακής Απόδοσης",
+          "fields": [
+            {
+              "label": "Βαθμός Εποχιακής Απόδοσης Ψύξης - SEER",
+              "aliases": [
+                "Βαθμός Απόδοσης Ψύξης (SEER)"
+              ]
+            },
+            {
+              "label": "Ενεργειακή Κλάση Ψύξης",
+              "aliases": [
+                "Ψύξης"
+              ]
+            },
+            {
+              "label": "Βαθμός Εποχιακής Απόδοσης Θέρμανσης Μέσης Εποχής - SCOP",
+              "aliases": [
+                "Βαθμός Απόδοσης Θέρμανσης (SCOP)"
+              ]
+            },
+            {
+              "label": "Ενεργειακή Κλάση Θέρμανσης Μέσης Εποχής",
+              "aliases": [
+                "Θέρμανσης (Μέση Ζώνη)"
+              ]
+            },
+            {
+              "label": "Βαθμός Εποχιακής Απόδοσης Θέρμανσης Θερμότερης Εποχής - SCOP",
+              "aliases": [
+                "Βαθμός Απόδοσης Θέρμανσης (SCOP) Θερμή Ζώνη"
+              ]
+            },
+            {
+              "label": "Ενεργειακή Κλάση Θέρμανσης Θερμότερης Εποχής",
+              "aliases": [
+                "Θέρμανσης (Θερμή Ζώνη)"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Καταναλώσεις",
+          "fields": [
+            {
+              "label": "Ετήσια Κατανάλωση Ψύξης ( kWh / a )",
+              "aliases": [
+                "Κατανάλωση Ψύξης"
+              ]
+            },
+            {
+              "label": "Ετήσια Κατανάλωση Θέρμανσης Μέσης Εποχής ( kWh / a )",
+              "aliases": [
+                "Κατανάλωση Θέρμανσης"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Επιπλέον Χαρακτηριστικά",
+          "fields": [
+            {
+              "label": "Τεχνολογία Κλιματιστικού",
+              "resolver": "air_conditioner_technology"
+            },
+            {
+              "label": "Ψυκτικό Υγρό",
+              "aliases": [
+                "Οικολογικό Ψυκτικό Υγρό (R32)"
+              ],
+              "resolver": "air_conditioner_refrigerant",
+              "refrigerant_code": "R32"
+            },
+            {
+              "label": "Ηχητική Ισχύς Εσωτερικής Μονάδας dB(A) - Hi",
+              "aliases": [
+                "Εσωτερικής Μονάδας"
+              ]
+            },
+            {
+              "label": "Ηχητική Ισχύς Εξωτερικής Μονάδας dB(A) - Hi",
+              "aliases": [
+                "Εξωτερικής Μονάδας"
+              ]
+            },
+            {
+              "label": "Αφύγρανση",
+              "resolver": "air_conditioner_dehumidification"
+            },
+            {
+              "label": "Φίλτρα",
+              "aliases": [
+                "Τύπος Φίλτρων"
+              ]
+            },
+            {
+              "label": "Πρόσθετες Λειτουργίες Κλιματιστικού",
+              "resolver": "air_conditioner_extra_features"
+            }
+          ]
+        },
+        {
+          "title": "Διαστάσεις και Βάρος",
+          "fields": [
+            {
+              "label": "Ύψος Εσωτερικής Μονάδας ( mm )",
+              "aliases": [
+                "Ύψος Εσωτερικής Μονάδας"
+              ],
+              "resolver": "air_conditioner_dimension_mm"
+            },
+            {
+              "label": "Πλάτος Εσωτερικής Μονάδας ( mm )",
+              "aliases": [
+                "Μήκος Εσωτερικής Μονάδας"
+              ],
+              "resolver": "air_conditioner_dimension_mm"
+            },
+            {
+              "label": "Βάθος Εσωτερικής Μονάδας ( mm )",
+              "aliases": [
+                "Βάθος Εσωτερικής Μονάδας"
+              ],
+              "resolver": "air_conditioner_dimension_mm"
+            },
+            {
+              "label": "Ύψος Εξωτερικής Μονάδας ( mm )",
+              "aliases": [
+                "Ύψος Εξωτερικής Μονάδας"
+              ],
+              "resolver": "air_conditioner_dimension_mm"
+            },
+            {
+              "label": "Πλάτος Εξωτερικής Μονάδας ( mm )",
+              "aliases": [
+                "Μήκος Εξωτερικής Μονάδας"
+              ],
+              "resolver": "air_conditioner_dimension_mm"
+            },
+            {
+              "label": "Βάθος Εξωτερικής Μονάδας ( mm )",
+              "aliases": [
+                "Βάθος Εξωτερικής Μονάδας"
+              ],
+              "resolver": "air_conditioner_dimension_mm"
+            }
+          ]
+        },
+        {
+          "title": "Γενικά Χαρακτηριστικά",
+          "fields": [
+            {
+              "label": "Εγγύηση Κατασκευαστή ( Εσωτερική μονάδα ) - Έτη",
+              "aliases": [
+                "Επιμέρους Εγγύηση Κατασκευαστή"
+              ],
+              "resolver": "air_conditioner_warranty_years",
+              "warranty_target": "unit"
+            },
+            {
+              "label": "Εγγύηση Κατασκευαστή ( Συμπιεστής ) - Έτη",
+              "aliases": [
+                "Επιμέρους Εγγύηση Κατασκευαστή"
+              ],
+              "resolver": "air_conditioner_warranty_years",
+              "warranty_target": "compressor"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "template_id": "skroutz_soundbar_v1",
       "match": {
         "source_name": "skroutz",

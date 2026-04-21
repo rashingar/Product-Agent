@@ -385,6 +385,8 @@ def build_source_scoped_deterministic_fields(
         return _build_ice_cream_maker_deterministic_fields(rule, taxonomy, model, seo_keyword_builder, brand, mpn, spec_lookup)
     if strategy_id == "tabletop_hob":
         return _build_tabletop_hob_deterministic_fields(rule, taxonomy, model, seo_keyword_builder, raw_title, brand, mpn, spec_lookup)
+    if strategy_id == "air_conditioner":
+        return _build_air_conditioner_deterministic_fields(rule, source, taxonomy, model, seo_keyword_builder, raw_title, brand, mpn, spec_lookup)
     raise ValueError(f"Unsupported deterministic source strategy: {rule.strategy_id}")
 
 
@@ -620,6 +622,42 @@ def _build_tabletop_hob_deterministic_fields(
     return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
 
 
+def _build_air_conditioner_deterministic_fields(
+    rule: SourceScopedRule,
+    source: SourceProductData,
+    taxonomy: TaxonomyResolution,
+    model: str,
+    seo_keyword_builder,
+    raw_title: str,
+    brand: str,
+    mpn: str,
+    spec_lookup: dict[str, str],
+) -> dict[str, object]:
+    category_phrase = rule.category_phrase
+    components = {
+        "btu": _format_air_conditioner_btu(spec_lookup, raw_title),
+        "energy_class": _format_air_conditioner_energy_class(spec_lookup, raw_title),
+        "ionizer": _format_air_conditioner_ionizer(spec_lookup, source),
+    }
+    differentiators = _source_rule_output_parts(rule, "name", components)
+    name = compose_name(brand, mpn, category_phrase, differentiators)
+    meta_title = compose_meta_title(
+        name=name,
+        brand=brand,
+        mpn=mpn,
+        category_phrase=category_phrase,
+        differentiators=_source_rule_output_parts(rule, "meta_title", components),
+        preserve_title=False,
+    )
+    seo_keyword = seo_keyword_builder(
+        normalize_whitespace(
+            " ".join(part for part in [brand, mpn, category_phrase, *_source_rule_output_parts(rule, "seo_keyword", components)] if part)
+        ),
+        model,
+    )
+    return _skroutz_result(brand, mpn, category_phrase, differentiators, name, meta_title, seo_keyword, taxonomy)
+
+
 def _skroutz_result(
     brand: str,
     mpn: str,
@@ -655,6 +693,8 @@ def resolve_skroutz_family(taxonomy: TaxonomyResolution) -> str | None:
     leaf = normalize_for_match(taxonomy.leaf_category)
     if sub == normalize_for_match("Sound Bars") and leaf == normalize_for_match("Audio Systems"):
         return "soundbar"
+    if leaf == normalize_for_match("Κλιματιστικά"):
+        return "air_conditioner"
     if sub == normalize_for_match("Ψυγειοκαταψύκτες"):
         return "fridge_freezer"
     if sub == normalize_for_match("Καφετιέρες Φίλτρου"):
@@ -1268,6 +1308,60 @@ def normalize_connectivity(value: str) -> str:
     if normalized in {"wifi", "wi fi"}:
         return "WiFi"
     return normalize_whitespace(value)
+
+
+def _format_air_conditioner_btu(spec_lookup: dict[str, str], raw_title: str) -> str:
+    raw = normalize_value(spec_lookup, ["Απόδοση (BTU)", "BTU", "Ονομαστική Απόδοση", "Απόδοση Ψύξης BTU"])
+    candidate = raw or raw_title
+    if not candidate:
+        return ""
+    match = re.search(r"\b(\d{4,6})\s*BTU\b", candidate, flags=re.IGNORECASE)
+    if match:
+        return f"{match.group(1)} BTU"
+    number_match = re.search(r"\b(\d{4,6})\b", normalize_whitespace(candidate))
+    if raw and number_match:
+        return f"{number_match.group(1)} BTU"
+    return ""
+
+
+def _extract_air_conditioner_energy_token(value: str) -> str:
+    normalized = normalize_whitespace(value)
+    if not normalized:
+        return ""
+    match = re.search(r"(?<![A-Z])([A-G](?:\+{1,3})?)(?![A-Z])", normalized, flags=re.IGNORECASE)
+    return match.group(1).upper() if match else ""
+
+
+def _format_air_conditioner_energy_class(spec_lookup: dict[str, str], raw_title: str) -> str:
+    cooling = _extract_air_conditioner_energy_token(normalize_value(spec_lookup, ["Ψύξης", "Ενεργειακή Κλάση Ψύξης"]))
+    heating = _extract_air_conditioner_energy_token(
+        normalize_value(spec_lookup, ["Θέρμανσης (Μέση Ζώνη)", "Ενεργειακή Κλάση Θέρμανσης", "Ενεργειακή Κλάση Θέρμανσης Μέσης Εποχής"])
+    )
+    if cooling and heating:
+        return f"{cooling}/{heating}"
+
+    combined = normalize_value(spec_lookup, ["Ενεργειακή Κλάση", "Ενεργειακή Κλάση Ψύξης/Θέρμανσης"])
+    if combined:
+        pair_match = re.search(r"(?<![A-Z])([A-G](?:\+{1,3})?)\s*/\s*([A-G](?:\+{1,3})?)(?![A-Z])", combined, flags=re.IGNORECASE)
+        if pair_match:
+            return f"{pair_match.group(1).upper()}/{pair_match.group(2).upper()}"
+        token = _extract_air_conditioner_energy_token(combined)
+        if token:
+            return token
+
+    title_match = re.search(r"(?<![A-Z])([A-G](?:\+{1,3})?)\s*/\s*([A-G](?:\+{1,3})?)(?![A-Z])", raw_title or "", flags=re.IGNORECASE)
+    if title_match:
+        return f"{title_match.group(1).upper()}/{title_match.group(2).upper()}"
+    return ""
+
+
+def _format_air_conditioner_ionizer(spec_lookup: dict[str, str], source: SourceProductData) -> str:
+    ionizer_value = normalize_value(spec_lookup, ["Ιονιστής", "Λειτουργία Ιονιστή"])
+    if normalize_for_match(ionizer_value) in {"ναι", "yes", "supported", "υποστηριζεται"}:
+        return "με Ιονιστή"
+    if "ιονιστ" in normalize_for_match(source.name):
+        return "με Ιονιστή"
+    return ""
 
 
 def normalize_color_differentiator(spec_lookup: dict[str, str]) -> str:
