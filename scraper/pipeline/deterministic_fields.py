@@ -1037,6 +1037,10 @@ def normalize_name_rule_value(
     if not normalized:
         return ""
     alias_keys = {normalize_for_match(alias) for alias in aliases}
+    if normalize_for_match("Χρώμα") in alias_keys and "," in normalized:
+        primary_color = normalize_whitespace(normalized.split(",", 1)[0])
+        if primary_color:
+            normalized = primary_color
     unit = infer_measurement_unit(aliases, matched_label, category_phrase, taxonomy, normalized)
     if unit and not _is_tv_scope(category_phrase, taxonomy):
         return compact_unit_value(normalized, unit)

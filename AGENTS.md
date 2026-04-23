@@ -20,6 +20,7 @@ treat it as a request to run the full pipeline.
 
 ## End-To-End Flow
 
+0. use the repo environment always for the pipeline
 1. Parse the template fields exactly as provided.
 2. If `url` is a currently supported product URL recognized by the runtime source-detection layer, run:
    `python -m pipeline.workflow prepare --model {model} --url "{url}" --photos {photos} --sections {sections} --skroutz-status {skroutz_status} --boxnow {boxnow} --price {price}`

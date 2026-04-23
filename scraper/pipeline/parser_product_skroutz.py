@@ -76,6 +76,15 @@ SKROUTZ_FAMILIES: dict[str, dict[str, Any]] = {
         "spec_mode": "raw",
         "taxonomy_mode": "family",
     },
+    "hair_straightener": {
+        "category_labels": {"Πρέσες Μαλλιών"},
+        "category_href_tokens": {"preses mallion"},
+        "title_tokens": {"presa mallion", "isiotik", "straightener"},
+        "breadcrumbs": ["Αρχική", "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ", "Προσωπική Φροντίδα", "Βούρτσες-Ψαλίδια-ισιωτικά"],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "family",
+    },
     "television": {
         "category_labels": {"Τηλεοράσεις"},
         "category_href_tokens": {"tileoraseis", "television"},
@@ -217,7 +226,7 @@ class SkroutzProductParser:
         provenance["category_tag"] = category_source
         diagnostics["category_tag"] = self._make_diagnostic(category_tag_text or category_tag_href, category_source, 0.95 if category_tag_text or category_tag_href else 0.0, category_trace)
 
-        family = self._resolve_family(category_tag_text, category_tag_href, title)
+        family = self._resolve_family(category_tag_text, category_tag_href, title, canonical_url)
         family_config = SKROUTZ_FAMILIES.get(family, {})
 
         merchant_titles = self._extract_merchant_titles(soup)
@@ -417,10 +426,19 @@ class SkroutzProductParser:
         value = normalize_whitespace(jsonld.get("category"))
         return (value, "", "jsonld:category", trace) if value else ("", "", "missing", trace)
 
-    def _resolve_family(self, category_hint: str, category_href: str, title: str) -> str | None:
+    def _resolve_family(self, category_hint: str, category_href: str, title: str, canonical_url: str = "") -> str | None:
         category_norm = normalize_for_match(category_hint)
         slug_norm = normalize_for_match(normalize_category_href_slug(category_href))
         title_norm = normalize_for_match(title)
+        canonical_norm = (canonical_url or "").strip().lower()
+        if (
+            "entoichiz" in title_norm
+            or "built in" in title_norm
+            or "ano pagkou" in title_norm
+            or "entoichiz" in canonical_norm
+            or "ano-pagou" in canonical_norm
+        ):
+            return "built_in_appliance"
         for family, config in SKROUTZ_FAMILIES.items():
             labels = {normalize_for_match(label) for label in config.get("category_labels", set())}
             href_tokens = {normalize_for_match(token) for token in config.get("category_href_tokens", set())}
@@ -428,8 +446,6 @@ class SkroutzProductParser:
                 return family
             if href_tokens and any(token and token in slug_norm for token in href_tokens):
                 return family
-        if "entoichiz" in title_norm or "built in" in title_norm:
-            return "built_in_appliance"
         for family, config in SKROUTZ_FAMILIES.items():
             title_tokens = {normalize_for_match(token) for token in config.get("title_tokens", set())}
             if title_tokens and any(token and token in title_norm for token in title_tokens):

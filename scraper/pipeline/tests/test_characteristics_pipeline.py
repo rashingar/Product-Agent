@@ -1054,3 +1054,61 @@ def test_built_in_hob_characteristics_prefer_manufacturer_values_on_conflict() -
     assert values[normalize_for_match("Αριθμός Ζωνών")] == "4"
     assert values[normalize_for_match("Αριθμός Ζωνών")] != "2"
 
+def test_skroutz_hair_straightener_characteristics_use_alias_enrichment() -> None:
+    source = SourceProductData(
+        source_name="skroutz",
+        brand="GA.MA",
+        mpn="GI3034",
+        name="GA.MA GI3034 Πρέσα Μαλλιών με Κεραμικές Πλάκες 45W",
+        spec_sections=[
+            SpecSection(
+                section="Βασικά Χαρακτηριστικά",
+                items=[
+                    SpecItem(label="Κεραμικές Πλάκες", value="Ναι"),
+                    SpecItem(label="Ατμός", value="Όχι"),
+                    SpecItem(label="Επαγγελματική", value="Ναι"),
+                    SpecItem(label="Ισχύς", value="45 W"),
+                    SpecItem(label="Μέγιστη Θερμοκρασία", value="230 °C"),
+                    SpecItem(label="Mini", value="-"),
+                ],
+            ),
+            SpecSection(
+                section="Λεπτομέρειες",
+                items=[
+                    SpecItem(label="Φαρδιές Πλάκες", value="Ναι"),
+                    SpecItem(label="Επίστρωση Τουρμαλίνης", value="Όχι"),
+                    SpecItem(label="Ionic", value="Όχι"),
+                    SpecItem(label="Επίστρωση Τιτανίου", value="Ναι"),
+                    SpecItem(label="Χρώμα", value="Μαύρο"),
+                    SpecItem(label="Επίστρωση Κερατίνης", value="-"),
+                    SpecItem(label="Ειδικά Χαρακτηριστικά", value="Περιστρεφόμενο Καλώδιο"),
+                    SpecItem(label="Σειρά", value="-"),
+                ],
+            ),
+        ],
+        presentation_source_text="Περιστρεφόμενο καλώδιο",
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        leaf_category="Προσωπική Φροντίδα",
+        sub_category="Βούρτσες-Ψαλίδια-ισιωτικά",
+    )
+
+    html, diagnostics, _warnings = build_characteristics_for_product(
+        source,
+        taxonomy,
+        schema_match=SchemaMatchResult(matched_schema_id=_schema_id_for_source_file("isiotika_mallion.json"), score=0.9),
+    )
+
+    soup = BeautifulSoup(html, "lxml")
+    values = {
+        normalize_for_match(cells[0].get_text(" ", strip=True)): cells[1].get_text(" ", strip=True)
+        for cells in (row.find_all("td") for row in soup.select("tbody tr"))
+        if len(cells) == 2
+    }
+
+    assert diagnostics["template_source"] == "schema_library_with_custom_overrides"
+    assert values[normalize_for_match("Τεχνολογία Πλάκας")] == "Κεραμική, Τιτανίου"
+    assert values[normalize_for_match("Μέγιστη Θερμοκρασία σε °C")] == "230 °C"
+    assert values[normalize_for_match("Σύστημα Ιονισμού")] == "Όχι"
+    assert values[normalize_for_match("Περιστρεφόμενο Καλώδιο")] == "Ναι"

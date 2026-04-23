@@ -102,6 +102,34 @@ def test_skroutz_air_conditioner_omits_ionizer_when_not_supported() -> None:
     assert fields["seo_keyword"] == "toyotomi-gtn-gtg-18cmw-klimatistiko-18000-btu-a-a"
 
 
+def test_electronet_emagie_cooker_uses_specific_name_schema_and_primary_color() -> None:
+    source = SourceProductData(
+        source_name="electronet",
+        brand="Eskimo",
+        mpn="EM5070W",
+        name="Κουζίνα Εμαγιέ Eskimo ES EM5070W Λευκή Α",
+        key_specs=[
+            SpecItem(label="Τύπος Συσκευής", value="Ηλεκτρική κουζίνα με εμαγιέ εστίες"),
+            SpecItem(label="Χωρητικότητα Φούρνου σε Λίτρα", value="60"),
+            SpecItem(label="Τύπος Εστίας", value="Εμαγιέ βάση με 4 ηλεκτρικές εστίες"),
+            SpecItem(label="Ενεργειακή Κλάση", value="A"),
+            SpecItem(label="Χρώμα", value="Λευκό,Μαύρο"),
+            SpecItem(label="Πλάτος Συσκευής σε Εκατοστά", value="59,8"),
+        ],
+    )
+    taxonomy = TaxonomyResolution(
+        parent_category="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        leaf_category="Κουζίνες",
+        sub_category="Κουζίνες Εμαγιέ",
+    )
+
+    fields = build_deterministic_product_fields(source, taxonomy, "233859", derive_seo_keyword)
+
+    assert fields["name"] == "Eskimo EM5070W – Ηλεκτρική κουζίνα με εμαγιέ εστίες 59,8cm Λευκό 60Lt A"
+    assert fields["meta_title"] == "Eskimo EM5070W Ηλεκτρική κουζίνα με εμαγιέ εστίες 59,8cm Λευκό | eTranoulis"
+    assert fields["seo_keyword"] == "eskimo-em5070w-ilektriki-kouzina-me-emagie-esties-598cm-leyko-60lt-a"
+
+
 def test_deterministic_name_and_meta_title_follow_business_rules() -> None:
     source = SourceProductData(
         brand="LG",

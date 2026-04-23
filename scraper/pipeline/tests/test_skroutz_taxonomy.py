@@ -169,3 +169,23 @@ def test_ice_cream_maker_category_resolves_to_small_appliance_taxonomy() -> None
     assert taxonomy.leaf_category == "Μικροί Μάγειρες"
     assert taxonomy.sub_category == "Παγωτομηχανές"
 
+def test_hair_straightener_category_resolves_to_personal_care_taxonomy() -> None:
+    parser = SkroutzProductParser()
+    resolver = TaxonomyResolver()
+    row = {
+        "name": "GA.MA GI3034 Πρέσα Μαλλιών με Κεραμικές Πλάκες 45W",
+        "category_tag_text": "Πρέσες Μαλλιών",
+        "category_tag_href": "https://www.skroutz.gr/c/1512/Preses-Mallion.html",
+        "manufacturer": "GA.MA",
+        "skroutz_product_url": "https://www.skroutz.gr/s/58285703/GA-MA-GI3034-Presa-Mallion-me-Keramikes-Plakes-45W.html",
+        "model": "GI3034",
+    }
+
+    parsed = parser.parse(build_minimal_taxonomy_html(row), row["skroutz_product_url"])
+    taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url, parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
+
+    assert parsed.source.page_type == "product"
+    assert parsed.source.skroutz_family == "hair_straightener"
+    assert taxonomy.parent_category == "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ"
+    assert taxonomy.leaf_category == "Προσωπική Φροντίδα"
+    assert taxonomy.sub_category == "Βούρτσες-Ψαλίδια-ισιωτικά"

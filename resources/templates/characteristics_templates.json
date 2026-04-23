@@ -936,6 +936,158 @@
           ]
         }
       ]
+    },
+    {
+      "template_id": "skroutz_hair_straightener_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_parent": "ΟΙΚΙΑΚΟΣ ΕΞΟΠΛΙΣΜΟΣ",
+        "taxonomy_leaf": "Προσωπική Φροντίδα",
+        "taxonomy_sub": "Βούρτσες-Ψαλίδια-ισιωτικά"
+      },
+      "preferred_schema_source_files": [
+        "isiotika_mallion.json"
+      ],
+      "sections": [
+        {
+          "title": "Επισκόπηση Προϊόντος",
+          "fields": [
+            {
+              "label": "Τεχνολογία Πλάκας",
+              "resolver": "personal_care_plate_technology",
+              "aliases": [
+                "Τεχνολογία Πλάκας"
+              ]
+            },
+            {
+              "label": "Μέγιστη Θερμοκρασία σε °C",
+              "aliases": [
+                "Μέγιστη Θερμοκρασία",
+                "Μέγιστη Θερμοκρασία σε °C"
+              ]
+            },
+            {
+              "label": "Σύστημα Ιονισμού",
+              "resolver": "personal_care_yes_no",
+              "aliases": [
+                "Ionic",
+                "Σύστημα Ιονισμού"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Γενικά Χαρακτηριστικά",
+          "fields": [
+            {
+              "label": "Περιστρεφόμενο Καλώδιο",
+              "resolver": "personal_care_rotating_cord",
+              "aliases": [
+                "Περιστρεφόμενο Καλώδιο",
+                "Ειδικά Χαρακτηριστικά"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "template_id": "skroutz_built_in_oven_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_parent": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        "taxonomy_leaf": "Εντοιχιζόμενες Συσκευές",
+        "taxonomy_sub": "Φούρνοι"
+      },
+      "preferred_schema_source_files": [
+        "entoixizomenoi_foyrnoi.json"
+      ],
+      "sections": [
+        {
+          "title": "Επισκόπηση Προϊόντος",
+          "fields": [
+            {
+              "label": "Τρόπος Εντοιχισμού",
+              "resolver": "oven_installation_type",
+              "aliases": [
+                "Είδος",
+                "Τρόπος Εντοιχισμού"
+              ]
+            },
+            {
+              "label": "Χωρητικότητα Φούρνου σε Λίτρα",
+              "resolver": "oven_number",
+              "aliases": [
+                "Χωρητικότητα Φούρνου"
+              ]
+            },
+            {
+              "label": "Αριθμός Λειτουργιών Ψησίματος",
+              "resolver": "oven_number",
+              "aliases": [
+                "Τρόποι Ψησίματος"
+              ]
+            },
+            {
+              "label": "Τρόποι Λειτουργίας Ψησίματος",
+              "aliases": [
+                "Τύποι Ψησίματος"
+              ]
+            },
+            {
+              "label": "Οθόνη Ψηφιακών Ενδείξεων",
+              "resolver": "oven_yes_no",
+              "aliases": [
+                "Ψηφιακή Οθόνη"
+              ]
+            },
+            {
+              "label": "Χειρισμός",
+              "aliases": [
+                "Διακόπτες"
+              ]
+            },
+            {
+              "label": "Ηλεκτρονικό Ρολόι",
+              "resolver": "oven_clock",
+              "aliases": [
+                "Ηλεκτρονικό Ρολόι",
+                "Ψηφιακή Οθόνη"
+              ]
+            },
+            {
+              "label": "Καθαρισμός Φούρνου",
+              "aliases": [
+                "Σύστημα Καθαρισμού"
+              ]
+            },
+            {
+              "label": "Άλλα Χαρακτηριστικά",
+              "resolver": "oven_other_features"
+            },
+            {
+              "label": "Συνδεσιμότητα",
+              "resolver": "oven_connectivity",
+              "aliases": [
+                "WiFi",
+                "Συνδεσιμότητα"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ασφάλεια",
+          "fields": [
+            {
+              "label": "Κλείδωμα Ασφαλείας για Παιδιά",
+              "resolver": "oven_yes_no",
+              "aliases": [
+                "Κλείδωμα"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

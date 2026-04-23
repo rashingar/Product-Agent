@@ -1,3 +1,5 @@
+import json
+
 from pipeline.repo_paths import (
     CATALOG_TAXONOMY_PATH,
     CHARACTERISTICS_TEMPLATES_PATH,
@@ -53,4 +55,14 @@ def test_support_files_resolve_from_resources_layout() -> None:
     for actual_path, expected_path in expected_paths:
         assert actual_path == expected_path
         assert actual_path.exists()
+
+
+def test_kouzines_emagie_filter_map_has_expected_category_filters() -> None:
+    filter_map = json.loads(FILTER_MAP_PATH.read_text(encoding="utf-8"))
+    expected = ["Τύπος φούρνου", "Ενεργειακή Κλάση", "Χρώμα", "Χωρητικότητα Φούρνου"]
+
+    subcategory_row = next(row for row in filter_map["subcategories"] if row["key"] == "Κουζίνες Εμαγιέ")
+
+    assert subcategory_row["filter_groups"] == expected
+    assert filter_map["by_sub_category_key"]["Κουζίνες Εμαγιέ"]["filter_groups"] == expected
 

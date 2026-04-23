@@ -189,7 +189,10 @@ class ElectronetFetcher:
                     section_locator = sections_locator.nth(section_index)
                     section_locator.scroll_into_view_if_needed(timeout=10000)
                     page.wait_for_timeout(500)
-                    title = normalize_whitespace(section_locator.locator("h2, h3, h4").first.inner_text(timeout=10000))
+                    title_locator = section_locator.locator("h2, h3, h4").first
+                    if title_locator.count() == 0:
+                        continue
+                    title = normalize_whitespace(title_locator.inner_text(timeout=10000))
                     if not title:
                         continue
                     if normalize_for_match(title) in SKIPPED_SECTION_TITLES:

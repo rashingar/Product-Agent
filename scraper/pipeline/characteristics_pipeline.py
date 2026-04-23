@@ -889,6 +889,122 @@ def _normalize_yes_no(value: str) -> str:
     return ""
 
 
+def _resolve_personal_care_plate_technology(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    direct_value, direct_source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    if direct_value:
+        return direct_value, direct_source
+
+    features: list[str] = []
+    matched_sources: list[str] = []
+    candidates = [
+        ("Κεραμική", "Κεραμικές Πλάκες"),
+        ("Τουρμαλίνη", "Επίστρωση Τουρμαλίνης"),
+        ("Τιτανίου", "Επίστρωση Τιτανίου"),
+        ("Κερατίνης", "Επίστρωση Κερατίνης"),
+    ]
+    for display, alias in candidates:
+        value, source = _first_value_from_aliases(context, [alias])
+        if _normalize_yes_no(value) == "Ναι":
+            features.append(display)
+            if source:
+                matched_sources.append(source)
+    if features:
+        return ", ".join(features), ",".join(matched_sources) or "spec_alias:plate_technology"
+    return "", "unresolved"
+
+
+def _resolve_personal_care_yes_no(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    normalized = _normalize_yes_no(value)
+    return (normalized, source) if normalized else ("", "unresolved")
+
+
+def _resolve_personal_care_rotating_cord(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(context.combined_text, "περιστρεφόμενο καλώδιο", "swivel cord"):
+        return "Ναι", "combined_text:rotating_cord"
+    return "", "unresolved"
+
+
+def _resolve_oven_installation_type(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    haystack = normalize_whitespace(" ".join(part for part in [value, context.source.name, context.source.canonical_url] if part))
+    if _contains_any(haystack, "ano pagkou", "άνω πάγκου"):
+        return "Άνω Πάγκου", source or "title_or_url:installation_type"
+    if value:
+        return value, source
+    return "", "unresolved"
+
+
+def _resolve_oven_number(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    count = _extract_int_from_text(value)
+    return (str(count), source) if count is not None else ("", "unresolved")
+
+
+def _resolve_oven_yes_no(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    normalized = _normalize_yes_no(value)
+    return (normalized, source) if normalized else ("", "unresolved")
+
+
+def _resolve_oven_clock(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(context.combined_text, "ψηφιακή οθόνη", "digital display"):
+        return "Ναι", source or "combined_text:clock"
+    return "", "unresolved"
+
+
+def _resolve_oven_connectivity(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    normalized = _normalize_yes_no(value)
+    if normalized == "Ναι":
+        return "WiFi", source
+    if normalized == "Όχι":
+        return "Όχι", source
+    if _contains_any(context.combined_text, "wifi", "wi-fi", "thinq"):
+        return "WiFi", source or "combined_text:connectivity"
+    return "", "unresolved"
+
+
+def _resolve_oven_other_features(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    features: list[str] = []
+    matched_sources: list[str] = []
+    candidates = [
+        ("Air Fry", "Air Fry"),
+        ("Τηλεσκοπικός Μηχανισμός", "Τηλεσκοπικός Μηχανισμός"),
+        ("Μαγείρεμα με Ατμό", "Μαγείρεμα με Ατμό"),
+    ]
+    for display, alias in candidates:
+        value, source = _first_value_from_aliases(context, [alias])
+        if _normalize_yes_no(value) == "Ναι":
+            features.append(display)
+            if source:
+                matched_sources.append(source)
+
+    accessories, accessories_source = _first_value_from_aliases(context, ["Αξεσουάρ"])
+    accessories = normalize_whitespace(accessories)
+    if accessories and accessories != "-":
+        features.append(accessories)
+        if accessories_source:
+            matched_sources.append(accessories_source)
+
+    connectivity, connectivity_source = _first_value_from_aliases(context, ["WiFi"])
+    if _normalize_yes_no(connectivity) == "Ναι":
+        features.append("WiFi")
+        if connectivity_source:
+            matched_sources.append(connectivity_source)
+
+    deduped = dedupe_strings(features)
+    return (", ".join(deduped), ",".join(dedupe_strings(matched_sources)) or "spec_alias:oven_features") if deduped else ("", "unresolved")
+
+
 def _format_decimal(value: float) -> str:
     if abs(value - round(value)) < 1e-9:
         return str(int(round(value)))
@@ -1543,6 +1659,15 @@ _RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, 
     "air_conditioner_extra_features": _resolve_air_conditioner_extra_features,
     "air_conditioner_dimension_mm": _resolve_air_conditioner_dimension_mm,
     "air_conditioner_warranty_years": _resolve_air_conditioner_warranty_years,
+    "personal_care_plate_technology": _resolve_personal_care_plate_technology,
+    "personal_care_yes_no": _resolve_personal_care_yes_no,
+    "personal_care_rotating_cord": _resolve_personal_care_rotating_cord,
+    "oven_installation_type": _resolve_oven_installation_type,
+    "oven_number": _resolve_oven_number,
+    "oven_yes_no": _resolve_oven_yes_no,
+    "oven_clock": _resolve_oven_clock,
+    "oven_connectivity": _resolve_oven_connectivity,
+    "oven_other_features": _resolve_oven_other_features,
     "fridge_temperature_control": _resolve_fridge_temperature_control,
     "fridge_installation_type": _resolve_fridge_installation_type,
     "fridge_dual_cooling_circuits": _resolve_fridge_dual_cooling_circuits,

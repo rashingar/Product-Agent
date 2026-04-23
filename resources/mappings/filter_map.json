@@ -561,8 +561,12 @@
       "sub_category": "Κουζίνες Εμαγιέ",
       "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > Κουζίνες Εμαγιέ",
       "url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines/kouzines-emagie",
-      "filter_groups": [],
-      "notes": "Filters not detectable (no filter module in page source)."
+      "filter_groups": [
+        "Τύπος φούρνου",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χωρητικότητα Φούρνου"
+      ]
     },
     {
       "key": "Κουζίνες Αερίου",
@@ -2277,8 +2281,12 @@
       "sub_category": "Κουζίνες Εμαγιέ",
       "path": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ > Κουζίνες > Κουζίνες Εμαγιέ",
       "url": "https://www.etranoulis.gr/oikiakes-syskeues/kouzines/kouzines-emagie",
-      "filter_groups": [],
-      "notes": "Filters not detectable (no filter module in page source)."
+      "filter_groups": [
+        "Τύπος φούρνου",
+        "Ενεργειακή Κλάση",
+        "Χρώμα",
+        "Χωρητικότητα Φούρνου"
+      ]
     },
     "Κουζίνες Αερίου": {
       "key": "Κουζίνες Αερίου",

@@ -51,18 +51,9 @@ def _select_skroutz_image_backed_sections(
     rendered_sections: list[dict[str, Any]],
     requested_sections: int,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    if len(all_sections) < requested_sections:
-        raise RuntimeError(
-            f"Skroutz section extraction failed: expected {requested_sections} sections, found {len(all_sections)}"
-        )
-
-    if len(rendered_sections) < requested_sections:
-        raise RuntimeError(
-            f"Skroutz rendered section extraction failed: expected {requested_sections} image records, found {len(rendered_sections)}"
-        )
-
     selected_blocks: list[dict[str, Any]] = []
     selected_rendered_sections: list[dict[str, Any]] = []
+    effective_limit = min(requested_sections, len(all_sections), len(rendered_sections))
     for block, rendered_section in zip(all_sections, rendered_sections):
         block_title = normalize_for_match(str(block.get("title", "")))
         rendered_title = normalize_for_match(str(rendered_section.get("title", "")))
@@ -75,12 +66,10 @@ def _select_skroutz_image_backed_sections(
 
         selected_blocks.append(block)
         selected_rendered_sections.append(rendered_section)
-        if len(selected_blocks) == requested_sections:
+        if len(selected_blocks) == effective_limit:
             return selected_blocks, selected_rendered_sections
 
-    raise RuntimeError(
-        f"Skroutz rendered section extraction failed: expected {requested_sections} image-backed sections, found {len(selected_blocks)}"
-    )
+    return selected_blocks, selected_rendered_sections
 
 
 def _section_image_candidates_for_block(block: dict[str, Any]) -> list[str]:
@@ -218,6 +207,12 @@ def resolve_skroutz_section_assets(
             rendered_sections=rendered_sections,
             requested_sections=requested_sections,
         )
+        if len(all_sections) < requested_sections:
+            section_warnings.append(f"skroutz_sections_clamped:{len(all_sections)}/{requested_sections}")
+        if len(rendered_sections) < requested_sections:
+            section_warnings.append(f"skroutz_rendered_sections_clamped:{len(rendered_sections)}/{requested_sections}")
+        if len(selected_presentation_blocks) < requested_sections:
+            section_warnings.append(f"skroutz_image_backed_sections_clamped:{len(selected_presentation_blocks)}/{requested_sections}")
         section_image_candidates = build_section_image_candidates(selected_presentation_blocks)
         selected_besco_images = []
         for section_index, block in enumerate(selected_presentation_blocks, start=1):
@@ -242,7 +237,7 @@ def resolve_skroutz_section_assets(
         output_dir=output_dir,
         requested_sections=len(selected_presentation_blocks),
         strict=True,
-        strict_expected_count=requested_sections,
+        strict_expected_count=len(selected_presentation_blocks),
     )
 
     return PrepareSectionAssetsResult(
