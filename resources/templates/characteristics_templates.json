@@ -1243,6 +1243,189 @@
       ]
     },
     {
+      "template_id": "skroutz_microwave_v1",
+      "match": {
+        "source_name": "skroutz",
+        "taxonomy_parent": "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        "taxonomy_leaf": "Φούρνοι Μικροκυμάτων",
+        "taxonomy_sub": ""
+      },
+      "preferred_schema_source_files": [
+        "foyrnoi_mikrokymaton.json"
+      ],
+      "sections": [
+        {
+          "title": "Επισκόπηση Προϊόντος",
+          "fields": [
+            {
+              "label": "Τρόπος Τοποθέτησης",
+              "aliases": [
+                "Τρόπος Τοποθέτησης",
+                "Τοποθέτηση"
+              ]
+            },
+            {
+              "label": "Χωρητικότητα Φούρνου σε Λίτρα",
+              "resolver": "oven_number",
+              "aliases": [
+                "Χωρητικότητα Φούρνου σε Λίτρα",
+                "Χωρητικότητα"
+              ]
+            },
+            {
+              "label": "Ισχύς Μικροκυμάτων (Watt)",
+              "aliases": [
+                "Ισχύς Μικροκυμάτων (Watt)",
+                "Ισχύς Μικροκυμάτων"
+              ]
+            },
+            {
+              "label": "Επίπεδα Ισχύος Μικροκυμάτων",
+              "resolver": "oven_number",
+              "aliases": [
+                "Επίπεδα Ισχύος Μικροκυμάτων",
+                "Επίπεδα Ισχύος"
+              ]
+            },
+            {
+              "label": "Ισχύς Grill (Watt)",
+              "resolver": "microwave_grill_power",
+              "aliases": [
+                "Ισχύς Grill (Watt)",
+                "Ισχύς Grill"
+              ]
+            },
+            {
+              "label": "Χειριστήριο",
+              "aliases": [
+                "Χειριστήριο",
+                "Τύπος Λειτουργίας"
+              ]
+            },
+            {
+              "label": "Οθόνη Ενδείξεων",
+              "resolver": "microwave_display",
+              "aliases": [
+                "Οθόνη Ενδείξεων",
+                "Τύπος Λειτουργίας"
+              ]
+            },
+            {
+              "label": "Περιστρεφόμενος Δίσκος;",
+              "resolver": "microwave_yes_no",
+              "aliases": [
+                "Περιστρεφόμενος Δίσκος",
+                "Περιστρεφόμενος Δίσκος;"
+              ]
+            },
+            {
+              "label": "Διάμετρος Περιστρεφόμενου Δίσκου σε mm",
+              "aliases": [
+                "Διάμετρος Περιστρεφόμενου Δίσκου σε mm",
+                "Διάμετρος Περιστρεφόμενου Δίσκου"
+              ]
+            },
+            {
+              "label": "Άνοιγμα Πόρτας με",
+              "aliases": [
+                "Άνοιγμα Πόρτας με",
+                "Άνοιγμα Πόρτας"
+              ]
+            },
+            {
+              "label": "Κλείδωμα Ασφαλείας για Παιδιά",
+              "resolver": "microwave_yes_no",
+              "aliases": [
+                "Κλείδωμα Ασφαλείας για Παιδιά",
+                "Κλείδωμα"
+              ]
+            },
+            {
+              "label": "Άλλα Χαρακτηριστικά",
+              "resolver": "microwave_other_features"
+            }
+          ]
+        },
+        {
+          "title": "Λειτουργικότητα",
+          "fields": [
+            {
+              "label": "Λειτουργία Μικροκύματα + Grill",
+              "resolver": "microwave_yes_no",
+              "aliases": [
+                "Λειτουργία Μικροκύματα + Grill",
+                "Λειτουργία Grill"
+              ]
+            },
+            {
+              "label": "Ξεπάγωμα με Βάση τον Χρόνο",
+              "resolver": "microwave_yes_no",
+              "aliases": [
+                "Ξεπάγωμα με Βάση τον Χρόνο",
+                "Λειτουργία Ξεπαγώματος"
+              ]
+            },
+            {
+              "label": "Ξεπάγωμα με Βάση το Βάρος",
+              "resolver": "microwave_yes_no",
+              "aliases": [
+                "Ξεπάγωμα με Βάση το Βάρος"
+              ]
+            },
+            {
+              "label": "Aυτόματα Προγράμματα Μαγειρέματος",
+              "resolver": "microwave_yes_no",
+              "aliases": [
+                "Aυτόματα Προγράμματα Μαγειρέματος",
+                "Αυτόματα Προγράμματα"
+              ]
+            },
+            {
+              "label": "Αριθμός Αυτόματων Προγραμμάτων",
+              "resolver": "microwave_auto_program_count",
+              "aliases": [
+                "Αριθμός Αυτόματων Προγραμμάτων",
+                "Αυτόματα Προγράμματα"
+              ]
+            },
+            {
+              "label": "Χρονοδιακόπτης",
+              "resolver": "microwave_yes_no",
+              "aliases": [
+                "Χρονοδιακόπτης"
+              ]
+            },
+            {
+              "label": "Πλήκτρο Αύξησης Χρόνου",
+              "resolver": "microwave_time_plus",
+              "aliases": [
+                "Πλήκτρο Αύξησης Χρόνου"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Γενικά χαρακτηριστικά",
+          "fields": [
+            {
+              "label": "Χρώμα",
+              "aliases": [
+                "Χρώμα"
+              ]
+            },
+            {
+              "label": "Διαστάσεις Συσκευής σε Εκατοστά (Υ x Π x Β)",
+              "resolver": "microwave_dimensions_triplet",
+              "aliases": [
+                "Διαστάσεις Συσκευής σε Εκατοστά (Υ x Π x Β)",
+                "Διαστάσεις"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "template_id": "skroutz_built_in_oven_v1",
       "match": {
         "source_name": "",

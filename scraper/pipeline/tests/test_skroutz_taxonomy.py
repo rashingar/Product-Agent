@@ -169,6 +169,28 @@ def test_ice_cream_maker_category_resolves_to_small_appliance_taxonomy() -> None
     assert taxonomy.leaf_category == "Μικροί Μάγειρες"
     assert taxonomy.sub_category == "Παγωτομηχανές"
 
+def test_microwave_category_resolves_to_microwave_leaf_taxonomy() -> None:
+    parser = SkroutzProductParser()
+    resolver = TaxonomyResolver()
+    row = {
+        "name": "Panasonic NN-K36NBMEPG Φούρνος Μικροκυμάτων με Grill 24lt Μαύρος",
+        "category_tag_text": "Φούρνοι Μικροκυμάτων",
+        "category_tag_href": "https://www.skroutz.gr/c/409/fournoi-mikrokymatwn.html",
+        "manufacturer": "Panasonic",
+        "skroutz_product_url": "https://www.skroutz.gr/s/45222101/Panasonic-NN-K36NBMEPG-Fournos-Mikrokymaton-me-Grill-24lt-Mayros.html",
+        "model": "NN-K36NBMEPG",
+    }
+
+    parsed = parser.parse(build_minimal_taxonomy_html(row), row["skroutz_product_url"])
+    taxonomy, _ = resolver.resolve(parsed.source.breadcrumbs, parsed.source.canonical_url, parsed.source.name, parsed.source.key_specs, parsed.source.spec_sections)
+
+    assert parsed.source.page_type == "product"
+    assert parsed.source.skroutz_family == "microwave"
+    assert taxonomy.parent_category == "ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ"
+    assert taxonomy.leaf_category == "Φούρνοι Μικροκυμάτων"
+    assert taxonomy.sub_category == "Με Grill"
+
+
 def test_hair_straightener_category_resolves_to_personal_care_taxonomy() -> None:
     parser = SkroutzProductParser()
     resolver = TaxonomyResolver()

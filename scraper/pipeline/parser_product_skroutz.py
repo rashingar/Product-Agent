@@ -122,6 +122,15 @@ SKROUTZ_FAMILIES: dict[str, dict[str, Any]] = {
         "spec_mode": "raw",
         "taxonomy_mode": "helper",
     },
+    "microwave": {
+        "category_labels": {"Ξ¦ΞΏΟΟΞ½ΞΏΞΉ ΞΞΉΞΊΟΞΏΞΊΟ…ΞΌΞ¬Ο„Ο‰Ξ½"},
+        "category_href_tokens": {"fournoi mikrokymatwn", "fournoi mikrokymaton", "mikrokymatwn", "mikrokymaton"},
+        "title_tokens": {"fournos mikrokymat", "mikrokymat", "microwave"},
+        "breadcrumbs": [],
+        "sections": [],
+        "spec_mode": "raw",
+        "taxonomy_mode": "helper",
+    },
     "refrigeration": {
         "category_labels": {"Ψυγεία", "Καταψύκτες", "Ψυγεία & Καταψύκτες"},
         "category_href_tokens": {"psygeia", "psigeia", "katapsyktes", "katapsiktes"},

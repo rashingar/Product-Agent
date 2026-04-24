@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 from bs4 import BeautifulSoup
 
-from .deterministic_fields import build_spec_lookup, effective_spec_sections
+from .deterministic_fields import build_spec_lookup, effective_spec_sections, resolve_spec_value
 from .html_builders import build_characteristics_html
 from .models import SchemaMatchResult, SourceProductData, SpecItem, SpecSection, TaxonomyResolution
 from .normalize import normalize_for_match, normalize_whitespace
@@ -430,10 +430,16 @@ def _first_value_from_aliases(context: _ResolutionContext, aliases: list[str], s
         key = normalize_for_match(alias)
         if key in context.spec_lookup:
             return context.spec_lookup[key], f"spec_alias:{alias}"
+    fuzzy_spec = resolve_spec_value(context.spec_lookup, aliases)
+    if fuzzy_spec.value:
+        return fuzzy_spec.value, f"{fuzzy_spec.source}:{fuzzy_spec.matched_label or 'alias'}"
     for alias in aliases:
         key = normalize_for_match(alias)
         if key in context.raw_lookup:
             return context.raw_lookup[key], f"raw_alias:{alias}"
+    fuzzy_raw = resolve_spec_value(context.raw_lookup, aliases)
+    if fuzzy_raw.value:
+        return fuzzy_raw.value, f"raw_{fuzzy_raw.source}:{fuzzy_raw.matched_label or 'alias'}"
     return "", ""
 
 
@@ -1669,6 +1675,99 @@ def _resolve_air_conditioner_warranty_years(context: _ResolutionContext, field: 
     return "", "unresolved"
 
 
+def _resolve_microwave_display(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(value, "ψηφιακ", "digital", "led"):
+        return "Ναι", source
+    return "", "unresolved"
+
+
+def _resolve_microwave_grill_power(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    formatted = _format_power_watts(value)
+    if formatted:
+        return formatted, source
+    match = re.search(r"(?:grill|γκριλ)[^\d]{0,30}(\d+(?:[.,]\d+)?)\s*w", normalize_for_match(context.combined_text), flags=re.IGNORECASE)
+    if match:
+        numeric = match.group(1).replace(",", ".")
+        if numeric.endswith(".0"):
+            numeric = numeric[:-2]
+        return f"{numeric} W", "combined_text:grill_power"
+    return "", "unresolved"
+
+
+def _resolve_microwave_yes_no(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    normalized = _normalize_yes_no(value)
+    return (normalized, source) if normalized else ("", "unresolved")
+
+
+def _resolve_microwave_auto_program_count(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    count = _extract_int_from_text(value)
+    if count is not None:
+        return str(count), source
+    match = re.search(r"(\d+)\s+αυτόματα?\s+προγράμ", context.combined_text, flags=re.IGNORECASE)
+    if match:
+        return match.group(1), "combined_text:auto_program_count"
+    return "", "unresolved"
+
+
+def _resolve_microwave_time_plus(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    normalized = _normalize_yes_no(value)
+    if normalized:
+        return normalized, source
+    if _contains_any(context.combined_text, "κουμπί 30", "quick 30", "βήματα των 30 δευτερολέπτων"):
+        return "Ναι", "combined_text:time_plus"
+    return "", "unresolved"
+
+
+def _resolve_microwave_other_features(context: _ResolutionContext, _field: dict[str, Any]) -> tuple[str, str]:
+    features: list[str] = []
+    sources: list[str] = []
+    for display, aliases in [("Inverter", ("Inverter",)), ("Retro", ("Retro",))]:
+        value, source = _first_value_from_aliases(context, list(aliases))
+        if _normalize_yes_no(value) == "Ναι":
+            features.append(display)
+            if source:
+                sources.append(source)
+    deduped = dedupe_strings(features)
+    if deduped:
+        return ", ".join(deduped), ",".join(dedupe_strings(sources)) or "spec_alias:microwave_features"
+    return "", "unresolved"
+
+
+def _resolve_microwave_dimensions_triplet(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    if value:
+        tokens = re.findall(r"\d+(?:[.,]\d+)?", value)
+        if len(tokens) >= 3:
+            return f"{tokens[0]} x {tokens[1]} x {tokens[2]} cm", source
+
+    width, width_source = _section_value(context, "Εξωτερικές Διαστάσεις", "Πλάτος")
+    depth, depth_source = _section_value(context, "Εξωτερικές Διαστάσεις", "Βάθος")
+    height, height_source = _section_value(context, "Εξωτερικές Διαστάσεις", "Ύψος")
+    if not (width and depth and height):
+        for section in _effective_spec_sections(context.source):
+            values = {normalize_for_match(item.label): normalize_whitespace(item.value) for item in section.items if normalize_whitespace(item.value)}
+            width = width or values.get(normalize_for_match("Πλάτος"), "")
+            depth = depth or values.get(normalize_for_match("Βάθος"), "")
+            height = height or values.get(normalize_for_match("Ύψος"), "")
+            if width and depth and height:
+                width_source = width_source or f"section_scan:{section.section}/Πλάτος"
+                depth_source = depth_source or f"section_scan:{section.section}/Βάθος"
+                height_source = height_source or f"section_scan:{section.section}/Ύψος"
+                break
+    if width and depth and height:
+        compact = [re.sub(r"\s*cm\b", "", part, flags=re.IGNORECASE) for part in [height, width, depth]]
+        return f"{compact[0]} x {compact[1]} x {compact[2]} cm", ",".join([height_source, width_source, depth_source])
+    return "", "unresolved"
+
+
 _RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, str]]] = {
     "air_conditioner_technology": _resolve_air_conditioner_technology,
     "air_conditioner_refrigerant": _resolve_air_conditioner_refrigerant,
@@ -1676,6 +1775,13 @@ _RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, 
     "air_conditioner_extra_features": _resolve_air_conditioner_extra_features,
     "air_conditioner_dimension_mm": _resolve_air_conditioner_dimension_mm,
     "air_conditioner_warranty_years": _resolve_air_conditioner_warranty_years,
+    "microwave_display": _resolve_microwave_display,
+    "microwave_grill_power": _resolve_microwave_grill_power,
+    "microwave_yes_no": _resolve_microwave_yes_no,
+    "microwave_auto_program_count": _resolve_microwave_auto_program_count,
+    "microwave_time_plus": _resolve_microwave_time_plus,
+    "microwave_other_features": _resolve_microwave_other_features,
+    "microwave_dimensions_triplet": _resolve_microwave_dimensions_triplet,
     "personal_care_plate_technology": _resolve_personal_care_plate_technology,
     "personal_care_yes_no": _resolve_personal_care_yes_no,
     "personal_care_rotating_cord": _resolve_personal_care_rotating_cord,

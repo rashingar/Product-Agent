@@ -113,6 +113,8 @@ def classify_skroutz_taxonomy(
         return _classify_dishwasher(context)
     if family_key == "cooker":
         return _classify_cooker(context)
+    if family_key == "microwave":
+        return _classify_microwave(context)
     if family_key == "refrigeration":
         return _classify_refrigeration(context)
     if family_key == "laundry":
@@ -189,6 +191,8 @@ def classify_skroutz_taxonomy(
         )
     if _has_any(context, "klimatist", "κλιματισ", "air condition", "btu", "inverter"):
         return _classify_air_conditioner(context)
+    if _has_any(context, "mikrokym", "μικροκυμα", "microwave"):
+        return _classify_microwave(context)
     if _has_any(context, "ygraeri", "υγραερι", "soba"):
         return _build_hint(
             context=context,
@@ -295,6 +299,26 @@ def _classify_cooker(context: dict[str, str]) -> SkroutzTaxonomyHint:
         context=context,
         parent="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
         leaf="Κουζίνες",
+        sub=sub,
+        matched_rule_id=rule_id,
+    )
+
+
+def _classify_microwave(context: dict[str, str]) -> SkroutzTaxonomyHint:
+    if _has_any(context, "grill", "γκριλ"):
+        sub = "Με Grill"
+        rule_id = "microwave:with_grill"
+    elif _has_any(context, "without grill", "χωρις grill", "χωρίς grill"):
+        sub = "Χωρίς Grill"
+        rule_id = "microwave:without_grill"
+    else:
+        sub = None
+        rule_id = "microwave:leaf_only"
+
+    return _build_hint(
+        context=context,
+        parent="ΟΙΚΙΑΚΕΣ ΣΥΣΚΕΥΕΣ",
+        leaf="Φούρνοι Μικροκυμάτων",
         sub=sub,
         matched_rule_id=rule_id,
     )
