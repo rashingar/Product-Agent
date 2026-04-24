@@ -5,8 +5,10 @@ from urllib.parse import urlparse
 ELECTRONET_DOMAINS = {"electronet.gr", "www.electronet.gr"}
 SKROUTZ_DOMAINS = {"skroutz.gr", "www.skroutz.gr", "skroutz.cy", "www.skroutz.cy"}
 TEFAL_MANUFACTURER_DOMAINS = {"shop.tefal.gr", "www.shop.tefal.gr"}
+BOSCH_MANUFACTURER_DOMAINS = {"bosch-home.gr", "www.bosch-home.gr"}
 SKROUTZ_PRODUCT_PATH_PREFIX = "/s/"
 TEFAL_PRODUCT_PATH_PREFIX = "/products/"
+BOSCH_PRODUCT_PATH_MARKER = "/mkt-product/"
 
 
 def normalize_host(url: str) -> str:
@@ -21,6 +23,8 @@ def detect_source(url: str) -> str:
         return "skroutz"
     if host in TEFAL_MANUFACTURER_DOMAINS:
         return "manufacturer_tefal"
+    if host in BOSCH_MANUFACTURER_DOMAINS:
+        return "manufacturer_bosch"
     raise ValueError("Input URL must be an Electronet, Skroutz, or supported manufacturer product URL")
 
 
@@ -34,6 +38,11 @@ def is_tefal_product_url(url: str) -> bool:
     return parsed.netloc.strip().lower() in TEFAL_MANUFACTURER_DOMAINS and parsed.path.startswith(TEFAL_PRODUCT_PATH_PREFIX)
 
 
+def is_bosch_product_url(url: str) -> bool:
+    parsed = urlparse(url)
+    return parsed.netloc.strip().lower() in BOSCH_MANUFACTURER_DOMAINS and BOSCH_PRODUCT_PATH_MARKER in parsed.path
+
+
 def validate_url_scope(url: str) -> tuple[str, bool, str]:
     source = detect_source(url)
     if source == "electronet":
@@ -44,4 +53,8 @@ def validate_url_scope(url: str) -> tuple[str, bool, str]:
         return source, False, "skroutz_non_product_path"
     if is_tefal_product_url(url):
         return source, True, "manufacturer_tefal_product_path"
-    return source, False, "manufacturer_tefal_non_product_path"
+    if source == "manufacturer_tefal":
+        return source, False, "manufacturer_tefal_non_product_path"
+    if is_bosch_product_url(url):
+        return source, True, "manufacturer_bosch_product_path"
+    return source, False, "manufacturer_bosch_non_product_path"

@@ -333,6 +333,9 @@ class ElectronetFetcher:
         filename_builder: Callable[[int, str], str],
     ) -> tuple[list[GalleryImage], list[str], list[str]]:
         target_dir = ensure_directory(Path(output_dir) / output_subdir)
+        for existing_file in target_dir.iterdir():
+            if existing_file.is_file() and existing_file.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+                existing_file.unlink()
         selected = images
         if requested_count is not None and requested_count > 0:
             selected = images[:requested_count]
@@ -360,7 +363,8 @@ class ElectronetFetcher:
                 except ImageConversionError as exc:
                     warnings.append(f"{non_jpg_warning_prefix}:{asset_position}:{ext}")
                     warnings.append(f"image_conversion_failed:{output_subdir}:{asset_position}:{ext}:{exc}")
-            filename = filename_builder(asset_position, ext)
+            filename_position = fallback_position if output_subdir == "bescos" else asset_position
+            filename = filename_builder(filename_position, ext)
             local_path = target_dir / filename
             write_bytes(local_path, payload)
             downloaded_image = GalleryImage(

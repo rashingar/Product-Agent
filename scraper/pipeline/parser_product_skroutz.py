@@ -6,6 +6,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup, Tag
 
+from .eprel import resolve_eprel_energy_label_asset_url
 from .models import FieldDiagnostic, GalleryImage, ParsedProduct, SelectorTraceEntry, SourceProductData, SpecItem, SpecSection
 from .normalize import clean_breadcrumbs, dedupe_urls_preserve_order, make_absolute_url, normalize_for_match, normalize_whitespace, parse_euro_price, safe_text
 from .skroutz_taxonomy import classify_skroutz_taxonomy, normalize_category_href_slug, serialize_source_category
@@ -303,6 +304,15 @@ class SkroutzProductParser:
         key_specs = self._build_key_specs(family, canonical_sections, raw_sections, raw_pairs, summary_pairs)
         provenance["key_specs"] = "canonical_from_specs" if key_specs else "missing"
         diagnostics["key_specs"] = self._make_diagnostic(key_specs, provenance["key_specs"], 0.9 if key_specs else 0.0, [])
+        energy_label_asset_url = resolve_eprel_energy_label_asset_url(
+            family_key=family,
+            breadcrumbs=breadcrumbs,
+            taxonomy_source_category=(taxonomy_hint.source_category if taxonomy_hint and not taxonomy_hint.ambiguous else family_source_category),
+            title=title,
+            canonical_url=canonical_url,
+            model_identifier=mpn,
+        )
+        product_sheet_asset_url = self._build_bsh_energy_label_pdf_url(brand, mpn)
 
         gallery_images, gallery_source, gallery_trace = self._extract_gallery_images(soup, jsonld, canonical_url, title)
         provenance["gallery_images"] = gallery_source
@@ -343,6 +353,8 @@ class SkroutzProductParser:
             price_text=price_text,
             price_value=price_value,
             gallery_images=gallery_images,
+            energy_label_asset_url=energy_label_asset_url,
+            product_sheet_asset_url=product_sheet_asset_url,
             key_specs=key_specs,
             spec_sections=canonical_sections,
             presentation_source_html=summary_html,
@@ -662,6 +674,38 @@ class SkroutzProductParser:
                 urls.append(make_absolute_url(src, url))
         normalized = dedupe_urls_preserve_order(urls)
         return [GalleryImage(url=item, alt=title, position=index) for index, item in enumerate(normalized, start=1)], "dom:img[data-modal-data]", trace
+
+    def _find_energy_class(self, sections: list[SpecSection]) -> str:
+        for section in sections:
+            for item in section.items:
+                if normalize_for_match(item.label) in {normalize_for_match("Ενεργειακή Κλάση"), normalize_for_match("Ενεργειακή κλάση")}:
+                    return normalize_whitespace(item.value or "")
+        return ""
+
+    def _build_bsh_energy_label_icon_url(self, brand: str, energy_class: str) -> str:
+        if normalize_for_match(brand) not in {normalize_for_match("Bosch"), normalize_for_match("Neff")}:
+            return ""
+        suffix = self._bsh_energy_class_icon_suffix(energy_class)
+        if not suffix:
+            return ""
+        return f"https://media3.bsh-group.com/Feature_Icons/100x/21143877_ENERGY_CLASS_ICON_2010_{suffix}.webp"
+
+    def _build_bsh_energy_label_pdf_url(self, brand: str, mpn: str) -> str:
+        normalized_brand = normalize_for_match(brand)
+        normalized_mpn = normalize_whitespace(mpn)
+        if not normalized_mpn:
+            return ""
+        if normalized_brand == normalize_for_match("Bosch"):
+            return f"https://media3.bsh-group.com/Documents/energylabel/el-GR/{normalized_mpn}.pdf"
+        if normalized_brand == normalize_for_match("Neff"):
+            return f"https://media3.neff-international.com/Documents/energylabel/el-GR/{normalized_mpn}.pdf"
+        return ""
+
+    def _bsh_energy_class_icon_suffix(self, energy_class: str) -> str:
+        normalized = normalize_whitespace(energy_class).upper().replace(" ", "")
+        if not normalized:
+            return ""
+        return normalized.replace("+", "_PLUS").replace("-", "_MINUS")
 
     def _extract_merchant_titles(self, soup: BeautifulSoup) -> list[str]:
         titles = [normalize_whitespace(node.get("title") or safe_text(node)) for node in soup.select("#prices .product-name[title], .selected-product-cards .product-name[title]")]

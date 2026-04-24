@@ -1,18 +1,13 @@
 from __future__ import annotations
 
 import csv
-import re
 from pathlib import Path
 from typing import Any
 
 from .normalize import normalize_whitespace
 from .repo_paths import PRODUCT_TEMPLATE_PATH
+from .text_health import detect_text_issues
 from .utils import load_template_headers, write_json
-
-REPLACEMENT_CHAR = "\ufffd"
-MOJIBAKE_RE = re.compile(r"(?:Ã.|Â.|Î.|Ï.|â€.|â€œ|â€™|â€\x9d)")
-C1_CONTROL_RE = re.compile(r"[\u0080-\u009f]")
-QUESTION_RUN_RE = re.compile(r"\?{3,}")
 REQUIRED_NON_EMPTY_FIELDS = {
     "model",
     "mpn",
@@ -110,21 +105,6 @@ def read_single_row_csv(path: str | Path) -> tuple[list[str], dict[str, str]]:
         headers = list(reader.fieldnames or [])
         row = next(reader, {})
         return headers, {key: value or "" for key, value in row.items()}
-
-
-def detect_text_issues(text: str) -> list[str]:
-    issues: list[str] = []
-    if not text:
-        return issues
-    if REPLACEMENT_CHAR in text:
-        issues.append("replacement_character")
-    if C1_CONTROL_RE.search(text):
-        issues.append("c1_control_character")
-    if MOJIBAKE_RE.search(text):
-        issues.append("mojibake_pattern")
-    if QUESTION_RUN_RE.search(text) and "http" not in text:
-        issues.append("question_mark_run")
-    return issues
 
 
 def summarize_health(field_health: dict[str, dict[str, Any]]) -> dict[str, int]:

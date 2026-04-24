@@ -346,6 +346,48 @@ def test_execute_split_llm_stage_uses_existing_valid_outputs_without_extra_regen
     assert (llm_dir / "intro_text.output.txt").read_text(encoding="utf-8") == valid_intro
 
 
+def test_execute_split_llm_stage_rejects_existing_corrupted_intro_output(tmp_path: Path) -> None:
+    llm_dir = tmp_path / "work" / "233541" / "llm"
+    task_manifest_path = _write_task_manifest(llm_dir)
+    valid_seo = {"product": {"meta_description": "Valid generated meta description.", "meta_keywords": ["LG", "Example"]}}
+    (llm_dir / "intro_text.output.txt").write_text(" ".join(["Καλημέρα???"] * 100), encoding="utf-8")
+    (llm_dir / "seo_meta.output.json").write_text(json.dumps(valid_seo, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    with pytest.raises(ServiceError) as excinfo:
+        execute_split_llm_stage(
+            llm_dir=llm_dir,
+            task_manifest_path=task_manifest_path,
+        )
+
+    assert excinfo.value.code == ServiceErrorCode.VALIDATION_FAILURE.value
+    assert excinfo.value.details["stage"] == "intro_text"
+    assert "llm_intro_text_encoding_invalid" in excinfo.value.details["error_codes"]
+
+
+def test_execute_split_llm_stage_rejects_existing_corrupted_seo_output(tmp_path: Path) -> None:
+    llm_dir = tmp_path / "work" / "233541" / "llm"
+    task_manifest_path = _write_task_manifest(llm_dir)
+    (llm_dir / "intro_text.output.txt").write_text(_build_intro(100), encoding="utf-8")
+    (llm_dir / "seo_meta.output.json").write_text(
+        json.dumps(
+            {"product": {"meta_description": "Κακή περιγραφή???", "meta_keywords": ["LG", "Example"]}},
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ServiceError) as excinfo:
+        execute_split_llm_stage(
+            llm_dir=llm_dir,
+            task_manifest_path=task_manifest_path,
+        )
+
+    assert excinfo.value.code == ServiceErrorCode.VALIDATION_FAILURE.value
+    assert excinfo.value.details["stage"] == "seo_meta"
+    assert "llm_seo_meta_description_encoding_invalid" in excinfo.value.details["error_codes"]
+
+
 def test_execute_split_llm_stage_rewrites_existing_bom_outputs_as_utf8(tmp_path: Path) -> None:
     llm_dir = tmp_path / "work" / "233541" / "llm"
     task_manifest_path = _write_task_manifest(llm_dir)

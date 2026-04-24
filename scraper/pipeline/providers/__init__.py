@@ -1,6 +1,6 @@
 from .base import ProductProvider, ProviderError
 from .electronet_provider import ElectronetProvider
-from .manufacturer_tefal_provider import ManufacturerTefalProvider
+from .manufacturer_tefal_provider import ManufacturerBoschProvider, ManufacturerTefalProvider
 from .models import (
     ProviderCapability,
     ProviderDefinition,
@@ -20,6 +20,7 @@ __all__ = [
     "ElectronetProvider",
     "ProductProvider",
     "ManufacturerTefalProvider",
+    "ManufacturerBoschProvider",
     "ProviderCapability",
     "ProviderDefinition",
     "ProviderError",

@@ -171,3 +171,22 @@ class ManufacturerTefalProvider(ProductProvider):
             source_name=self.source_name,
             fallback_used=bool(snapshot.metadata.get("fallback_used", False)),
         )
+
+
+class ManufacturerBoschProvider(ManufacturerTefalProvider):
+    definition = ProviderDefinition(
+        provider_id="manufacturer_bosch",
+        source_name="manufacturer_bosch",
+        kind=ProviderKind.MANUFACTURER_SITE,
+        capabilities=frozenset(
+            {
+                ProviderCapability.URL_INPUT,
+                ProviderCapability.LIVE_FETCH,
+                ProviderCapability.FIXTURE_FETCH,
+                ProviderCapability.HTML_SNAPSHOT,
+                ProviderCapability.NORMALIZED_PRODUCT,
+            }
+        ),
+        display_name="Bosch Home",
+        description="Manufacturer-site provider adapter for supported Bosch product pages.",
+    )

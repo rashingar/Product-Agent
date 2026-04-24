@@ -86,6 +86,7 @@ Rules:
 - `seo_meta.output.json` contains only `product.meta_description` and `product.meta_keywords`.
 - `product.meta_keywords` is structured JSON, not CSV text.
 - Presentation section titles/body copy are not LLM outputs.
+- Both LLM output files must be UTF-8 without BOM. Avoid shell redirection or console codepage paths for Greek text; render rejects mojibake/corrupted LLM artifacts before candidate generation.
 
 Then run:
 

@@ -939,6 +939,17 @@ def _resolve_oven_installation_type(context: _ResolutionContext, field: dict[str
     return "", "unresolved"
 
 
+def _resolve_oven_type(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
+    value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
+    if _contains_any(value, "ηλεκτρ", "electric"):
+        return "Ηλεκτρικός", source
+    voltage, voltage_source = _first_value_from_aliases(context, ["Τάση", "Τάση (V)"])
+    power, power_source = _first_value_from_aliases(context, ["Ισχύς", "Συνολική Ισχύς (Watt)"])
+    if voltage or power:
+        return "Ηλεκτρικός", voltage_source or power_source or "spec_alias:electrical_power"
+    return (value, source) if value else ("", "unresolved")
+
+
 def _resolve_oven_number(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
     value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
     count = _extract_int_from_text(value)
@@ -948,7 +959,11 @@ def _resolve_oven_number(context: _ResolutionContext, field: dict[str, Any]) -> 
 def _resolve_oven_yes_no(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
     value, source = _first_value_from_aliases(context, list(field.get("aliases", [])))
     normalized = _normalize_yes_no(value)
-    return (normalized, source) if normalized else ("", "unresolved")
+    if normalized:
+        return normalized, source
+    if _contains_any(value, "οθόνη", "display", "κλείδωμα", "child lock"):
+        return "Ναι", source
+    return "", "unresolved"
 
 
 def _resolve_oven_clock(context: _ResolutionContext, field: dict[str, Any]) -> tuple[str, str]:
@@ -956,6 +971,8 @@ def _resolve_oven_clock(context: _ResolutionContext, field: dict[str, Any]) -> t
     normalized = _normalize_yes_no(value)
     if normalized:
         return normalized, source
+    if _contains_any(value, "οθόνη", "display", "TFT"):
+        return "Ναι", source
     if _contains_any(context.combined_text, "ψηφιακή οθόνη", "digital display"):
         return "Ναι", source or "combined_text:clock"
     return "", "unresolved"
@@ -977,18 +994,18 @@ def _resolve_oven_other_features(context: _ResolutionContext, _field: dict[str, 
     features: list[str] = []
     matched_sources: list[str] = []
     candidates = [
-        ("Air Fry", "Air Fry"),
-        ("Τηλεσκοπικός Μηχανισμός", "Τηλεσκοπικός Μηχανισμός"),
-        ("Μαγείρεμα με Ατμό", "Μαγείρεμα με Ατμό"),
+        ("Air Fry", ("Air Fry", "Λειτουργία Air Fry")),
+        ("Τηλεσκοπικός Μηχανισμός", ("Τηλεσκοπικός Μηχανισμός",)),
+        ("Μαγείρεμα με Ατμό", ("Μαγείρεμα με Ατμό", "Τεχνολογία ατμού")),
     ]
-    for display, alias in candidates:
-        value, source = _first_value_from_aliases(context, [alias])
-        if _normalize_yes_no(value) == "Ναι":
+    for display, aliases in candidates:
+        value, source = _first_value_from_aliases(context, list(aliases))
+        if _normalize_yes_no(value) == "Ναι" or (display == "Τηλεσκοπικός Μηχανισμός" and value and normalize_whitespace(value) != "Μ/Δ"):
             features.append(display)
             if source:
                 matched_sources.append(source)
 
-    accessories, accessories_source = _first_value_from_aliases(context, ["Αξεσουάρ"])
+    accessories, accessories_source = _first_value_from_aliases(context, ["Αξεσουάρ", "Αξεσουάρ συσκευασίας"])
     accessories = normalize_whitespace(accessories)
     if accessories and accessories != "-":
         features.append(accessories)
@@ -1663,6 +1680,7 @@ _RESOLVERS: dict[str, Callable[[_ResolutionContext, dict[str, Any]], tuple[str, 
     "personal_care_yes_no": _resolve_personal_care_yes_no,
     "personal_care_rotating_cord": _resolve_personal_care_rotating_cord,
     "oven_installation_type": _resolve_oven_installation_type,
+    "oven_type": _resolve_oven_type,
     "oven_number": _resolve_oven_number,
     "oven_yes_no": _resolve_oven_yes_no,
     "oven_clock": _resolve_oven_clock,

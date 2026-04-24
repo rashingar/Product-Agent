@@ -6,6 +6,7 @@ from typing import Any
 from .mapping import serialize_meta_keywords
 from .models import CLIInput, ParsedProduct, TaxonomyResolution
 from .normalize import normalize_whitespace
+from .text_health import detect_text_issues
 
 INTRO_MIN_WORDS = 80
 INTRO_MAX_WORDS = 180
@@ -152,6 +153,8 @@ def validate_intro_text_output(
     normalized = normalize_whitespace(value)
     if HTML_DETECT_RE.search(value):
         errors.append("llm_intro_text_html_invalid")
+    if detect_text_issues(normalized):
+        errors.append("llm_intro_text_encoding_invalid")
     word_count = count_plain_text_words(normalized)
     if word_count < intro_word_min or word_count > intro_word_max:
         errors.append("llm_intro_text_word_count_invalid")
@@ -174,8 +177,12 @@ def validate_seo_meta_output(payload: dict[str, Any]) -> tuple[dict[str, Any], l
     meta_keywords = product.get("meta_keywords", [])
     if not isinstance(meta_description, str):
         errors.append("llm_seo_meta_description_invalid")
+    elif detect_text_issues(meta_description):
+        errors.append("llm_seo_meta_description_encoding_invalid")
     if not isinstance(meta_keywords, list) or any(not isinstance(item, str) for item in meta_keywords):
         errors.append("llm_seo_meta_keywords_invalid")
+    elif any(detect_text_issues(item) for item in meta_keywords):
+        errors.append("llm_seo_meta_keywords_encoding_invalid")
     return {
         "product": {
             "meta_description": normalize_whitespace(meta_description),

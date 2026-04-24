@@ -6,7 +6,7 @@ from ..parser_product_manufacturer import ManufacturerProductParser
 from ..parser_product_skroutz import SkroutzProductParser
 from .base import ProductProvider, ProviderError
 from .electronet_provider import ElectronetProvider
-from .manufacturer_tefal_provider import ManufacturerTefalProvider
+from .manufacturer_tefal_provider import ManufacturerBoschProvider, ManufacturerTefalProvider
 from .models import ProviderDefinition, ProviderErrorCode, ProviderKind, ProviderStage
 from .skroutz_provider import SkroutzProvider
 
@@ -14,6 +14,7 @@ RUNTIME_SOURCE_PROVIDER_IDS = {
     "electronet": "electronet",
     "skroutz": "skroutz",
     "manufacturer_tefal": "manufacturer_tefal",
+    "manufacturer_bosch": "manufacturer_bosch",
 }
 
 
@@ -78,4 +79,5 @@ def bootstrap_runtime_provider_registry(
     registry.register(ElectronetProvider(fetcher=fetcher, parser=electronet_parser))
     registry.register(SkroutzProvider(fetcher=fetcher, parser=skroutz_parser))
     registry.register(ManufacturerTefalProvider(fetcher=fetcher, parser=manufacturer_parser))
+    registry.register(ManufacturerBoschProvider(fetcher=fetcher, parser=manufacturer_parser))
     return registry

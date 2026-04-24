@@ -56,7 +56,7 @@ def resolve_prepare_taxonomy_enrichment(
             "hero_summary_applied": False,
             "presentation_applied": False,
             "presentation_block_count": 0,
-            "fallback_reason": "direct_source_already_manufacturer" if source == "manufacturer_tefal" else "not_applicable_non_skroutz",
+            "fallback_reason": "direct_source_already_manufacturer" if source.startswith("manufacturer_") else "not_applicable_non_skroutz",
         }
 
     return PrepareTaxonomyEnrichmentResult(

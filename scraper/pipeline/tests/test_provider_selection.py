@@ -191,14 +191,15 @@ def test_bootstrap_runtime_provider_registry_registers_active_providers() -> Non
         manufacturer_parser=object(),
     )
 
-    assert registry.ids() == ("electronet", "manufacturer_tefal", "skroutz")
-    assert [definition.provider_id for definition in registry.definitions()] == ["electronet", "manufacturer_tefal", "skroutz"]
+    assert registry.ids() == ("electronet", "manufacturer_bosch", "manufacturer_tefal", "skroutz")
+    assert [definition.provider_id for definition in registry.definitions()] == ["electronet", "manufacturer_bosch", "manufacturer_tefal", "skroutz"]
 
 
 def test_source_to_provider_id_maps_supported_sources() -> None:
     assert source_to_provider_id("electronet") == "electronet"
     assert source_to_provider_id("skroutz") == "skroutz"
     assert source_to_provider_id("manufacturer_tefal") == "manufacturer_tefal"
+    assert source_to_provider_id("manufacturer_bosch") == "manufacturer_bosch"
     assert source_to_provider_id("unsupported_source") is None
 
 

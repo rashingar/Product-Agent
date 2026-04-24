@@ -883,6 +883,8 @@ def _score_spec_label_match(label: str, normalized_aliases: list[str]) -> int:
                 for label_token in label_tokens
             )
         )
+        if len(alias_tokens) > 1 and overlap < len(alias_tokens):
+            continue
         if overlap:
             best_score = max(best_score, overlap * 10 + len(alias_tokens))
     return best_score

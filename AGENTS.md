@@ -41,6 +41,10 @@ treat it as a request to run the full pipeline.
 5. Author these task outputs:
    - `work/{model}/llm/intro_text.output.txt`
    - `work/{model}/llm/seo_meta.output.json`
+   Encoding rule:
+   - both files must be UTF-8 text without BOM
+   - do not write Greek LLM output through shell redirection, PowerShell inline heredocs, or any codepage-dependent console path
+   - when editing manually in this runtime, use repo-native UTF-8 file writes or `apply_patch`
 6. The assistant must write only the LLM-owned fields:
    - `product.meta_description`
    - `product.meta_keywords`
@@ -87,6 +91,7 @@ treat it as a request to run the full pipeline.
    `tools/run_opencart_pipeline.sh`
    Run from repo root with `CURRENT_JOB_PRODUCT_FILE` set to the exact `products/{model}.csv` path created in the current job.
 12. If validation fails, debug the pipeline until the failure cause is understood then fixed and rerun until the output is complete.
+   - if render fails with an LLM encoding error, treat it as a corrupted handoff artifact and rewrite the LLM output files as clean UTF-8 before rerunning
 13. If the OpenCart publish phase warns or fails after render succeeds, keep the successful render outputs, report the publish status/stage/message clearly, and debug the publish phase separately.
 
 ## Validation Expectations

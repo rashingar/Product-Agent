@@ -113,6 +113,12 @@ def test_validate_intro_text_output_rejects_long_intro() -> None:
     assert "llm_intro_text_word_count_invalid" in errors
 
 
+def test_validate_intro_text_output_rejects_encoding_corruption() -> None:
+    _, errors = validate_intro_text_output(" ".join(["Καλημέρα???"] * INTRO_MIN_WORDS))
+
+    assert "llm_intro_text_encoding_invalid" in errors
+
+
 def test_validate_seo_meta_output_accepts_product_meta_only_shape() -> None:
     normalized, errors = validate_seo_meta_output(
         {
@@ -158,6 +164,19 @@ def test_validate_seo_meta_output_rejects_legacy_presentation_shape() -> None:
     )
 
     assert errors == ["llm_seo_meta_root_shape_invalid"]
+
+
+def test_validate_seo_meta_output_rejects_encoding_corruption() -> None:
+    _, errors = validate_seo_meta_output(
+        {
+            "product": {
+                "meta_description": "Κακή περιγραφή???",
+                "meta_keywords": ["LG", "MH6535GDS"],
+            }
+        }
+    )
+
+    assert "llm_seo_meta_description_encoding_invalid" in errors
 
 
 def test_seo_meta_prompt_source_uses_repo_root_relative_path_and_updated_guidance() -> None:
